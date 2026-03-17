@@ -126,21 +126,32 @@ class GeminiChallenger(BaseAgent):
 
         breadth = snapshot.get("breadth_pct", float("nan"))
         term = snapshot.get("vix_term_ratio", float("nan"))
+        credit = snapshot.get("credit_change", float("nan"))
+        rscore = snapshot.get("regime_score", 50)
         breadth_str = f"{breadth:.0%}" if not math.isnan(breadth) else "N/A"
         term_str = f"{term:.2f}" if not math.isnan(term) else "N/A"
+        credit_str = f"{credit:+.2%}" if not math.isnan(credit) else "N/A"
+        score_label = (
+            "DEFENSIVE" if rscore < 30 else
+            "CAUTIOUS"  if rscore < 50 else
+            "NEUTRAL"   if rscore < 70 else
+            "BULLISH"
+        )
 
         header = (
             f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d Ret':>8} {'Sharpe':>7} "
             f"{'5d Ret':>7} {'60d Ret':>8} {'RSI':>6} {'vs Idx':>8} "
-            f"{'52wH%':>7} {'Beta':>6} {'VolRatio':>9} {'MACD':>7} {'Price':>10}"
+            f"{'52wH%':>7} {'Beta':>6} {'VolRatio':>9} {'MACD':>7} {'ATR%':>6} {'Price':>10}"
         )
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
             f"S&P 500 {MOMENTUM_WINDOW}-day return: {snapshot['benchmark_return']:.1%}",
             f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
-            f"Breadth: {breadth_str} of universe above 50d SMA | VIX term structure: {term_str} (>1=calm, <0.9=fear)",
+            f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} (>1=calm, <0.9=fear) | Credit spreads 20d: {credit_str} (positive=risk-on)",
+            f"Composite regime score: {rscore}/100 — {score_label} (0–30=defensive, 31–49=cautious, 50–69=neutral, 70+=bullish)",
             "",
             "Candidates (sorted by Sharpe_20d):",
+            "ATR% = daily expected move as % of price — consider sizing smaller when ATR% is high.",
             "",
             header,
             "-" * len(header),
@@ -162,6 +173,7 @@ class GeminiChallenger(BaseAgent):
                 f"{fmt(c['beta'], '.2f'):>6} "
                 f"{fmt(c['vol_ratio'], '.2f'):>9} "
                 f"{fmt(c.get('macd_hist', float('nan'))):>7} "
+                f"{fmt(c.get('atr_pct', float('nan'))):>6} "
                 f"{c['last_price']:>10.2f}"
             )
 

@@ -46,6 +46,7 @@ class CandidateInfo(TypedDict):
     last_price: float
     vol_ratio: float      # today's volume / 20d avg volume (>1.5 = high-volume confirmation)
     macd_hist: float      # MACD histogram / last_price (positive = bullish, negative = bearish)
+    atr_pct: float        # 14-day ATR as % of price (daily expected move)
 
 
 class MarketSnapshot(TypedDict):
@@ -53,21 +54,25 @@ class MarketSnapshot(TypedDict):
     benchmark_return: float
     as_of_date: str
     regime: str           # "BULL" | "BEAR" | "NEUTRAL"
+    regime_score: int     # composite 0-100: 0-30=defensive, 31-49=cautious, 50-69=neutral, 70+=bullish
     spx_vs_200d: float    # % above/below 200-day SMA
     vix_level: float      # VIX spot price
     vix_term_ratio: float # VIX3M/VIX: >1=contango (calm), <0.9=backwardation (fear)
     breadth_pct: float    # % of universe stocks above their 50d SMA
+    credit_change: float  # 20d change in HYG/LQD ratio (positive=risk-on, negative=risk-off)
     price_map: dict       # {ticker: last_close_price} for ALL fetched tickers
     returns_1d: dict      # {ticker: 1-day return} for ALL fetched tickers
     benchmark_return_1d: float  # S&P 500 1-day return
 
 
 class DataFetcher:
-    def fetch_ohlcv(self, tickers: list[str], period: str = "1y") -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Download adjusted close prices and volume for *tickers* from yfinance.
-        Returns (close_df, volume_df)."""
+    def fetch_ohlcv(
+        self, tickers: list[str], period: str = "1y"
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        """Download OHLCV for *tickers* from yfinance.
+        Returns (close, volume, high, low)."""
         if not tickers:
-            return pd.DataFrame(), pd.DataFrame()
+            return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
         data = yf.download(
             tickers,
             period=period,
@@ -75,13 +80,23 @@ class DataFetcher:
             progress=False,
             threads=True,
         )
+        empty = pd.DataFrame()
         if isinstance(data.columns, pd.MultiIndex):
+            lvl = data.columns.get_level_values(0)
             close = data["Close"]
-            volume = data["Volume"] if "Volume" in data.columns.get_level_values(0) else pd.DataFrame()
+            volume = data["Volume"] if "Volume" in lvl else empty
+            high   = data["High"]   if "High"   in lvl else empty
+            low    = data["Low"]    if "Low"     in lvl else empty
         else:
-            close = data[["Close"]].rename(columns={"Close": tickers[0]})
-            volume = data[["Volume"]].rename(columns={"Volume": tickers[0]}) if "Volume" in data.columns else pd.DataFrame()
-        return close.dropna(how="all"), volume.dropna(how="all") if not volume.empty else pd.DataFrame()
+            close  = data[["Close"]].rename(columns={"Close":  tickers[0]})
+            volume = data[["Volume"]].rename(columns={"Volume": tickers[0]}) if "Volume" in data.columns else empty
+            high   = data[["High"]].rename(columns={"High":   tickers[0]})  if "High"   in data.columns else empty
+            low    = data[["Low"]].rename(columns={"Low":    tickers[0]})   if "Low"    in data.columns else empty
+
+        def _clean(df: pd.DataFrame) -> pd.DataFrame:
+            return df.dropna(how="all") if not df.empty else df
+
+        return _clean(close), _clean(volume), _clean(high), _clean(low)
 
     def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
         """Ratio of latest volume to prior 20d average volume. >1.5 = high-volume confirmation."""
@@ -169,13 +184,82 @@ class DataFetcher:
         last_close = close.iloc[-1].replace(0, np.nan)
         return (hist.iloc[-1] / last_close).rename("macd_hist")
 
+    def compute_atr(
+        self, high: pd.DataFrame, low: pd.DataFrame, close: pd.DataFrame, window: int = 14
+    ) -> pd.Series:
+        """14-day ATR as % of last close price (daily expected move).
+        E.g. 0.025 = stock typically moves ±2.5% per day."""
+        if high.empty or low.empty or len(close) < window + 1:
+            return pd.Series(np.nan, index=close.columns, name="atr_pct")
+        prev_close = close.shift(1)
+        tr1 = high - low
+        tr2 = (high - prev_close).abs()
+        tr3 = (low  - prev_close).abs()
+        # Stack along axis=2 and take element-wise max across the 3 TR components
+        stacked = np.stack([tr1.values, tr2.values, tr3.values], axis=2)
+        true_range = pd.DataFrame(stacked.max(axis=2), index=close.index, columns=close.columns)
+        atr = true_range.rolling(window, min_periods=window // 2).mean()
+        last_close = close.iloc[-1].replace(0, np.nan)
+        return (atr.iloc[-1] / last_close).rename("atr_pct")
+
+    def fetch_credit_spread(self) -> float:
+        """20-day change in HYG/LQD ratio as a credit spread proxy.
+        Positive = spreads tightening (risk-on). Negative = widening (risk-off).
+        """
+        try:
+            data, *_ = self.fetch_ohlcv(["HYG", "LQD"], period="2mo")
+            if "HYG" not in data.columns or "LQD" not in data.columns:
+                return float("nan")
+            hyg = data["HYG"].dropna()
+            lqd = data["LQD"].dropna()
+            hyg, lqd = hyg.align(lqd, join="inner")
+            if len(hyg) < 22:
+                return float("nan")
+            ratio = hyg / lqd
+            change = float(ratio.iloc[-1] / ratio.iloc[-22] - 1)
+            return change
+        except Exception as exc:
+            logger.warning("Credit spread fetch failed: %s", exc)
+        return float("nan")
+
+    @staticmethod
+    def compute_regime_score(
+        spx_vs_200d: float,
+        vix_term_ratio: float,
+        breadth_pct: float,
+        credit_change: float,
+    ) -> int:
+        """Composite regime score 0–100.
+        Combines SPX trend, VIX term structure, market breadth, and credit spreads.
+        0–30 = defensive/bear  |  31–49 = cautious  |  50–69 = neutral  |  70–100 = bullish/aggressive
+        """
+        scores: list[float] = []
+
+        # SPX vs 200d SMA: -10% → 0, 0% → 50, +10% → 100
+        if not math.isnan(spx_vs_200d):
+            scores.append(max(0.0, min(100.0, 50.0 + spx_vs_200d * 500.0)))
+
+        # VIX term ratio: 0.85 → 0, 1.00 → 50, 1.15 → 100
+        if not math.isnan(vix_term_ratio):
+            scores.append(max(0.0, min(100.0, (vix_term_ratio - 0.85) / 0.30 * 100.0)))
+
+        # Breadth: 20% above 50d → 0, 50% → 50, 80% → 100
+        if not math.isnan(breadth_pct):
+            scores.append(max(0.0, min(100.0, (breadth_pct - 0.20) / 0.60 * 100.0)))
+
+        # Credit spread change: -5% → 0, 0% → 50, +5% → 100
+        if not math.isnan(credit_change):
+            scores.append(max(0.0, min(100.0, 50.0 + credit_change * 1000.0)))
+
+        return round(sum(scores) / len(scores)) if scores else 50
+
     def fetch_vix(self) -> tuple[float, float]:
         """Fetch VIX level and VIX term structure ratio (VIX3M/VIX).
         Term ratio >1 = contango (calm market), <0.9 = backwardation (fear/stress).
         Returns (vix_level, term_ratio).
         """
         try:
-            data, _ = self.fetch_ohlcv(["^VIX", "^VIX3M"], period="5d")
+            data, *_ = self.fetch_ohlcv(["^VIX", "^VIX3M"], period="5d")
             vix = (
                 float(data["^VIX"].dropna().iloc[-1])
                 if "^VIX" in data.columns and not data["^VIX"].dropna().empty
@@ -266,7 +350,7 @@ class DataFetcher:
         market_map = {t: m for t, m in all_tickers}
 
         logger.info("Fetching OHLCV for %d tickers …", len(flat_tickers))
-        close, volume = self.fetch_ohlcv(flat_tickers, period="1y")
+        close, volume, high, low = self.fetch_ohlcv(flat_tickers, period="1y")
 
         returned = set(close.columns)
         missing = [t for t in flat_tickers if t not in returned]
@@ -278,7 +362,7 @@ class DataFetcher:
 
         # Benchmark + regime
         logger.info("Fetching benchmark %s …", BETA_BENCHMARK)
-        bench_raw, _ = self.fetch_ohlcv([BETA_BENCHMARK], period="1y")
+        bench_raw, *_ = self.fetch_ohlcv([BETA_BENCHMARK], period="1y")
         bench_close: pd.Series = bench_raw.iloc[:, 0]
 
         regime, spx_vs_200d = self.compute_regime(bench_close)
@@ -299,12 +383,28 @@ class DataFetcher:
         beta = self.compute_beta(close, bench_close)
         vol_ratio = self.compute_vol_ratio(volume, MOMENTUM_WINDOW)
         macd_hist = self.compute_macd(close)
+        atr_pct = self.compute_atr(high, low, close)
 
         # Market breadth: % of universe stocks above their 50d SMA
         sma_50 = close.rolling(50, min_periods=30).mean().iloc[-1]
         above_50 = (close.iloc[-1] > sma_50).sum()
         valid_breadth = int(sma_50.notna().sum())
         breadth_pct = float(above_50 / valid_breadth) if valid_breadth > 0 else float("nan")
+
+        # Credit spread proxy and composite regime score
+        credit_change = self.fetch_credit_spread()
+        regime_score = self.compute_regime_score(spx_vs_200d, vix_term_ratio, breadth_pct, credit_change)
+        _score_label = (
+            "DEFENSIVE" if regime_score < 30 else
+            "CAUTIOUS"  if regime_score < 50 else
+            "NEUTRAL"   if regime_score < 70 else
+            "BULLISH"
+        )
+        logger.info(
+            "Regime score: %d/100 (%s) | Credit spread 20d: %+.2f%%",
+            regime_score, _score_label,
+            credit_change * 100 if not math.isnan(credit_change) else 0,
+        )
         bench_momentum = float(
             bench_close.iloc[-1] / bench_close.iloc[-MOMENTUM_WINDOW - 1] - 1
         ) if len(bench_close) > MOMENTUM_WINDOW else 0.0
@@ -338,6 +438,7 @@ class DataFetcher:
 
             vr = float(vol_ratio.get(ticker, np.nan)) if not vol_ratio.empty and ticker in vol_ratio.index else float("nan")
             mh = float(macd_hist.get(ticker, np.nan)) if not macd_hist.empty and ticker in macd_hist.index else float("nan")
+            at = float(atr_pct.get(ticker, np.nan)) if not atr_pct.empty and ticker in atr_pct.index else float("nan")
             records.append({
                 "ticker": ticker,
                 "market": market_map.get(ticker, "UNKNOWN"),
@@ -354,6 +455,7 @@ class DataFetcher:
                 "last_price": last_price,
                 "vol_ratio": vr,
                 "macd_hist": mh,
+                "atr_pct": at,
             })
 
         # Sort by Sharpe descending, apply market cap, correlation filter, take top N
@@ -381,9 +483,10 @@ class DataFetcher:
         benchmark_return_1d = float(bench_close.iloc[-1] / bench_close.iloc[-2] - 1) if len(bench_close) >= 2 else 0.0
 
         logger.info(
-            "Snapshot ready: %d candidates, as of %s, benchmark %.1f%%, breadth %.0f%%",
+            "Snapshot ready: %d candidates, as of %s, benchmark %.1f%%, breadth %.0f%%, regime score %d",
             len(top), as_of, bench_momentum * 100,
             breadth_pct * 100 if not math.isnan(breadth_pct) else 0,
+            regime_score,
         )
 
         candidates: list[CandidateInfo] = [CandidateInfo(**r) for r in top]
@@ -392,10 +495,12 @@ class DataFetcher:
             benchmark_return=bench_momentum,
             as_of_date=as_of,
             regime=regime,
+            regime_score=regime_score,
             spx_vs_200d=spx_vs_200d,
             vix_level=vix_level,
             vix_term_ratio=vix_term_ratio,
             breadth_pct=breadth_pct,
+            credit_change=credit_change,
             price_map=price_map,
             returns_1d=returns_1d,
             benchmark_return_1d=benchmark_return_1d,

@@ -141,13 +141,23 @@ class OpenAIRiskManager(BaseAgent):
 
         breadth = snapshot.get("breadth_pct", float("nan"))
         term = snapshot.get("vix_term_ratio", float("nan"))
+        credit = snapshot.get("credit_change", float("nan"))
+        rscore = snapshot.get("regime_score", 50)
         breadth_str = f"{breadth:.0%}" if not math.isnan(breadth) else "N/A"
         term_str = f"{term:.2f}" if not math.isnan(term) else "N/A"
+        credit_str = f"{credit:+.2%}" if not math.isnan(credit) else "N/A"
+        score_label = (
+            "DEFENSIVE" if rscore < 30 else
+            "CAUTIOUS"  if rscore < 50 else
+            "NEUTRAL"   if rscore < 70 else
+            "BULLISH"
+        )
 
         lines = [
             f"## Synthesis task — {date.today().isoformat()}",
             f"Regime: {regime} | SPX vs 200d: {spx_vs:+.1%} | VIX: {vix_str} | S&P 500 20d: {snapshot['benchmark_return']:+.1%}",
-            f"Breadth: {breadth_str} above 50d SMA | VIX term structure: {term_str} (>1=calm, <0.9=fear)",
+            f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} | Credit spreads 20d: {credit_str}",
+            f"Composite regime score: {rscore}/100 — {score_label}",
             f"Strategist proposal portfolio beta: {strat_beta_str} ({beta_target_str} for {regime} regime)",
             "",
         ]
