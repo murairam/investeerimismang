@@ -19,9 +19,6 @@ Each entry is written automatically after the daily run.
 
   Tier 3 — Higher effort, very high impact
 
-  SEC EDGAR insider trading — completely free federal database. When a CEO buys $500k of their own stock, that's the strongest
-  possible signal. Especially powerful for Nordic stocks where insider trading disclosures are also public (Finansinspektionen
-  in Sweden, Finanstilsynet in Norway). Would require a new fetcher module.
 
   Options implied volatility — yfinance provides free options chains for US stocks. High IV = market expects a big move (could
   be earnings, could be news). Compare IV to historical vol (IV rank) to find cheap vs expensive options as a signal.

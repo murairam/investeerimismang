@@ -13,7 +13,7 @@ This report evaluates whether the AI's stated rationales (e.g., 'strong momentum
 - ✅ Strategy is producing alpha 100% of days (target: >60%)
 
 ## Systematic Biases / Errors ⚠️
-- ⚠️ Conviction sizing is INVERTED: Tier 1 (20-25%) averaged -0.6%, but Tier 3 (5-10%) averaged +3.7%. Lower conviction beats higher!
+- None detected yet
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
@@ -22,12 +22,11 @@ This report evaluates whether the AI's stated rationales (e.g., 'strong momentum
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 1 | -0.55% |
-| Tier 2 (medium conviction) | 12-18% | 1 | +2.78% |
-| Tier 3 (low conviction) | 5-10% | 1 | +3.66% |
+| Tier 2 (medium conviction) | 12-18% | 3 | -0.02% |
+| Tier 3 (low conviction) | 5-10% | 2 | +2.33% |
 
 ## Action Items for the AI
-- Re-calibrate conviction: If low-conviction picks are winning, increase their weights. If high-conviction picks are losing, reduce tier 1 sizing or improve stock selection.
+- Continue current strategy. Performance signals are healthy.
 
 ## How This Improves the AI
 This report is automatically fed into the AI's system prompt on each run, so it learns to:
