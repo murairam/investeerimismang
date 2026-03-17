@@ -3,13 +3,12 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "FORTUM.HE": 91.64327696,
-    "MAERSK-B.CO": 0.10225309,
-    "NHY.OL": 19.62620941,
-    "TELIA.ST": 32.37905473,
-    "XOM": 7.89855752,
-    "TAL1T.TL": 1269.88636887,
-    "SCATC.OL": 5.93523029
+    "FORTUM.HE": 108.59728319,
+    "MAERSK-B.CO": 0.10027855,
+    "NHY.OL": 23.52438066,
+    "TELIA.ST": 33.40989811,
+    "XOM": 8.11181857,
+    "TAL1T.TL": 1123.59545918
   },
   "history": [
     {
@@ -20,13 +19,12 @@
       "return_since_start": 0.0,
       "turnover": 1.0,
       "positions": {
-        "FORTUM.HE": 91.64327696,
-        "MAERSK-B.CO": 0.10225309,
-        "NHY.OL": 19.62620941,
-        "TELIA.ST": 32.37905473,
-        "XOM": 7.89855752,
-        "TAL1T.TL": 1269.88636887,
-        "SCATC.OL": 5.93523029
+        "FORTUM.HE": 108.59728319,
+        "MAERSK-B.CO": 0.10027855,
+        "NHY.OL": 23.52438066,
+        "TELIA.ST": 33.40989811,
+        "XOM": 8.11181857,
+        "TAL1T.TL": 1123.59545918
       }
     }
   ],

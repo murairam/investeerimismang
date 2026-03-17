@@ -3,38 +3,33 @@
   "positions": [
     {
       "ticker": "FORTUM.HE",
-      "weight": 0.20253164556962028,
+      "weight": 0.24,
       "rationale": "consensus pick + strong recent performance with solid momentum."
     },
     {
       "ticker": "MAERSK-B.CO",
-      "weight": 0.18354430379746836,
+      "weight": 0.18,
       "rationale": "consensus pick + consistent positive returns and high Sharpe ratio."
     },
     {
       "ticker": "NHY.OL",
-      "weight": 0.18354430379746836,
+      "weight": 0.22,
       "rationale": "consensus pick + solid return, positive vs_index, and recovering momentum."
     },
     {
       "ticker": "TELIA.ST",
-      "weight": 0.1550632911392405,
+      "weight": 0.16,
       "rationale": "consensus pick + stable performance near 52-week high with improving momentum."
     },
     {
       "ticker": "XOM",
-      "weight": 0.12658227848101267,
+      "weight": 0.13,
       "rationale": "consensus pick + strong return and positive vs_index in the S&P 500."
     },
     {
       "ticker": "TAL1T.TL",
-      "weight": 0.07911392405063293,
+      "weight": 0.07,
       "rationale": "unique pick + showing more volatility but has potential for recovery."
-    },
-    {
-      "ticker": "SCATC.OL",
-      "weight": 0.06962025316455697,
-      "rationale": "unique pick + shows slight recovery signs and is undervalued."
     }
   ],
   "reasoning": "The consensus picks were weighted higher due to their validated performance and strong signals. Unique picks were included based on their recovery potential and momentum, ensuring a diversified portfolio. The final portfolio beta is 0.84, which fits well within the target range for a NEUTRAL regime. Residual cash was deployed (strong selected alpha (+11.0%)).",
@@ -61,7 +56,6 @@
     "FORTUM.HE": 22.100000381469727,
     "MAERSK-B.CO": 17950.0,
     "NHY.OL": 93.5199966430664,
-    "SCATC.OL": 117.30000305175781,
     "TAL1T.TL": 0.6230000257492065,
     "TELIA.ST": 47.88999938964844,
     "XOM": 160.25999450683594
