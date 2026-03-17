@@ -50,6 +50,28 @@ def _mark_to_market(positions: dict[str, float], cash: float, price_map: dict[st
     return equity, holdings_value
 
 
+def reset_for_live(start_date: str) -> None:
+    """
+    Reset the paper account to €10,000 on the first LIVE run (April 6).
+    The game wipes all pre-game gains/losses and restarts everyone at 10,000.
+    """
+    state = {
+        "start_date": start_date,
+        "initial_capital": _DEFAULT_START_CAPITAL,
+        "cash": _DEFAULT_START_CAPITAL,
+        "positions": {},
+        "history": [],
+        "last_rebalanced_date": None,
+        "last_equity": _DEFAULT_START_CAPITAL,
+    }
+    _save_raw(state)
+    logger.info(
+        "Paper account reset to €%.0f for LIVE mode start (%s)",
+        _DEFAULT_START_CAPITAL,
+        start_date,
+    )
+
+
 def rebalance_to_proposal(
     proposal: PortfolioProposal,
     as_of_date: str,

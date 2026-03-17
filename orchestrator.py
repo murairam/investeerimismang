@@ -30,7 +30,7 @@ from data.fetcher import DataFetcher
 from data.learning_report import generate_pregame_learning_report
 from data.meta_learning import generate_meta_learning_report
 from data.mode_guard import enforce_mode_and_freeze, generate_live_handoff_if_due
-from data.paper_account import rebalance_to_proposal
+from data.paper_account import rebalance_to_proposal, reset_for_live
 from data.portfolio_store import load_last, load_yesterday_prices, save as save_portfolio
 from output.dispatcher import WebhookDispatcher
 from portfolio.validator import PortfolioValidator
@@ -218,6 +218,11 @@ class AlphaSharkOrchestrator:
         )
 
         # Step 6b: paper trading account (virtual €10,000 baseline)
+        # On the first LIVE run the game resets all portfolios to €10,000 — mirror that here
+        if mode_info["lock_status"] == "initialized":
+            reset_for_live(snapshot["as_of_date"])
+            logger.info("Paper account reset to €10,000 for LIVE mode start")
+
         paper_metrics = rebalance_to_proposal(
             final_proposal,
             as_of_date=snapshot["as_of_date"],
