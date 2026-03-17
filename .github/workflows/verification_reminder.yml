@@ -1,0 +1,33 @@
+name: AlphaShark Verification Reminder
+
+on:
+  schedule:
+    # 07:00 UTC = 10:00 EEST (30 min after main run at 09:30 EEST)
+    # Runs Mon–Fri, right before the 10:00 EET submission cutoff
+    - cron: '0 7 * * 1-5'
+  workflow_dispatch:   # allow manual trigger for testing
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check verification status and send reminder if needed
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python verification_reminder.py

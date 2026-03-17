@@ -19,6 +19,7 @@ from typing import Optional
 from openai import OpenAI
 
 from agents.base_agent import BaseAgent
+from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot
 from portfolio.models import PortfolioProposal, Position
 
@@ -207,11 +208,17 @@ class OpenAIRiskManager(BaseAgent):
         )
 
         usage = response.usage
+        cost = log_usage(
+            agent_name="OpenAIRiskManager",
+            model=self.MODEL,
+            input_tokens=usage.prompt_tokens,
+            output_tokens=usage.completion_tokens,
+        )
         logger.info(
-            "Meta-analyst tokens — in: %d, out: %d (~$%.5f)",
+            "Meta-analyst tokens — in: %d, out: %d (cost: $%.5f)",
             usage.prompt_tokens,
             usage.completion_tokens,
-            usage.prompt_tokens / 1_000_000 * 0.15 + usage.completion_tokens / 1_000_000 * 0.60,
+            cost,
         )
 
         data = json.loads(response.choices[0].message.content)

@@ -20,6 +20,7 @@ _MAX_EMBED_DESCRIPTION = 4096
 class WebhookDispatcher:
     def __init__(self) -> None:
         self.webhook_url = os.environ["DISCORD_WEBHOOK_URL"]
+        self.user_id = os.environ.get("DISCORD_USER_ID")  # Optional Discord user ID for @mentions
 
     def format_embed(
         self,
@@ -182,8 +183,20 @@ class WebhookDispatcher:
             },
         }
 
-    def send(self, embed: dict) -> None:
+    def send(self, embed: dict, mention_user: bool = False) -> None:
+        """
+        Send embed to Discord.
+
+        Args:
+            embed: Discord embed dict
+            mention_user: If True and DISCORD_USER_ID is set, mentions the user (pings their phone)
+        """
         payload = {"embeds": [embed]}
+
+        # Add user mention for LIVE mode alerts
+        if mention_user and self.user_id:
+            payload["content"] = f"<@{self.user_id}>"
+
         try:
             response = requests.post(self.webhook_url, json=payload, timeout=10)
             response.raise_for_status()

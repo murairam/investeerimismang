@@ -15,6 +15,7 @@ from openai import OpenAI
 
 from agents.base_agent import BaseAgent
 from config import MOMENTUM_WINDOW
+from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot
 from data.portfolio_store import load_performance_history
 from portfolio.models import PortfolioProposal, Position
@@ -350,11 +351,17 @@ class OpenAIStrategist(BaseAgent):
         )
 
         usage = response.usage
+        cost = log_usage(
+            agent_name="OpenAIStrategist",
+            model=self.MODEL,
+            input_tokens=usage.prompt_tokens,
+            output_tokens=usage.completion_tokens,
+        )
         logger.info(
-            "Strategist tokens — in: %d, out: %d (~$%.4f)",
+            "Strategist tokens — in: %d, out: %d (cost: $%.4f)",
             usage.prompt_tokens,
             usage.completion_tokens,
-            usage.prompt_tokens / 1_000_000 * 2.50 + usage.completion_tokens / 1_000_000 * 10.0,
+            cost,
         )
 
         data = json.loads(response.choices[0].message.content)

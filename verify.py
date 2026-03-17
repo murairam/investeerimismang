@@ -14,6 +14,8 @@ import sys
 from datetime import date
 from typing import Optional
 
+from data.verification_tracker import mark_verified
+
 _STORE_PATH = os.path.join(os.path.dirname(__file__), "portfolio_history.json")
 
 
@@ -63,7 +65,8 @@ def main() -> None:
     answer = input("  > ").strip().lower()
 
     if answer == "y":
-        print("\n  Portfolio confirmed. Record is up to date.\n")
+        mark_verified(data.get("date", date.today().isoformat()))
+        print("\n  ✅ Portfolio confirmed. Record is up to date.\n")
 
     elif answer == "n":
         print("\n  The system will use its record for tomorrow's decisions.")
@@ -118,7 +121,8 @@ def _enter_manual(existing: dict) -> None:
         "confidence": existing.get("confidence", 0.5),
     }
     save(data)
-    print("  Saved. The system will use this as the baseline for tomorrow.\n")
+    mark_verified(data["date"])
+    print("  ✅ Saved. The system will use this as the baseline for tomorrow.\n")
 
 
 if __name__ == "__main__":

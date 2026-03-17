@@ -24,9 +24,11 @@ from agents.gemini_challenger import GeminiChallenger
 from agents.openai_risk_manager import OpenAIRiskManager
 from agents.openai_strategist import OpenAIStrategist
 from config import CASH_POLICY
+from data.cost_tracker import get_total_cost
 from data.diary import append_entry as append_daily_log
 from data.fetcher import DataFetcher
 from data.learning_report import generate_pregame_learning_report
+from data.meta_learning import generate_meta_learning_report
 from data.mode_guard import enforce_mode_and_freeze, generate_live_handoff_if_due
 from data.paper_account import rebalance_to_proposal
 from data.portfolio_store import load_last, load_yesterday_prices, save as save_portfolio
@@ -237,6 +239,16 @@ class AlphaSharkOrchestrator:
             learning_summary["paper_return"] * 100,
         )
 
+        # Step 7c: generate meta-learning report (AI critiques its own reasoning quality)
+        meta_summary = generate_meta_learning_report(target_date="2026-04-06")
+        logger.info(
+            "Meta-learning report updated: accuracy %.0f%%, insights %d, biases %d, alpha hit rate %.0f%%",
+            meta_summary["accuracy_score"] * 100,
+            meta_summary["insights_count"],
+            meta_summary["biases_count"],
+            meta_summary["alpha_hit_rate"] * 100,
+        )
+
         # On/after live date, emit one-time handoff summary automatically
         handoff_info = generate_live_handoff_if_due(snapshot["as_of_date"], game_start_date="2026-04-06")
         if handoff_info and handoff_info.get("generated"):
@@ -250,7 +262,17 @@ class AlphaSharkOrchestrator:
             paper_metrics=paper_metrics,
             mode=mode_info["mode"],
         )
-        self.dispatcher.send(embed)
+        # Mention user in LIVE mode so they get a notification
+        self.dispatcher.send(embed, mention_user=(mode_info["mode"] == "LIVE"))
+
+        # Step 9: Print cost summary
+        cost_summary = get_total_cost()
+        logger.info(
+            "💰 Today's API cost: $%.4f | Total project cost: $%.4f (%d runs)",
+            cost_summary["daily_breakdown"].get(snapshot["as_of_date"], 0.0),
+            cost_summary["total_cost"],
+            cost_summary["run_count"],
+        )
 
         logger.info("── AlphaShark pipeline complete ──")
 
