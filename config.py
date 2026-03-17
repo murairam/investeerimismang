@@ -6,9 +6,10 @@ Global configuration: game constraints, ticker universe, signal parameters.
 GAME_CONSTRAINTS = {
     "min_stocks": 5,
     "max_stocks": 20,
-    "min_weight": 0.05,   # 5%
-    "max_weight": 0.25,   # 25%
-    "max_total_weight": 1.00,
+    "min_weight": 0.05,        # 5%
+    "max_weight": 0.25,        # 25%
+    "max_total_weight": 1.00,  # 100%
+    "min_total_weight": 0.75,  # 75% — game allows max 25% cash (earns no return)
 }
 
 # Preferred stock-count bands by market regime (still bounded by GAME_CONSTRAINTS)

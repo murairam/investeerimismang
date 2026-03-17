@@ -74,6 +74,10 @@ class PortfolioValidator:
         total = sum(p.weight for p in proposal.positions)
         if total > self.c["max_total_weight"] + 1e-9:
             errors.append(f"Total weight {total:.1%} exceeds 100%")
+        if total < self.c["min_total_weight"] - 1e-9:
+            errors.append(
+                f"Total weight {total:.1%} below 75% minimum (game allows max 25% cash)"
+            )
 
         return ValidationResult(ok=len(errors) == 0, errors=errors)
 
