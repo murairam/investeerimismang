@@ -1,9 +1,35 @@
 {
   "start_date": "2026-03-17",
   "initial_capital": 10000.0,
-  "cash": 10000.0,
-  "positions": {},
-  "history": [],
-  "last_rebalanced_date": null,
+  "cash": 0.0,
+  "positions": {
+    "FORTUM.HE": 91.64327696,
+    "MAERSK-B.CO": 0.10225309,
+    "NHY.OL": 19.62620941,
+    "TELIA.ST": 32.37905473,
+    "XOM": 7.89855752,
+    "TAL1T.TL": 1269.88636887,
+    "SCATC.OL": 5.93523029
+  },
+  "history": [
+    {
+      "date": "2026-03-17",
+      "equity": 10000.0,
+      "cash": 0.0,
+      "daily_return": 0.0,
+      "return_since_start": 0.0,
+      "turnover": 1.0,
+      "positions": {
+        "FORTUM.HE": 91.64327696,
+        "MAERSK-B.CO": 0.10225309,
+        "NHY.OL": 19.62620941,
+        "TELIA.ST": 32.37905473,
+        "XOM": 7.89855752,
+        "TAL1T.TL": 1269.88636887,
+        "SCATC.OL": 5.93523029
+      }
+    }
+  ],
+  "last_rebalanced_date": "2026-03-17",
   "last_equity": 10000.0
 }
