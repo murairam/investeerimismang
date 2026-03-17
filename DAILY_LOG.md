@@ -616,3 +616,35 @@ Winners: MAERSK-B.CO +3.3%, FORTUM.HE +2.1%, XOM +1.8% | Losers: NHY.OL -0.8%, N
 - ▼ **TELIA.ST**: 15.0% → 10.0% (-5.0%)
 
 ---
+## 2026-03-17 15:52:08
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +1.7% · VIX: 23.0 · S&P 500 20d: -1.8%
+
+**Yesterday's P&L:** Portfolio +1.2% · Benchmark +0.4% · Alpha +0.9%
+Winners: MAERSK-B.CO +3.4%, FORTUM.HE +2.6%, XOM +1.9% | Losers: NHY.OL -0.6%, BOL.ST -0.4%, NOKIA.HE -0.1%
+
+**Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 7 · **Total weight:** 100.0%
+
+**Thesis:** The consensus picks were weighted higher due to their validated performance and strong signals. Unique picks were included based on their recovery potential and momentum, ensuring a diversified portfolio. The final portfolio beta is 0.84, which fits well within the target range for a NEUTRAL regime. Residual cash was deployed (strong selected alpha (+11.0%)).
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **FORTUM.HE** | 20.3% | consensus pick + strong recent performance with solid momentum. |
+| 2 | **MAERSK-B.CO** | 18.4% | consensus pick + consistent positive returns and high Sharpe ratio. |
+| 3 | **NHY.OL** | 18.4% | consensus pick + solid return, positive vs_index, and recovering momentum. |
+| 4 | **TELIA.ST** | 15.5% | consensus pick + stable performance near 52-week high with improving momentum. |
+| 5 | **XOM** | 12.7% | consensus pick + strong return and positive vs_index in the S&P 500. |
+| 6 | **TAL1T.TL** | 7.9% | unique pick + showing more volatility but has potential for recovery. |
+| 7 | **SCATC.OL** | 7.0% | unique pick + shows slight recovery signs and is undervalued. |
+
+**Changes from yesterday:**
+- ➕ Added **TAL1T.TL** at 7.9%
+- ➕ Added **SCATC.OL** at 7.0%
+- ➖ Removed **NOKIA.HE** (was 20.0%)
+- ➖ Removed **BOL.ST** (was 5.0%)
+- ▲ **NHY.OL**: 15.0% → 18.4% (+3.4%)
+- ▲ **TELIA.ST**: 10.0% → 15.5% (+5.5%)
+
+---

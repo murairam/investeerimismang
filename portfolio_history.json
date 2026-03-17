@@ -2,68 +2,68 @@
   "date": "2026-03-17",
   "positions": [
     {
-      "ticker": "NOKIA.HE",
-      "weight": 0.2,
-      "rationale": "consensus pick + strong Sharpe_20d and momentum justify a high weight."
-    },
-    {
       "ticker": "FORTUM.HE",
-      "weight": 0.2,
-      "rationale": "consensus pick + strong momentum and solid performance support this weight."
+      "weight": 0.20253164556962028,
+      "rationale": "consensus pick + strong recent performance with solid momentum."
     },
     {
       "ticker": "MAERSK-B.CO",
-      "weight": 0.18,
-      "rationale": "consensus pick + recovering momentum and positive vs_index warrant significant allocation."
+      "weight": 0.18354430379746836,
+      "rationale": "consensus pick + consistent positive returns and high Sharpe ratio."
     },
     {
       "ticker": "NHY.OL",
-      "weight": 0.15,
-      "rationale": "consensus pick + strong recovery signals and solid recent performance justify inclusion."
-    },
-    {
-      "ticker": "XOM",
-      "weight": 0.12,
-      "rationale": "consensus pick + good Sharpe_20d and sector diversification add value."
+      "weight": 0.18354430379746836,
+      "rationale": "consensus pick + solid return, positive vs_index, and recovering momentum."
     },
     {
       "ticker": "TELIA.ST",
-      "weight": 0.1,
-      "rationale": "consensus pick + improving momentum and near 52-week high support this position."
+      "weight": 0.1550632911392405,
+      "rationale": "consensus pick + stable performance near 52-week high with improving momentum."
     },
     {
-      "ticker": "BOL.ST",
-      "weight": 0.05,
-      "rationale": "unique pick + potential recovery signals justify a smaller allocation."
+      "ticker": "XOM",
+      "weight": 0.12658227848101267,
+      "rationale": "consensus pick + strong return and positive vs_index in the S&P 500."
+    },
+    {
+      "ticker": "TAL1T.TL",
+      "weight": 0.07911392405063293,
+      "rationale": "unique pick + showing more volatility but has potential for recovery."
+    },
+    {
+      "ticker": "SCATC.OL",
+      "weight": 0.06962025316455697,
+      "rationale": "unique pick + shows slight recovery signs and is undervalued."
     }
   ],
-  "reasoning": "The final portfolio includes all consensus picks with higher weights due to their validated performance. Additionally, BOL.ST was included as a contrarian pick with potential recovery signals. The portfolio beta is well within the target range for a NEUTRAL regime, ensuring a balanced approach across multiple sectors.",
+  "reasoning": "The consensus picks were weighted higher due to their validated performance and strong signals. Unique picks were included based on their recovery potential and momentum, ensuring a diversified portfolio. The final portfolio beta is 0.84, which fits well within the target range for a NEUTRAL regime. Residual cash was deployed (strong selected alpha (+11.0%)).",
   "confidence": 0.85,
   "performance_history": [
     {
       "date": "2026-03-17",
-      "benchmark_return_20d": -0.0187,
-      "portfolio_return_1d": 0.011733,
-      "benchmark_return_1d": 0.002397,
-      "alpha_1d": 0.009335,
+      "benchmark_return_20d": -0.0175,
+      "portfolio_return_1d": 0.012471,
+      "benchmark_return_1d": 0.003572,
+      "alpha_1d": 0.008899,
       "position_returns": {
-        "FORTUM.HE": 0.020882,
-        "MAERSK-B.CO": 0.032537,
-        "NHY.OL": -0.008294,
-        "TELIA.ST": 0.000837,
-        "XOM": 0.018444,
-        "NOKIA.HE": -0.004808,
-        "BOL.ST": -0.004803
+        "NOKIA.HE": -0.000801,
+        "FORTUM.HE": 0.025522,
+        "MAERSK-B.CO": 0.033688,
+        "NHY.OL": -0.00553,
+        "XOM": 0.019271,
+        "TELIA.ST": 0.001883,
+        "BOL.ST": -0.004163
       }
     }
   ],
   "close_prices": {
-    "BOL.ST": 621.5999755859375,
-    "FORTUM.HE": 22.0,
-    "MAERSK-B.CO": 17930.0,
-    "NHY.OL": 93.26000213623047,
-    "NOKIA.HE": 7.452000141143799,
-    "TELIA.ST": 47.84000015258789,
-    "XOM": 160.1300048828125
+    "FORTUM.HE": 22.100000381469727,
+    "MAERSK-B.CO": 17950.0,
+    "NHY.OL": 93.5199966430664,
+    "SCATC.OL": 117.30000305175781,
+    "TAL1T.TL": 0.6230000257492065,
+    "TELIA.ST": 47.88999938964844,
+    "XOM": 160.25999450683594
   }
 }
