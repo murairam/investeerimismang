@@ -325,6 +325,12 @@ class OpenAIStrategist(BaseAgent):
                 trend = "improving" if delta > 0.005 else ("deteriorating" if delta < -0.005 else "flat")
                 lines.append(f"  Trend: benchmark momentum is {trend} ({delta:+.1%} over {len(perf_history)} days).")
 
+        if snapshot.get("learning_context"):
+            lines += ["", snapshot["learning_context"]]
+
+        if snapshot.get("news_headlines"):
+            lines += ["", snapshot["news_headlines"]]
+
         lines += [
             "",
             "Generate a portfolio from the candidates above following the game rules and "

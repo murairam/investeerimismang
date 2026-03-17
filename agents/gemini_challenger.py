@@ -163,6 +163,12 @@ class GeminiChallenger(BaseAgent):
             for pos in prior_proposal.positions:
                 lines.append(f"  {pos.ticker:<12} {pos.weight:.1%}")
 
+        if snapshot.get("learning_context"):
+            lines += ["", snapshot["learning_context"]]
+
+        if snapshot.get("news_headlines"):
+            lines += ["", snapshot["news_headlines"]]
+
         lines += ["", "Build your independent portfolio. Return valid JSON only."]
         return "\n".join(lines)
 

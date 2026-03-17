@@ -27,9 +27,11 @@ from config import CASH_POLICY
 from data.cost_tracker import get_total_cost
 from data.diary import append_entry as append_daily_log
 from data.fetcher import DataFetcher
+from data.learning_context import get_learning_context
 from data.learning_report import generate_pregame_learning_report
 from data.meta_learning import generate_meta_learning_report
 from data.mode_guard import enforce_mode_and_freeze, generate_live_handoff_if_due
+from data.news_fetcher import fetch_candidate_news, format_news_for_prompt
 from data.paper_account import rebalance_to_proposal, reset_for_live
 from data.portfolio_store import load_last, load_yesterday_prices, save as save_portfolio
 from output.dispatcher import WebhookDispatcher
@@ -58,6 +60,24 @@ class AlphaSharkOrchestrator:
             snapshot["benchmark_return"] * 100,
             snapshot["regime"],
         )
+
+        # Step 1b: inject learning context (what worked / didn't in past runs)
+        learning_context = get_learning_context()
+        snapshot["learning_context"] = learning_context
+        if learning_context:
+            logger.info("Learning context loaded (%d chars) — injecting into agent prompts", len(learning_context))
+        else:
+            logger.info("No learning context yet (first run or files missing)")
+
+        # Step 1c: fetch recent news headlines for top candidates
+        top_tickers = [c["ticker"] for c in snapshot["candidates"][:20]]
+        try:
+            news_items = fetch_candidate_news(top_tickers)
+            snapshot["news_headlines"] = format_news_for_prompt(news_items)
+            logger.info("Fetched %d news headlines for %d tickers", len(news_items), len(top_tickers))
+        except Exception as exc:
+            logger.warning("News fetch failed (non-fatal): %s", exc)
+            snapshot["news_headlines"] = ""
 
         # Enforce pre-game/live mode behavior and post-start parameter freeze
         mode_info = enforce_mode_and_freeze(snapshot["as_of_date"], game_start_date="2026-04-06")

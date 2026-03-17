@@ -189,6 +189,9 @@ class OpenAIRiskManager(BaseAgent):
                 "Not available (fallback — use Proposal A as base, apply risk rules).",
             ]
 
+        if snapshot.get("learning_context"):
+            lines += ["", snapshot["learning_context"]]
+
         lines += [
             "",
             "Synthesise the final portfolio. Weight consensus picks higher. "
