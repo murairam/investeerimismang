@@ -1,6 +1,6 @@
 # AlphaShark
 
-An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). Runs daily via GitHub Actions, fetches live market data, uses GPT-4o to build a momentum portfolio, validates it against game rules, and posts the result to Discord.
+An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). Runs daily via GitHub Actions, fetches live market data, uses a 3-model AI ensemble (GPT-4o + Gemini + GPT-4o-mini) to build a momentum portfolio, validates it against game rules, and posts the result to Discord.
 
 **Game end date: 19 June 2026**
 
@@ -12,12 +12,46 @@ An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game
 Morning (automated, before 10:00 EET):
   python main.py          ← GitHub Actions runs this
       ↓ posts to Discord with proposed portfolio changes
+            ↓ rebalances paper account (virtual €10,000) and tracks learning P&L
 
 You manually update your game portfolio on the website.
 
 Then confirm the system's record matches yours:
   python verify.py        ← run after updating the game
 ```
+
+### Pre-game training mode (starting now)
+
+Before the game starts (6 April), run `python main.py` daily and use the built-in paper account:
+
+- Starts at **€10,000 virtual capital** on first run
+- Rebalances automatically to the latest validated agent portfolio
+- Persists holdings/equity in `paper_account.json`
+- Appends paper-account performance to `DAILY_LOG.md`
+- Includes paper-account equity/performance in Discord output
+- Auto-generates `PREGAME_LEARNING.md` with win/loss analysis and action items until 6 April
+
+Run this anytime to refresh and inspect the learning summary:
+
+```bash
+python pregame_review.py
+```
+
+This gives you a live rehearsal loop: observe suggestions, measure virtual outcomes, and tune the code before real capital/game decisions.
+
+### Automatic mode switch on 6 April
+
+The system now enforces two modes by date:
+
+- **PREGAME (before 2026-04-06):** training/experimentation mode
+- **LIVE (on/after 2026-04-06):** strict parameter freeze mode
+
+In LIVE mode, protected strategy files are fingerprint-locked in `live_mode_lock.json`.
+If those files change after lock creation, the run fails fast so accidental strategy drift is prevented.
+
+On the first LIVE run, a one-time handoff file is generated automatically:
+
+- `LIVE_HANDOFF_2026-04-06.md`
 
 ---
 
@@ -28,9 +62,11 @@ Market data (yfinance)
     ↓
 Rich signal table (momentum, Sharpe, RSI, regime…)
     ↓
-GPT-4o (OpenAIStrategist) — portfolio selection & sizing
+GPT-4o (OpenAIStrategist) ──┐  independent proposals
+Gemini 2.0 Flash             ├─ (challenger falls back to gpt-4o-mini if quota exceeded)
+(GeminiChallenger)          ─┘
     ↓
-GPT-4o-mini (OpenAIRiskManager) — risk review pass
+GPT-4o-mini (OpenAIRiskManager) — meta-analyst, synthesises both proposals
     ↓
 PortfolioValidator — enforces game constraints
     ↓
@@ -38,7 +74,7 @@ portfolio_history.json — saved for next day's context
     ↓
 Discord webhook — daily embed posted
     ↓
-DIARY.md — human-readable daily log appended
+DAILY_LOG.md — human-readable daily log appended
 ```
 
 ---
@@ -57,7 +93,7 @@ DIARY.md — human-readable daily log appended
 | `beta` | sensitivity to S&P 500 moves |
 | `vol_20d` | annualised 20-day volatility |
 
-**Market regime** (BULL / BEAR / NEUTRAL) is determined by SPX vs its 200-day SMA and injected into Claude's system prompt to adjust aggression level.
+**Market regime** (BULL / BEAR / NEUTRAL) is determined by SPX vs its 200-day SMA and injected into each model's system prompt to adjust aggression level.
 
 ---
 
@@ -77,7 +113,7 @@ DIARY.md — human-readable daily log appended
 
 Stocks across 6 markets: **US S&P 500**, **OMX Helsinki** (Finland), **OMX Stockholm 30** (Sweden), **OBX** (Norway), **OMX Copenhagen 25** (Denmark), **Baltic Main List** (Tallinn, Riga, Vilnius).
 
-Top 30 candidates by Sharpe ratio are passed to Claude, with:
+Top 30 candidates by Sharpe ratio are passed to the models, with:
 - Max 15 US candidates
 - Max 5 candidates per other market
 - Correlated pairs (>0.85 over 60d) deduplicated — keep higher Sharpe
@@ -92,12 +128,25 @@ pip install -r requirements.txt
 python main.py
 ```
 
+### GitHub Actions (automated daily runs)
+
+1. Push the repo to GitHub
+2. Go to **Settings → Secrets and variables → Actions**
+3. Add these 3 repository secrets:
+   - `OPENAI_API_KEY`
+   - `GEMINI_API_KEY`
+   - `DISCORD_WEBHOOK_URL`
+4. The workflow runs automatically at **09:30 EEST (06:30 UTC)** on weekdays, 90 min before the 10:00 EET submission cutoff.
+5. After each run, `portfolio_history.json` and `DAILY_LOG.md` are committed back to the repo automatically.
+
+After the automated run posts to Discord, manually update your positions on the game website, then run `python verify.py` to confirm the baseline matches.
+
 ### Required environment variables
 
 ```
-ANTHROPIC_API_KEY=...
-OPENAI_API_KEY=...
-DISCORD_WEBHOOK_URL=...
+OPENAI_API_KEY=...      # GPT-4o strategist + GPT-4o-mini meta-analyst
+GEMINI_API_KEY=...      # Gemini 2.0 Flash challenger (free tier, 1500 req/day)
+DISCORD_WEBHOOK_URL=... # Discord channel webhook for daily posts
 ```
 
 ---
@@ -105,22 +154,34 @@ DISCORD_WEBHOOK_URL=...
 ## Project structure
 
 ```
-├── main.py                    # entry point
-├── orchestrator.py            # pipeline wiring
-├── config.py                  # universe, signal params, game constraints
+├── main.py                      # entry point
+├── orchestrator.py              # pipeline wiring (all 3 agents)
+├── config.py                    # universe, signal params, game constraints
+├── verify.py                    # interactive CLI to confirm/correct daily portfolio
+├── pregame_review.py            # refresh/print pre-game learning summary
 ├── data/
-│   ├── fetcher.py             # market data + signal computation
-│   └── portfolio_store.py     # load/save portfolio_history.json
+│   ├── fetcher.py               # market data + signal computation
+│   ├── portfolio_store.py       # load/save portfolio_history.json
+│   ├── paper_account.py         # virtual account state + daily rebalancing
+│   ├── learning_report.py       # pre-game win/loss analyzer + markdown report
+│   ├── mode_guard.py            # pregame/live switch + live parameter freeze
+│   └── diary.py                 # append entries to DAILY_LOG.md
 ├── agents/
-│   ├── anthropic_strategist.py  # Claude — portfolio generation
-│   └── openai_risk_manager.py   # OpenAI — risk review (Phase 2)
+│   ├── base_agent.py            # abstract base class
+│   ├── openai_strategist.py     # GPT-4o — primary portfolio selection & sizing
+│   ├── gemini_challenger.py     # Gemini 2.0 Flash — independent second opinion
+│   └── openai_risk_manager.py   # GPT-4o-mini — meta-analyst, synthesises proposals
 ├── portfolio/
-│   ├── models.py              # Position, PortfolioProposal dataclasses
-│   └── validator.py           # constraint validation + normalisation
+│   ├── models.py                # Position, PortfolioProposal dataclasses
+│   └── validator.py             # constraint validation + normalisation
 ├── output/
-│   └── dispatcher.py          # Discord webhook
-├── portfolio_history.json     # last accepted portfolio (auto-generated)
-└── DAILY_LOG.md               # daily decision log (auto-generated)
+│   └── dispatcher.py            # Discord webhook
+├── portfolio_history.json       # last accepted portfolio (auto-generated)
+├── paper_account.json           # virtual paper account ledger (auto-generated)
+├── PREGAME_LEARNING.md          # actionable pre-game learning report (auto-generated)
+├── live_mode_lock.json          # live-mode strategy lock fingerprints (auto-generated)
+├── LIVE_HANDOFF_2026-04-06.md   # final pregame handoff when live mode starts
+└── DAILY_LOG.md                 # daily decision + paper P&L log (auto-generated)
 ```
 
 ---

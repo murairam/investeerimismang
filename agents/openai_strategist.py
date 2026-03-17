@@ -16,6 +16,7 @@ from openai import OpenAI
 from agents.base_agent import BaseAgent
 from config import MOMENTUM_WINDOW
 from data.fetcher import MarketSnapshot
+from data.portfolio_store import load_performance_history
 from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,30 @@ _REGIME_GUIDANCE = {
     ),
 }
 
+def _vix_guidance(vix: float) -> str:
+    if math.isnan(vix):
+        return "VIX data unavailable — use regime signals only."
+    if vix > 30:
+        return (
+            f"VIX is {vix:.1f} — extreme fear. Reduce overall beta. "
+            "Cap your highest-conviction positions at 20% and prefer names with strong earnings visibility. "
+            "This is not the time for speculative breakouts."
+        )
+    if vix > 22:
+        return (
+            f"VIX is {vix:.1f} — elevated uncertainty. "
+            "Be selective: only add a position if its Sharpe_20d is clearly above the median. "
+            "Slightly prefer quality over pure momentum."
+        )
+    if vix < 15:
+        return (
+            f"VIX is {vix:.1f} — market complacency. "
+            "Momentum strategy works well here but ensure every position has a genuine Sharpe edge. "
+            "Avoid names that are 'up on nothing' — confirm with vs_index > 0."
+        )
+    return f"VIX is {vix:.1f} — normal range. Standard momentum strategy applies."
+
+
 _SYSTEM_PROMPT_TEMPLATE = """You are AlphaShark, an elite quantitative portfolio manager competing in the Äripäev/SEB Investment Game (Estonia). Your mandate is to build a high-conviction, momentum-driven portfolio that maximises returns by game end (19 June 2026).
 
 Today's date: {today}. The market snapshot provided below is your ONLY source of truth for current price action — do not rely on training-data knowledge of stock prices or recent news.
@@ -54,10 +79,13 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - Favour stocks with the strongest risk-adjusted momentum (Sharpe_20d = 20d return / annualised vol).
 - High Sharpe means a smooth, persistent uptrend — much better than a volatile spike.
 - Prefer high-beta names in bull-market conditions — they amplify gains.
-- Target 8–12 positions; diversify across at least 2 markets to reduce single-market risk.
+- Regime-based position count target: BULL 6–8, NEUTRAL 8–10, BEAR 10–12.
+- Diversify across at least 2 markets to reduce single-market risk.
 - Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them.
 - vs_index > 0 means the stock beat its own market — pure alpha signal.
+- vol_ratio = today's volume / 20d average volume. >1.5 means the move has high-volume confirmation (strong signal). <0.7 means low-volume move (weak signal, be cautious).
 - Goal: BEAT other game participants — take conviction bets, not passive exposure.
+- **Diversify from the crowd**: if your top 5 picks are all US mega-cap tech, you are running the same portfolio as every other participant. You MUST include at least 2 picks from non-US markets (Nordic, Baltic, or European). This is required for every portfolio.
 
 ## Position sizing — MANDATORY RULES
 You MUST size by conviction. Equal-weighting is forbidden.
@@ -69,6 +97,9 @@ You MUST size by conviction. Equal-weighting is forbidden.
 
 ## Market regime
 {regime_guidance}
+
+## VIX volatility filter
+{vix_guidance}
 
 ## Output format
 You must respond with a valid JSON object and nothing else.
@@ -110,10 +141,11 @@ class OpenAIStrategist(BaseAgent):
     ) -> PortfolioProposal:
         user_message = self._build_user_message(snapshot, prior_proposal)
         regime = snapshot.get("regime", "NEUTRAL")
+        vix = snapshot.get("vix_level", float("nan"))
 
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
-                proposal = self._call_openai(user_message, regime)
+                proposal = self._call_openai(user_message, regime, vix)
                 logger.info(
                     "Strategist produced %d positions (confidence %.0f%%)",
                     len(proposal.positions),
@@ -142,7 +174,7 @@ class OpenAIStrategist(BaseAgent):
         header = (
             f"{'Ticker':<12} {'Market':<12} {'20d Ret':>8} {'Sharpe':>7} "
             f"{'5d Ret':>7} {'60d Ret':>8} {'RSI':>6} {'vs Idx':>8} "
-            f"{'52wH%':>7} {'Beta':>6} {'Price':>10}"
+            f"{'52wH%':>7} {'Beta':>6} {'VolRatio':>9} {'Price':>10}"
         )
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
@@ -155,10 +187,10 @@ class OpenAIStrategist(BaseAgent):
             "-" * len(header),
         ]
 
-        for c in snapshot["candidates"]:
-            def fmt(v: float, fmt_str: str = ".1%") -> str:
-                return "N/A" if math.isnan(v) else format(v, fmt_str)
+        def fmt(v: float, fmt_str: str = ".1%") -> str:
+            return "N/A" if math.isnan(v) else format(v, fmt_str)
 
+        for c in snapshot["candidates"]:
             lines.append(
                 f"{c['ticker']:<12} {c['market']:<12} "
                 f"{fmt(c['momentum']):>8} "
@@ -169,6 +201,7 @@ class OpenAIStrategist(BaseAgent):
                 f"{fmt(c['vs_index']):>8} "
                 f"{fmt(c['pct_from_52w_high']):>7} "
                 f"{fmt(c['beta'], '.2f'):>6} "
+                f"{fmt(c['vol_ratio'], '.2f'):>9} "
                 f"{c['last_price']:>10.2f}"
             )
 
@@ -183,9 +216,113 @@ class OpenAIStrategist(BaseAgent):
                 lines.append(f"{pos.ticker:<12} {pos.weight:>8.1%}")
             lines += [
                 "",
-                "Prefer to HOLD winners (momentum confirmed); "
-                "EXIT only if momentum has reversed or a clearly better opportunity exists.",
+                "Turnover rule: to EXIT a current holding, the replacement must have a Sharpe_20d "
+                "at least 20% higher than the stock being replaced. "
+                "Do not swap positions for marginal gains — each trade executes at next-day open price.",
             ]
+
+        # Performance context — full daily P&L review
+        perf_history = load_performance_history(max_days=5)
+        daily_entries = [e for e in perf_history if "portfolio_return_1d" in e]
+        if daily_entries:
+            lines += ["", "## Performance review (last %d days)" % len(daily_entries)]
+            col_header = f"{'Date':<12} {'Portfolio':>10} {'Benchmark':>10} {'Alpha':>8}    Key movers"
+            lines.append(col_header)
+            lines.append("-" * len(col_header))
+            for entry in daily_entries:
+                p_ret = entry.get("portfolio_return_1d", float("nan"))
+                b_ret = entry.get("benchmark_return_1d", float("nan"))
+                a_ret = entry.get("alpha_1d", float("nan"))
+                pos_rets = entry.get("position_returns", {})
+
+                p_str = f"{p_ret:+.1%}" if not math.isnan(p_ret) else "N/A"
+                b_str = f"{b_ret:+.1%}" if not math.isnan(b_ret) else "N/A"
+                a_str = f"{a_ret:+.1%}" if not math.isnan(a_ret) else "N/A"
+
+                movers = []
+                if pos_rets:
+                    top_w = sorted(pos_rets.items(), key=lambda x: -x[1])[:2]
+                    top_l = sorted(pos_rets.items(), key=lambda x: x[1])[:1]
+                    for t, r in top_w:
+                        if r > 0:
+                            movers.append(f"{t} {r:+.1%} ▲")
+                    for t, r in top_l:
+                        if r < 0:
+                            movers.append(f"{t} {r:+.1%} ▼")
+                movers_str = "  ".join(movers) if movers else ""
+                lines.append(
+                    f"{entry['date']:<12} {p_str:>10} {b_str:>10} {a_str:>8}    {movers_str}"
+                )
+
+            # Cumulative stats
+            cum_port = sum(
+                e.get("portfolio_return_1d", 0.0) for e in daily_entries
+                if not math.isnan(e.get("portfolio_return_1d", float("nan")))
+            )
+            cum_bench = sum(
+                e.get("benchmark_return_1d", 0.0) for e in daily_entries
+                if not math.isnan(e.get("benchmark_return_1d", float("nan")))
+            )
+            cum_alpha = cum_port - cum_bench
+            lines.append(
+                f"\nCumulative since tracking: portfolio {cum_port:+.1%}, "
+                f"benchmark {cum_bench:+.1%}, alpha {cum_alpha:+.1%}"
+            )
+
+            # Consistent winners/losers across days
+            ticker_returns: dict = {}
+            for entry in daily_entries:
+                for t, r in entry.get("position_returns", {}).items():
+                    ticker_returns.setdefault(t, []).append(r)
+            consistent_winners = [
+                t for t, rets in ticker_returns.items()
+                if len(rets) >= 2 and all(r > 0 for r in rets)
+            ]
+            consistent_losers = [
+                t for t, rets in ticker_returns.items()
+                if len(rets) >= 2 and all(r < 0 for r in rets)
+            ]
+            if consistent_winners:
+                lines.append(f"Consistent winners this week: {', '.join(consistent_winners)}")
+            if consistent_losers:
+                lines.append(f"Consistent underperformers: {', '.join(consistent_losers)}")
+
+            # Strategy adaptation signal
+            if len(daily_entries) >= 2:
+                recent_alpha = [
+                    e.get("alpha_1d", float("nan")) for e in daily_entries[-3:]
+                    if not math.isnan(e.get("alpha_1d", float("nan")))
+                ]
+                if recent_alpha:
+                    avg_alpha = sum(recent_alpha) / len(recent_alpha)
+                    if avg_alpha > 0.003:
+                        lines.append(
+                            "Strategy adaptation signal: recent alpha is positive — "
+                            "current momentum picks are working. Maintain conviction."
+                        )
+                    elif avg_alpha < -0.003:
+                        lines.append(
+                            "Strategy adaptation signal: recent alpha is negative — "
+                            "consider reviewing position sizing and reviewing losers for exit."
+                        )
+                    else:
+                        lines.append(
+                            "Strategy adaptation signal: alpha is near zero — "
+                            "monitor for regime change signals before making large shifts."
+                        )
+        elif len(perf_history) >= 2:
+            # Fallback: show old-style benchmark trend if no P&L data yet
+            lines += ["", "## Recent benchmark trend (S&P 500 20d return over last runs)"]
+            for entry in perf_history:
+                bret = entry.get("benchmark_return_20d", float("nan"))
+                bret_str = f"{bret:+.1%}" if not math.isnan(bret) else "N/A"
+                lines.append(f"  {entry['date']}: S&P 500 20d = {bret_str}")
+            first_bret = perf_history[0].get("benchmark_return_20d", float("nan"))
+            last_bret = perf_history[-1].get("benchmark_return_20d", float("nan"))
+            if not (math.isnan(first_bret) or math.isnan(last_bret)):
+                delta = last_bret - first_bret
+                trend = "improving" if delta > 0.005 else ("deteriorating" if delta < -0.005 else "flat")
+                lines.append(f"  Trend: benchmark momentum is {trend} ({delta:+.1%} over {len(perf_history)} days).")
 
         lines += [
             "",
@@ -194,11 +331,12 @@ class OpenAIStrategist(BaseAgent):
         ]
         return "\n".join(lines)
 
-    def _call_openai(self, user_message: str, regime: str = "NEUTRAL") -> PortfolioProposal:
+    def _call_openai(self, user_message: str, regime: str = "NEUTRAL", vix: float = float("nan")) -> PortfolioProposal:
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = _SYSTEM_PROMPT_TEMPLATE.format(
             today=date.today().isoformat(),
             regime_guidance=regime_guidance,
+            vix_guidance=_vix_guidance(vix),
         )
 
         response = self.client.chat.completions.create(

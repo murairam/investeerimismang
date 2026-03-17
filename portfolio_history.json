@@ -3,40 +3,67 @@
   "positions": [
     {
       "ticker": "NOKIA.HE",
-      "weight": 0.25,
-      "rationale": "Strong 20d return and high Sharpe ratio, with significant outperformance vs index, indicating a high-conviction momentum breakout."
-    },
-    {
-      "ticker": "ERIC-B.ST",
       "weight": 0.2,
-      "rationale": "Solid momentum and near 52-week high, demonstrating strong risk-adjusted returns and outperformance vs index."
-    },
-    {
-      "ticker": "TELIA.ST",
-      "weight": 0.15,
-      "rationale": "Stable uptrend with a consistent Sharpe ratio and at its 52-week high, indicating strong momentum."
+      "rationale": "consensus pick + strong Sharpe_20d and momentum justify a high weight."
     },
     {
       "ticker": "FORTUM.HE",
-      "weight": 0.1,
-      "rationale": "Good 20d return with a reasonable Sharpe ratio and at its 52-week high, offering a balanced growth opportunity."
-    },
-    {
-      "ticker": "NHY.OL",
-      "weight": 0.1,
-      "rationale": "Decent 20d return and Sharpe, with positive vs index performance, providing diversification with potential upside."
+      "weight": 0.2,
+      "rationale": "consensus pick + strong momentum and solid performance support this weight."
     },
     {
       "ticker": "MAERSK-B.CO",
-      "weight": 0.05,
-      "rationale": "Strong recent performance and at 52-week high, warrants a smaller position due to lower Sharpe compared to top picks."
+      "weight": 0.18,
+      "rationale": "consensus pick + recovering momentum and positive vs_index warrant significant allocation."
     },
     {
-      "ticker": "SAMPO.HE",
+      "ticker": "NHY.OL",
+      "weight": 0.15,
+      "rationale": "consensus pick + strong recovery signals and solid recent performance justify inclusion."
+    },
+    {
+      "ticker": "XOM",
+      "weight": 0.12,
+      "rationale": "consensus pick + good Sharpe_20d and sector diversification add value."
+    },
+    {
+      "ticker": "TELIA.ST",
+      "weight": 0.1,
+      "rationale": "consensus pick + improving momentum and near 52-week high support this position."
+    },
+    {
+      "ticker": "BOL.ST",
       "weight": 0.05,
-      "rationale": "Provides diversification with moderate momentum and positive vs index performance, fitting the lower conviction tier."
+      "rationale": "unique pick + potential recovery signals justify a smaller allocation."
     }
   ],
-  "reasoning": "I adjusted the weights to ensure a more balanced distribution, reducing the concentration in the top positions while maintaining high-conviction stocks. This enhances diversification and aligns with the goal of maximizing absolute returns.",
-  "confidence": 0.85
+  "reasoning": "The final portfolio includes all consensus picks with higher weights due to their validated performance. Additionally, BOL.ST was included as a contrarian pick with potential recovery signals. The portfolio beta is well within the target range for a NEUTRAL regime, ensuring a balanced approach across multiple sectors.",
+  "confidence": 0.85,
+  "performance_history": [
+    {
+      "date": "2026-03-17",
+      "benchmark_return_20d": -0.0187,
+      "portfolio_return_1d": 0.011733,
+      "benchmark_return_1d": 0.002397,
+      "alpha_1d": 0.009335,
+      "position_returns": {
+        "FORTUM.HE": 0.020882,
+        "MAERSK-B.CO": 0.032537,
+        "NHY.OL": -0.008294,
+        "TELIA.ST": 0.000837,
+        "XOM": 0.018444,
+        "NOKIA.HE": -0.004808,
+        "BOL.ST": -0.004803
+      }
+    }
+  ],
+  "close_prices": {
+    "BOL.ST": 621.5999755859375,
+    "FORTUM.HE": 22.0,
+    "MAERSK-B.CO": 17930.0,
+    "NHY.OL": 93.26000213623047,
+    "NOKIA.HE": 7.452000141143799,
+    "TELIA.ST": 47.84000015258789,
+    "XOM": 160.1300048828125
+  }
 }

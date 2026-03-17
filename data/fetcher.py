@@ -42,6 +42,7 @@ class CandidateInfo(TypedDict):
     pct_from_52w_high: float  # (last_price / 52w_high) - 1
     beta: float
     last_price: float
+    vol_ratio: float      # today's volume / 20d avg volume (>1.5 = high-volume confirmation)
 
 
 class MarketSnapshot(TypedDict):
@@ -51,13 +52,17 @@ class MarketSnapshot(TypedDict):
     regime: str           # "BULL" | "BEAR" | "NEUTRAL"
     spx_vs_200d: float    # % above/below 200-day SMA
     vix_level: float      # VIX spot price
+    price_map: dict       # {ticker: last_close_price} for ALL fetched tickers
+    returns_1d: dict      # {ticker: 1-day return} for ALL fetched tickers
+    benchmark_return_1d: float  # S&P 500 1-day return
 
 
 class DataFetcher:
-    def fetch_ohlcv(self, tickers: list[str], period: str = "1y") -> pd.DataFrame:
-        """Download adjusted close prices for *tickers* from yfinance."""
+    def fetch_ohlcv(self, tickers: list[str], period: str = "1y") -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Download adjusted close prices and volume for *tickers* from yfinance.
+        Returns (close_df, volume_df)."""
         if not tickers:
-            return pd.DataFrame()
+            return pd.DataFrame(), pd.DataFrame()
         data = yf.download(
             tickers,
             period=period,
@@ -67,9 +72,21 @@ class DataFetcher:
         )
         if isinstance(data.columns, pd.MultiIndex):
             close = data["Close"]
+            volume = data["Volume"] if "Volume" in data.columns.get_level_values(0) else pd.DataFrame()
         else:
             close = data[["Close"]].rename(columns={"Close": tickers[0]})
-        return close.dropna(how="all")
+            volume = data[["Volume"]].rename(columns={"Volume": tickers[0]}) if "Volume" in data.columns else pd.DataFrame()
+        return close.dropna(how="all"), volume.dropna(how="all") if not volume.empty else pd.DataFrame()
+
+    def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
+        """Ratio of latest volume to prior 20d average volume. >1.5 = high-volume confirmation."""
+        if volume.empty or len(volume) < window + 1:
+            return pd.Series(dtype=float)
+        # Use iloc[-window-1:-1] to get the prior 20d avg (excluding today), then compare to today
+        avg_vol = volume.iloc[-window - 1:-1].mean()
+        latest_vol = volume.iloc[-1]
+        ratio = latest_vol / avg_vol.replace(0, np.nan)
+        return ratio.rename("vol_ratio")
 
     def compute_momentum(self, close: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
         """N-day price return for each ticker."""
@@ -138,9 +155,9 @@ class DataFetcher:
     def fetch_vix(self) -> float:
         """Fetch current VIX level."""
         try:
-            vix_data = self.fetch_ohlcv(["^VIX"], period="5d")
-            if not vix_data.empty:
-                return float(vix_data.iloc[-1, 0])
+            vix_close, _ = self.fetch_ohlcv(["^VIX"], period="5d")
+            if not vix_close.empty:
+                return float(vix_close.iloc[-1, 0])
         except Exception as exc:
             logger.warning("Failed to fetch VIX: %s", exc)
         return float("nan")
@@ -215,7 +232,7 @@ class DataFetcher:
         market_map = {t: m for t, m in all_tickers}
 
         logger.info("Fetching OHLCV for %d tickers …", len(flat_tickers))
-        close = self.fetch_ohlcv(flat_tickers, period="1y")
+        close, volume = self.fetch_ohlcv(flat_tickers, period="1y")
 
         returned = set(close.columns)
         missing = [t for t in flat_tickers if t not in returned]
@@ -227,7 +244,7 @@ class DataFetcher:
 
         # Benchmark + regime
         logger.info("Fetching benchmark %s …", BETA_BENCHMARK)
-        bench_raw = self.fetch_ohlcv([BETA_BENCHMARK], period="1y")
+        bench_raw, _ = self.fetch_ohlcv([BETA_BENCHMARK], period="1y")
         bench_close: pd.Series = bench_raw.iloc[:, 0]
 
         regime, spx_vs_200d = self.compute_regime(bench_close)
@@ -241,6 +258,7 @@ class DataFetcher:
         vol_20d = self.compute_vol(close, MOMENTUM_WINDOW)
         rsi = self.compute_rsi(close, RSI_WINDOW)
         beta = self.compute_beta(close, bench_close)
+        vol_ratio = self.compute_vol_ratio(volume, MOMENTUM_WINDOW)
         bench_momentum = float(
             bench_close.iloc[-1] / bench_close.iloc[-MOMENTUM_WINDOW - 1] - 1
         ) if len(bench_close) > MOMENTUM_WINDOW else 0.0
@@ -272,6 +290,7 @@ class DataFetcher:
             high = float(high_52w.get(ticker, np.nan)) if ticker in high_52w.index else float("nan")
             pct_from_high = (last_price / high - 1) if (not math.isnan(high) and high > 0) else float("nan")
 
+            vr = float(vol_ratio.get(ticker, np.nan)) if not vol_ratio.empty and ticker in vol_ratio.index else float("nan")
             records.append({
                 "ticker": ticker,
                 "market": market_map.get(ticker, "UNKNOWN"),
@@ -285,6 +304,7 @@ class DataFetcher:
                 "pct_from_52w_high": pct_from_high,
                 "beta": float(beta.get(ticker, np.nan)),
                 "last_price": last_price,
+                "vol_ratio": vr,
             })
 
         # Sort by Sharpe descending, apply market cap, correlation filter, take top N
@@ -305,6 +325,12 @@ class DataFetcher:
 
         as_of = str(close.index[-1].date()) if len(close) > 0 else "unknown"
 
+        # 1-day returns for ALL tickers (for P&L computation)
+        returns_1d_series = (close.iloc[-1] / close.iloc[-2] - 1) if len(close) >= 2 else pd.Series(dtype=float)
+        returns_1d: dict = returns_1d_series.dropna().to_dict()
+        price_map: dict = {t: float(close[t].dropna().iloc[-1]) for t in close.columns if t in close.columns and not close[t].dropna().empty}
+        benchmark_return_1d = float(bench_close.iloc[-1] / bench_close.iloc[-2] - 1) if len(bench_close) >= 2 else 0.0
+
         logger.info(
             "Snapshot ready: %d candidates, as of %s, benchmark %.1f%%",
             len(top), as_of, bench_momentum * 100,
@@ -318,4 +344,7 @@ class DataFetcher:
             regime=regime,
             spx_vs_200d=spx_vs_200d,
             vix_level=vix_level,
+            price_map=price_map,
+            returns_1d=returns_1d,
+            benchmark_return_1d=benchmark_return_1d,
         )

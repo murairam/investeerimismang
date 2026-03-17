@@ -11,6 +11,21 @@ GAME_CONSTRAINTS = {
     "max_total_weight": 1.00,
 }
 
+# Preferred stock-count bands by market regime (still bounded by GAME_CONSTRAINTS)
+POSITION_TARGETS_BY_REGIME = {
+    "BULL": {"min_stocks": 6, "max_stocks": 8},
+    "NEUTRAL": {"min_stocks": 8, "max_stocks": 10},
+    "BEAR": {"min_stocks": 10, "max_stocks": 12},
+}
+
+# Cash policy (used when proposed allocation is below 100%)
+CASH_POLICY = {
+    "min_cash_gap": 0.01,                 # ignore tiny residual cash below 1%
+    "high_vix_threshold": 26.0,           # keep more cash in high-volatility regimes
+    "weak_benchmark_threshold": -0.02,    # if benchmark momentum is weaker than -2%
+    "strong_alpha_threshold": 0.03,       # deploy cash when selected names show strong alpha
+}
+
 # ── Signal parameters ────────────────────────────────────────────────────────
 MOMENTUM_WINDOW = 20        # trading days for momentum calculation
 BETA_WINDOW = 60            # trading days for beta calculation

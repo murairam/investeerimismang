@@ -24,13 +24,13 @@ from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """You are a meta-analyst for the Äripäev/SEB Investment Game (Estonia). You receive two independent portfolio proposals — one from GPT-4o and one from Gemini — and synthesize the best final portfolio.
+_SYSTEM_PROMPT = """You are a meta-analyst for the Äripäev/SEB Investment Game (Estonia). You receive two independent portfolio proposals — one from GPT-4o Strategist (momentum-focused) and one from a Contrarian Challenger — and synthesize the best final portfolio.
 
 Game ends 19 June 2026. Goal: highest absolute return, beating other participants.
 
 ## Synthesis rules
-1. **Consensus picks** (appear in BOTH proposals): these have been independently validated by two different AI models. Give them higher conviction weights (18–25%) unless there is a specific risk reason not to.
-2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, regime fit. Include the best ones.
+1. **Consensus picks** (appear in BOTH proposals): independently validated. Give them higher conviction weights (18–25%) unless there is a specific risk reason not to.
+2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, vol_ratio, regime fit. Include the best ones.
 3. **Ignore weak unique picks**: if only one model picked something and its signals are mediocre, skip it.
 4. **DO NOT equal-weight**. Size by conviction:
    - Consensus + strong signals: 20–25%
@@ -38,8 +38,17 @@ Game ends 19 June 2026. Goal: highest absolute return, beating other participant
    - Diversifiers: 5–10%
 5. **Equal-weighting is a failure**. If you find yourself giving everything the same weight, you are not doing your job.
 6. **Check market concentration**: if >65% ends up in one market, redistribute.
-7. **Check regime fit**: BEAR = lower beta, cap at 15%. BULL = concentrate on best names.
-8. **Target 8–12 positions** across at least 2 markets.
+7. **Check regime fit and portfolio beta**:
+   - You will be given the portfolio-weighted beta computed from the proposals.
+   - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
+   - BULL regime: portfolio beta up to 1.30 is acceptable. Concentrate on top names.
+   - NEUTRAL: target portfolio beta between 0.95 and 1.15.
+8. **Target regime-based position count** across at least 2 markets:
+    - BULL: 6–8
+    - NEUTRAL: 8–10
+    - BEAR: 10–12
+9. **Vol_ratio signal**: prefer positions where vol_ratio > 1.2 (high-volume confirmation). Be cautious about positions where vol_ratio < 0.7 (low-volume, potentially weak move).
+10. **Contrarian insight**: the challenger picks represent what the momentum crowd is ignoring. If the challenger's picks have strong signals (recovering RSI, accelerating 5d momentum, positive vs_index), include at least 1–2 of them even if they're not consensus.
 
 ## Hard constraints
 - 5 to 20 stocks.
@@ -48,6 +57,10 @@ Game ends 19 June 2026. Goal: highest absolute return, beating other participant
 - No duplicate tickers.
 
 ## Output — JSON only
+CRITICAL: "weight" must be a DECIMAL between 0.05 and 0.25. NOT a percentage.
+  Correct: 0.20 (means 20%)
+  WRONG:   20   (do not write whole numbers)
+
 {
   "positions": [
     {
@@ -56,7 +69,7 @@ Game ends 19 June 2026. Goal: highest absolute return, beating other participant
       "rationale": "consensus/unique pick + one-sentence reason for this weight."
     }
   ],
-  "reasoning": "2–3 sentences: what consensus existed, what you changed, and why.",
+  "reasoning": "2–3 sentences: what consensus existed, what contrarian picks you included, and portfolio beta vs target.",
   "confidence": 0.80
 }"""
 
@@ -92,6 +105,22 @@ class OpenAIRiskManager(BaseAgent):
             logger.warning("Meta-analyst failed (%s) — falling back to strategist proposal", exc)
             return prior_proposal
 
+    @staticmethod
+    def _portfolio_beta(proposal: PortfolioProposal, snapshot: MarketSnapshot) -> float:
+        """Compute weighted-average beta of a proposal using the candidate beta values."""
+        beta_map = {
+            c["ticker"]: c["beta"]
+            for c in snapshot["candidates"]
+            if not math.isnan(c.get("beta", float("nan")))
+        }
+        covered = [(p.weight, beta_map[p.ticker]) for p in proposal.positions if p.ticker in beta_map]
+        if not covered:
+            return float("nan")
+        covered_weight = sum(w for w, _ in covered)
+        if covered_weight == 0:
+            return float("nan")
+        return sum(w * b for w, b in covered) / covered_weight
+
     def _build_message(
         self,
         strategist: PortfolioProposal,
@@ -103,9 +132,16 @@ class OpenAIRiskManager(BaseAgent):
         vix = snapshot.get("vix_level", float("nan"))
         vix_str = f"{vix:.1f}" if not math.isnan(vix) else "N/A"
 
+        # Compute portfolio betas for context
+        strat_beta = self._portfolio_beta(strategist, snapshot)
+        strat_beta_str = f"{strat_beta:.2f}" if not math.isnan(strat_beta) else "N/A"
+        beta_targets = {"BULL": "target ≤1.30", "BEAR": "target ≤0.90", "NEUTRAL": "target 0.95–1.15"}
+        beta_target_str = beta_targets.get(regime, "target 0.95–1.15")
+
         lines = [
             f"## Synthesis task — {date.today().isoformat()}",
             f"Regime: {regime} | SPX vs 200d: {spx_vs:+.1%} | VIX: {vix_str} | S&P 500 20d: {snapshot['benchmark_return']:+.1%}",
+            f"Strategist proposal portfolio beta: {strat_beta_str} ({beta_target_str} for {regime} regime)",
             "",
         ]
 
@@ -179,13 +215,21 @@ class OpenAIRiskManager(BaseAgent):
         )
 
         data = json.loads(response.choices[0].message.content)
+        raw_positions = data["positions"]
+
+        # Auto-fix: if any weight > 1.0 the model output percentages (e.g. 25 instead of 0.25)
+        if any(float(p["weight"]) > 1.0 for p in raw_positions):
+            logger.warning("Meta-analyst returned percentage weights — auto-converting to decimals")
+            for p in raw_positions:
+                p["weight"] = float(p["weight"]) / 100.0
+
         positions = [
             Position(
                 ticker=p["ticker"],
                 weight=float(p["weight"]),
                 rationale=p.get("rationale", ""),
             )
-            for p in data["positions"]
+            for p in raw_positions
         ]
         return PortfolioProposal(
             positions=positions,

@@ -1,0 +1,35 @@
+{
+  "start_date": "2026-03-17",
+  "initial_capital": 10000.0,
+  "cash": 0.0,
+  "positions": {
+    "NOKIA.HE": 294.9852435,
+    "MAERSK-B.CO": 0.1115449,
+    "FORTUM.HE": 81.4848342,
+    "NHY.OL": 16.08751646,
+    "TELIA.ST": 25.04696314,
+    "ALFA.ST": 1.53080757,
+    "TAL1T.TL": 802.56818513
+  },
+  "history": [
+    {
+      "date": "2026-03-17",
+      "equity": 10000.0,
+      "cash": 0.0,
+      "daily_return": 0.0,
+      "return_since_start": 0.0,
+      "turnover": 1.0,
+      "positions": {
+        "NOKIA.HE": 294.9852435,
+        "MAERSK-B.CO": 0.1115449,
+        "FORTUM.HE": 81.4848342,
+        "NHY.OL": 16.08751646,
+        "TELIA.ST": 25.04696314,
+        "ALFA.ST": 1.53080757,
+        "TAL1T.TL": 802.56818513
+      }
+    }
+  ],
+  "last_rebalanced_date": "2026-03-17",
+  "last_equity": 10000.0
+}
