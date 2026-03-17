@@ -31,6 +31,7 @@ from data.learning_context import get_learning_context
 from data.learning_report import generate_pregame_learning_report
 from data.meta_learning import generate_meta_learning_report
 from data.mode_guard import enforce_mode_and_freeze, generate_live_handoff_if_due
+from data.earnings_fetcher import fetch_upcoming_earnings, format_earnings_warning
 from data.news_fetcher import fetch_candidate_news, format_news_for_prompt
 from data.paper_account import rebalance_to_proposal, reset_for_live
 from data.portfolio_store import load_last, load_yesterday_prices, save as save_portfolio
@@ -54,11 +55,16 @@ class AlphaSharkOrchestrator:
 
         # Step 1: market data
         snapshot = self.fetcher.get_market_snapshot()
+        import math as _math
+        breadth = snapshot.get("breadth_pct", float("nan"))
+        term = snapshot.get("vix_term_ratio", float("nan"))
         logger.info(
-            "Snapshot: %d candidates, benchmark %.1f%%, regime %s",
+            "Snapshot: %d candidates, benchmark %.1f%%, regime %s, breadth %.0f%%, VIX term %.2f",
             len(snapshot["candidates"]),
             snapshot["benchmark_return"] * 100,
             snapshot["regime"],
+            breadth * 100 if not _math.isnan(breadth) else 0,
+            term if not _math.isnan(term) else 0,
         )
 
         # Step 1b: inject learning context (what worked / didn't in past runs)
@@ -78,6 +84,19 @@ class AlphaSharkOrchestrator:
         except Exception as exc:
             logger.warning("News fetch failed (non-fatal): %s", exc)
             snapshot["news_headlines"] = ""
+
+        # Step 1d: fetch upcoming earnings (binary risk warning for agents)
+        try:
+            earnings = fetch_upcoming_earnings(top_tickers)
+            snapshot["earnings_warning"] = format_earnings_warning(earnings)
+            if earnings:
+                logger.info(
+                    "Earnings within 7 days: %s",
+                    ", ".join(f"{e['ticker']} {e['earnings_date']}" for e in earnings),
+                )
+        except Exception as exc:
+            logger.warning("Earnings fetch failed (non-fatal): %s", exc)
+            snapshot["earnings_warning"] = ""
 
         # Enforce pre-game/live mode behavior and post-start parameter freeze
         mode_info = enforce_mode_and_freeze(snapshot["as_of_date"], game_start_date="2026-04-06")
@@ -263,6 +282,7 @@ class AlphaSharkOrchestrator:
             prior=prior_portfolio,
             performance=daily_performance,
             paper_metrics=paper_metrics,
+            mode=mode_info["mode"],
         )
 
         # Step 7b: update pre-game learning report (towards April 6)

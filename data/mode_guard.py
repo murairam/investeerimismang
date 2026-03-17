@@ -22,7 +22,7 @@ _LOCK_PATH = os.path.join(_ROOT, "live_mode_lock.json")
 _GAME_START_DATE = "2026-04-06"
 _PROTECTED_FILES = [
     "config.py",
-    "rules.txt",
+    "docs/rules.txt",
     "agents/openai_strategist.py",
     "agents/gemini_challenger.py",
     "agents/openai_risk_manager.py",

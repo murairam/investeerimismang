@@ -139,9 +139,15 @@ class OpenAIRiskManager(BaseAgent):
         beta_targets = {"BULL": "target ≤1.30", "BEAR": "target ≤0.90", "NEUTRAL": "target 0.95–1.15"}
         beta_target_str = beta_targets.get(regime, "target 0.95–1.15")
 
+        breadth = snapshot.get("breadth_pct", float("nan"))
+        term = snapshot.get("vix_term_ratio", float("nan"))
+        breadth_str = f"{breadth:.0%}" if not math.isnan(breadth) else "N/A"
+        term_str = f"{term:.2f}" if not math.isnan(term) else "N/A"
+
         lines = [
             f"## Synthesis task — {date.today().isoformat()}",
             f"Regime: {regime} | SPX vs 200d: {spx_vs:+.1%} | VIX: {vix_str} | S&P 500 20d: {snapshot['benchmark_return']:+.1%}",
+            f"Breadth: {breadth_str} above 50d SMA | VIX term structure: {term_str} (>1=calm, <0.9=fear)",
             f"Strategist proposal portfolio beta: {strat_beta_str} ({beta_target_str} for {regime} regime)",
             "",
         ]
@@ -188,6 +194,9 @@ class OpenAIRiskManager(BaseAgent):
                 "### Proposal B — Gemini Challenger",
                 "Not available (fallback — use Proposal A as base, apply risk rules).",
             ]
+
+        if snapshot.get("earnings_warning"):
+            lines += ["", snapshot["earnings_warning"]]
 
         if snapshot.get("learning_context"):
             lines += ["", snapshot["learning_context"]]

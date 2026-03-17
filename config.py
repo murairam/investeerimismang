@@ -42,6 +42,57 @@ OTHER_MARKET_CAP = 5        # max candidates per other market in top-30
 CORR_WINDOW = 60            # days for correlation filter
 CORR_THRESHOLD = 0.85       # correlation above this → keep higher Sharpe
 
+# ── Sector map ───────────────────────────────────────────────────────────────
+# Abbreviated sector tags (max 6 chars) for each ticker in the universe.
+# Used by agents to detect sector concentration and diversification gaps.
+SECTOR_MAP: dict[str, str] = {
+    # SP500 — Technology
+    "AAPL": "Tech", "NVDA": "Tech", "MSFT": "Tech", "GOOGL": "Tech",
+    "META": "Tech", "AVGO": "Tech", "AMD": "Tech", "CRM": "Tech",
+    "ORCL": "Tech", "CSCO": "Tech", "QCOM": "Tech", "IBM": "Tech",
+    "TXN": "Tech", "ACN": "Tech", "INTC": "Tech",
+    # SP500 — Consumer (discretionary + staples)
+    "AMZN": "Cons", "TSLA": "Cons", "NFLX": "Cons", "NKE": "Cons",
+    "MCD": "Cons", "KO": "Cons", "PEP": "Cons", "WMT": "Cons",
+    "HD": "Cons", "LOW": "Cons", "COST": "Cons", "PG": "Cons", "PM": "Cons",
+    # SP500 — Healthcare
+    "LLY": "Health", "UNH": "Health", "JNJ": "Health", "MRK": "Health",
+    "ABBV": "Health", "TMO": "Health", "ABT": "Health", "DHR": "Health",
+    "AMGN": "Health",
+    # SP500 — Financials
+    "JPM": "Fin", "V": "Fin", "MA": "Fin", "BAC": "Fin", "GS": "Fin", "SPGI": "Fin",
+    # SP500 — Energy / Utilities
+    "XOM": "Energy", "CVX": "Energy", "NEE": "Util",
+    # SP500 — Industrials
+    "HON": "Ind", "CAT": "Ind", "UPS": "Ind", "BA": "Ind",
+    # Finland — OMXHLCPI
+    "NOKIA.HE": "Tech", "FORTUM.HE": "Util", "SAMPO.HE": "Fin",
+    "NESTE.HE": "Energy", "KNEBV.HE": "Ind", "WRT1V.HE": "Ind",
+    "STERV.HE": "Mat", "OUT1V.HE": "Mat", "ELISA.HE": "Tel",
+    "ORNBV.HE": "Health", "UPM.HE": "Mat", "METSO.HE": "Ind",
+    # Sweden — OMXS30
+    "ERIC-B.ST": "Tech", "VOLV-B.ST": "Ind", "ATCO-A.ST": "Ind",
+    "SEB-A.ST": "Fin", "SWED-A.ST": "Fin", "INVE-B.ST": "Fin",
+    "HM-B.ST": "Cons", "SHB-A.ST": "Fin", "ESSITY-B.ST": "Cons",
+    "ABB.ST": "Ind", "SAND.ST": "Ind", "SKF-B.ST": "Ind",
+    "ALFA.ST": "Ind", "TELIA.ST": "Tel", "BOL.ST": "Mat",
+    "NIBE-B.ST": "Ind", "EVO.ST": "Cons", "SSAB-A.ST": "Mat",
+    # Norway — OBX
+    "EQNR.OL": "Energy", "DNB.OL": "Fin", "NHY.OL": "Mat",
+    "TEL.OL": "Tel", "MOWI.OL": "Cons", "ORK.OL": "Cons",
+    "YAR.OL": "Mat", "SCATC.OL": "Energy", "SUBC.OL": "Energy",
+    "SALM.OL": "Cons", "RECSI.OL": "Energy",
+    # Denmark — OMXC25
+    "NOVO-B.CO": "Health", "DSV.CO": "Ind", "ORSTED.CO": "Energy",
+    "CARL-B.CO": "Cons", "GMAB.CO": "Health", "MAERSK-B.CO": "Ind",
+    "COLO-B.CO": "Health", "GN.CO": "Health", "DEMANT.CO": "Health",
+    "PNDORA.CO": "Cons", "ISS.CO": "Ind",
+    # Baltic
+    "LHV1T.TL": "Fin", "PRF1T.TL": "Cons", "TKM1T.TL": "Cons",
+    "MRK1T.TL": "Ind", "ARC1T.TL": "RE", "TAL1T.TL": "Cons",
+    "GRG1L.VS": "Mat", "APG1L.VS": "Cons", "VLP1L.VS": "Cons",
+}
+
 # ── Ticker universe ──────────────────────────────────────────────────────────
 # yfinance ticker symbols per market
 UNIVERSE: dict[str, list[str]] = {

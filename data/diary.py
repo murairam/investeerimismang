@@ -12,7 +12,8 @@ from portfolio.models import PortfolioProposal
 
 logger = logging.getLogger(__name__)
 
-_DIARY_PATH = os.path.join(os.path.dirname(__file__), "..", "DAILY_LOG.md")
+_PREGAME_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "PREGAME_LOG.md")
+_LIVE_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "DAILY_LOG.md")
 
 
 def append_entry(
@@ -21,17 +22,27 @@ def append_entry(
     prior: Optional[PortfolioProposal] = None,
     performance: Optional[dict] = None,
     paper_metrics: Optional[dict] = None,
+    mode: str = "PREGAME",
 ) -> None:
-    """Append today's portfolio entry to DIARY.md."""
-    path = os.path.abspath(_DIARY_PATH)
+    """Append today's portfolio entry to the appropriate log file.
+
+    PREGAME runs write to PREGAME_LOG.md (training record).
+    LIVE runs write to DAILY_LOG.md (the real competition log, starts clean on April 6).
+    """
+    if mode == "LIVE":
+        path = os.path.abspath(_LIVE_LOG_PATH)
+        title = "AlphaShark — Daily Portfolio Log"
+        subtitle = "Each entry is written automatically after the daily run."
+    else:
+        path = os.path.abspath(_PREGAME_LOG_PATH)
+        title = "AlphaShark — Pre-Game Training Log"
+        subtitle = "Training runs before the game starts (April 6). Values reset to €10,000 on game day."
+
     entry = _build_entry(final, snapshot, prior, performance, paper_metrics)
 
-    # Create header if file doesn't exist yet
     if not os.path.exists(path):
         with open(path, "w") as f:
-            f.write("# AlphaShark — Daily Portfolio Log\n\n")
-            f.write("Each entry is written automatically after the daily run.\n\n")
-            f.write("---\n\n")
+            f.write(f"# {title}\n\n{subtitle}\n\n---\n\n")
 
     with open(path, "a") as f:
         f.write(entry)

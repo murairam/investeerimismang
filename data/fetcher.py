@@ -20,6 +20,7 @@ from config import (
     OTHER_MARKET_CAP,
     REGIME_THRESHOLD,
     RSI_WINDOW,
+    SECTOR_MAP,
     SMA_REGIME_WINDOW,
     SP500_MARKET_CAP,
     TOP_N_CANDIDATES,
@@ -32,6 +33,7 @@ logger = logging.getLogger(__name__)
 class CandidateInfo(TypedDict):
     ticker: str
     market: str
+    sector: str           # abbreviated sector tag from SECTOR_MAP
     momentum: float       # 20d return
     mom_5d: float         # 5d return
     mom_60d: float        # 60d return
@@ -43,6 +45,7 @@ class CandidateInfo(TypedDict):
     beta: float
     last_price: float
     vol_ratio: float      # today's volume / 20d avg volume (>1.5 = high-volume confirmation)
+    macd_hist: float      # MACD histogram / last_price (positive = bullish, negative = bearish)
 
 
 class MarketSnapshot(TypedDict):
@@ -52,6 +55,8 @@ class MarketSnapshot(TypedDict):
     regime: str           # "BULL" | "BEAR" | "NEUTRAL"
     spx_vs_200d: float    # % above/below 200-day SMA
     vix_level: float      # VIX spot price
+    vix_term_ratio: float # VIX3M/VIX: >1=contango (calm), <0.9=backwardation (fear)
+    breadth_pct: float    # % of universe stocks above their 50d SMA
     price_map: dict       # {ticker: last_close_price} for ALL fetched tickers
     returns_1d: dict      # {ticker: 1-day return} for ALL fetched tickers
     benchmark_return_1d: float  # S&P 500 1-day return
@@ -152,15 +157,44 @@ class DataFetcher:
             regime = "NEUTRAL"
         return regime, float(pct)
 
-    def fetch_vix(self) -> float:
-        """Fetch current VIX level."""
+    def compute_macd(self, close: pd.DataFrame) -> pd.Series:
+        """MACD histogram normalised by price (hist/close). Positive = bullish, negative = bearish."""
+        if len(close) < 35:
+            return pd.Series(np.nan, index=close.columns, name="macd_hist")
+        ema12 = close.ewm(span=12, adjust=False).mean()
+        ema26 = close.ewm(span=26, adjust=False).mean()
+        macd_line = ema12 - ema26
+        signal_line = macd_line.ewm(span=9, adjust=False).mean()
+        hist = macd_line - signal_line
+        last_close = close.iloc[-1].replace(0, np.nan)
+        return (hist.iloc[-1] / last_close).rename("macd_hist")
+
+    def fetch_vix(self) -> tuple[float, float]:
+        """Fetch VIX level and VIX term structure ratio (VIX3M/VIX).
+        Term ratio >1 = contango (calm market), <0.9 = backwardation (fear/stress).
+        Returns (vix_level, term_ratio).
+        """
         try:
-            vix_close, _ = self.fetch_ohlcv(["^VIX"], period="5d")
-            if not vix_close.empty:
-                return float(vix_close.iloc[-1, 0])
+            data, _ = self.fetch_ohlcv(["^VIX", "^VIX3M"], period="5d")
+            vix = (
+                float(data["^VIX"].dropna().iloc[-1])
+                if "^VIX" in data.columns and not data["^VIX"].dropna().empty
+                else float("nan")
+            )
+            vix3m = (
+                float(data["^VIX3M"].dropna().iloc[-1])
+                if "^VIX3M" in data.columns and not data["^VIX3M"].dropna().empty
+                else float("nan")
+            )
+            term_ratio = (
+                vix3m / vix
+                if not math.isnan(vix) and not math.isnan(vix3m) and vix > 0
+                else float("nan")
+            )
+            return vix, term_ratio
         except Exception as exc:
-            logger.warning("Failed to fetch VIX: %s", exc)
-        return float("nan")
+            logger.warning("Failed to fetch VIX data: %s", exc)
+        return float("nan"), float("nan")
 
     def apply_correlation_filter(
         self, records: list[dict], close: pd.DataFrame
@@ -248,8 +282,13 @@ class DataFetcher:
         bench_close: pd.Series = bench_raw.iloc[:, 0]
 
         regime, spx_vs_200d = self.compute_regime(bench_close)
-        vix_level = self.fetch_vix()
-        logger.info("Regime: %s (SPX vs 200d: %.1f%%), VIX: %.1f", regime, spx_vs_200d * 100, vix_level if not math.isnan(vix_level) else 0)
+        vix_level, vix_term_ratio = self.fetch_vix()
+        logger.info(
+            "Regime: %s (SPX vs 200d: %.1f%%), VIX: %.1f, term ratio: %.2f",
+            regime, spx_vs_200d * 100,
+            vix_level if not math.isnan(vix_level) else 0,
+            vix_term_ratio if not math.isnan(vix_term_ratio) else 0,
+        )
 
         # Compute all signals
         momentum_20d = self.compute_momentum(close, MOMENTUM_WINDOW)
@@ -259,6 +298,13 @@ class DataFetcher:
         rsi = self.compute_rsi(close, RSI_WINDOW)
         beta = self.compute_beta(close, bench_close)
         vol_ratio = self.compute_vol_ratio(volume, MOMENTUM_WINDOW)
+        macd_hist = self.compute_macd(close)
+
+        # Market breadth: % of universe stocks above their 50d SMA
+        sma_50 = close.rolling(50, min_periods=30).mean().iloc[-1]
+        above_50 = (close.iloc[-1] > sma_50).sum()
+        valid_breadth = int(sma_50.notna().sum())
+        breadth_pct = float(above_50 / valid_breadth) if valid_breadth > 0 else float("nan")
         bench_momentum = float(
             bench_close.iloc[-1] / bench_close.iloc[-MOMENTUM_WINDOW - 1] - 1
         ) if len(bench_close) > MOMENTUM_WINDOW else 0.0
@@ -291,9 +337,11 @@ class DataFetcher:
             pct_from_high = (last_price / high - 1) if (not math.isnan(high) and high > 0) else float("nan")
 
             vr = float(vol_ratio.get(ticker, np.nan)) if not vol_ratio.empty and ticker in vol_ratio.index else float("nan")
+            mh = float(macd_hist.get(ticker, np.nan)) if not macd_hist.empty and ticker in macd_hist.index else float("nan")
             records.append({
                 "ticker": ticker,
                 "market": market_map.get(ticker, "UNKNOWN"),
+                "sector": SECTOR_MAP.get(ticker, "?"),
                 "momentum": mom,
                 "mom_5d": float(momentum_5d.get(ticker, np.nan)) if ticker in momentum_5d.index else float("nan"),
                 "mom_60d": float(momentum_60d.get(ticker, np.nan)) if ticker in momentum_60d.index else float("nan"),
@@ -305,6 +353,7 @@ class DataFetcher:
                 "beta": float(beta.get(ticker, np.nan)),
                 "last_price": last_price,
                 "vol_ratio": vr,
+                "macd_hist": mh,
             })
 
         # Sort by Sharpe descending, apply market cap, correlation filter, take top N
@@ -332,8 +381,9 @@ class DataFetcher:
         benchmark_return_1d = float(bench_close.iloc[-1] / bench_close.iloc[-2] - 1) if len(bench_close) >= 2 else 0.0
 
         logger.info(
-            "Snapshot ready: %d candidates, as of %s, benchmark %.1f%%",
+            "Snapshot ready: %d candidates, as of %s, benchmark %.1f%%, breadth %.0f%%",
             len(top), as_of, bench_momentum * 100,
+            breadth_pct * 100 if not math.isnan(breadth_pct) else 0,
         )
 
         candidates: list[CandidateInfo] = [CandidateInfo(**r) for r in top]
@@ -344,6 +394,8 @@ class DataFetcher:
             regime=regime,
             spx_vs_200d=spx_vs_200d,
             vix_level=vix_level,
+            vix_term_ratio=vix_term_ratio,
+            breadth_pct=breadth_pct,
             price_map=price_map,
             returns_1d=returns_1d,
             benchmark_return_1d=benchmark_return_1d,

@@ -30,4 +30,4 @@ jobs:
       - name: Check verification status and send reminder if needed
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python verification_reminder.py
+        run: python scripts/verification_reminder.py

@@ -204,3 +204,70 @@ Lisaks jagatakse iganädalasi auhindu vastavalt tulemuste edetabelile või loosi
 
 
 Head mänguõnne!
+
+
+
+5. Portfellivalik
+Mängu alguses saab iga Osaleja luua endale ühe virtuaalse portfelli, mille tarbeks antakse talle 10 000 ühikut virtuaalraha. Selle raha eest peab Osaleja investeerima vähemalt viide nimekirjas olevasse ettevõttesse. Maksimaalselt saab investeerida 20 ettevõttesse. Minimaalselt 5% ja maksimaalselt 25% võib investeerida igasse aktsiasse. Mängus võib hoida maksimaalselt 25% rahast sulas, kuid selle pealt ei ole võimalik teenida tootlust.
+
+Osalejad võivad piiramatus koguses teha muudatusi oma portfellis kuni registreerimisperioodi lõpuni. Igal osalejal on lubatud luua üks portfell. Portfell koosneb selle hetkeväärtusest virtuaalses valuutas, praegusest ja järgmisest orderist.
+
+Protsendiline jaotus, mille iga Osaleja määrab igale aktsiale oma portfellis, säilib konstantsena. See tähendab, et kui mõne aktsia väärtus portfellis suureneb või väheneb, muutub ainult portfelli koguväärtus, mitte Osaleja poolt määratud protsentuaalne jaotus.
+
+See lähenemine võimaldab Osalejal kulutada vähem aega oma portfelli tasakaalustamisele ning rohkem aega huvitavate aktsiate leidmisele, luues samal ajal õiglasema mängukeskkonna kõigile, kes Mängus osalevad.
+
+Lihtsuse huvides ei rakendata mängus tehingutele ega portfellide haldamisele teenus- ega haldustasusid. Kõik mängus tehtavad tehingud on virtuaalsed ja teenustasudeta, et tagada osalejatele võrdsed tingimused.
+
+Portfelli Order
+
+Order on aktsiate valik, millel on määratud suhteline protsendijaotus. Üks order võib koosneda kuni 20 aktsiast.
+
+Igas orderis peab igal aktsial olema protsendijaotus vahemikus 5–25%. Orderi kogu protsent ei tohi ületada 100%.
+
+Portfelli väärtus
+
+Portfelli väärtus muutub proportsionaalselt iga aktsia hinnamuutusega vastavalt selle protsendilisele jaotusele praeguses Orderis.
+
+Näiteks: Portfell ABC sisaldab 25% aktsiat XYZ. Kui aktsia XYZ hind tõuseb 40%, kasvab portfelli väärtus 10%.
+
+Päeva lõpuks kajastatud väärtused võivad erineda päeva jooksul nähtust erinevatel põhjustel, sealhulgas, kuid mitte ainult: kustutatud tehingud, erinev ajaperioodide koondamine, andmekadu jne. Aktsiahinnad ümardatakse süsteemis lähima täisarvuni.
+
+Portfelli loomine
+
+Portfelli loomisel peab Osaleja valima 5 kuni 20 aktsia vahel saadaval olevate aktsiate nimekirjast, et luua esmane Portfelli Order.
+
+Portfelli praeguse Orderi uuendamine
+
+Osalejad saavad oma praegust Orderit muuta, esitades järgmise Orderi, mis muutub portfelli praeguseks Orderiks järgmisel kauplemispäeval kl 10.00. Väärtpaberite hinnad on 15-minutilise viivitusega. Päevatabel uueneb igal hommikul kl 10.15.
+
+Erandid ja erikäsitlused
+
+●      Aktsia pankrotistumine: Kui mõni aktsia kuulutab välja pankroti, kaotavad kõik portfellid, mille praeguses Orderis see aktsia on, selle aktsia jaotusele vastava väärtuse.
+
+●      Aktsia eemaldamine saadaval olevate aktsiate nimekirjast: Kui aktsia eemaldatakse saadaval olevate aktsiate nimekirjast, säilitavad kõik portfellid, mille praeguses Orderis see aktsia on, oma täieliku väärtuse, kuid aktsia eemaldatakse nende praegusest portfellist.
+
+●      Splittide ja vastassplittide arvestamine: Mäng kohandub automaatselt aktsiate splittide ja vastassplittidega.
+
+●      Dividendide reinvesteerimine: Dividendid reinvesteeritakse automaatselt aktsiasse, mida portfell omab.
+
+6. Mäng
+6.1 Mitmekordseid osalemisi ei aktsepteerita. Kadunud osalemiste eest vastutust ei võeta ning edastamise tõendit ei loeta kättesaamise tõendiks. Erandiks on Äripäeva tellijad, kel on võimalik vastavalt reeglitele osaleda kahe portfelliga. Kasutades Äripäeva tellijana mängus topeltportfelli loomise võimalust, peab topelt võiduvõimaluse hoidmiseks olema Äripäeva tellija mängu lõpuni.
+
+6.2 Mängus osalemine on võimalik pärast osalemisprotsessi edukat läbimist. Osalejad peavad mängus osalemiseks registreeruma enne 19. juunit 2026 ja auhindade võitmiseks registreeruma enne 31. maid 2026. Osalejatele, kes on juba enne Mängu osalemisperioodi algust registreerunud, määratakse juhuslikult valitud "õnneloosiga" portfell, juhul kui nad ei ole ise oma valikut teinud enne Mängu osalemisperioodi lõppu. Siiski, et osaleda auhindade võitmise võimaluses, peab osaleja olema vähemalt korra oma kontole sisse loginud, vaadanud oma portfelli valikut ning nõustunud tingimustega.
+
+Mäng toimub ajavahemikus 06.04.2026 kuni 19.06.2026.
+
+Peaauhind antakse osalejale, kellel on Mängu lõpuks kõrgeim protsentuaalne tootlus kahe kümnendkohani täpsustatult.
+
+NB! Mängule saab registeeruda alates 16. märtsist, ent mängijate loodud portfellid hakkavad võistlema 6. aprillist. Seega, kõigi enne 6. aprilli loodud portfellide väärtus võrdsustatakse mängu alguseks 10 000 virtuaalrahale. Portfelli võit või kaotus enne 6. aprilli ei lähe arvesse.
+
+7. Vaheauhinnad
+7.1 Igal nädalal saavad auhinna kolm osalejat, kelle portfellid on nädala jooksul saavutanud parima tootluse. Arvestus algab esmaspäeval ja lõpeb järgmise esmaspäeva hommikul kell 9.00, vahetult enne turu avanemist, mil selgitatakse välja nädala parimad.
+
+Iga osaleja saab Mängus osalemiseks luua ühe portfelli. Erandina on Äripäeva tellijatel võimalus luua teine portfell lisaks. Iganädalasele auhinnale kvalifitseerumiseks peab osaleja olema Mängus osalemise registreerimise lõpetanud vastava nädala esmaspäevaks.
+
+Osalejad võivad võita rohkem kui ühe iganädalase auhinna.
+
+7.2 Igakuine auhind
+
+Igakuine loosimine toimub vastavalt SEB tingimustele: kõigi osalejate vahel loositakse iga kuu välja auhindu (näiteks SEB poolt väljapandud fondiosakuid või muid preemiaid) vastavalt kampaania kirjeldusele.
