@@ -9,3 +9,4 @@ build/
 .venv/
 venv/
 *.log
+data/sec_cik_cache.json

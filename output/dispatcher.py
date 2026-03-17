@@ -28,7 +28,6 @@ class WebhookDispatcher:
         snapshot: MarketSnapshot,
         prior_proposal: Optional[PortfolioProposal] = None,
         paper_metrics: Optional[dict] = None,
-        mode: str = "PREGAME",
     ) -> dict:
         total_weight = sum(p.weight for p in proposal.positions)
         confidence_pct = int(proposal.confidence * 100)
@@ -161,11 +160,8 @@ class WebhookDispatcher:
         if len(description) > _MAX_EMBED_DESCRIPTION:
             description = description[: _MAX_EMBED_DESCRIPTION - 3] + "…"
 
-        mode_info = snapshot.get("mode", mode)
         verification_reminder = (
             "\n\n⚠️ **ACTION REQUIRED:** Update your game portfolio on the website, then run `python verify.py` to confirm sync."
-            if mode_info == "LIVE" or mode == "LIVE"
-            else "\n\n📝 Pregame mode: Virtual portfolio only (no action needed until April 6)"
         )
 
         return {

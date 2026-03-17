@@ -33,6 +33,8 @@ from data.meta_learning import generate_meta_learning_report
 from data.mode_guard import enforce_mode_and_freeze, generate_live_handoff_if_due
 from data.earnings_fetcher import fetch_upcoming_earnings, format_earnings_warning
 from data.news_fetcher import fetch_candidate_news, format_news_for_prompt
+from data.insider_fetcher import fetch_insider_trades, format_insider_context
+from data.trends_fetcher import fetch_search_interest, format_trends_context
 from data.paper_account import rebalance_to_proposal, reset_for_live
 from data.portfolio_store import load_last, load_yesterday_prices, save as save_portfolio
 from output.dispatcher import WebhookDispatcher
@@ -97,6 +99,35 @@ class AlphaSharkOrchestrator:
         except Exception as exc:
             logger.warning("Earnings fetch failed (non-fatal): %s", exc)
             snapshot["earnings_warning"] = ""
+
+        # Step 1e: fetch insider buying activity from SEC EDGAR Form 4 (US tickers only)
+        try:
+            us_candidates = [c["ticker"] for c in snapshot["candidates"] if "." not in c["ticker"]]
+            insider_trades = fetch_insider_trades(us_candidates)
+            snapshot["insider_context"] = format_insider_context(insider_trades)
+            if insider_trades:
+                logger.info("Insider buys: %d found (%s)", len(insider_trades),
+                            ", ".join(t["ticker"] for t in insider_trades[:5]))
+            else:
+                logger.info("Insider buys: none above $50k threshold")
+        except Exception as exc:
+            logger.warning("Insider fetch failed (non-fatal): %s", exc)
+            snapshot["insider_context"] = ""
+
+        # Step 1f: fetch Google search interest as retail crowding indicator
+        try:
+            top_tickers = [c["ticker"] for c in snapshot["candidates"]]
+            trends = fetch_search_interest(top_tickers)
+            snapshot["trends_context"] = format_trends_context(trends)
+            if trends:
+                crowded = [t["ticker"] for t in trends if t["signal"] == "crowded"]
+                radar   = [t["ticker"] for t in trends if t["signal"] == "radar"]
+                logger.info("Trends: crowded=%s, under-radar=%s", crowded or "none", radar or "none")
+            else:
+                logger.info("Trends: no data (throttled or failed)")
+        except Exception as exc:
+            logger.warning("Trends fetch failed (non-fatal): %s", exc)
+            snapshot["trends_context"] = ""
 
         # Enforce pre-game/live mode behavior and post-start parameter freeze
         mode_info = enforce_mode_and_freeze(snapshot["as_of_date"], game_start_date="2026-04-06")
@@ -315,10 +346,9 @@ class AlphaSharkOrchestrator:
             snapshot,
             prior_proposal=prior_portfolio,
             paper_metrics=paper_metrics,
-            mode=mode_info["mode"],
         )
         # Mention user in LIVE mode so they get a notification
-        self.dispatcher.send(embed, mention_user=(mode_info["mode"] == "LIVE"))
+        self.dispatcher.send(embed, mention_user=True)
 
         # Step 9: Print cost summary
         cost_summary = get_total_cost()

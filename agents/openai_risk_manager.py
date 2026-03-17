@@ -211,6 +211,12 @@ class OpenAIRiskManager(BaseAgent):
         if snapshot.get("learning_context"):
             lines += ["", snapshot["learning_context"]]
 
+        if snapshot.get("insider_context"):
+            lines += ["", snapshot["insider_context"]]
+
+        if snapshot.get("trends_context"):
+            lines += ["", snapshot["trends_context"]]
+
         lines += [
             "",
             "Synthesise the final portfolio. Weight consensus picks higher. "

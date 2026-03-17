@@ -353,6 +353,12 @@ class OpenAIStrategist(BaseAgent):
         if snapshot.get("news_headlines"):
             lines += ["", snapshot["news_headlines"]]
 
+        if snapshot.get("insider_context"):
+            lines += ["", snapshot["insider_context"]]
+
+        if snapshot.get("trends_context"):
+            lines += ["", snapshot["trends_context"]]
+
         lines += [
             "",
             "Generate a portfolio from the candidates above following the game rules and "

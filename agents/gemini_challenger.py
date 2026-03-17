@@ -191,6 +191,12 @@ class GeminiChallenger(BaseAgent):
         if snapshot.get("news_headlines"):
             lines += ["", snapshot["news_headlines"]]
 
+        if snapshot.get("insider_context"):
+            lines += ["", snapshot["insider_context"]]
+
+        if snapshot.get("trends_context"):
+            lines += ["", snapshot["trends_context"]]
+
         lines += ["", "Build your independent portfolio. Return valid JSON only."]
         return "\n".join(lines)
 
