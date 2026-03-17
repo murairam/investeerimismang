@@ -6,6 +6,25 @@ An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game
 
 ---
 
+## Key Features
+
+- 🤖 **3-Model AI Ensemble**: GPT-4o + Gemini + GPT-4o-mini analyze markets in parallel
+- 📊 **Automated Learning**: Tracks win/loss patterns, best tickers, optimal position sizing
+- 🧠 **AI Self-Critique**: Evaluates quality of its own reasoning (not just which stocks won)
+- 💰 **Cost Tracking**: Monitors OpenAI API spending per run
+- ⏰ **Automated Verification Reminders**: Pings you if portfolio sync is missing (LIVE mode)
+- 📝 **Paper Trading**: Virtual €10k account for pregame training
+
+**Quick commands:**
+```bash
+python main.py           # Run full pipeline
+python status.py         # View project dashboard (costs, learning, next steps)
+python verify.py         # Confirm portfolio sync (LIVE mode)
+python pregame_review.py # View learning summary (PREGAME mode)
+```
+
+---
+
 ## Daily workflow
 
 ```
@@ -132,22 +151,27 @@ python main.py
 
 1. Push the repo to GitHub
 2. Go to **Settings → Secrets and variables → Actions**
-3. Add these 3 repository secrets:
-   - `OPENAI_API_KEY`
-   - `GEMINI_API_KEY`
-   - `DISCORD_WEBHOOK_URL`
-4. The workflow runs automatically at **09:30 EEST (06:30 UTC)** on weekdays, 90 min before the 10:00 EET submission cutoff.
-5. After each run, `portfolio_history.json` and `DAILY_LOG.md` are committed back to the repo automatically.
+3. Add these repository secrets:
+   - `OPENAI_API_KEY` (required)
+   - `GEMINI_API_KEY` (required)
+   - `DISCORD_WEBHOOK_URL` (required)
+   - `DISCORD_USER_ID` (optional — enables @mentions in LIVE mode)
+4. The workflow runs automatically at **09:30 EEST (06:30 UTC)** on weekdays, 90 min before the 10:00 EET submission cutoff
+5. After each run, portfolio and learning files are committed back to the repo automatically
+6. **In LIVE mode**: 30 minutes later (10:00 EEST), a second workflow checks if you've run `python verify.py`. If not, it sends a Discord reminder.
 
 After the automated run posts to Discord, manually update your positions on the game website, then run `python verify.py` to confirm the baseline matches.
 
 ### Required environment variables
 
 ```
-OPENAI_API_KEY=...      # GPT-4o strategist + GPT-4o-mini meta-analyst
-GEMINI_API_KEY=...      # Gemini 2.0 Flash challenger (free tier, 1500 req/day)
-DISCORD_WEBHOOK_URL=... # Discord channel webhook for daily posts
+OPENAI_API_KEY=...         # GPT-4o strategist + GPT-4o-mini meta-analyst
+GEMINI_API_KEY=...         # Gemini 2.0 Flash challenger (free tier, 1500 req/day)
+DISCORD_WEBHOOK_URL=...    # Discord channel webhook for daily posts
+DISCORD_USER_ID=...        # Optional: Discord user ID for @mentions in LIVE mode
 ```
+
+To get your Discord user ID: Enable Developer Mode in Discord → Right-click your username → Copy User ID
 
 ---
 
@@ -155,15 +179,20 @@ DISCORD_WEBHOOK_URL=... # Discord channel webhook for daily posts
 
 ```
 ├── main.py                      # entry point
+├── status.py                    # project dashboard (costs, learning, next steps)
 ├── orchestrator.py              # pipeline wiring (all 3 agents)
 ├── config.py                    # universe, signal params, game constraints
 ├── verify.py                    # interactive CLI to confirm/correct daily portfolio
 ├── pregame_review.py            # refresh/print pre-game learning summary
+├── verification_reminder.py     # GitHub Actions job for LIVE mode sync reminders
 ├── data/
 │   ├── fetcher.py               # market data + signal computation
 │   ├── portfolio_store.py       # load/save portfolio_history.json
 │   ├── paper_account.py         # virtual account state + daily rebalancing
 │   ├── learning_report.py       # pre-game win/loss analyzer + markdown report
+│   ├── meta_learning.py         # AI self-critique: reasoning quality analysis
+│   ├── cost_tracker.py          # OpenAI API spending tracker
+│   ├── verification_tracker.py  # tracks when portfolio was last verified
 │   ├── mode_guard.py            # pregame/live switch + live parameter freeze
 │   └── diary.py                 # append entries to DAILY_LOG.md
 ├── agents/
@@ -178,10 +207,13 @@ DISCORD_WEBHOOK_URL=... # Discord channel webhook for daily posts
 │   └── dispatcher.py            # Discord webhook
 ├── portfolio_history.json       # last accepted portfolio (auto-generated)
 ├── paper_account.json           # virtual paper account ledger (auto-generated)
+├── cost_log.json                # API cost tracking (auto-generated)
+├── verification_tracker.json    # portfolio sync tracking (auto-generated)
+├── DAILY_LOG.md                 # daily decision + paper P&L log (auto-generated)
 ├── PREGAME_LEARNING.md          # actionable pre-game learning report (auto-generated)
+├── AI_SELF_CRITIQUE.md          # AI reasoning quality analysis (auto-generated)
 ├── live_mode_lock.json          # live-mode strategy lock fingerprints (auto-generated)
-├── LIVE_HANDOFF_2026-04-06.md   # final pregame handoff when live mode starts
-└── DAILY_LOG.md                 # daily decision + paper P&L log (auto-generated)
+└── LIVE_HANDOFF_2026-04-06.md   # final pregame handoff when live mode starts
 ```
 
 ---
