@@ -1,0 +1,206 @@
+Otsi
+Otsi mängijaid ja portfelle
+Ülevaade
+Liigad
+Auhinnad
+Kuidas mängida
+Reeglid
+
+
+
+Kuidas mängida
+Kuidas mäng toimib?
+  Selles mängus saad õppida aktsiate ostmist ja müümist ning arendada oma investeerimisteadmisi. Pane proovile oma oskused, võistle sõprade ja teiste investoritega ning võida väärtuslikke auhindu!
+
+
+Investor Toomase ja SEB mäng toimub kujuteldaval börsil, mis jäljendab Balti, Skandinaavia ja USA turgude liikumisi.
+
+Investeerimisportfelli loomine on lihtne ja kasutajasõbralik. Kogu mängu vältel toetab sind Investor Toomase tiim, kes jagab igapäevaselt värskeid börsiuudiseid, et saaksid teha teadlikke otsuseid aktsiate ostmisel ja müümisel. Loe põhjalikku juhendit ja alusta mängimist juba täna!
+
+Igal mängijal on üks investeerimisportfell, mida tuleb hallata. Äripäeva tellijatel on võimalus luua teine portfell lisaks.
+Portfellis peab olema vähemalt viis erinevat aktsiat.
+Ühte ettevõttesse saab investeerida kuni 25% rahast.
+Mängu alguses on igal mängijal kasutada 10 000 ühikut raha, mille väärtus muutub vastavalt aktsiahindade kõikumisele.
+Mäng lõpeb 19. juunil, mil selgub edetabel. Parimad mängijad saavad väärikalt premeeritud 4. juulil InvesteerimisFestivalil.
+Mängu lihtsustamiseks ei pea sa pidevalt hoidma oma investeeringuid tasakaalus. Investeerides ühte aktsiasse 20 ühikut raha, püsib see samal tasemel kuniks otsustad oma positsiooni suurendada või vähendada. Küll aga muutub portfelli koguväärtus, mis peegeldab aktsiahindade liikumist. Tänu sellele kulutad vähem aega oma portfelli kallal nokitsemisele ja saad keskenduda hoopis põnevate aktsiate otsimisele.
+
+Kõik muudatused, mida oma portfellis läbi viid, leiavad aset kauplemispäeval kl 10:00, et saaksid kauplemist alustada varakult ja reageerida kiirelt värskeimatele uudistele.
+
+Väärtpaberite hinnad on 15-minutilise viivitusega ja mängijate edetabel uueneb igal hommikul kl 10:15. 
+
+Aktsiahinnad kuvatakse süsteemis ümardatuna lähima täisarvuni, kuid tegelikud tootlused ja portfelli väärtus arvutatakse täpse turuhinna alusel.
+
+Rohkem informatsiooni mängu kohta leiad mängu reeglistikust.
+
+Mängus tekkinud probleemide korral kirjuta investeerimismang@aripaev.ee
+
+Millistesse aktsiatesse on võimalik investeerida?
+Investeerimiseks on saadaval Balti põhinimekirja, USA S&P 500 indeksi ning Skandinaavia peamiste aktsiaindeksite aktsiad.
+
+Saadaolevad turud ja indeksid:
+
+Balti börs – Balti põhinimekiri
+USA – S&P 500
+Soome – OMX Helsinki Large Cap (OMXHLCPI)
+Rootsi – OMX Stockholm 30 (OMXS30)
+Norra – OBX Index
+Taani – OMX Copenhagen 25 (OMXC25)
+Mõned üksikud väärtpaberid neist indeksitest võivad olla tehnilistel, likviidsuse või muudel põhjustel investeerimisnimekirjast eemaldatud. Konkreetse ettevõtte aktsia kättesaadavuse kontrollimiseks kasuta otsingus ettevõtte nime.
+
+Kui müün aktsia ja tahan reinvesteerida, millal see toimub?
+Kui müüd aktsia, toimub müük järgmisel turu avamisel. Kui otsustad saadud summa uuesti investeerida, siis see juhtub tavaliselt järgmisel kauplemispäeval, sõltuvalt investeerimisvalikutest. 
+
+Mõnel juhul võib kogu protsess kesta kuni kaks kauplemispäeva, kui müük ja reinvesteerimine toimuvad eraldi kauplemispäevadel.
+
+Miks on müüdud aktsia ikka veel minu portfellis nähtav?
+Isegi pärast müüki võib aktsia jääda portfelli nähtavaks kuni järgmise kauplemispäevani. 
+
+Kui müüd aktsia, jääb see portfellis nähtavaks seni, kuni tehing on lõplikult arveldatud. See ei tähenda, et sa seda veel omaksid, kuid hind võib olla informatiivselt kuvatud kuni järgmise päeva alguseni.
+
+Nii näed eelmise päeva sulgemishinna ja järgmise päeva avanemishinna erinevusest tekkinud kasumit või kahjumit.
+
+Kauplemispäeva lõpus kadus mu portfellist päeva jooksul teenitud kasum. Kas see kaobki pärast turu sulgemist?
+Mängukeskkonnas hakatakse graafikuid kuvama alates kauplemispäeva algusest: Balti ja Skandinaavia turgude puhul kell 10:15 ning USA aktsiate puhul kell 16:45. Kui portfell koosneb täielikult USA aktsiatest, ilmub graafik pärast USA turu avanemist.
+
+Kauplemispäeva jooksul kuvatakse reaalajas andmeid üksnes informatiivsel eesmärgil ning hinnad muutuvad interaktiivselt vaid vastava börsi lahtioleku ajal. Pärast börsi sulgemist näitab graafik nulltootlust, et vältida eksitavaid hinnaliikumisi suletud turu ajal.
+
+Portfelli ametlikud arvestused tehakse iga kauplemispäeva lõpus pärast turu sulgumist ning kõik muudatused kajastuvad portfellis õigesti järgmisel kauplemispäeval. Seega ei kao kasum ära, kuna hindade kadumine ei mõjuta portfelli väärtust. Portfelli õige väärtus on nähtav järgmisel kauplemispäeval.
+
+Kuni mis kellaajani saan aktsiaid osta, et tehing teostataks?
+Kuni kauplemispäeva lõpuni saab aktsiaid osta, kuid tuleb arvestada 15-minutilise hinnaviivitusega. Kui order esitatakse enne kella 10:00 (Eesti aja järgi), lisatakse aktsia portfelli samal päeval avamishinnaga. Kui order esitatakse pärast kella 10:00, lisatakse aktsia portfelli järgmisel kauplemispäeval avamishinnaga.
+
+Kui ostan USA aktsiat täna, kui USA turg on veel suletud, siis kas see ilmub mu portfelli täna avamishinnaga või alles homme?
+Kui order esitatakse enne kella 10:00 (Eesti aja järgi), lisatakse aktsia portfelli samal päeval avamishinnaga. Kui order esitatakse pärast kella 10:00, lisatakse aktsia portfelli järgmisel kauplemispäeval avamishinnaga.
+
+Kui ostan USA turu avanedes aktsia, siis millal tehing teostatakse ja mis hinnaga?
+Tehing teostatakse järgmise kauplemispäeva avamishinnaga.
+
+Kuidas ma loon oma portfelli?
+Selleks, et luua oma portfell, pead olema registreerunud Investor Toomase ja SEB investeerimismängu kasutajaks. Sisseloginuna näed avalehel nuppu “Loo portfell”. Nupule klikates ja juhiseid järgides saadki oma portfelli luua.
+
+Lisasin oma portfelli USA aktsia, kuid ma ei näe seda seal? Miks?
+Kõik aktsiad, mille oled lisanud oma portfelli, on automaatselt nähtaval Sinu portfellis, kui Balti ja Skandinaavia turud avanevad ehk kauplemispäeval (argipäeviti) kl 10:15. Kuna USA turud avanevad Eesti aja järgi kl 16:30, siis näed USA aktsiatega seotud portfelli muudatusi alates 16:45.
+
+Kuidas ma saan oma portfelli uuesti tasakaalustada?
+Kliki nupul “Halda oma portfelli”, mille leiad Investor Toomase ja SEB investeerimismängu avalehelt päevasisese graafiku alt.
+
+Avatud menüüs saad kustutada, lisada või muuta aktsiate osakaalu oma portfellis.
+
+Sa pead valima vähemalt viis aktsiat, mille protsendimäär on 5%-25% vahemikus.
+
+Kogu investeeritud summa peab olema vähem või võrdne 100%-ga.
+
+Kaalujaotuse muutused mõjutavad sinu portfelli järgmise päeva alguses kl 10:00, kui turg avaneb.
+
+Näen, et täna on mu portfell punases, kuid aktsiaid eraldi vaadates on need rohelises. Kuidas see on võimalik?
+Sellel võib olla mitu põhjust:
+
+Kui rebalansseerisid oma portfelli nii, et lisasid juurde ühe või rohkem aktsiaid või suurendasid nende protsentuaalset osakaalu, tähendab see, et need aktsiad osteti tänahommikuse avamishinnaga. Protsendimuutus, mida näed individuaalsete aktsiate puhul tablool, on arvutatud eelmise päeva sulgemishinnaga. See tähendab, et kui ostsid aktsia sel hommikul avanemishinnaga, võib aktsia hind olla madalam avanemishinnast, kuid kõrgem eilsest sulgemishinnast.
+
+Kui tasakaalustasid oma portfelli nii, et müüsid ühe või rohkem aktsiaid või vähendasid nende protsentuaalset osakaalu tänaseks, tähendab see, et aktsia müüakse tänahommikuse avanemishinnaga. See tähendab, et näed seda aktsiat ikka veel portfellilehe graafikul, kuid see avaldab su portfellile negatiivset mõju, kui aktsia müüdi avanemishinnaga, mis oli madalam eelmise päeva sulgemishinnast.
+
+Kuidas arvutatakse minu portfelliseisu?
+Sinu portfelli edenemine põhineb sinu portfellis olevate aktsiate käitumisel. Aktsiate väärtuse kasvu ja langust jälgitakse baashinna põhjal ehk selle hinna põhjal, mille juures aktsiaid osteti.
+
+Baashinda kasutatakse selleks, et tuvastada nii üldine tootlus ostmise hetkest (nt ajalooline tootlus) kui tänane tootlus (nt päevasisene tootlus).
+
+Alates eelmisest kauplemispäevast ostetud aktsiate baashind põhineb eelmisel sulgemishinnal. Seega iga aktsiahinna tõus või langus arvutatakse eelmise päeva sulgemishinna baasil.
+
+Kui aktsia lisandus portfelli tasakaalustamise tulemusel, on osaku baashind järgmise kauplemispäeva avanemishind. Sel juhul arvutatakse iga aktsiahinna tõus või langus järgneva päeva avanemishinna baasil.
+
+Kui sinu portfell loodi kauplemistundide ajal ja kõik aktsiad osteti sel ajal, määratakse baashinnaks järgmine täheldatud kauplemishind pärast portfelli loomise lõpetamist.
+
+Avanemishind määratakse Balti ja Skandinaavia börsi aktsiate puhul kell 10:00 ja USA börsi aktsiate puhul kell 16:30 Eesti aja järgi. Kui aktsia on olnud sinu portfellis kauem kui esimese kauplemispäeva, arvutame sinu protsentuaalse arengu eelmise päeva sulgemishinna ja jooksva päeva sulgemishinna põhjal. See kehtib olenemata sellest, kas tegemist on esimese kauplemisjärgse päevaga, esimese päevaga, mil aktsia lisati portfelli, või esimese päevaga, mil aktsia osakaalu % portfellis kohandati.
+
+Portfelli väärtus muutub vastavalt iga aktsia hinnamuutusega, korrutades selle määratud protsendiga. Siiski ei muutu iga aktsia jaotusprotsent, kui hinnad tõusevad või langevad.
+
+Näiteks, portfelli ABC sisaldab 25% aktsiat XYZ. Kui aktsia XYZ hind tõuseb 40%, kasvab portfell 10%. Samas, aktsia XYZ osalusprotsent (25%) ei suurene 40% (ega muutu 35% peale). Suureneda saab ainult portfelli koguväärtus. Kasutaja poolt määratud osalusprotsendid püsivad vastavalt nende seadistustele.
+
+Ma ei ole kindel, mis hinna juures ma ostan või müün aktsiat.
+Kui teed oma portfellis muudatusi, nt ostad või müüd aktsiaid või suurendad mõne aktsia osalusprotsenti, siis muudatused viiakse läbi turgude avanemisel vastavalt muudatuste esinemise järjekorrale.
+
+Kui suurendad aktsia osalusprotsenti, nt ostes aktsiaid juurde, siis ükskõik kas suurendasid juba olemasoleva aktsia protsenti või ostsid juurde täiesti uue aktsia, jälgitakse järgmisel kauplemispäeval portfelliseisu avanemishinnast sulgemishinnani.
+
+Kui vähendasid aktsia osalusprotsenti, nt müües, toimub müügitehing järgmisel päeval avanemishinna juures ja kohandab pärast müügitehingu lõppu portfelli baasväärtust. See on nähtav sinu portfellilehel müüginimekirjas.
+
+Kui uus portfell luuakse kauplemispäeva jooksul, määratakse ostuhind esimese täheldatud tehingu hinnaga ostetud aktsiate puhul. Kui tehinguid ei toimu, "ostetakse" aktsia järgmise kauplemispäeva avanemishinnaga.
+
+Portfellis oleva aktsia hind suurenes märgatavalt, aga osalusprotsent on järgmisel päeval ikka sama. Kas see ei peaks suurenema?
+See on taotluslik lihtsustus, et Investor Toomase ja SEB investeerimismäng oleks rohkem kättesaadavam ja lõbusam mängida! 
+
+Sa võid seda ette kujutada nii, et sinu portfelli protsendid kohandatakse automaatselt kauplemispäeva lõpus, et säilitada samad protsendid, mis olid päeva alguses, kasutades rebalansseerimiseks ametlikku sulgemishinda. Nii saad veeta vähem aega portfelli käsitsi rebalansseerimisele, et see vastaks sinu strateegiale, ja rohkem aega huvitavate aktsiate leidmisele, millesse investeerida.
+
+Portfelli väärtus arvutati eile börsipäeva lõpus teisiti. Täna näen ajaloolisest graafikust, et väärtus on teine. Miks?
+Väärtus, mida näed kauplemispäeva ajal on sinu portfelli hinnanguline väärtus, mis põhineb päevasisestel kauplemishindadel. Päeva lõpus arvutatakse sinu portfelli tegelik väärtus ametlike sulgemishindade põhjal. Seega, need väärtused (viimane tehing, mida nägid kauplemispäeval, mis mõjutas sinu varade väärtust ja sulgumishinda) võivad üksteisest erineda.
+
+Kuidas rebalansseerida?
+
+Esimene päev
+Kasutaja soovib suurendada oma osalust ettevõttes. Ta investeerib täiendavalt, suurendades oma osalust ettevõttes 5%-lt 15%-ni. Kui ta on juba kogu oma kapitali investeerinud, peab ta vähendama ühe või mitme muu aktsia osakaalu.
+
+Portfellis tehtud muudatused kajastuvad järgmisel kauplemispäeval, kui aktsiaturg avatakse kell 10:00. Kuni selle ajani saab kasutaja teha täiendavaid muudatusi.
+
+Teine päev
+Eelmisel päeval investeeris kasutaja ettevõttesse täiendavalt 10% oma kapitalist. Tehing sooritatakse avanemishinnaga.
+
+Kasutaja algne 5%-line osalus ettevõttes jääb muutumatuks ning põhineb eelmise päeva sulgemishinnal.
+
+See tähendab, et kui ettevõtte sulgemishind eile oli 10 ja tänane avanemishind on 10,30, suureneb algse 5%-lise osaluse väärtus 3%. Uus 10%-line osalus ei ole sellest hinnaliikumisest mõjutatud, kuna see osteti hinnaga 10,30.
+
+5% osalus varasemast, mis põhineb eelmisel sulgemishinnal.
+10% osalus teostatakse järgmisel kauplemispäeval avanemishinnaga, kui börs avatakse.
+Kolmas päev
+Kolmandal päeval põhineb kogu 15%-line osalus ettevõttes eelmisel päeval kehtinud sulgemishinnal.
+
+Kogu osalus uuendati varasema avanemishinna põhjal ning kõik kasutaja portfellis olevad aktsiad on nüüd sama hinna alusel.
+Investeerimismäng, kus võistled peaauhinna, iganädalaste auhindade ja loosiauhindade nimel.
+
+Privaatsuspoliitika
+Küpsiste poliitika
+
+
+
+
+Teenust osutab Norkon Fantasy Funds.
+
+Tere tulemast Investor Toomase ja SEB investeerimismängu!
+Investor Toomase ja SEB investeerimismäng on hea võimalus õppida ja katsetada investeerimisoskusi ilma reaalse rahaga riskimata. Pane oma oskused proovile ja võistle teiste osalejatega väärtuslike auhindade nimel!
+
+Osaleda saavad kõik – võib-olla oled just sina see, kes võidab peaauhinna! 
+
+Mängus osalemine on kõigile tasuta. 
+
+NB! Äripäeva tellijatel on võimalus luua teine portfell lisaks. Nii saad suurendada ka oma võiduvõimalust! Äripäeva konto omanikele toimub sisselogimine automaatselt, mistõttu eraldi registreerimine ei ole vajalik.
+
+Liitu mänguga, arenda oma investeerimisoskusi ja naudi põnevat väljakutset! 😊
+
+
+Auhinnad:
+🏆 Peaauhind: 10 000 eurot, luksusliku BMW iX kasutusõigus aastaks koos tasuta kindlustuse ja hooldusega ning unustamatu võimalus külastada NASDAQ MarketSite’i Times Square’il, New Yorgis, koos tasuta lendude ja majutusega.
+
+🥈 Teine koht: äriklassi edasi-tagasi lennupilet kahele vabalt valitud airBalticu otselennu sihtkohta Tallinnast.
+
+🥉 Kolmas koht: Äripäev PRO aastane tasuta tellimus, Investor Toomase Investeerimisklubi aastane tasuta liikmelisus ja 500 € kingitus SEB roboinvestori portfelli.
+
+Iganädalased auhinnad: kolm parimat saavad igal nädalal investeerimisalase raamatu.
+
+Lisaks: mitmed põnevad üllatusauhinnad! Kokku on auhinnafondi väärtus üle 30 000 euro.
+
+Kuidas osaleda:
+Mängule registreerimine algab 16. märtsil. Mäng algab 6. aprillil ja kestab kuni 19. juunini. Peaauhinna võidab osaleja, kelle portfell on mängu lõpuks kõige suurema väärtusega.
+
+Vali oma portfelli 5–20 aktsiat. Saad mängu alustamiseks 10 000 eurot virtuaalraha, mida võid mängukeskkonnas vabalt valitud aktsiatesse investeerida.
+
+Mänguga saad liituda kogu mänguperioodi vältel. Küll aga peaauhindade nimel saavad võistelda ainult 31. maiks registreerunud mängijad.
+
+Mängus saab investeerida Standard & Poor´s 500, Norra, Taani, Rootsi, Soome ja Balti peamistesse börsiindeksitesse kuuluvatesse aktsiatesse. NB! Nimekirjadest võivad olla eemaldatud mõned väikese likviidsusega väärtpaberid.
+
+Auhindade jagamine:
+Peaauhind läheb osalejale, kelle portfell saavutab 19. juunil mängu lõppedes kõige suurema väärtusega.
+
+Teise ja kolmanda koha võitjad selguvad samuti mängu lõpuks saavutatud tootluse alusel.
+
+Lisaks jagatakse iganädalasi auhindu vastavalt tulemuste edetabelile või loosimise teel.
+
+
+Head mänguõnne!

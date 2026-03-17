@@ -1,0 +1,33 @@
+name: AlphaShark Daily Run
+
+on:
+  schedule:
+    # 06:30 UTC = 09:30 EEST (UTC+3, summer / game period)
+    # Worst case in EET winter: 08:30 EET — still 90 min before the 10:00 cutoff.
+    - cron: '30 6 * * 1-5'
+  workflow_dispatch:   # allow manual trigger for testing
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run AlphaShark
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python main.py

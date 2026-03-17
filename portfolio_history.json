@@ -1,0 +1,42 @@
+{
+  "date": "2026-03-17",
+  "positions": [
+    {
+      "ticker": "NOKIA.HE",
+      "weight": 0.25,
+      "rationale": "Strong 20d return and high Sharpe ratio, with significant outperformance vs index, indicating a high-conviction momentum breakout."
+    },
+    {
+      "ticker": "ERIC-B.ST",
+      "weight": 0.2,
+      "rationale": "Solid momentum and near 52-week high, demonstrating strong risk-adjusted returns and outperformance vs index."
+    },
+    {
+      "ticker": "TELIA.ST",
+      "weight": 0.15,
+      "rationale": "Stable uptrend with a consistent Sharpe ratio and at its 52-week high, indicating strong momentum."
+    },
+    {
+      "ticker": "FORTUM.HE",
+      "weight": 0.1,
+      "rationale": "Good 20d return with a reasonable Sharpe ratio and at its 52-week high, offering a balanced growth opportunity."
+    },
+    {
+      "ticker": "NHY.OL",
+      "weight": 0.1,
+      "rationale": "Decent 20d return and Sharpe, with positive vs index performance, providing diversification with potential upside."
+    },
+    {
+      "ticker": "MAERSK-B.CO",
+      "weight": 0.05,
+      "rationale": "Strong recent performance and at 52-week high, warrants a smaller position due to lower Sharpe compared to top picks."
+    },
+    {
+      "ticker": "SAMPO.HE",
+      "weight": 0.05,
+      "rationale": "Provides diversification with moderate momentum and positive vs index performance, fitting the lower conviction tier."
+    }
+  ],
+  "reasoning": "I adjusted the weights to ensure a more balanced distribution, reducing the concentration in the top positions while maintaining high-conviction stocks. This enhances diversification and aligns with the goal of maximizing absolute returns.",
+  "confidence": 0.85
+}
