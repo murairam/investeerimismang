@@ -2,62 +2,73 @@
   "date": "2026-03-17",
   "positions": [
     {
+      "ticker": "NHY.OL",
+      "weight": 0.21721311475409835,
+      "rationale": "consensus pick + strong momentum with high Sharpe among current holdings."
+    },
+    {
       "ticker": "FORTUM.HE",
-      "weight": 0.24,
-      "rationale": "consensus pick + strong recent performance with solid momentum."
+      "weight": 0.17786885245901637,
+      "rationale": "unique pick + highest Sharpe among current holdings, strong recovery potential."
+    },
+    {
+      "ticker": "CSCO",
+      "weight": 0.1483606557377049,
+      "rationale": "unique pick + strong contrarian fit in US Tech with recovering momentum."
     },
     {
       "ticker": "MAERSK-B.CO",
-      "weight": 0.18,
-      "rationale": "consensus pick + consistent positive returns and high Sharpe ratio."
+      "weight": 0.11885245901639345,
+      "rationale": "unique pick + solid momentum and strong recent performance."
     },
     {
-      "ticker": "NHY.OL",
-      "weight": 0.22,
-      "rationale": "consensus pick + solid return, positive vs_index, and recovering momentum."
+      "ticker": "GOOGL",
+      "weight": 0.11885245901639345,
+      "rationale": "unique pick + large-cap US Tech name showing strong contrarian signals."
     },
     {
-      "ticker": "TELIA.ST",
-      "weight": 0.16,
-      "rationale": "consensus pick + stable performance near 52-week high with improving momentum."
+      "ticker": "CVX",
+      "weight": 0.08934426229508198,
+      "rationale": "unique pick + strong risk-adjusted momentum in the energy sector."
     },
     {
-      "ticker": "XOM",
-      "weight": 0.13,
-      "rationale": "consensus pick + strong return and positive vs_index in the S&P 500."
+      "ticker": "SALM.OL",
+      "weight": 0.07950819672131149,
+      "rationale": "unique pick + key non-US contrarian pick from the OBX market."
     },
     {
-      "ticker": "TAL1T.TL",
-      "weight": 0.07,
-      "rationale": "unique pick + showing more volatility but has potential for recovery."
+      "ticker": "NOKIA.HE",
+      "weight": 0.050000000000000024,
+      "rationale": "unique pick + high Sharpe ratio and strong recent performance."
     }
   ],
-  "reasoning": "The consensus picks were weighted higher due to their validated performance and strong signals. Unique picks were included based on their recovery potential and momentum, ensuring a diversified portfolio. The final portfolio beta is 0.84, which fits well within the target range for a NEUTRAL regime. Residual cash was deployed (strong selected alpha (+11.0%)).",
+  "reasoning": "The consensus pick NHY.OL was weighted higher due to its strong momentum and Sharpe ratio. Unique picks like FORTUM.HE and CSCO were included for their solid signals and contrarian appeal. The portfolio beta is 0.82, fitting well within the NEUTRAL regime target of 0.95\u20131.15, with a diversified selection across multiple markets.",
   "confidence": 0.85,
   "performance_history": [
     {
       "date": "2026-03-17",
-      "benchmark_return_20d": -0.0175,
-      "portfolio_return_1d": 0.012471,
-      "benchmark_return_1d": 0.003572,
-      "alpha_1d": 0.008899,
+      "benchmark_return_20d": -0.0186,
+      "portfolio_return_1d": 0.013944,
+      "benchmark_return_1d": 0.002494,
+      "alpha_1d": 0.011449,
       "position_returns": {
-        "NOKIA.HE": -0.000801,
-        "FORTUM.HE": 0.025522,
-        "MAERSK-B.CO": 0.033688,
+        "FORTUM.HE": 0.027842,
+        "MAERSK-B.CO": 0.036568,
         "NHY.OL": -0.00553,
-        "XOM": 0.019271,
-        "TELIA.ST": 0.001883,
-        "BOL.ST": -0.004163
+        "TELIA.ST": 0.002929,
+        "XOM": 0.010113,
+        "TAL1T.TL": 0.001608
       }
     }
   ],
   "close_prices": {
-    "FORTUM.HE": 22.100000381469727,
-    "MAERSK-B.CO": 17950.0,
+    "CSCO": 79.2699966430664,
+    "CVX": 197.97999572753906,
+    "FORTUM.HE": 22.149999618530273,
+    "GOOGL": 310.9200134277344,
+    "MAERSK-B.CO": 18000.0,
     "NHY.OL": 93.5199966430664,
-    "TAL1T.TL": 0.6230000257492065,
-    "TELIA.ST": 47.88999938964844,
-    "XOM": 160.25999450683594
+    "NOKIA.HE": 7.464000225067139,
+    "SALM.OL": 595.5
   }
 }

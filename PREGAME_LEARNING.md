@@ -8,24 +8,23 @@ Days remaining: 20
 - Training days with measurable alpha: 1
 - Win days (alpha > 0): 1
 - Loss days (alpha < 0): 0
-- Average daily alpha: +0.89%
+- Average daily alpha: +1.14%
 - Paper account equity: €10,000.00 (from €10,000.00, return +0.00%)
 - Max drawdown (paper): 0.00%
 - Average turnover: 100.00%
 
 ## Best and worst day
-- Best alpha day: 2026-03-17 (+0.89%)
-- Worst alpha day: 2026-03-17 (+0.89%)
+- Best alpha day: 2026-03-17 (+1.14%)
+- Worst alpha day: 2026-03-17 (+1.14%)
 
 ## Ticker lessons
 | Ticker | Obs | Avg 1d return | Hit rate |
 |---|---:|---:|---:|
-| MAERSK-B.CO | 1 | +3.37% | 100% |
-| FORTUM.HE | 1 | +2.55% | 100% |
-| XOM | 1 | +1.93% | 100% |
-| TELIA.ST | 1 | +0.19% | 100% |
-| NOKIA.HE | 1 | -0.08% | 0% |
-| BOL.ST | 1 | -0.42% | 0% |
+| MAERSK-B.CO | 1 | +3.66% | 100% |
+| FORTUM.HE | 1 | +2.78% | 100% |
+| XOM | 1 | +1.01% | 100% |
+| TELIA.ST | 1 | +0.29% | 100% |
+| TAL1T.TL | 1 | +0.16% | 100% |
 | NHY.OL | 1 | -0.55% | 0% |
 
 ## Action plan until April 6

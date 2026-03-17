@@ -1,0 +1,21 @@
+{
+  "runs": [
+    {
+      "date": "2026-03-17",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-4o",
+      "input_tokens": 4331,
+      "output_tokens": 376,
+      "cost_usd": 0.014587
+    },
+    {
+      "date": "2026-03-17",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-4o-mini",
+      "input_tokens": 1523,
+      "output_tokens": 437,
+      "cost_usd": 0.000491
+    }
+  ],
+  "total_cost": 0.015078
+}
