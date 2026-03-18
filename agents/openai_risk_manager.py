@@ -92,11 +92,12 @@ class OpenAIRiskManager(BaseAgent):
         snapshot: MarketSnapshot,
         prior_proposal: Optional[PortfolioProposal] = None,
         challenger_proposal: Optional[PortfolioProposal] = None,
+        bear_cases: Optional[dict] = None,
     ) -> PortfolioProposal:
         if prior_proposal is None:
             raise ValueError("OpenAIRiskManager requires prior_proposal from Strategist.")
 
-        user_message = self._build_message(prior_proposal, challenger_proposal, snapshot)
+        user_message = self._build_message(prior_proposal, challenger_proposal, snapshot, bear_cases or {})
 
         try:
             result = self._call_openai(user_message)
@@ -133,6 +134,7 @@ class OpenAIRiskManager(BaseAgent):
         strategist: PortfolioProposal,
         challenger: Optional[PortfolioProposal],
         snapshot: MarketSnapshot,
+        bear_cases: Optional[dict] = None,
     ) -> str:
         regime = snapshot.get("regime", "NEUTRAL")
         spx_vs = snapshot.get("spx_vs_200d", 0.0)
@@ -223,9 +225,29 @@ class OpenAIRiskManager(BaseAgent):
         if snapshot.get("trends_context"):
             lines += ["", snapshot["trends_context"]]
 
+        if bear_cases:
+            high_risk = [(t, v) for t, v in bear_cases.items() if v["risk"] == "HIGH"]
+            other_risk = [(t, v) for t, v in bear_cases.items() if v["risk"] != "HIGH"]
+            lines += ["", "### ⚠️ Devil's Advocate — Bear Cases"]
+            lines.append(
+                "These are the strongest arguments AGAINST each pick. "
+                "Factor them into your weight decisions — HIGH risk picks should be sized down or cut."
+            )
+            if high_risk:
+                lines.append("")
+                lines.append("**HIGH RISK (reduce weight or exclude):**")
+                for ticker, v in high_risk:
+                    lines.append(f"  {ticker}: {v['bear_case']}")
+            if other_risk:
+                lines.append("")
+                lines.append("**MEDIUM / LOW RISK (acknowledge but can hold):**")
+                for ticker, v in other_risk:
+                    lines.append(f"  {ticker} [{v['risk']}]: {v['bear_case']}")
+
         lines += [
             "",
             "Synthesise the final portfolio. Weight consensus picks higher. "
+            "For HIGH-RISK picks flagged above: reduce weight by at least 30% vs what you'd otherwise give, or exclude. "
             "Apply regime and concentration rules. Respond ONLY with the JSON object.",
         ]
         return "\n".join(lines)

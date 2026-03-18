@@ -68,6 +68,61 @@ def load_yesterday_prices() -> dict:
         return {}
 
 
+def save_verified(
+    positions: list[dict],
+    date: str,
+    close_prices: Optional[dict] = None,
+) -> None:
+    """Save the user's ACTUAL game portfolio as verified source of truth.
+
+    This overwrites any AI proposal for today and marks the positions as
+    verified. Tomorrow's P&L tracking will be based on this portfolio,
+    ensuring the learning loop reflects real game performance.
+
+    positions: list of {"ticker": str, "weight": float}
+    """
+    path = os.path.abspath(_STORE_PATH)
+    existing: dict = {}
+    if os.path.exists(path):
+        try:
+            with open(path, "r") as f:
+                existing = json.load(f)
+        except Exception:
+            existing = {}
+
+    performance_history = existing.get("performance_history", [])
+
+    data: dict = {
+        "date": date,
+        "source": "verified",
+        "positions": [
+            {
+                "ticker": p["ticker"],
+                "weight": p["weight"],
+                "rationale": f"verified from game portfolio {date}",
+            }
+            for p in positions
+        ],
+        "reasoning": existing.get("reasoning", "Verified game portfolio"),
+        "confidence": existing.get("confidence", 1.0),
+        "performance_history": performance_history,
+    }
+    if close_prices is not None:
+        data["close_prices"] = close_prices
+    elif "close_prices" in existing:
+        data["close_prices"] = existing["close_prices"]
+
+    try:
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2)
+        logger.info(
+            "Verified portfolio saved: %d positions for %s",
+            len(positions), date,
+        )
+    except Exception as exc:
+        logger.warning("Could not save verified portfolio: %s", exc)
+
+
 def save(
     proposal: PortfolioProposal,
     date: str,
@@ -98,11 +153,21 @@ def save(
 
     # Idempotency guard: if today's proposal is already saved, only update
     # performance_history — don't overwrite positions/reasoning/confidence.
-    # This prevents a second orchestrator run from replacing the morning proposal.
+    # If the existing entry is VERIFIED (user's actual game portfolio), never
+    # overwrite it with an AI proposal — the verified portfolio is the source
+    # of truth for tomorrow's P&L tracking.
+    is_verified_today = (
+        existing.get("date") == date and existing.get("source") == "verified"
+    )
     already_saved_today = (
         existing.get("date") == date and existing.get("positions")
     )
-    if already_saved_today:
+    if is_verified_today:
+        logger.info(
+            "Verified portfolio exists for %s — AI proposal will not overwrite it",
+            date,
+        )
+    elif already_saved_today:
         logger.info(
             "Portfolio already saved for %s — skipping proposal overwrite, updating performance only",
             date,
@@ -139,8 +204,9 @@ def save(
     # Keep only last 10 entries
     performance_history = performance_history[-10:]
 
-    if already_saved_today:
-        # Preserve the original morning proposal; only refresh performance + prices
+    if is_verified_today or already_saved_today:
+        # Preserve existing positions (verified takes priority, then first AI proposal).
+        # Only refresh performance_history and close_prices.
         data: dict = {
             "date": existing["date"],
             "positions": existing["positions"],
@@ -148,6 +214,8 @@ def save(
             "confidence": existing.get("confidence", proposal.confidence),
             "performance_history": performance_history,
         }
+        if existing.get("source"):
+            data["source"] = existing["source"]
         if close_prices is not None:
             data["close_prices"] = close_prices
         elif "close_prices" in existing:

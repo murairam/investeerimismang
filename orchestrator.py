@@ -21,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 from agents.gemini_challenger import GeminiChallenger
+from agents.gemini_devil import GeminiDevil
 from agents.openai_risk_manager import OpenAIRiskManager
 from agents.openai_strategist import OpenAIStrategist
 from config import CASH_POLICY
@@ -48,6 +49,7 @@ class AlphaSharkOrchestrator:
         self.fetcher = DataFetcher()
         self.strategist = OpenAIStrategist()
         self.challenger = GeminiChallenger()
+        self.devil = GeminiDevil()
         self.risk_manager = OpenAIRiskManager()
         self.validator = PortfolioValidator()
         self.dispatcher = WebhookDispatcher()
@@ -210,12 +212,25 @@ class AlphaSharkOrchestrator:
         else:
             logger.info("Challenger unavailable — meta-analyst will use strategist only")
 
-        # Step 4: Meta-analyst synthesises both proposals
+        # Step 3c: Devil's advocate — free Gemini call that argues against the top picks
+        logger.info("Calling GeminiDevil — stress-testing top picks …")
+        bear_cases: dict = {}
+        try:
+            bear_cases = self.devil.challenge(
+                strategist_proposal,
+                challenger_proposal,
+                snapshot,
+            )
+        except Exception as exc:
+            logger.warning("Devil's advocate failed (non-fatal): %s", exc)
+
+        # Step 4: Meta-analyst synthesises both proposals + bear cases
         logger.info("Calling OpenAIRiskManager (GPT-4o-mini) — synthesising …")
         final_proposal = self.risk_manager.propose(
             snapshot,
             prior_proposal=strategist_proposal,
             challenger_proposal=challenger_proposal if challenger_proposal.positions else None,
+            bear_cases=bear_cases if bear_cases else None,
         )
 
         # Step 5: Validate & normalise
