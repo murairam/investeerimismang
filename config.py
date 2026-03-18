@@ -14,10 +14,12 @@ GAME_CONSTRAINTS = {
 }
 
 # Preferred stock-count bands by market regime (still bounded by GAME_CONSTRAINTS)
+# Competition logic: daily rebalancing replaces insurance positions.
+# Concentrate on highest-signal picks; no token 5% diversifiers.
 POSITION_TARGETS_BY_REGIME = {
-    "BULL": {"min_stocks": 8, "max_stocks": 10},
-    "NEUTRAL": {"min_stocks": 12, "max_stocks": 15},
-    "BEAR": {"min_stocks": 14, "max_stocks": 18},
+    "BULL": {"min_stocks": 6, "max_stocks": 8},
+    "NEUTRAL": {"min_stocks": 8, "max_stocks": 10},
+    "BEAR": {"min_stocks": 10, "max_stocks": 14},
 }
 
 # Cash policy (used when proposed allocation is below 100%)

@@ -26,21 +26,22 @@ logger = logging.getLogger(__name__)
 _REGIME_GUIDANCE = {
     "BULL": (
         "Market regime: BULL (SPX above 200d SMA by ≥2%). "
-        "Be aggressive — favour high-beta names, concentrate top convictions at 20-25%. "
-        "Target 8–10 positions; no need to max out to 20 when conviction is high."
+        "Concentrate hard — 6–8 positions only. Top 2-3 consensus picks at 20-25% each. "
+        "No position below 10%. Cut anything with Sharpe below the median. "
+        "High beta, high conviction — this is the regime to make big gains."
     ),
     "BEAR": (
         "Market regime: BEAR (SPX below 200d SMA by ≥2%). "
-        "Be defensive and broadly diversified — target 14–18 positions to spread risk. "
-        "Cap individual weights at 10%; favour low-beta, quality names with earnings visibility "
-        "(healthcare, staples, utilities). More positions = lower single-name blow-up risk."
+        "Spread risk across 10–14 positions. Cap individual at 12%. "
+        "Favour low-beta quality names (healthcare, staples, utilities). No position below 6%. "
+        "Diversification here is real risk management, not dilution."
     ),
     "NEUTRAL": (
         "Market regime: NEUTRAL (SPX near 200d SMA). "
-        "MANDATORY: output exactly 12–15 positions. This game has ZERO transaction costs — every position "
-        "costs nothing to hold. A 5% position in a solid stock is free alpha. Do NOT self-censor to 8-10. "
-        "Prefer quality momentum (high Sharpe) over raw beta; mix growth and defensive names. "
-        "With 12+ positions you can afford meaningful weights (7-10%) on each without sacrificing diversification."
+        "Target 8–10 high-conviction positions. No token positions — minimum 8% per pick. "
+        "Top 2-3 consensus picks at 18-22%. Mid-tier picks at 10-14%. Tail picks at 8-10%. "
+        "Daily rebalancing replaces insurance positions — if a pick is not worth 8%, skip it entirely. "
+        "Quality over quantity: 8 strong picks beat 15 mediocre ones."
     ),
 }
 
@@ -84,7 +85,7 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - Favour stocks with the strongest risk-adjusted momentum (Sharpe_20d = 20d return / annualised vol).
 - High Sharpe means a smooth, persistent uptrend — much better than a volatile spike.
 - Prefer high-beta names in bull-market conditions — they amplify gains.
-- Regime-based position count target: BULL 8–10, NEUTRAL 12–15, BEAR 14–18. The game allows 20 stocks with no transaction costs — more positions = free diversification. Use the full range, especially in NEUTRAL/BEAR.
+- Regime-based position count: BULL 6–8, NEUTRAL 8–10, BEAR 10–14. Daily rebalancing replaces diversification — rotate out losers tomorrow rather than holding insurance positions today. Minimum 8% per position (NEUTRAL/BULL). No token 5-6% picks unless BEAR regime.
 - Diversify across at least 2 markets to reduce single-market risk.
 - Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them.
 - vs_index > 0 means the stock beat its own market — pure alpha signal.
