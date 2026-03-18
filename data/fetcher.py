@@ -210,6 +210,47 @@ class DataFetcher:
         last_close = close.iloc[-1].replace(0, np.nan)
         return (atr.iloc[-1] / last_close).rename("atr_pct")
 
+    def _fetch_dividend_yields_targeted(self, tickers: list[str], close: pd.DataFrame) -> pd.Series:
+        """Trailing 12-month dividend yield for a small focused set of tickers.
+        Uses auto_adjust=False to avoid NaN issues; divides raw dividends by adjusted close.
+        """
+        if not tickers:
+            return pd.Series(dtype=float)
+        try:
+            data = yf.download(
+                tickers,
+                period="1y",
+                auto_adjust=False,
+                actions=True,
+                progress=False,
+                threads=True,
+            )
+            if data.empty:
+                return pd.Series(dtype=float)
+
+            if isinstance(data.columns, pd.MultiIndex):
+                if "Dividends" not in data.columns.get_level_values(0):
+                    return pd.Series(dtype=float)
+                divs = data["Dividends"].fillna(0.0)
+            else:
+                if "Dividends" not in data.columns:
+                    return pd.Series(dtype=float)
+                divs = data[["Dividends"]].rename(columns={"Dividends": tickers[0]}).fillna(0.0)
+
+            yields: dict[str, float] = {}
+            for ticker in tickers:
+                if ticker not in divs.columns:
+                    yields[ticker] = float("nan")
+                    continue
+                annual_div = float(divs[ticker].sum())
+                lp_s = close[ticker].dropna() if ticker in close.columns else pd.Series(dtype=float)
+                lp = float(lp_s.iloc[-1]) if not lp_s.empty else 0.0
+                yields[ticker] = annual_div / lp if lp > 0 else float("nan")
+            return pd.Series(yields, name="dividend_yield")
+        except Exception as exc:
+            logger.warning("Dividend yield fetch failed: %s", exc)
+            return pd.Series(dtype=float)
+
     def fetch_credit_spread(self) -> float:
         """20-day change in HYG/LQD ratio as a credit spread proxy.
         Positive = spreads tightening (risk-on). Negative = widening (risk-off).
@@ -358,7 +399,10 @@ class DataFetcher:
         market_map = {t: m for t, m in all_tickers}
 
         logger.info("Fetching OHLCV for %d tickers …", len(flat_tickers))
-        close, volume, high, low, raw_dividends = self.fetch_ohlcv(flat_tickers, period="1y", actions=True)
+        # Use actions=False for the main universe download — combining auto_adjust=True + actions=True
+        # in large batches causes yfinance to return NaN close prices for many tickers.
+        # Dividend yields are fetched separately on just the top-N candidates after filtering.
+        close, volume, high, low, _ = self.fetch_ohlcv(flat_tickers, period="1y")
 
         returned = set(close.columns)
         missing = [t for t in flat_tickers if t not in returned]
@@ -420,18 +464,7 @@ class DataFetcher:
         # 52-week high
         high_52w = close.rolling(252, min_periods=60).max().iloc[-1]
 
-        # Dividend yields — computed from raw_dividends already downloaded above (no extra API call)
-        div_yield_map: dict[str, float] = {}
-        if not raw_dividends.empty:
-            divs = raw_dividends.fillna(0.0)
-            for _t in flat_tickers:
-                if _t not in divs.columns:
-                    continue
-                annual_div = float(divs[_t].sum())
-                _lp_s = close[_t].dropna() if _t in close.columns else pd.Series(dtype=float)
-                _lp = float(_lp_s.iloc[-1]) if not _lp_s.empty else 0.0
-                div_yield_map[_t] = annual_div / _lp if _lp > 0 else float("nan")
-        div_yield = pd.Series(div_yield_map, name="dividend_yield")
+        # Dividend yields are fetched AFTER candidate filtering (targeted ~40-ticker call, not full universe)
 
         # Valid tickers: must have 20d momentum
         valid_tickers = momentum_20d.dropna().index.tolist()
@@ -477,7 +510,7 @@ class DataFetcher:
                 "vol_ratio": vr,
                 "macd_hist": mh,
                 "atr_pct": at,
-                "dividend_yield": float(div_yield.get(ticker, float("nan"))) if not div_yield.empty and ticker in div_yield.index else float("nan"),
+                "dividend_yield": float("nan"),  # filled in after top-N filtering via _fetch_dividend_yields_targeted
             })
 
         # Sort by Sharpe descending, apply market cap, correlation filter, take top N
@@ -495,6 +528,13 @@ class DataFetcher:
             records = after_cap
         records.sort(key=lambda x: x["sharpe_20d"], reverse=True)
         top = records[:TOP_N_CANDIDATES]
+
+        # Targeted dividend yield fetch — only for the ~40 candidates, not the full 111-ticker universe.
+        # Separate call with auto_adjust=False avoids the NaN issue seen with auto_adjust+actions on large batches.
+        top_tickers = [r["ticker"] for r in top]
+        div_yield = self._fetch_dividend_yields_targeted(top_tickers, close)
+        for r in top:
+            r["dividend_yield"] = float(div_yield.get(r["ticker"], float("nan"))) if not div_yield.empty and r["ticker"] in div_yield.index else float("nan")
 
         as_of = date.today().isoformat()
 

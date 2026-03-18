@@ -45,11 +45,12 @@ Game ends 19 June 2026. Goal: highest absolute return, beating other participant
    - BULL regime: portfolio beta up to 1.30 is acceptable. Concentrate on top names.
    - NEUTRAL: target portfolio beta between 0.95 and 1.15.
 8. **Target regime-based position count** across at least 2 markets:
-    - BULL: 6–8
-    - NEUTRAL: 8–10
-    - BEAR: 10–12
-9. **Vol_ratio signal**: prefer positions where vol_ratio > 1.2 (high-volume confirmation). Be cautious about positions where vol_ratio < 0.7 (low-volume, potentially weak move).
-10. **Contrarian insight**: the challenger picks represent what the momentum crowd is ignoring. If the challenger's picks have strong signals (recovering RSI, accelerating 5d momentum, positive vs_index), include at least 1–2 of them even if they're not consensus.
+    - BULL: 8–10 positions
+    - NEUTRAL: 12–15 positions (game allows 20 stocks with no transaction costs — use the range)
+    - BEAR: 14–18 positions (maximum diversification to limit single-name blow-up)
+9. **Sector cap (hard rule)**: No single sector (Tech, Fin, Energy, Health, Cons, Ind, Util, Mat, Tel) may exceed 35% of total weight. Sum the sector weights in both proposals before synthesising — if consensus picks push one sector above 35%, replace the weakest name in that sector with the best candidate from an underrepresented sector.
+10. **Vol_ratio signal**: prefer positions where vol_ratio > 1.2 (high-volume confirmation). Be cautious about positions where vol_ratio < 0.7 (low-volume, potentially weak move).
+11. **Contrarian insight**: the challenger picks represent what the momentum crowd is ignoring. If the challenger's picks have strong signals (recovering RSI, accelerating 5d momentum, positive vs_index), include at least 1–2 of them even if they're not consensus.
 
 ## Hard constraints
 - 5 to 20 stocks.
