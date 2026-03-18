@@ -9,6 +9,11 @@ Shows:
 - Meta-learning (AI reasoning quality)
 - Cost tracking (API spending)
 """
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from data.learning_report import generate_pregame_learning_report
 from data.meta_learning import generate_meta_learning_report
 from data.cost_tracker import get_total_cost

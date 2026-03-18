@@ -14,6 +14,8 @@ import sys
 from datetime import date
 from typing import Optional
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from data.verification_tracker import mark_verified
 
 _STORE_PATH = os.path.join(os.path.dirname(__file__), "portfolio_history.json")
