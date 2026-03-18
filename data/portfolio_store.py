@@ -96,6 +96,18 @@ def save(
         except Exception:
             existing = {}
 
+    # Idempotency guard: if today's proposal is already saved, only update
+    # performance_history — don't overwrite positions/reasoning/confidence.
+    # This prevents a second orchestrator run from replacing the morning proposal.
+    already_saved_today = (
+        existing.get("date") == date and existing.get("positions")
+    )
+    if already_saved_today:
+        logger.info(
+            "Portfolio already saved for %s — skipping proposal overwrite, updating performance only",
+            date,
+        )
+
     performance_history: list[dict] = existing.get("performance_history", [])
 
     # Build today's performance history entry
@@ -127,19 +139,32 @@ def save(
     # Keep only last 10 entries
     performance_history = performance_history[-10:]
 
-    data: dict = {
-        "date": date,
-        "positions": [
-            {"ticker": p.ticker, "weight": p.weight, "rationale": p.rationale}
-            for p in proposal.positions
-        ],
-        "reasoning": proposal.reasoning,
-        "confidence": proposal.confidence,
-        "performance_history": performance_history,
-    }
-
-    if close_prices is not None:
-        data["close_prices"] = close_prices
+    if already_saved_today:
+        # Preserve the original morning proposal; only refresh performance + prices
+        data: dict = {
+            "date": existing["date"],
+            "positions": existing["positions"],
+            "reasoning": existing.get("reasoning", proposal.reasoning),
+            "confidence": existing.get("confidence", proposal.confidence),
+            "performance_history": performance_history,
+        }
+        if close_prices is not None:
+            data["close_prices"] = close_prices
+        elif "close_prices" in existing:
+            data["close_prices"] = existing["close_prices"]
+    else:
+        data = {
+            "date": date,
+            "positions": [
+                {"ticker": p.ticker, "weight": p.weight, "rationale": p.rationale}
+                for p in proposal.positions
+            ],
+            "reasoning": proposal.reasoning,
+            "confidence": proposal.confidence,
+            "performance_history": performance_history,
+        }
+        if close_prices is not None:
+            data["close_prices"] = close_prices
 
     try:
         with open(path, "w") as f:

@@ -1,48 +1,48 @@
 {
-  "date": "2026-03-17",
+  "date": "2026-03-18",
   "positions": [
     {
       "ticker": "SAMPO.HE",
-      "weight": 0.18846153846153846,
-      "rationale": "Consensus pick with strong defensive characteristics in the financial sector."
+      "weight": 0.19,
+      "rationale": "verified from game screenshot 2026-03-18"
     },
     {
       "ticker": "NOKIA.HE",
-      "weight": 0.16999999999999998,
-      "rationale": "Unique pick with strong momentum and high retail interest, fitting the neutral regime."
+      "weight": 0.17,
+      "rationale": "verified from game screenshot 2026-03-18"
     },
     {
       "ticker": "CVX",
-      "weight": 0.1423076923076923,
-      "rationale": "Consensus pick with robust momentum and a high Sharpe ratio, providing energy sector exposure."
+      "weight": 0.14,
+      "rationale": "verified from game screenshot 2026-03-18"
     },
     {
       "ticker": "NEE",
-      "weight": 0.1423076923076923,
-      "rationale": "Contrarian pick with recovering momentum in the utility sector, offering stability."
+      "weight": 0.14,
+      "rationale": "verified from game screenshot 2026-03-18"
     },
     {
       "ticker": "DSV.CO",
-      "weight": 0.1146153846153846,
-      "rationale": "Unique contrarian pick with potential for breakout, fitting the neutral regime."
+      "weight": 0.11,
+      "rationale": "verified from game screenshot 2026-03-18"
     },
     {
       "ticker": "MAERSK-B.CO",
-      "weight": 0.09615384615384616,
-      "rationale": "Unique pick with strong returns and sector diversification, fitting the neutral regime."
+      "weight": 0.1,
+      "rationale": "verified from game screenshot 2026-03-18"
     },
     {
       "ticker": "FORTUM.HE",
-      "weight": 0.07769230769230769,
-      "rationale": "Unique pick showing strong momentum, providing additional energy sector exposure."
+      "weight": 0.08,
+      "rationale": "verified from game screenshot 2026-03-18"
     },
     {
       "ticker": "XOM",
-      "weight": 0.06846153846153846,
-      "rationale": "Unique pick with solid performance in energy, complementing the portfolio's sector balance."
+      "weight": 0.07,
+      "rationale": "verified from game screenshot 2026-03-18"
     }
   ],
-  "reasoning": "The final portfolio includes the consensus pick SAMPO.HE with a higher weight due to its defensive characteristics. NOKIA.HE and CVX are also included for their strong momentum. Additionally, NEE and DSV.CO are contrarian picks with good signals, enhancing diversification. The portfolio beta is well within the target range for a neutral regime, ensuring balanced risk exposure.",
+  "reasoning": "The final portfolio includes strong consensus picks from both proposals, weighted higher for conviction, while also integrating unique contrarian picks that show recovering momentum. The portfolio beta is within the target range for a NEUTRAL regime, ensuring a balanced risk profile.",
   "confidence": 0.85,
   "performance_history": [
     {
@@ -61,16 +61,33 @@
         "XOM": 0.010049,
         "CSCO": 0.004689
       }
+    },
+    {
+      "date": "2026-03-18",
+      "benchmark_return_20d": -0.0303,
+      "portfolio_return_1d": -0.001904,
+      "benchmark_return_1d": -0.006441,
+      "alpha_1d": 0.004537,
+      "position_returns": {
+        "NFLX": -0.002967,
+        "XOM": 0.003904,
+        "DNB.OL": 0.008547,
+        "SHB-A.ST": 0.001425,
+        "EVO.ST": -0.009156,
+        "ERIC-B.ST": -0.022829,
+        "NOKIA.HE": -0.013934,
+        "ALFA.ST": 0.008037
+      }
     }
   ],
   "close_prices": {
-    "CVX": 197.97000122070312,
-    "DSV.CO": 1641.5,
-    "FORTUM.HE": 22.149999618530273,
-    "MAERSK-B.CO": 18000.0,
-    "NEE": 92.52999877929688,
-    "NOKIA.HE": 7.464000225067139,
-    "SAMPO.HE": 9.567999839782715,
-    "XOM": 158.80999755859375
+    "SAMPO.HE": 9.53,
+    "NOKIA.HE": 7.358,
+    "CVX": 199.61,
+    "NEE": 91.31,
+    "DSV.CO": 1620.5,
+    "MAERSK-B.CO": 18310.0,
+    "FORTUM.HE": 22.08,
+    "XOM": 159.33
   }
 }

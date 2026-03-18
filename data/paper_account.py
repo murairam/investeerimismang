@@ -50,6 +50,67 @@ def _mark_to_market(positions: dict[str, float], cash: float, price_map: dict[st
     return equity, holdings_value
 
 
+def sync_verified_positions(
+    positions: list[dict],
+    equity: float,
+    as_of_date: str,
+    price_map: dict[str, float],
+) -> None:
+    """
+    Overwrite paper account with manually verified game positions.
+
+    Called from verify.py after the user confirms their actual holdings.
+    positions: list of {"ticker": str, "weight": float}
+    equity:    actual game portfolio value in EUR
+    price_map: {ticker: native_price} — used to derive share counts
+    """
+    state = _load_raw()
+    initial_capital = float(state.get("initial_capital", equity))
+
+    target_positions: dict[str, float] = {}
+    for pos in positions:
+        ticker = pos["ticker"]
+        px = price_map.get(ticker)
+        if px and px > 0:
+            target_positions[ticker] = round((equity * pos["weight"]) / px, 8)
+        else:
+            logger.warning("No price for %s — skipping in paper account sync", ticker)
+
+    history = state.get("history", [])
+    return_since_start = (equity / initial_capital - 1) if initial_capital > 0 else 0.0
+    history_entry = {
+        "date": as_of_date,
+        "equity": round(equity, 2),
+        "cash": 0.0,
+        "daily_return": 0.0,
+        "return_since_start": round(return_since_start, 6),
+        "turnover": 1.0,
+        "positions": target_positions,
+        "source": "verified",
+    }
+    if history and history[-1].get("date") == as_of_date:
+        history[-1] = history_entry
+    else:
+        history.append(history_entry)
+    history = history[-60:]
+
+    new_state = {
+        "start_date": state.get("start_date") or as_of_date,
+        "initial_capital": initial_capital,
+        "cash": 0.0,
+        "positions": target_positions,
+        "history": history,
+        "last_rebalanced_date": as_of_date,
+        "last_equity": round(equity, 8),
+    }
+    _save_raw(new_state)
+    logger.info(
+        "Paper account synced from verified game positions: %d holdings, equity €%.2f",
+        len(target_positions),
+        equity,
+    )
+
+
 def reset_for_live(start_date: str) -> None:
     """
     Reset the paper account to €10,000 on the first LIVE run (April 6).

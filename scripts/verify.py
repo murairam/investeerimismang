@@ -18,6 +18,7 @@ from typing import Optional
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from data.verification_tracker import mark_verified
+from data.paper_account import sync_verified_positions
 
 _STORE_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
 
@@ -85,6 +86,34 @@ def main() -> None:
         print("\n  Skipped.\n")
 
 
+def _ask_equity() -> float:
+    print("  What is your current game portfolio value in EUR? (e.g. 9965)")
+    raw = input("  > ").strip().replace(",", ".").replace("€", "").replace("EUR", "").strip()
+    try:
+        return float(raw)
+    except ValueError:
+        print("  Could not parse — using 10000 as fallback.")
+        return 10000.0
+
+
+def _fetch_prices(tickers: list[str]) -> dict[str, float]:
+    try:
+        import yfinance as yf
+        print(f"  Fetching prices for {len(tickers)} tickers…")
+        raw = yf.download(tickers, period="2d", auto_adjust=True, progress=False)
+        close = raw["Close"] if "Close" in raw else raw
+        price_map: dict[str, float] = {}
+        for t in tickers:
+            if t in close.columns:
+                series = close[t].dropna()
+                if not series.empty:
+                    price_map[t] = float(series.iloc[-1])
+        return price_map
+    except Exception as exc:
+        print(f"  Price fetch failed: {exc}")
+        return {}
+
+
 def _enter_manual(existing: dict) -> None:
     """Let the user type in their actual game portfolio."""
     print()
@@ -117,14 +146,26 @@ def _enter_manual(existing: dict) -> None:
     total = sum(p["weight"] for p in positions)
     print(f"\n  Entered {len(positions)} positions, total {total:.1%}")
 
+    equity = _ask_equity()
+
+    today = date.today().isoformat()
     data = {
-        "date": date.today().isoformat(),
+        "date": today,
         "positions": positions,
         "reasoning": existing.get("reasoning", "manually entered portfolio"),
         "confidence": existing.get("confidence", 0.5),
     }
     save(data)
-    mark_verified(data["date"])
+
+    # Also sync paper account so equity tracking matches the real game
+    price_map = _fetch_prices([p["ticker"] for p in positions])
+    if price_map and equity > 0:
+        sync_verified_positions(positions, equity, today, price_map)
+        print(f"  Paper account synced: equity €{equity:.0f}, {len(price_map)} prices fetched.")
+    else:
+        print("  ⚠️  Could not fetch prices — paper account not updated.")
+
+    mark_verified(today)
     print("  ✅ Saved. The system will use this as the baseline for tomorrow.\n")
 
 

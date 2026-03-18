@@ -1,8 +1,8 @@
 # AI Self-Critique Report
 
-Generated: 2026-03-17
-Training days analyzed: 1
-Days until live mode: 20
+Generated: 2026-03-18
+Training days analyzed: 2
+Days until live mode: 19
 
 ## Meta-Learning Question
 **Is the AI's reasoning accurate, or just lucky/unlucky?**
@@ -13,7 +13,7 @@ This report evaluates whether the AI's stated rationales (e.g., 'strong momentum
 - ✅ Strategy is producing alpha 100% of days (target: >60%)
 
 ## Systematic Biases / Errors ⚠️
-- None detected yet
+- ⚠️ Conviction sizing is INVERTED: Tier 1 (20-25%) averaged -0.3%, but Tier 3 (5-10%) averaged +0.2%. Lower conviction beats higher!
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
@@ -22,11 +22,12 @@ This report evaluates whether the AI's stated rationales (e.g., 'strong momentum
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 2 (medium conviction) | 12-18% | 3 | -0.02% |
-| Tier 3 (low conviction) | 5-10% | 2 | +2.33% |
+| Tier 1 (high conviction) | 20-25% | 1 | -0.30% |
+| Tier 2 (medium conviction) | 12-18% | 2 | -1.07% |
+| Tier 3 (low conviction) | 5-10% | 4 | +0.16% |
 
 ## Action Items for the AI
-- Continue current strategy. Performance signals are healthy.
+- Re-calibrate conviction: If low-conviction picks are winning, increase their weights. If high-conviction picks are losing, reduce tier 1 sizing or improve stock selection.
 
 ## How This Improves the AI
 This report is automatically fed into the AI's system prompt on each run, so it learns to:

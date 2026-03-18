@@ -3,12 +3,14 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "FORTUM.HE": 108.59728319,
-    "MAERSK-B.CO": 0.10027855,
-    "NHY.OL": 23.52438066,
-    "TELIA.ST": 33.40989811,
-    "XOM": 8.11181857,
-    "TAL1T.TL": 1123.59545918
+    "SAMPO.HE": 198.6726128,
+    "NOKIA.HE": 230.23240011,
+    "CVX": 6.9891288,
+    "NEE": 15.27872084,
+    "DSV.CO": 0.67642703,
+    "MAERSK-B.CO": 0.05442381,
+    "FORTUM.HE": 36.10507246,
+    "XOM": 4.37802046
   },
   "history": [
     {
@@ -26,8 +28,27 @@
         "XOM": 8.11181857,
         "TAL1T.TL": 1123.59545918
       }
+    },
+    {
+      "date": "2026-03-18",
+      "equity": 9965.0,
+      "cash": 0.0,
+      "daily_return": 0.0,
+      "return_since_start": -0.0035,
+      "turnover": 1.0,
+      "positions": {
+        "SAMPO.HE": 198.6726128,
+        "NOKIA.HE": 230.23240011,
+        "CVX": 6.9891288,
+        "NEE": 15.27872084,
+        "DSV.CO": 0.67642703,
+        "MAERSK-B.CO": 0.05442381,
+        "FORTUM.HE": 36.10507246,
+        "XOM": 4.37802046
+      },
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-03-17",
-  "last_equity": 10000.0
+  "last_rebalanced_date": "2026-03-18",
+  "last_equity": 9965.0
 }
