@@ -1,12 +1,12 @@
 """
-GeminiDevil — Devil's advocate pressure-tester (free Gemini tier).
+GeminiDevil — Devil's advocate pressure-tester.
 
 Receives the merged strategist + challenger proposals and argues AGAINST
 each top pick. Forces the Risk Manager to confront the bear case before
 committing to a weight.
 
-Free tier: runs on gemini-2.0-flash, same quota as the Challenger.
-Cost: $0.00 per run.
+Primary: Gemini 2.0 Flash (free tier).
+Fallback: gpt-4o-mini (~$0.0003/run) if Gemini is unavailable.
 """
 import json
 import logging
@@ -17,6 +17,7 @@ from typing import Optional
 
 from google import genai
 from google.genai import types
+from openai import OpenAI
 
 from data.fetcher import MarketSnapshot
 from portfolio.models import PortfolioProposal
@@ -52,6 +53,7 @@ class GeminiDevil:
 
     def __init__(self) -> None:
         self._gemini = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        self._openai = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     def challenge(
         self,
@@ -83,7 +85,7 @@ class GeminiDevil:
             try:
                 result = self._call_gemini(user_message)
                 logger.info(
-                    "Devil's advocate challenged %d picks: %d HIGH, %d MEDIUM, %d LOW risk",
+                    "Devil's advocate (Gemini) challenged %d picks: %d HIGH, %d MEDIUM, %d LOW risk",
                     len(result),
                     sum(1 for v in result.values() if v["risk"] == "HIGH"),
                     sum(1 for v in result.values() if v["risk"] == "MEDIUM"),
@@ -91,9 +93,24 @@ class GeminiDevil:
                 )
                 return result
             except Exception as exc:
-                logger.warning("Devil's advocate attempt %d failed: %s", attempt, type(exc).__name__)
+                logger.warning("Devil's advocate Gemini attempt %d failed: %s", attempt, type(exc).__name__)
                 if attempt <= self.MAX_RETRIES:
                     time.sleep(2)
+
+        # Fallback to OpenAI gpt-4o-mini
+        logger.info("Gemini unavailable — falling back to OpenAI devil's advocate …")
+        try:
+            result = self._call_openai(user_message)
+            logger.info(
+                "Devil's advocate (OpenAI fallback) challenged %d picks: %d HIGH, %d MEDIUM, %d LOW risk",
+                len(result),
+                sum(1 for v in result.values() if v["risk"] == "HIGH"),
+                sum(1 for v in result.values() if v["risk"] == "MEDIUM"),
+                sum(1 for v in result.values() if v["risk"] == "LOW"),
+            )
+            return result
+        except Exception as exc:
+            logger.warning("OpenAI devil's advocate fallback also failed: %s", exc)
 
         logger.info("Devil's advocate unavailable — Risk Manager will proceed without bear cases")
         return {}
@@ -127,6 +144,27 @@ class GeminiDevil:
 
         lines += ["", "For each ticker, give the strongest reason it might FAIL. Cite the numbers."]
         return "\n".join(lines)
+
+    def _call_openai(self, user_message: str) -> dict[str, dict]:
+        response = self._openai.chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "user", "content": user_message},
+            ],
+        )
+        data = json.loads(response.choices[0].message.content)
+        bears = data.get("bears", data) if isinstance(data, dict) else data
+        return {
+            item["ticker"]: {
+                "bear_case": item.get("bear_case", ""),
+                "risk": item.get("risk", "MEDIUM").upper(),
+            }
+            for item in (bears if isinstance(bears, list) else [])
+            if "ticker" in item
+        }
 
     def _call_gemini(self, user_message: str) -> dict[str, dict]:
         response = self._gemini.models.generate_content(
