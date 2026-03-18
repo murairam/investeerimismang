@@ -1,5 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: AlphaShark Verification Reminder
-
 on:
   schedule:
     # 07:00 UTC = 10:00 EEST (30 min after main run at 09:30 EEST)
