@@ -1,0 +1,33 @@
+name: AlphaShark Evening Review
+
+on:
+  schedule:
+    # 19:00 UTC = 21:00 EET (UTC+2, winter) / 22:00 EEST (UTC+3, summer)
+    - cron: '0 19 * * 1-5'
+  workflow_dispatch:   # manual trigger from GitHub mobile app
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run evening review
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python scripts/evening_review.py
