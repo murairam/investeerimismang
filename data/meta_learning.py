@@ -335,13 +335,15 @@ def generate_meta_learning_report(target_date: str = "2026-04-06") -> dict:
     }
 
 
-def generate_signal_correlation_report(performance_history: list[dict]) -> str:
+def generate_ticker_performance_report(performance_history: list[dict]) -> str:
     """
     Analyze per-ticker performance across tracked runs to identify which tickers
     have been reliable vs consistently disappointing.
 
     Returns a formatted string suitable for injection into agent prompts.
-    As signal snapshots accumulate, this will be upgraded to full signal-to-return correlation.
+    Note: this is ticker-level hit-rate tracking, not signal-to-return correlation.
+    Full signal correlation (Sharpe/vs_index/vol_ratio vs returns) requires stored
+    signal snapshots and will be added once enough runs accumulate.
     """
     if not performance_history:
         return ""

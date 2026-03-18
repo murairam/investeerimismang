@@ -69,36 +69,42 @@ class MarketSnapshot(TypedDict):
 
 class DataFetcher:
     def fetch_ohlcv(
-        self, tickers: list[str], period: str = "1y"
-    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        self, tickers: list[str], period: str = "1y", actions: bool = False
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """Download OHLCV for *tickers* from yfinance.
-        Returns (close, volume, high, low)."""
+        Returns (close, volume, high, low, dividends).
+        dividends is non-empty only when actions=True.
+        """
         if not tickers:
-            return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+            empty = pd.DataFrame()
+            return empty, empty, empty, empty, empty
         data = yf.download(
             tickers,
             period=period,
             auto_adjust=True,
+            actions=actions,
             progress=False,
             threads=True,
         )
         empty = pd.DataFrame()
         if isinstance(data.columns, pd.MultiIndex):
             lvl = data.columns.get_level_values(0)
-            close = data["Close"]
-            volume = data["Volume"] if "Volume" in lvl else empty
-            high   = data["High"]   if "High"   in lvl else empty
-            low    = data["Low"]    if "Low"     in lvl else empty
+            close     = data["Close"]
+            volume    = data["Volume"]    if "Volume"    in lvl else empty
+            high      = data["High"]      if "High"      in lvl else empty
+            low       = data["Low"]       if "Low"       in lvl else empty
+            dividends = data["Dividends"] if "Dividends" in lvl else empty
         else:
-            close  = data[["Close"]].rename(columns={"Close":  tickers[0]})
-            volume = data[["Volume"]].rename(columns={"Volume": tickers[0]}) if "Volume" in data.columns else empty
-            high   = data[["High"]].rename(columns={"High":   tickers[0]})  if "High"   in data.columns else empty
-            low    = data[["Low"]].rename(columns={"Low":    tickers[0]})   if "Low"    in data.columns else empty
+            close     = data[["Close"]].rename(columns={"Close":     tickers[0]})
+            volume    = data[["Volume"]].rename(columns={"Volume":    tickers[0]}) if "Volume"    in data.columns else empty
+            high      = data[["High"]].rename(columns={"High":       tickers[0]}) if "High"      in data.columns else empty
+            low       = data[["Low"]].rename(columns={"Low":         tickers[0]}) if "Low"       in data.columns else empty
+            dividends = data[["Dividends"]].rename(columns={"Dividends": tickers[0]}) if "Dividends" in data.columns else empty
 
         def _clean(df: pd.DataFrame) -> pd.DataFrame:
             return df.dropna(how="all") if not df.empty else df
 
-        return _clean(close), _clean(volume), _clean(high), _clean(low)
+        return _clean(close), _clean(volume), _clean(high), _clean(low), dividends
 
     def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
         """Ratio of latest volume to prior 20d average volume. >1.5 = high-volume confirmation."""
@@ -203,49 +209,6 @@ class DataFetcher:
         atr = true_range.rolling(window, min_periods=window // 2).mean()
         last_close = close.iloc[-1].replace(0, np.nan)
         return (atr.iloc[-1] / last_close).rename("atr_pct")
-
-    def fetch_dividend_yields(self, tickers: list[str], close: pd.DataFrame) -> pd.Series:
-        """Trailing 12-month dividend yield: sum(annual dividends) / last close price.
-        The game auto-reinvests dividends — yield is free additional return on top of price gains.
-        """
-        try:
-            data = yf.download(
-                tickers,
-                period="1y",
-                auto_adjust=True,
-                actions=True,
-                progress=False,
-                threads=True,
-            )
-            if data.empty:
-                return pd.Series(dtype=float)
-
-            if isinstance(data.columns, pd.MultiIndex):
-                if "Dividends" not in data.columns.get_level_values(0):
-                    return pd.Series(dtype=float)
-                divs = data["Dividends"].fillna(0.0)
-            else:
-                if "Dividends" not in data.columns:
-                    return pd.Series(dtype=float)
-                single = tickers[0] if len(tickers) == 1 else None
-                if single:
-                    divs = data[["Dividends"]].rename(columns={"Dividends": single}).fillna(0.0)
-                else:
-                    return pd.Series(dtype=float)
-
-            yields: dict[str, float] = {}
-            for ticker in tickers:
-                if ticker not in divs.columns:
-                    yields[ticker] = float("nan")
-                    continue
-                annual_div = float(divs[ticker].sum())
-                last_price_s = close[ticker].dropna() if ticker in close.columns else pd.Series(dtype=float)
-                last_price = float(last_price_s.iloc[-1]) if not last_price_s.empty else 0.0
-                yields[ticker] = annual_div / last_price if last_price > 0 else float("nan")
-            return pd.Series(yields, name="dividend_yield")
-        except Exception as exc:
-            logger.warning("Dividend yield fetch failed: %s", exc)
-            return pd.Series(dtype=float)
 
     def fetch_credit_spread(self) -> float:
         """20-day change in HYG/LQD ratio as a credit spread proxy.
@@ -395,7 +358,7 @@ class DataFetcher:
         market_map = {t: m for t, m in all_tickers}
 
         logger.info("Fetching OHLCV for %d tickers …", len(flat_tickers))
-        close, volume, high, low = self.fetch_ohlcv(flat_tickers, period="1y")
+        close, volume, high, low, raw_dividends = self.fetch_ohlcv(flat_tickers, period="1y", actions=True)
 
         returned = set(close.columns)
         missing = [t for t in flat_tickers if t not in returned]
@@ -457,9 +420,18 @@ class DataFetcher:
         # 52-week high
         high_52w = close.rolling(252, min_periods=60).max().iloc[-1]
 
-        # Dividend yields (trailing 12-month; game auto-reinvests — free return)
-        logger.info("Fetching dividend yields …")
-        div_yield = self.fetch_dividend_yields(flat_tickers, close)
+        # Dividend yields — computed from raw_dividends already downloaded above (no extra API call)
+        div_yield_map: dict[str, float] = {}
+        if not raw_dividends.empty:
+            divs = raw_dividends.fillna(0.0)
+            for _t in flat_tickers:
+                if _t not in divs.columns:
+                    continue
+                annual_div = float(divs[_t].sum())
+                _lp_s = close[_t].dropna() if _t in close.columns else pd.Series(dtype=float)
+                _lp = float(_lp_s.iloc[-1]) if not _lp_s.empty else 0.0
+                div_yield_map[_t] = annual_div / _lp if _lp > 0 else float("nan")
+        div_yield = pd.Series(div_yield_map, name="dividend_yield")
 
         # Valid tickers: must have 20d momentum
         valid_tickers = momentum_20d.dropna().index.tolist()

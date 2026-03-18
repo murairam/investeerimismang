@@ -67,6 +67,7 @@ Every position must have a different weight. Equal-weighting means you are not t
 - Do NOT pick the top-3 stocks by Sharpe_20d — those are the crowded consensus trades.
 - Do NOT fill the portfolio with US mega-cap tech if they dominate the Sharpe ranking.
 - At least 3 of your picks must be from non-US markets.
+- **Sector cap**: no single sector (Tech, Fin, Energy, Health, Cons, Ind, Util, Mat, Tel) may exceed 35% of total weight. Sum the Sector column before finalising — replace the weakest name in any over-weight sector with a better-diversifying pick.
 
 ## Output — valid JSON only, no other text
 {{"positions":[{{"ticker":"X","weight":0.20,"rationale":"why this contrarian pick at this weight"}}],"reasoning":"2-3 sentence contrarian thesis — what the crowd is missing","confidence":0.80}}"""

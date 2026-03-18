@@ -9,7 +9,7 @@ GAME_CONSTRAINTS = {
     "min_weight": 0.05,        # 5%
     "max_weight": 0.25,        # 25%
     "max_total_weight": 1.00,  # 100%
-    "min_total_weight": 0.95,  # 95% — cash earns zero; deploy almost everything
+    "min_total_weight": 0.75,  # 75% game-rule minimum; cash policy targets higher deployment
     "max_sector_weight": 0.35, # 35% cap per sector to prevent concentration blow-ups
 }
 

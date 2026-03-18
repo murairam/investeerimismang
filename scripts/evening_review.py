@@ -58,7 +58,7 @@ def _fetch_prices(tickers: list[str]) -> dict[str, tuple[float, float]]:
     return result
 
 
-def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float, alpha: float) -> str:
+def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float, alpha: float, prize_context: str = "") -> str:
     """One-sentence AI recommendation via OpenAI gpt-4o-mini (~$0.0005/call)."""
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
@@ -66,6 +66,7 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
     try:
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
+        extra = f"\n\nAdditional context: {prize_context}" if prize_context else ""
         resp = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -83,11 +84,11 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
                         f"benchmark: {benchmark_ret:+.2%}, alpha: {alpha:+.2%}.\n"
                         f"Position returns: {positions_summary}\n\n"
                         "Should I update my portfolio for tomorrow? "
-                        "Name any specific positions worth dropping or keeping."
+                        f"Name any specific positions worth dropping or keeping.{extra}"
                     ),
                 },
             ],
-            max_tokens=90,
+            max_tokens=100,
             temperature=0.3,
         )
         return resp.choices[0].message.content.strip()
@@ -166,17 +167,23 @@ def main() -> None:
     if us_tickers:
         us_note = f"\n_US positions ({', '.join(us_tickers)}) are intraday — markets still open._"
 
-    # AI recommendation
-    positions_summary = ", ".join(f"{t} {r:+.1%}" for t, _, r, _ in pos_returns)
-    recommendation = _ai_take(positions_summary, portfolio_ret, benchmark_ret, alpha)
-
     action_note = "\n\n📋 **To change tomorrow's portfolio:** update on the game website.\nDeadline: **10:00 EET** (orders before 10:00 execute at tomorrow's open)."
 
-    # Weekly prize awareness (snapshot taken Monday 09:00 EET)
-    prize_note = ""
+    # Weekly prize awareness (snapshot taken Monday 09:00 EET) — built BEFORE AI call so AI gets context
     weekday = datetime.today().weekday()  # 0=Mon, 3=Thu, 4=Fri
+    prize_context = ""
+    prize_note = ""
     if weekday in (3, 4):
-        prize_note = "\n\n🏆 **Weekly prize heads-up:** leaderboard snapshot is Monday 09:00 EET. If you need to climb the weekly ranking, consider higher-conviction bets tomorrow. If you're already near the top, protect the lead with lower-beta positions."
+        prize_context = (
+            "Weekly leaderboard prize snapshot is Monday 09:00 EET. "
+            "Factor this into your recommendation: if the portfolio needs to climb the weekly ranking, "
+            "suggest higher-conviction bets; if already near the top, suggest protecting with lower-beta positions."
+        )
+        prize_note = "\n\n🏆 **Weekly prize heads-up:** leaderboard snapshot is Monday 09:00 EET. If you need to climb the weekly ranking, consider higher-conviction bets. If already near the top, protect the lead with lower-beta positions."
+
+    # AI recommendation (receives prize context when applicable)
+    positions_summary = ", ".join(f"{t} {r:+.1%}" for t, _, r, _ in pos_returns)
+    recommendation = _ai_take(positions_summary, portfolio_ret, benchmark_ret, alpha, prize_context)
 
     description = f"{perf_line}{us_note}\n\n{table}\n💬 {recommendation}{prize_note}{action_note}"
 

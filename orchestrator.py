@@ -246,13 +246,13 @@ class AlphaSharkOrchestrator:
                     f"{final_proposal.reasoning} A cash buffer was intentionally retained ({reason})."
                 ).strip()
 
-        # Enforce game rule: max 25% cash (min 75% invested), regardless of cash policy
+        # Hard floor: game rule requires at least 75% invested (max 25% cash)
         total = sum(p.weight for p in final_proposal.positions)
         min_total = self.validator.c.get("min_total_weight", 0.75)
         if total < min_total - 1e-9:
             logger.info(
-                "Portfolio at %.1f%% — deploying to meet 75%% minimum (game rule: max 25%% cash)",
-                total * 100,
+                "Portfolio at %.1f%% — deploying to meet %.0f%% game-rule minimum",
+                total * 100, min_total * 100,
             )
             final_proposal = self.validator.normalize(final_proposal)
 
@@ -394,4 +394,4 @@ class AlphaSharkOrchestrator:
         if regime == "BULL":
             return True, "bull regime"
 
-        return False, "neutral regime with mixed edge"
+        return True, "neutral regime — cash earns zero, deploy residual"

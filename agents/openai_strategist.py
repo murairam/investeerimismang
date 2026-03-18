@@ -90,6 +90,7 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - vol_ratio = today's volume / 20d average volume. >1.5 means the move has high-volume confirmation (strong signal). <0.7 means low-volume move (weak signal, be cautious).
 - Goal: BEAT other game participants — take conviction bets, not passive exposure.
 - **Diversify from the crowd**: if your top 5 picks are all US mega-cap tech, you are running the same portfolio as every other participant. You MUST include at least 2 picks from non-US markets (Nordic, Baltic, or European). This is required for every portfolio.
+- **Sector cap (hard rule)**: No single sector (Tech, Fin, Energy, Health, Cons, Ind, Util, Mat, Tel) may exceed 35% of total portfolio weight. Sum the weights in the Sector column before submitting — if any sector exceeds 35%, replace the weakest name in that sector with the best candidate from an underrepresented sector.
 - **DivYld column**: The game auto-reinvests dividends — a 4% yield stock earns ~1.5% free return over the 75-day game on top of price gains. Nordic utilities and Baltic stocks often carry 3–6% yields; factor this in when comparing otherwise-similar candidates.
 
 ## Baltic market specialist guidance

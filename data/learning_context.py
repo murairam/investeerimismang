@@ -112,8 +112,8 @@ def _generate_signal_summary() -> str:
         return ""
 
     try:
-        from data.meta_learning import generate_signal_correlation_report
-        return generate_signal_correlation_report(performance_history)
+        from data.meta_learning import generate_ticker_performance_report
+        return generate_ticker_performance_report(performance_history)
     except Exception as exc:
         logger.debug("Signal correlation report unavailable: %s", exc)
         return ""
