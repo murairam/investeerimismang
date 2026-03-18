@@ -155,6 +155,28 @@ class PortfolioValidator:
             confidence=proposal.confidence,
         )
 
+    def round_to_whole_pct(self, proposal: PortfolioProposal) -> PortfolioProposal:
+        """
+        Round all weights to whole percentages that sum to exactly 100%.
+        Uses largest-remainder method to distribute rounding errors.
+        """
+        weights = [p.weight for p in proposal.positions]
+        floored = [int(w * 100) for w in weights]
+        remainders = [(w * 100 - floored[i], i) for i, w in enumerate(weights)]
+        deficit = 100 - sum(floored)
+        # Distribute remaining percentage points to positions with largest remainders
+        for _, i in sorted(remainders, reverse=True)[:deficit]:
+            floored[i] += 1
+        positions = [
+            Position(ticker=p.ticker, weight=floored[i] / 100.0, rationale=p.rationale)
+            for i, p in enumerate(proposal.positions)
+        ]
+        return PortfolioProposal(
+            positions=positions,
+            reasoning=proposal.reasoning,
+            confidence=proposal.confidence,
+        )
+
     def enforce_sector_cap(
         self, proposal: PortfolioProposal, candidates: list[dict]
     ) -> PortfolioProposal:

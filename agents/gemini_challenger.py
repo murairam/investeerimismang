@@ -261,7 +261,7 @@ class GeminiChallenger(BaseAgent):
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
                 response_mime_type="application/json",
-                temperature=0.8,
+                temperature=0.2,
             ),
         )
 

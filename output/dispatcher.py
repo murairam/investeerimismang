@@ -16,6 +16,57 @@ logger = logging.getLogger(__name__)
 _EMBED_COLOUR = 0x2ECC71
 _MAX_EMBED_DESCRIPTION = 4096
 
+# Display names as they appear in the Äripäev game UI
+GAME_NAMES: dict[str, str] = {
+    # S&P 500
+    "AAPL": "Apple", "NVDA": "Nvidia", "MSFT": "Microsoft", "AMZN": "Amazon",
+    "GOOGL": "Alphabet", "META": "Meta", "TSLA": "Tesla", "AVGO": "Broadcom",
+    "JPM": "JPMorgan Chase", "LLY": "Eli Lilly", "UNH": "UnitedHealth",
+    "XOM": "Exxon Mobil", "V": "Visa", "MA": "Mastercard", "JNJ": "Johnson & Johnson",
+    "WMT": "Walmart", "PG": "Procter & Gamble", "HD": "Home Depot",
+    "MRK": "Merck", "COST": "Costco", "ABBV": "AbbVie", "CVX": "Chevron",
+    "CRM": "Salesforce", "NFLX": "Netflix", "AMD": "AMD",
+    "BAC": "Bank of America", "PEP": "PepsiCo", "KO": "Coca-Cola",
+    "TMO": "Thermo Fisher", "ORCL": "Oracle", "CSCO": "Cisco",
+    "ACN": "Accenture", "MCD": "McDonald's", "ABT": "Abbott",
+    "TXN": "Texas Instruments", "DHR": "Danaher", "NKE": "Nike",
+    "INTC": "Intel", "PM": "Philip Morris", "NEE": "NextEra Energy",
+    "UPS": "UPS", "LOW": "Lowe's", "QCOM": "Qualcomm",
+    "AMGN": "Amgen", "IBM": "IBM", "GS": "Goldman Sachs",
+    "CAT": "Caterpillar", "HON": "Honeywell", "BA": "Boeing", "SPGI": "S&P Global",
+    # Finland
+    "NOKIA.HE": "Nokia", "FORTUM.HE": "Fortum", "SAMPO.HE": "Sampo A",
+    "NESTE.HE": "Neste", "KNEBV.HE": "Kone B", "WRT1V.HE": "Wärtsilä",
+    "STERV.HE": "Stora Enso R", "OUT1V.HE": "Outokumpu A", "ELISA.HE": "Elisa",
+    "ORNBV.HE": "Orion B", "UPM.HE": "UPM-Kymmene", "METSO.HE": "Metso",
+    # Sweden
+    "ERIC-B.ST": "Ericsson B", "VOLV-B.ST": "Volvo B", "ATCO-A.ST": "Atlas Copco A",
+    "SEB-A.ST": "SEB A", "SWED-A.ST": "Swedbank A", "INVE-B.ST": "Investor B",
+    "HM-B.ST": "H&M B", "SHB-A.ST": "Handelsbanken A", "ESSITY-B.ST": "Essity B",
+    "ABB.ST": "ABB", "SAND.ST": "Sandvik", "SKF-B.ST": "SKF B",
+    "ALFA.ST": "Alfa Laval", "TELIA.ST": "Telia", "BOL.ST": "Boliden",
+    "NIBE-B.ST": "NIBE B", "EVO.ST": "Evolution", "SSAB-A.ST": "SSAB A",
+    # Norway
+    "EQNR.OL": "Equinor", "DNB.OL": "DNB", "NHY.OL": "Norsk Hydro",
+    "TEL.OL": "Telenor", "MOWI.OL": "Mowi", "ORK.OL": "Orkla",
+    "YAR.OL": "Yara", "SCATC.OL": "Scatec", "SUBC.OL": "Subsea 7",
+    "SALM.OL": "SalMar", "RECSI.OL": "REC Silicon",
+    # Denmark
+    "NOVO-B.CO": "Novo Nordisk B", "DSV.CO": "DSV", "ORSTED.CO": "Ørsted",
+    "CARL-B.CO": "Carlsberg B", "GMAB.CO": "Genmab", "MAERSK-B.CO": "A.P. Møller - Mærsk B",
+    "COLO-B.CO": "Coloplast B", "GN.CO": "GN Store Nord", "DEMANT.CO": "Demant",
+    "PNDORA.CO": "Pandora", "ISS.CO": "ISS",
+    # Baltic
+    "LHV1T.TL": "LHV Group", "PRF1T.TL": "Premia Foods", "TKM1T.TL": "Tallinna Kaubamaja",
+    "MRK1T.TL": "Merko Ehitus", "ARC1T.TL": "Arco Vara", "TAL1T.TL": "Tallink Grupp",
+    "GRG1L.VS": "Grigeo", "APG1L.VS": "Apranga", "VLP1L.VS": "Vilkyškių pieninė",
+}
+
+
+def _display(ticker: str) -> str:
+    """Return game display name for a ticker, fallback to ticker itself."""
+    return GAME_NAMES.get(ticker, ticker)
+
 
 class WebhookDispatcher:
     def __init__(self) -> None:
@@ -75,11 +126,12 @@ class WebhookDispatcher:
             f"📊 Context: {regime} regime · VIX {vix_str} · Candidates {len(snapshot['candidates'])} · Run {run_time_str}"
         )
 
-        rows = ["```", f"{'#':<3} {'Ticker':<12} {'Weight':>7}", "-" * 28]
+        rows = ["```", f"{'#':<3} {'Stock':<26} {'%':>4}", "-" * 36]
         for i, pos in enumerate(proposal.positions, 1):
-            rows.append(f"{i:<3} {pos.ticker:<12} {pos.weight:>6.1%}")
-        rows.append("-" * 28)
-        rows.append(f"{'TOTAL':<16} {total_weight:>6.1%}")
+            name = _display(pos.ticker)
+            rows.append(f"{i:<3} {name:<26} {int(pos.weight * 100):>3}%")
+        rows.append("-" * 36)
+        rows.append(f"{'TOTAL':<30} {int(total_weight * 100):>3}%")
         rows.append("```")
         holdings_table = "\n".join(rows)
 
@@ -88,7 +140,7 @@ class WebhookDispatcher:
             rationale = pos.rationale.strip()
             if len(rationale) > 90:
                 rationale = rationale[:89] + "…"
-            rationale_lines.append(f"{i}. **{pos.ticker}** — {rationale}")
+            rationale_lines.append(f"{i}. **{_display(pos.ticker)}** — {rationale}")
         rationale_block = "\n".join(rationale_lines[:8])
 
         change_lines: list[str] = []
@@ -106,14 +158,14 @@ class WebhookDispatcher:
 
             if added or removed or resized:
                 for ticker in added[:3]:
-                    change_lines.append(f"➕ {ticker} {current_map[ticker]:.1%}")
+                    change_lines.append(f"➕ {_display(ticker)} {int(current_map[ticker] * 100)}%")
                 for ticker in removed[:3]:
-                    change_lines.append(f"➖ {ticker} (was {prior_map[ticker]:.1%})")
+                    change_lines.append(f"➖ {_display(ticker)} (was {int(prior_map[ticker] * 100)}%)")
                 for ticker in resized[:4]:
                     diff = current_map[ticker] - prior_map[ticker]
                     arrow = "▲" if diff > 0 else "▼"
                     change_lines.append(
-                        f"{arrow} {ticker} {prior_map[ticker]:.1%}→{current_map[ticker]:.1%} ({diff:+.1%})"
+                        f"{arrow} {_display(ticker)} {int(prior_map[ticker] * 100)}%→{int(current_map[ticker] * 100)}% ({diff:+.0%})"
                     )
             else:
                 change_lines.append("No material changes vs yesterday")

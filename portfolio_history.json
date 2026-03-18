@@ -2,44 +2,44 @@
   "date": "2026-03-18",
   "positions": [
     {
-      "ticker": "SAMPO.HE",
-      "weight": 0.19,
-      "rationale": "verified from game screenshot 2026-03-18"
-    },
-    {
-      "ticker": "NOKIA.HE",
-      "weight": 0.17,
-      "rationale": "verified from game screenshot 2026-03-18"
+      "ticker": "MAERSK-B.CO",
+      "weight": 0.24,
+      "rationale": "manually entered"
     },
     {
       "ticker": "CVX",
-      "weight": 0.14,
-      "rationale": "verified from game screenshot 2026-03-18"
-    },
-    {
-      "ticker": "NEE",
-      "weight": 0.14,
-      "rationale": "verified from game screenshot 2026-03-18"
-    },
-    {
-      "ticker": "DSV.CO",
-      "weight": 0.11,
-      "rationale": "verified from game screenshot 2026-03-18"
-    },
-    {
-      "ticker": "MAERSK-B.CO",
-      "weight": 0.1,
-      "rationale": "verified from game screenshot 2026-03-18"
-    },
-    {
-      "ticker": "FORTUM.HE",
-      "weight": 0.08,
-      "rationale": "verified from game screenshot 2026-03-18"
+      "weight": 0.2,
+      "rationale": "manually entered"
     },
     {
       "ticker": "XOM",
-      "weight": 0.07,
-      "rationale": "verified from game screenshot 2026-03-18"
+      "weight": 0.12,
+      "rationale": "manually entered"
+    },
+    {
+      "ticker": "DNB.OL",
+      "weight": 0.12,
+      "rationale": "manually entered"
+    },
+    {
+      "ticker": "SHB-A.ST",
+      "weight": 0.1,
+      "rationale": "manually entered"
+    },
+    {
+      "ticker": "TELIA.ST",
+      "weight": 0.09,
+      "rationale": "manually entered"
+    },
+    {
+      "ticker": "ERIC-B.ST",
+      "weight": 0.08,
+      "rationale": "manually entered"
+    },
+    {
+      "ticker": "ALFA.ST",
+      "weight": 0.05,
+      "rationale": "manually entered"
     }
   ],
   "reasoning": "The final portfolio includes strong consensus picks from both proposals, weighted higher for conviction, while also integrating unique contrarian picks that show recovering momentum. The portfolio beta is within the target range for a NEUTRAL regime, ensuring a balanced risk profile.",
@@ -64,30 +64,31 @@
     },
     {
       "date": "2026-03-18",
-      "benchmark_return_20d": -0.0303,
-      "portfolio_return_1d": -0.001904,
-      "benchmark_return_1d": -0.006441,
-      "alpha_1d": 0.004537,
+      "benchmark_return_20d": -0.0304,
+      "portfolio_return_1d": -0.000604,
+      "benchmark_return_1d": -0.006499,
+      "alpha_1d": 0.005895,
       "position_returns": {
-        "NFLX": -0.002967,
-        "XOM": 0.003904,
-        "DNB.OL": 0.008547,
-        "SHB-A.ST": 0.001425,
-        "EVO.ST": -0.009156,
-        "ERIC-B.ST": -0.022829,
-        "NOKIA.HE": -0.013934,
-        "ALFA.ST": 0.008037
+        "SAMPO.HE": -0.005435,
+        "NOKIA.HE": -0.017685,
+        "CVX": 0.013386,
+        "NEE": -0.01713,
+        "DSV.CO": -0.003351,
+        "MAERSK-B.CO": 0.034722,
+        "FORTUM.HE": 0.004966,
+        "XOM": 0.006549
       }
     }
   ],
   "close_prices": {
-    "SAMPO.HE": 9.53,
-    "NOKIA.HE": 7.358,
-    "CVX": 199.61,
-    "NEE": 91.31,
-    "DSV.CO": 1620.5,
-    "MAERSK-B.CO": 18310.0,
-    "FORTUM.HE": 22.08,
-    "XOM": 159.33
-  }
+    "ALFA.ST": 527.5999755859375,
+    "CVX": 200.6199951171875,
+    "DNB.OL": 296.79998779296875,
+    "ERIC-B.ST": 109.44999694824219,
+    "MAERSK-B.CO": 18625.0,
+    "SHB-A.ST": 141.0,
+    "TELIA.ST": 47.52000045776367,
+    "XOM": 159.85000610351562
+  },
+  "source": "verified"
 }

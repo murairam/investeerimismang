@@ -79,57 +79,68 @@ class AlphaSharkOrchestrator:
         else:
             logger.info("No learning context yet (first run or files missing)")
 
-        # Step 1c: fetch recent news headlines for top candidates
-        top_tickers = [c["ticker"] for c in snapshot["candidates"][:20]]
-        try:
-            news_items = fetch_candidate_news(top_tickers)
-            snapshot["news_headlines"] = format_news_for_prompt(news_items)
-            logger.info("Fetched %d news headlines for %d tickers", len(news_items), len(top_tickers))
-        except Exception as exc:
-            logger.warning("News fetch failed (non-fatal): %s", exc)
-            snapshot["news_headlines"] = ""
+        # Steps 1c–1f: fetch news, earnings, insider trades, and trends IN PARALLEL
+        top_tickers_20 = [c["ticker"] for c in snapshot["candidates"][:20]]
+        us_candidates = [c["ticker"] for c in snapshot["candidates"] if "." not in c["ticker"]]
+        all_candidate_tickers = [c["ticker"] for c in snapshot["candidates"]]
 
-        # Step 1d: fetch upcoming earnings (binary risk warning for agents)
-        try:
-            earnings = fetch_upcoming_earnings(top_tickers)
-            snapshot["earnings_warning"] = format_earnings_warning(earnings)
-            if earnings:
-                logger.info(
-                    "Earnings within 7 days: %s",
-                    ", ".join(f"{e['ticker']} {e['earnings_date']}" for e in earnings),
-                )
-        except Exception as exc:
-            logger.warning("Earnings fetch failed (non-fatal): %s", exc)
-            snapshot["earnings_warning"] = ""
+        def _fetch_news():
+            try:
+                items = fetch_candidate_news(top_tickers_20)
+                logger.info("Fetched %d news headlines for %d tickers", len(items), len(top_tickers_20))
+                return "news_headlines", format_news_for_prompt(items)
+            except Exception as exc:
+                logger.warning("News fetch failed (non-fatal): %s", exc)
+                return "news_headlines", ""
 
-        # Step 1e: fetch insider buying activity from SEC EDGAR Form 4 (US tickers only)
-        try:
-            us_candidates = [c["ticker"] for c in snapshot["candidates"] if "." not in c["ticker"]]
-            insider_trades = fetch_insider_trades(us_candidates)
-            snapshot["insider_context"] = format_insider_context(insider_trades)
-            if insider_trades:
-                logger.info("Insider buys: %d found (%s)", len(insider_trades),
-                            ", ".join(t["ticker"] for t in insider_trades[:5]))
-            else:
-                logger.info("Insider buys: none above $50k threshold")
-        except Exception as exc:
-            logger.warning("Insider fetch failed (non-fatal): %s", exc)
-            snapshot["insider_context"] = ""
+        def _fetch_earnings():
+            try:
+                earnings = fetch_upcoming_earnings(top_tickers_20)
+                if earnings:
+                    logger.info("Earnings within 7 days: %s",
+                                ", ".join(f"{e['ticker']} {e['earnings_date']}" for e in earnings))
+                return "earnings_warning", format_earnings_warning(earnings)
+            except Exception as exc:
+                logger.warning("Earnings fetch failed (non-fatal): %s", exc)
+                return "earnings_warning", ""
 
-        # Step 1f: fetch Google search interest as retail crowding indicator
-        try:
-            top_tickers = [c["ticker"] for c in snapshot["candidates"]]
-            trends = fetch_search_interest(top_tickers)
-            snapshot["trends_context"] = format_trends_context(trends)
-            if trends:
-                crowded = [t["ticker"] for t in trends if t["signal"] == "crowded"]
-                radar   = [t["ticker"] for t in trends if t["signal"] == "radar"]
-                logger.info("Trends: crowded=%s, under-radar=%s", crowded or "none", radar or "none")
-            else:
-                logger.info("Trends: no data (throttled or failed)")
-        except Exception as exc:
-            logger.warning("Trends fetch failed (non-fatal): %s", exc)
-            snapshot["trends_context"] = ""
+        def _fetch_insider():
+            try:
+                trades = fetch_insider_trades(us_candidates)
+                if trades:
+                    logger.info("Insider buys: %d found (%s)", len(trades),
+                                ", ".join(t["ticker"] for t in trades[:5]))
+                else:
+                    logger.info("Insider buys: none above $50k threshold")
+                return "insider_context", format_insider_context(trades)
+            except Exception as exc:
+                logger.warning("Insider fetch failed (non-fatal): %s", exc)
+                return "insider_context", ""
+
+        def _fetch_trends():
+            try:
+                trends = fetch_search_interest(all_candidate_tickers)
+                if trends:
+                    crowded = [t["ticker"] for t in trends if t["signal"] == "crowded"]
+                    radar   = [t["ticker"] for t in trends if t["signal"] == "radar"]
+                    logger.info("Trends: crowded=%s, under-radar=%s", crowded or "none", radar or "none")
+                else:
+                    logger.info("Trends: no data (throttled or failed)")
+                return "trends_context", format_trends_context(trends)
+            except Exception as exc:
+                logger.warning("Trends fetch failed (non-fatal): %s", exc)
+                return "trends_context", ""
+
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            enrichment_futures = [
+                pool.submit(_fetch_news),
+                pool.submit(_fetch_earnings),
+                pool.submit(_fetch_insider),
+                pool.submit(_fetch_trends),
+            ]
+            for future in enrichment_futures:
+                key, value = future.result()
+                snapshot[key] = value
 
         # Enforce pre-game/live mode behavior and post-start parameter freeze
         mode_info = enforce_mode_and_freeze(snapshot["as_of_date"], game_start_date="2026-04-06")
@@ -278,6 +289,9 @@ class AlphaSharkOrchestrator:
             )
             final_proposal = self.validator.normalize(final_proposal)
 
+        # Round all weights to whole percentages (game UI has 1% precision)
+        final_proposal = self.validator.round_to_whole_pct(final_proposal)
+
         total = sum(p.weight for p in final_proposal.positions)
         logger.info(
             "Final portfolio: %d positions, total weight %.1f%%, confidence %.0f%%",
@@ -287,6 +301,32 @@ class AlphaSharkOrchestrator:
         )
         for pos in final_proposal.positions:
             logger.info("  %-12s  %5.1f%%  %s", pos.ticker, pos.weight * 100, pos.rationale[:60])
+
+        # Devil's advocate audit: show how bear-case flags map to final weights
+        if bear_cases:
+            logger.info("── Devil's advocate impact audit ──")
+            flagged_in_portfolio = [
+                (pos, bear_cases[pos.ticker])
+                for pos in final_proposal.positions
+                if pos.ticker in bear_cases
+            ]
+            not_included = [
+                (ticker, info)
+                for ticker, info in bear_cases.items()
+                if ticker not in {pos.ticker for pos in final_proposal.positions}
+            ]
+            for pos, info in sorted(flagged_in_portfolio, key=lambda x: x[1]["risk"]):
+                risk_icon = "🔴" if info["risk"] == "HIGH" else ("🟡" if info["risk"] == "MEDIUM" else "🟢")
+                logger.info(
+                    "  %s %-12s %5.1f%% [%s] %s",
+                    risk_icon, pos.ticker, pos.weight * 100, info["risk"], info["bear_case"][:80],
+                )
+            if not_included:
+                logger.info("  Excluded by Risk Manager (flagged but not in final portfolio):")
+                for ticker, info in not_included:
+                    risk_icon = "🔴" if info["risk"] == "HIGH" else ("🟡" if info["risk"] == "MEDIUM" else "🟢")
+                    logger.info("    %s %-12s [%s] %s", risk_icon, ticker, info["risk"], info["bear_case"][:80])
+            logger.info("──────────────────────────────────")
 
         # Step 6: Persist portfolio for tomorrow's run (include benchmark + P&L data)
         final_tickers = {pos.ticker for pos in final_proposal.positions}

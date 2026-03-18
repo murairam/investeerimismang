@@ -17,6 +17,48 @@ from typing import Optional
 # Ensure project root is on the path regardless of where the script is invoked from
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from output.dispatcher import GAME_NAMES
+
+def _norm(s: str) -> str:
+    """Lowercase + replace Nordic chars so 'maersk' matches 'Mærsk', 'orsted' matches 'Ørsted'."""
+    s = s.lower()
+    for old, new in [("æ", "ae"), ("ø", "o"), ("å", "a"), ("ö", "o"), ("ä", "a"), ("ü", "u")]:
+        s = s.replace(old, new)
+    return s
+
+
+# Reverse map: normalised game name → ticker
+_NAME_TO_TICKER: dict[str, str] = {_norm(name): ticker for ticker, name in GAME_NAMES.items()}
+
+
+def _resolve_ticker(raw: str) -> Optional[str]:
+    """
+    Accept a ticker symbol OR a game display name and return the canonical ticker.
+    Tries exact match first, then prefix/substring match on normalised game names.
+    """
+    # Exact ticker match (e.g. "CVX", "MAERSK-B.CO")
+    upper = raw.upper()
+    if upper in GAME_NAMES:
+        return upper
+
+    normed = _norm(raw)
+
+    # Exact normalised name match
+    if normed in _NAME_TO_TICKER:
+        return _NAME_TO_TICKER[normed]
+
+    # Prefix match (e.g. "maersk" → "a.p. moller - maersk b")
+    matches = [t for name, t in _NAME_TO_TICKER.items() if name.startswith(normed)]
+    if len(matches) == 1:
+        return matches[0]
+
+    # Substring match (e.g. "alfa" → "alfa laval")
+    matches = [t for name, t in _NAME_TO_TICKER.items() if normed in name]
+    if len(matches) == 1:
+        return matches[0]
+
+    return None
+
 from data.verification_tracker import mark_verified
 from data.paper_account import sync_verified_positions
 
@@ -31,8 +73,18 @@ def load() -> Optional[dict]:
 
 
 def save(data: dict) -> None:
+    """Write portfolio_history.json, preserving performance_history and close_prices."""
+    existing: dict = {}
+    if os.path.exists(_STORE_PATH):
+        try:
+            with open(_STORE_PATH) as f:
+                existing = json.load(f)
+        except Exception:
+            pass
+    # Always update positions/date/reasoning/confidence; keep historical fields intact
+    merged = {**existing, **data}
     with open(_STORE_PATH, "w") as f:
-        json.dump(data, f, indent=2)
+        json.dump(merged, f, indent=2)
 
 
 def print_portfolio(data: dict) -> None:
@@ -118,7 +170,8 @@ def _enter_manual(existing: dict) -> None:
     """Let the user type in their actual game portfolio."""
     print()
     print("  Enter your actual game portfolio below.")
-    print("  Format per line:  TICKER WEIGHT%   (e.g. NVDA 20)")
+    print("  Format per line:  NAME WEIGHT   (e.g. 'Chevron 20' or 'CVX 20')")
+    print("  Stock names can be partial (e.g. 'maersk 24', 'alfa 5', 'exxon 12')")
     print("  Empty line when done.")
     print()
 
@@ -127,16 +180,23 @@ def _enter_manual(existing: dict) -> None:
         line = input("  > ").strip()
         if not line:
             break
-        parts = line.split()
+        # Split on last whitespace-separated token as weight, rest is name
+        parts = line.rsplit(None, 1)
         if len(parts) != 2:
-            print("  Bad format — use: TICKER WEIGHT  (e.g. NVDA 20)")
+            print("  Bad format — e.g. 'Chevron 20' or 'maersk 24'")
             continue
-        ticker = parts[0].upper()
+        name_raw, weight_raw = parts
         try:
-            weight = float(parts[1].replace("%", "")) / 100
+            weight = float(weight_raw.replace("%", "")) / 100
         except ValueError:
             print("  Weight must be a number (e.g. 20 for 20%)")
             continue
+        ticker = _resolve_ticker(name_raw.strip())
+        if ticker is None:
+            print(f"  ❓ Could not recognise '{name_raw}' — try the ticker symbol (e.g. MAERSK-B.CO)")
+            continue
+        game_name = GAME_NAMES.get(ticker, ticker)
+        print(f"     ✓ {game_name} ({ticker}) {weight:.0%}")
         positions.append({"ticker": ticker, "weight": weight, "rationale": "manually entered"})
 
     if not positions:

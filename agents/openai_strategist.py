@@ -397,7 +397,7 @@ class OpenAIStrategist(BaseAgent):
         response = self.client.chat.completions.create(
             model=self.MODEL,
             response_format={"type": "json_object"},
-            temperature=0.7,
+            temperature=0.2,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message},

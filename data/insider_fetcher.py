@@ -9,6 +9,7 @@ import logging
 import os
 import time
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, timedelta
 
 import requests
@@ -145,50 +146,54 @@ def fetch_insider_trades(tickers: list[str]) -> list[dict]:
     cutoff  = (date.today() - timedelta(days=_LOOKBACK_DAYS)).isoformat()
     all_trades: list[dict] = []
 
-    for ticker in us_tickers:
+    def _fetch_ticker(ticker: str) -> list[dict]:
         cik = cik_map.get(ticker.upper())
         if not cik:
-            logger.debug("No CIK for %s — skipping", ticker)
-            continue
-
+            return []
         cik_padded = cik.zfill(10)
         try:
             url = f"{_EDGAR_BASE}/submissions/CIK{cik_padded}.json"
-            resp = requests.get(url, headers=_HEADERS, timeout=15)
-            time.sleep(_REQUEST_DELAY)
+            resp = requests.get(url, headers=_HEADERS, timeout=8)
             resp.raise_for_status()
             data = resp.json()
         except Exception as exc:
-            logger.warning("Submissions fetch failed for %s: %s", ticker, exc)
-            continue
+            logger.debug("Submissions fetch failed for %s: %s", ticker, exc)
+            return []
 
         try:
             recent = data.get("filings", {}).get("recent", {})
             forms        = recent.get("form", [])
             filing_dates = recent.get("filingDate", [])
             accessions   = recent.get("accessionNumber", [])
-        except Exception as exc:
-            logger.debug("Submissions parse error for %s: %s", ticker, exc)
-            continue
+        except Exception:
+            return []
 
-        # Filter Form 4/4A within lookback window
         qualifying = [
             acc
             for form, fd, acc in zip(forms, filing_dates, accessions)
             if form in ("4", "4/A") and fd >= cutoff
         ][:_MAX_FILINGS_PER_TICKER]
 
+        ticker_trades = []
         for acc in qualifying:
             acc_nodashes = acc.replace("-", "")
             xml_url = f"{_EDGAR_ARCHIVES}/{cik}/{acc_nodashes}/{acc_nodashes}.xml"
             try:
-                resp = requests.get(xml_url, headers=_HEADERS, timeout=15)
-                time.sleep(_REQUEST_DELAY)
+                resp = requests.get(xml_url, headers=_HEADERS, timeout=8)
                 resp.raise_for_status()
-                trades = _parse_form4_xml(resp.text, ticker)
-                all_trades.extend(trades)
+                ticker_trades.extend(_parse_form4_xml(resp.text, ticker))
             except Exception as exc:
                 logger.debug("Form4 fetch/parse failed for %s acc %s: %s", ticker, acc, exc)
+        return ticker_trades
+
+    # Fetch all tickers concurrently — SEC allows 10 req/s, 8 workers stays well under that
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = {pool.submit(_fetch_ticker, t): t for t in us_tickers}
+        for future in as_completed(futures):
+            try:
+                all_trades.extend(future.result())
+            except Exception as exc:
+                logger.debug("Insider fetch thread error: %s", exc)
 
     all_trades.sort(key=lambda x: x["value_usd"], reverse=True)
     return all_trades

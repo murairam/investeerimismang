@@ -499,3 +499,320 @@ Winners: DNB.OL +0.9%, ALFA.ST +0.8%, XOM +0.4% | Losers: ERIC-B.ST -2.3%, NOKIA
 - ▼ **DNB.OL**: 13.6% → 8.0% (-5.6%)
 
 ---
+## 2026-03-18 16:06:51
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +1.0% · VIX: 23.8 · S&P 500 20d: -2.9%
+
+**Yesterday's P&L:** Portfolio -0.3% · Benchmark -0.5% · Alpha +0.2%
+Winners: MAERSK-B.CO +2.2%, CVX +0.8%, XOM +0.0% | Losers: NEE -1.6%, NOKIA.HE -1.2%, DSV.CO -1.1%
+
+**Paper account:** Equity €9,965.00 (start €10,000) · Today +0.00% · Since start -0.35% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 7 · **Total weight:** 100.0%
+
+**Thesis:** The portfolio includes all consensus picks weighted higher for conviction. Unique picks were selected based on strong signals and potential recovery, while maintaining a balanced exposure across sectors. The portfolio beta is within the target range for a NEUTRAL regime, ensuring a diversified approach.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **NHY.OL** | 20.6% | consensus pick + strong performance and positive outlook. |
+| 2 | **SAMPO.HE** | 18.8% | consensus pick + undervalued financial stock with insider buying. |
+| 3 | **TELIA.ST** | 16.2% | consensus pick + decent yield and improving fundamentals. |
+| 4 | **LHV1T.TL** | 13.5% | strong recovery momentum and positive signals. |
+| 5 | **TAL1T.TL** | 11.8% | overlooked tech stock showing signs of recovery. |
+| 6 | **XOM** | 11.8% | consistent performer with strong recent performance. |
+| 7 | **EVOT.ST** | 7.4% | diversifier with potential despite sector challenges. |
+
+**Changes from yesterday:**
+- ➕ Added **NHY.OL** at 20.6%
+- ➕ Added **TELIA.ST** at 16.2%
+- ➕ Added **LHV1T.TL** at 13.5%
+- ➕ Added **TAL1T.TL** at 11.8%
+- ➕ Added **EVOT.ST** at 7.4%
+- ➖ Removed **NOKIA.HE** (was 17.0%)
+- ➖ Removed **CVX** (was 14.0%)
+- ➖ Removed **NEE** (was 14.0%)
+- ➖ Removed **DSV.CO** (was 11.0%)
+- ➖ Removed **MAERSK-B.CO** (was 10.0%)
+- ➖ Removed **FORTUM.HE** (was 8.0%)
+- ▲ **XOM**: 7.0% → 11.8% (+4.8%)
+
+---
+## 2026-03-18 16:54:40
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +1.0% · VIX: 23.2 · S&P 500 20d: -2.9%
+
+**Yesterday's P&L:** Portfolio -0.1% · Benchmark -0.5% · Alpha +0.4%
+Winners: MAERSK-B.CO +3.1%, CVX +0.8% | Losers: NEE -1.8%, SAMPO.HE -0.6%, NOKIA.HE -0.5%
+
+**Paper account:** Equity €9,965.00 (start €10,000) · Today +0.00% · Since start -0.35% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** The final portfolio includes strong consensus picks from both proposals, weighted higher for their proven performance. Unique contrarian picks were included to provide diversification and capture potential recovery in underappreciated sectors. The portfolio beta is within the target range for a NEUTRAL regime, ensuring balanced risk exposure.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SAMPO.HE** | 19.1% | Consensus pick with strong performance and positive momentum. |
+| 2 | **TELIA.ST** | 17.2% | Consensus pick with strong dividend yield and positive vs_index indicators. |
+| 3 | **ERIC-B.ST** | 15.3% | Consensus pick with technical breakout potential in the tech sector. |
+| 4 | **NHY.OL** | 11.6% | Consensus pick with strong momentum in the materials sector. |
+| 5 | **XOM** | 11.6% | Consensus pick with continued strong performance and consistent gains. |
+| 6 | **DNB.OL** | 9.7% | Unique contrarian pick with solid non-US financials and strong accelerating momentum. |
+| 7 | **APG1L.VS** | 7.8% | Unique contrarian pick with recovering momentum in the Baltic region. |
+| 8 | **NFLX** | 7.8% | Consensus pick with high 20-day return in the consumer sector. |
+
+**Changes from yesterday:**
+- ➕ Added **TELIA.ST** at 17.2%
+- ➕ Added **ERIC-B.ST** at 15.3%
+- ➕ Added **NHY.OL** at 11.6%
+- ➕ Added **DNB.OL** at 9.7%
+- ➕ Added **APG1L.VS** at 7.8%
+- ➕ Added **NFLX** at 7.8%
+- ➖ Removed **NOKIA.HE** (was 17.0%)
+- ➖ Removed **CVX** (was 14.0%)
+- ➖ Removed **NEE** (was 14.0%)
+- ➖ Removed **DSV.CO** (was 11.0%)
+- ➖ Removed **MAERSK-B.CO** (was 10.0%)
+- ➖ Removed **FORTUM.HE** (was 8.0%)
+- ▲ **XOM**: 7.0% → 11.6% (+4.6%)
+
+---
+## 2026-03-18 17:33:16
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +1.0% · VIX: 23.3 · S&P 500 20d: -2.9%
+
+**Yesterday's P&L:** Portfolio -0.1% · Benchmark -0.5% · Alpha +0.4%
+Winners: MAERSK-B.CO +3.5%, CVX +0.9%, FORTUM.HE +0.5% | Losers: NOKIA.HE -1.8%, NEE -1.4%, SAMPO.HE -0.5%
+
+**Paper account:** Equity €9,965.00 (start €10,000) · Today +0.00% · Since start -0.35% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** The final portfolio includes consensus picks from both proposals, weighted higher for their validated performance. Unique picks were selected based on strong signals, with a focus on Nordic and Baltic stocks for diversification. The portfolio beta is within the target range for a NEUTRAL regime, ensuring a balanced risk profile.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MAERSK-B.CO** | 24.4% | Consensus pick with strong momentum and consistent performance. |
+| 2 | **CVX** | 19.5% | Consensus pick with solid momentum and consistent returns. |
+| 3 | **XOM** | 14.7% | Consensus pick with positive momentum and high beta. |
+| 4 | **DNB.OL** | 11.8% | Unique pick with recovering momentum in Nordic Financials. |
+| 5 | **MOWI.OL** | 9.8% | Unique pick with strong recovering momentum in Nordic Consumer. |
+| 6 | **TELIA.ST** | 7.9% | Consensus pick with strong risk-adjusted returns and high dividend yield. |
+| 7 | **CSCO** | 6.9% | Unique pick showing accelerating momentum in non-mega-cap US Tech. |
+| 8 | **SHB-A.ST** | 5.0% | Contrarian pick with potential but high risk; weight reduced due to negative performance signals. |
+
+**Changes from yesterday:**
+- ➕ Added **DNB.OL** at 11.8%
+- ➕ Added **MOWI.OL** at 9.8%
+- ➕ Added **TELIA.ST** at 7.9%
+- ➕ Added **CSCO** at 6.9%
+- ➕ Added **SHB-A.ST** at 5.0%
+- ➖ Removed **SAMPO.HE** (was 19.0%)
+- ➖ Removed **NOKIA.HE** (was 17.0%)
+- ➖ Removed **NEE** (was 14.0%)
+- ➖ Removed **DSV.CO** (was 11.0%)
+- ➖ Removed **FORTUM.HE** (was 8.0%)
+- ▲ **MAERSK-B.CO**: 10.0% → 24.4% (+14.4%)
+- ▲ **CVX**: 14.0% → 19.5% (+5.5%)
+- ▲ **XOM**: 7.0% → 14.7% (+7.7%)
+
+---
+## 2026-03-18 17:48:40
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +0.9% · VIX: 23.3 · S&P 500 20d: -3.0%
+
+**Yesterday's P&L:** Portfolio -0.1% · Benchmark -0.6% · Alpha +0.6%
+Winners: MAERSK-B.CO +3.5%, CVX +1.1%, FORTUM.HE +0.5% | Losers: NOKIA.HE -1.8%, NEE -1.4%, SAMPO.HE -0.5%
+
+**Paper account:** Equity €9,965.00 (start €10,000) · Today +0.00% · Since start -0.35% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** The portfolio includes a mix of consensus picks weighted higher for their proven performance, while also incorporating contrarian picks to capture potential upside ignored by the market. The overall portfolio beta is within the target range for a NEUTRAL regime, ensuring balanced risk exposure.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **TELIA.ST** | 20.4% | Consensus pick with strong dividend yield and robust momentum. |
+| 2 | **NOKIA.HE** | 13.0% | Consensus pick with high recent returns, but reduced due to overbought signals. |
+| 3 | **NFLX** | 13.0% | Consensus pick with significant recent return, but reduced due to potential overbought conditions. |
+| 4 | **ERIC-B.ST** | 13.0% | Consensus pick with good momentum, but reduced due to nearing overbought levels. |
+| 5 | **XOM** | 11.1% | Consensus pick providing stability and yield, but reduced due to overbought conditions. |
+| 6 | **NHY.OL** | 9.3% | Consensus pick with solid Sharpe and positive developments. |
+| 7 | **SHB-A.ST** | 11.1% | Contrarian pick with strong conviction despite recent bearish momentum. |
+| 8 | **DNB.OL** | 9.3% | Contrarian pick with recovering momentum, included for diversification. |
+
+**Changes from yesterday:**
+- ➕ Added **TELIA.ST** at 20.4%
+- ➕ Added **NFLX** at 13.0%
+- ➕ Added **ERIC-B.ST** at 13.0%
+- ➕ Added **NHY.OL** at 9.3%
+- ➕ Added **SHB-A.ST** at 11.1%
+- ➕ Added **DNB.OL** at 9.3%
+- ➖ Removed **SAMPO.HE** (was 19.0%)
+- ➖ Removed **CVX** (was 14.0%)
+- ➖ Removed **NEE** (was 14.0%)
+- ➖ Removed **DSV.CO** (was 11.0%)
+- ➖ Removed **MAERSK-B.CO** (was 10.0%)
+- ➖ Removed **FORTUM.HE** (was 8.0%)
+- ▼ **NOKIA.HE**: 17.0% → 13.0% (-4.0%)
+- ▲ **XOM**: 7.0% → 11.1% (+4.1%)
+
+---
+## 2026-03-18 17:53:57
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +0.9% · VIX: 23.6 · S&P 500 20d: -3.0%
+
+**Yesterday's P&L:** Portfolio -0.1% · Benchmark -0.6% · Alpha +0.6%
+Winners: MAERSK-B.CO +3.5%, CVX +1.1%, FORTUM.HE +0.5% | Losers: NOKIA.HE -1.8%, NEE -1.5%, SAMPO.HE -0.5%
+
+**Paper account:** Equity €9,965.00 (start €10,000) · Today +0.00% · Since start -0.35% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** The final portfolio includes strong consensus picks from both proposals, weighted higher for conviction. Unique contrarian picks were added to diversify and capture potential recoveries, while high-risk picks were reduced in weight or excluded. The portfolio beta is within the target range for a NEUTRAL regime, ensuring balanced risk exposure.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MAERSK-B.CO** | 24.4% | Consensus pick with strong momentum and consistent performance. |
+| 2 | **CVX** | 19.5% | Consensus pick, reliable energy sector performer with consistent growth. |
+| 3 | **XOM** | 14.7% | Consensus pick with strong momentum, though flagged for potential overbought conditions. |
+| 4 | **DNB.OL** | 11.8% | Unique contrarian pick showing recovering momentum signals despite recent underperformance. |
+| 5 | **TELIA.ST** | 9.8% | Consensus pick with positive momentum and high dividend yield. |
+| 6 | **ERIC-B.ST** | 7.9% | Consensus pick with solid tech sector momentum, though nearing overbought levels. |
+| 7 | **MOWI.OL** | 6.9% | Unique contrarian pick with recovering momentum, despite recent poor performance. |
+| 8 | **NOKIA.HE** | 5.0% | Sector cap replacement for SUBC.OL (Energy sector >35%) |
+
+**Changes from yesterday:**
+- ➕ Added **DNB.OL** at 11.8%
+- ➕ Added **TELIA.ST** at 9.8%
+- ➕ Added **ERIC-B.ST** at 7.9%
+- ➕ Added **MOWI.OL** at 6.9%
+- ➖ Removed **SAMPO.HE** (was 19.0%)
+- ➖ Removed **NEE** (was 14.0%)
+- ➖ Removed **DSV.CO** (was 11.0%)
+- ➖ Removed **FORTUM.HE** (was 8.0%)
+- ▲ **MAERSK-B.CO**: 10.0% → 24.4% (+14.4%)
+- ▲ **CVX**: 14.0% → 19.5% (+5.5%)
+- ▲ **XOM**: 7.0% → 14.7% (+7.7%)
+- ▼ **NOKIA.HE**: 17.0% → 5.0% (-12.0%)
+
+---
+## 2026-03-18 17:59:32
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +0.9% · VIX: 23.5 · S&P 500 20d: -2.9%
+
+**Yesterday's P&L:** Portfolio -0.0% · Benchmark -0.6% · Alpha +0.5%
+Winners: MAERSK-B.CO +3.5%, CVX +1.2%, FORTUM.HE +0.5% | Losers: NOKIA.HE -1.8%, NEE -1.4%, SAMPO.HE -0.5%
+
+**Paper account:** Equity €9,965.00 (start €10,000) · Today +0.00% · Since start -0.35% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** The portfolio includes strong consensus picks like MAERSK-B.CO, CVX, and XOM, weighted higher for their proven performance. Additionally, I incorporated contrarian picks like DNB.OL and SHB-A.ST to capture overlooked opportunities. The portfolio beta is balanced within the target range for a NEUTRAL regime, ensuring diversified exposure across multiple markets.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MAERSK-B.CO** | 21.7% | Consensus pick with strong momentum and consistent performance. |
+| 2 | **CVX** | 19.2% | Consensus pick showing strong momentum and positive performance. |
+| 3 | **XOM** | 10.8% | Consensus pick with strong performance, but reduced due to overbought conditions. |
+| 4 | **DNB.OL** | 13.3% | Contrarian pick with potential upside, despite recent underperformance. |
+| 5 | **SHB-A.ST** | 10.8% | Contrarian pick showing early signs of recovery and strong conviction. |
+| 6 | **TELIA.ST** | 9.2% | Consensus pick with strong momentum and high dividend yield. |
+| 7 | **SAMPO.HE** | 7.5% | Consensus pick with solid momentum and potential upside. |
+| 8 | **NHY.OL** | 7.5% | Consensus pick with positive momentum and supportive news. |
+
+**Changes from yesterday:**
+- ➕ Added **DNB.OL** at 13.3%
+- ➕ Added **SHB-A.ST** at 10.8%
+- ➕ Added **TELIA.ST** at 9.2%
+- ➕ Added **NHY.OL** at 7.5%
+- ➖ Removed **NOKIA.HE** (was 17.0%)
+- ➖ Removed **NEE** (was 14.0%)
+- ➖ Removed **DSV.CO** (was 11.0%)
+- ➖ Removed **FORTUM.HE** (was 8.0%)
+- ▲ **MAERSK-B.CO**: 10.0% → 21.7% (+11.7%)
+- ▲ **CVX**: 14.0% → 19.2% (+5.2%)
+- ▲ **XOM**: 7.0% → 10.8% (+3.8%)
+- ▼ **SAMPO.HE**: 19.0% → 7.5% (-11.5%)
+
+---
+## 2026-03-18 18:09:31
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +0.8% · VIX: 23.5 · S&P 500 20d: -3.0%
+
+**Yesterday's P&L:** Portfolio -0.1% · Benchmark -0.7% · Alpha +0.6%
+Winners: MAERSK-B.CO +3.5%, CVX +1.3%, XOM +0.6% | Losers: NOKIA.HE -1.8%, NEE -1.6%, SAMPO.HE -0.5%
+
+**Paper account:** Equity €9,965.00 (start €10,000) · Today +0.00% · Since start -0.35% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** The portfolio includes strong consensus picks like MAERSK-B.CO, CVX, and XOM, weighted higher due to their solid performance signals. Unique picks like DNB.OL and SHB-A.ST were included for their contrarian potential, despite some risks. The overall portfolio beta is within the target range for a NEUTRAL regime, ensuring balanced risk exposure.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MAERSK-B.CO** | 24.7% | Consensus pick with strong recent momentum and consistent performance. |
+| 2 | **CVX** | 19.8% | Consensus pick with proven track record and solid momentum. |
+| 3 | **XOM** | 11.9% | Consensus pick with strong momentum, though slightly overbought. |
+| 4 | **DNB.OL** | 11.9% | Unique pick with potential recovery in the financial sector despite recent underperformance. |
+| 5 | **SHB-A.ST** | 9.9% | Contrarian pick with a compelling dividend yield, though recent performance is weak. |
+| 6 | **TELIA.ST** | 8.9% | Consensus pick with high dividend yield and strong momentum. |
+| 7 | **NHY.OL** | 8.0% | Consensus pick providing material sector exposure with positive signals. |
+| 8 | **MCD** | 5.0% | Unique pick in the consumer staples sector showing early signs of recovery. |
+
+**Changes from yesterday:**
+- ➕ Added **DNB.OL** at 11.9%
+- ➕ Added **SHB-A.ST** at 9.9%
+- ➕ Added **TELIA.ST** at 8.9%
+- ➕ Added **NHY.OL** at 8.0%
+- ➕ Added **MCD** at 5.0%
+- ➖ Removed **SAMPO.HE** (was 19.0%)
+- ➖ Removed **NOKIA.HE** (was 17.0%)
+- ➖ Removed **NEE** (was 14.0%)
+- ➖ Removed **DSV.CO** (was 11.0%)
+- ➖ Removed **FORTUM.HE** (was 8.0%)
+- ▲ **MAERSK-B.CO**: 10.0% → 24.7% (+14.7%)
+- ▲ **CVX**: 14.0% → 19.8% (+5.8%)
+- ▲ **XOM**: 7.0% → 11.9% (+4.9%)
+
+---
+## 2026-03-18 18:10:19
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: +0.9% · VIX: 23.4 · S&P 500 20d: -3.0%
+
+**Yesterday's P&L:** Portfolio -0.1% · Benchmark -0.6% · Alpha +0.6%
+Winners: MAERSK-B.CO +3.5%, CVX +1.3%, XOM +0.7% | Losers: NOKIA.HE -1.8%, NEE -1.7%, SAMPO.HE -0.5%
+
+**Paper account:** Equity €9,965.00 (start €10,000) · Today +0.00% · Since start -0.35% · Turnover 0.0% · Cash N/A
+
+**Confidence:** 85% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** The final portfolio includes strong consensus picks like MAERSK-B.CO, CVX, and XOM, weighted higher due to their proven performance. Unique picks such as DNB.OL and SHB-A.ST were included for their contrarian potential despite some risks. The portfolio beta is within the target range for a NEUTRAL regime, ensuring a balanced approach across sectors and markets.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MAERSK-B.CO** | 24.7% | Consensus pick with strong momentum and consistent performance. |
+| 2 | **CVX** | 19.8% | Consensus pick with proven gains and solid position in the energy sector. |
+| 3 | **XOM** | 11.9% | Consensus pick with strong performance, though flagged for overbought conditions. |
+| 4 | **DNB.OL** | 11.9% | Unique pick with recovering momentum in the Nordic financial sector. |
+| 5 | **SHB-A.ST** | 9.9% | Contrarian pick with strong signals despite recent underperformance. |
+| 6 | **TELIA.ST** | 8.9% | Consensus pick with high dividend yield and solid recent performance. |
+| 7 | **ERIC-B.ST** | 8.0% | Consensus pick with solid momentum and positive vs_index. |
+| 8 | **ALFA.ST** | 5.0% | Unique pick with recovering momentum in the Nordic industrial sector. |
+
+**Changes from yesterday:**
+- ➕ Added **DNB.OL** at 11.9%
+- ➕ Added **SHB-A.ST** at 9.9%
+- ➕ Added **TELIA.ST** at 8.9%
+- ➕ Added **ERIC-B.ST** at 8.0%
+- ➕ Added **ALFA.ST** at 5.0%
+- ➖ Removed **SAMPO.HE** (was 19.0%)
+- ➖ Removed **NOKIA.HE** (was 17.0%)
+- ➖ Removed **NEE** (was 14.0%)
+- ➖ Removed **DSV.CO** (was 11.0%)
+- ➖ Removed **FORTUM.HE** (was 8.0%)
+- ▲ **MAERSK-B.CO**: 10.0% → 24.7% (+14.7%)
+- ▲ **CVX**: 14.0% → 19.8% (+5.8%)
+- ▲ **XOM**: 7.0% → 11.9% (+4.9%)
+
+---
