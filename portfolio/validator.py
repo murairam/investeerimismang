@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 
-from config import GAME_CONSTRAINTS, POSITION_TARGETS_BY_REGIME
+from config import GAME_CONSTRAINTS, POSITION_TARGETS_BY_REGIME, SECTOR_MAP
 from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
@@ -76,8 +76,22 @@ class PortfolioValidator:
             errors.append(f"Total weight {total:.1%} exceeds 100%")
         if total < self.c["min_total_weight"] - 1e-9:
             errors.append(
-                f"Total weight {total:.1%} below 75% minimum (game allows max 25% cash)"
+                f"Total weight {total:.1%} below {self.c['min_total_weight']:.0%} minimum"
             )
+
+        # Sector concentration — advisory only (normalize() cannot fix this)
+        max_sector_w = self.c.get("max_sector_weight", 1.0)
+        if max_sector_w < 1.0:
+            sector_weights: dict[str, float] = {}
+            for pos in proposal.positions:
+                sector = SECTOR_MAP.get(pos.ticker, "?")
+                sector_weights[sector] = sector_weights.get(sector, 0.0) + pos.weight
+            for sector, sw in sector_weights.items():
+                if sw > max_sector_w + 1e-9:
+                    logger.warning(
+                        "Advisory: sector '%s' weight %.1f%% exceeds %.0f%% max — consider redistributing",
+                        sector, sw * 100, max_sector_w * 100,
+                    )
 
         return ValidationResult(ok=len(errors) == 0, errors=errors)
 

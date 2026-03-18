@@ -2,9 +2,9 @@ name: AlphaShark Daily Run
 
 on:
   schedule:
-    # 06:30 UTC = 09:30 EEST (UTC+3, summer / game period)
-    # Runs Mon–Fri, 90 min before the 10:00 EET submission cutoff
-    - cron: '30 6 * * 1-5'
+    # 05:30 UTC = 08:30 EEST (UTC+3, summer / game period)
+    # Runs Mon–Fri, ~90 min before the 10:00 EET submission cutoff
+    - cron: '30 5 * * 1-5'
   workflow_dispatch:   # allow manual trigger for testing
 
 jobs:
@@ -33,6 +33,15 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: python main.py
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d '{"embeds":[{"title":"🚨 AlphaShark FAILED","description":"Morning run failed — portfolio was NOT updated.\n\n**Action required:** Submit portfolio manually on the game website before **10:00 EET**.","color":15158332}]}'
 
       - name: Commit portfolio history and daily log
         run: |

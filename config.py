@@ -9,14 +9,15 @@ GAME_CONSTRAINTS = {
     "min_weight": 0.05,        # 5%
     "max_weight": 0.25,        # 25%
     "max_total_weight": 1.00,  # 100%
-    "min_total_weight": 0.75,  # 75% — game allows max 25% cash (earns no return)
+    "min_total_weight": 0.95,  # 95% — cash earns zero; deploy almost everything
+    "max_sector_weight": 0.35, # 35% cap per sector to prevent concentration blow-ups
 }
 
 # Preferred stock-count bands by market regime (still bounded by GAME_CONSTRAINTS)
 POSITION_TARGETS_BY_REGIME = {
-    "BULL": {"min_stocks": 6, "max_stocks": 8},
-    "NEUTRAL": {"min_stocks": 8, "max_stocks": 10},
-    "BEAR": {"min_stocks": 10, "max_stocks": 12},
+    "BULL": {"min_stocks": 8, "max_stocks": 10},
+    "NEUTRAL": {"min_stocks": 12, "max_stocks": 15},
+    "BEAR": {"min_stocks": 14, "max_stocks": 18},
 }
 
 # Cash policy (used when proposed allocation is below 100%)
@@ -31,14 +32,14 @@ CASH_POLICY = {
 MOMENTUM_WINDOW = 20        # trading days for momentum calculation
 BETA_WINDOW = 60            # trading days for beta calculation
 BETA_BENCHMARK = "^GSPC"    # S&P 500 as benchmark
-TOP_N_CANDIDATES = 30       # screened stocks passed to Claude
+TOP_N_CANDIDATES = 40       # screened stocks passed to Claude
 RSI_WINDOW = 14             # RSI lookback period
 MOM_SHORT = 5               # short-term momentum window (days)
 MOM_LONG = 60               # long-term momentum window (days)
 SMA_REGIME_WINDOW = 200     # days for market regime SMA
 REGIME_THRESHOLD = 0.02     # 2% band for BULL/BEAR classification
 SP500_MARKET_CAP = 15       # max SP500 candidates in top-30
-OTHER_MARKET_CAP = 5        # max candidates per other market in top-30
+OTHER_MARKET_CAP = 6        # max candidates per other market in top-40
 CORR_WINDOW = 60            # days for correlation filter
 CORR_THRESHOLD = 0.85       # correlation above this → keep higher Sharpe
 

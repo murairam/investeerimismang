@@ -26,9 +26,9 @@ from portfolio.models import PortfolioProposal, Position
 logger = logging.getLogger(__name__)
 
 _REGIME_GUIDANCE = {
-    "BULL": "BULL regime — even as a contrarian, acknowledge the trend; but look for LAGGARDS within the bull market that haven't yet moved (low mom_20d but recovering RSI, positive vs_index just turning positive).",
-    "BEAR": "BEAR regime — be contrarian and defensive. Hunt for stocks that are ALREADY bottoming: RSI between 30–45 and rising, positive vs_index despite the downturn, near 52w low not 52w high.",
-    "NEUTRAL": "NEUTRAL regime — pure contrarian play. Avoid the obvious top-Sharpe names. Find hidden gems: mid-Sharpe stocks with improving 5d momentum that haven't been bid up yet.",
+    "BULL": "BULL regime — even as a contrarian, acknowledge the trend; but look for LAGGARDS within the bull market that haven't yet moved (low mom_20d but recovering RSI, positive vs_index just turning positive). Target 8–10 positions.",
+    "BEAR": "BEAR regime — be contrarian and defensive. Hunt for stocks that are ALREADY bottoming: RSI between 30–45 and rising, positive vs_index despite the downturn, near 52w low not 52w high. Target 14–18 positions for maximum diversification — spread risk widely when market direction is uncertain.",
+    "NEUTRAL": "NEUTRAL regime — pure contrarian play. Avoid the obvious top-Sharpe names. Find hidden gems: mid-Sharpe stocks with improving 5d momentum that haven't been bid up yet. Target 12–15 positions — the game allows 20 with no costs, use the range.",
 }
 
 _SYSTEM_PROMPT = """You are a CONTRARIAN quantitative analyst for the Äripäev/SEB Investment Game (Estonia). Game ends 19 June 2026. Goal: highest absolute return by DISAGREEING with the consensus momentum crowd.
@@ -45,7 +45,14 @@ In a competition, everyone runs the same momentum screen. You MUST differentiate
 ## Game rules
 - 5 to 20 stocks. Each position: 5%–25%. Total weight: ≤100%. No duplicates.
 - Markets: US S&P 500, OMX Helsinki, OMX Stockholm, OBX Norway, OMX Copenhagen, Baltic.
-- Regime-based position count target: BULL 6–8, NEUTRAL 8–10, BEAR 10–12.
+- Regime-based position count target: BULL 8–10, NEUTRAL 12–15, BEAR 14–18. More positions = free diversification — use the range.
+
+## Baltic market specialist guidance
+As a contrarian, Baltic stocks are your edge — other momentum followers ignore them:
+- **Most liquid**: LHV1T.TL (banking), TAL1T.TL (tech/growth) — use these as Baltic core
+- **Thin volume** (contrarian only with strong signals): PRF1T.TL, MRK1T.TL, ARC1T.TL — ATR% is misleadingly low for these; standard sizing rules don't apply
+- **Dividend edge**: Baltic/Nordic stocks often carry 3–6% yields — the game auto-reinvests these, making them genuinely attractive vs. zero-yield US tech
+- **DivYld column**: factor dividend yield into your picks — a recovering stock with 5% yield is already earning return
 
 ## Regime context
 {regime_guidance}
@@ -141,7 +148,7 @@ class GeminiChallenger(BaseAgent):
         header = (
             f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d Ret':>8} {'Sharpe':>7} "
             f"{'5d Ret':>7} {'60d Ret':>8} {'RSI':>6} {'vs Idx':>8} "
-            f"{'52wH%':>7} {'Beta':>6} {'VolRatio':>9} {'MACD':>7} {'ATR%':>6} {'Price':>10}"
+            f"{'52wH%':>7} {'Beta':>6} {'VolRatio':>9} {'MACD':>7} {'ATR%':>6} {'DivYld':>7} {'Price':>10}"
         )
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
@@ -174,6 +181,7 @@ class GeminiChallenger(BaseAgent):
                 f"{fmt(c['vol_ratio'], '.2f'):>9} "
                 f"{fmt(c.get('macd_hist', float('nan'))):>7} "
                 f"{fmt(c.get('atr_pct', float('nan'))):>6} "
+                f"{fmt(c.get('dividend_yield', float('nan'))):>7} "
                 f"{c['last_price']:>10.2f}"
             )
 

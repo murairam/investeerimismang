@@ -335,6 +335,74 @@ def generate_meta_learning_report(target_date: str = "2026-04-06") -> dict:
     }
 
 
+def generate_signal_correlation_report(performance_history: list[dict]) -> str:
+    """
+    Analyze per-ticker performance across tracked runs to identify which tickers
+    have been reliable vs consistently disappointing.
+
+    Returns a formatted string suitable for injection into agent prompts.
+    As signal snapshots accumulate, this will be upgraded to full signal-to-return correlation.
+    """
+    if not performance_history:
+        return ""
+
+    # Aggregate per-ticker returns across all tracked days
+    ticker_returns: dict[str, list[float]] = {}
+    for entry in performance_history:
+        for ticker, ret in entry.get("position_returns", {}).items():
+            if not math.isnan(ret):
+                ticker_returns.setdefault(ticker, []).append(ret)
+
+    # Need at least a few tickers with multi-day observations
+    multi_obs = {t: rets for t, rets in ticker_returns.items() if len(rets) >= 2}
+    if len(multi_obs) < 3:
+        return ""
+
+    ticker_stats = {
+        t: {
+            "avg": sum(rets) / len(rets),
+            "hit_rate": sum(1 for ret in rets if ret > 0) / len(rets),
+            "obs": len(rets),
+        }
+        for t, rets in multi_obs.items()
+    }
+
+    sorted_by_avg = sorted(ticker_stats.items(), key=lambda x: x[1]["avg"], reverse=True)
+    n_days = len(performance_history)
+
+    lines = [
+        f"## Per-ticker performance ({n_days} tracked days, tickers with ≥2 observations)",
+        "",
+        "**Consistent performers** (keep unless signals deteriorate):",
+    ]
+    for ticker, s in sorted_by_avg:
+        if s["avg"] > 0.002 and s["hit_rate"] >= 0.6:
+            lines.append(
+                f"  {ticker:<12} avg {s['avg']:+.2%}  hit-rate {s['hit_rate']:.0%}  ({s['obs']} obs) ✅"
+            )
+
+    lines.append("")
+    lines.append("**Persistent underperformers** (consider avoiding):")
+    for ticker, s in reversed(sorted_by_avg):
+        if s["avg"] < -0.002 or s["hit_rate"] < 0.35:
+            lines.append(
+                f"  {ticker:<12} avg {s['avg']:+.2%}  hit-rate {s['hit_rate']:.0%}  ({s['obs']} obs) ⚠️"
+            )
+
+    # Signal-level notes (placeholder until signal_snapshot is stored per run)
+    lines += [
+        "",
+        "_Note: full signal-to-return correlation (Sharpe, vs_index, vol_ratio) will appear here_",
+        "_once signal snapshots are accumulated across 5+ runs._",
+    ]
+
+    result = "\n".join(lines)
+    # Only return if there's meaningful content (at least one entry in either section)
+    if "✅" in result or "⚠️" in result:
+        return result
+    return ""
+
+
 if __name__ == "__main__":
     result = generate_meta_learning_report()
     print(f"\n✅ Meta-learning report generated: {result['report_path']}")

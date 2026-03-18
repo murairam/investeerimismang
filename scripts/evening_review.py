@@ -12,7 +12,7 @@ import json
 import logging
 import os
 import sys
-from datetime import date
+from datetime import date, datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -172,7 +172,13 @@ def main() -> None:
 
     action_note = "\n\n📋 **To change tomorrow's portfolio:** update on the game website.\nDeadline: **10:00 EET** (orders before 10:00 execute at tomorrow's open)."
 
-    description = f"{perf_line}{us_note}\n\n{table}\n💬 {recommendation}{action_note}"
+    # Weekly prize awareness (snapshot taken Monday 09:00 EET)
+    prize_note = ""
+    weekday = datetime.today().weekday()  # 0=Mon, 3=Thu, 4=Fri
+    if weekday in (3, 4):
+        prize_note = "\n\n🏆 **Weekly prize heads-up:** leaderboard snapshot is Monday 09:00 EET. If you need to climb the weekly ranking, consider higher-conviction bets tomorrow. If you're already near the top, protect the lead with lower-beta positions."
+
+    description = f"{perf_line}{us_note}\n\n{table}\n💬 {recommendation}{prize_note}{action_note}"
 
     embed = {
         "title": f"🌙 AlphaShark Evening Review — {date.today().isoformat()}",

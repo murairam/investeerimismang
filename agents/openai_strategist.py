@@ -26,17 +26,20 @@ logger = logging.getLogger(__name__)
 _REGIME_GUIDANCE = {
     "BULL": (
         "Market regime: BULL (SPX above 200d SMA by ≥2%). "
-        "Be aggressive — favour high-beta names, concentrate positions, push weights toward 20-25% for top convictions."
+        "Be aggressive — favour high-beta names, concentrate top convictions at 20-25%. "
+        "Target 8–10 positions; no need to max out to 20 when conviction is high."
     ),
     "BEAR": (
         "Market regime: BEAR (SPX below 200d SMA by ≥2%). "
-        "Be defensive — favour low-beta, quality names; cap individual weights at 10-15%; "
-        "prefer sectors with earnings visibility (healthcare, staples, utilities)."
+        "Be defensive and broadly diversified — target 14–18 positions to spread risk. "
+        "Cap individual weights at 10%; favour low-beta, quality names with earnings visibility "
+        "(healthcare, staples, utilities). More positions = lower single-name blow-up risk."
     ),
     "NEUTRAL": (
         "Market regime: NEUTRAL (SPX near 200d SMA). "
-        "Balanced approach — prefer quality momentum (high Sharpe) over raw beta; "
-        "mix of growth and defensive names."
+        "Target 12–15 positions for broad diversification at no cost. "
+        "Prefer quality momentum (high Sharpe) over raw beta; mix growth and defensive names. "
+        "With 12+ positions you can afford meaningful weights (7-10%) on each without sacrificing diversification."
     ),
 }
 
@@ -80,13 +83,26 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - Favour stocks with the strongest risk-adjusted momentum (Sharpe_20d = 20d return / annualised vol).
 - High Sharpe means a smooth, persistent uptrend — much better than a volatile spike.
 - Prefer high-beta names in bull-market conditions — they amplify gains.
-- Regime-based position count target: BULL 6–8, NEUTRAL 8–10, BEAR 10–12.
+- Regime-based position count target: BULL 8–10, NEUTRAL 12–15, BEAR 14–18. The game allows 20 stocks with no transaction costs — more positions = free diversification. Use the full range, especially in NEUTRAL/BEAR.
 - Diversify across at least 2 markets to reduce single-market risk.
 - Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them.
 - vs_index > 0 means the stock beat its own market — pure alpha signal.
 - vol_ratio = today's volume / 20d average volume. >1.5 means the move has high-volume confirmation (strong signal). <0.7 means low-volume move (weak signal, be cautious).
 - Goal: BEAT other game participants — take conviction bets, not passive exposure.
 - **Diversify from the crowd**: if your top 5 picks are all US mega-cap tech, you are running the same portfolio as every other participant. You MUST include at least 2 picks from non-US markets (Nordic, Baltic, or European). This is required for every portfolio.
+- **DivYld column**: The game auto-reinvests dividends — a 4% yield stock earns ~1.5% free return over the 75-day game on top of price gains. Nordic utilities and Baltic stocks often carry 3–6% yields; factor this in when comparing otherwise-similar candidates.
+
+## Baltic market specialist guidance
+Baltic stocks behave differently from US/Nordic names — apply specific caution:
+- **Most liquid & reliable**: LHV1T.TL (banking, strong fundamentals), TAL1T.TL (tech/growth, highest Baltic liquidity)
+- **Thin-volume names** (use only with strong signals): PRF1T.TL, MRK1T.TL, ARC1T.TL — low daily volume means ATR% is misleadingly small; do NOT apply standard ATR-based sizing to these
+- **Baltic edge**: local competitors may overlook Baltic stocks; if fundamentals and momentum align, Baltic picks are differentiated alpha
+- **Dividend strength**: LHV1T.TL, GRG1L.VS, APG1L.VS often carry 3–6% yields — genuine free return in this game
+
+## Portfolio turnover — MANDATORY HOLD RATE
+At least 40% of total portfolio weight must remain in positions held from yesterday. This prevents chasing noise and avoids systematic open-price slippage (you always buy at the next day's open, so excessive turnover means buying yesterday's momentum at a premium).
+- A current holding should be KEPT unless the replacement candidate has Sharpe_20d ≥ 20% higher.
+- Exception: exit immediately if a holding shows negative vs_index AND RSI > 70 (overbought with weakening alpha).
 
 ## Position sizing — MANDATORY RULES
 You MUST size by conviction. Equal-weighting is forbidden.
@@ -189,7 +205,7 @@ class OpenAIStrategist(BaseAgent):
         header = (
             f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d Ret':>8} {'Sharpe':>7} "
             f"{'5d Ret':>7} {'60d Ret':>8} {'RSI':>6} {'vs Idx':>8} "
-            f"{'52wH%':>7} {'Beta':>6} {'VolRatio':>9} {'MACD':>7} {'ATR%':>6} {'Price':>10}"
+            f"{'52wH%':>7} {'Beta':>6} {'VolRatio':>9} {'MACD':>7} {'ATR%':>6} {'DivYld':>7} {'Price':>10}"
         )
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
@@ -222,6 +238,7 @@ class OpenAIStrategist(BaseAgent):
                 f"{fmt(c['vol_ratio'], '.2f'):>9} "
                 f"{fmt(c.get('macd_hist', float('nan'))):>7} "
                 f"{fmt(c.get('atr_pct', float('nan'))):>6} "
+                f"{fmt(c.get('dividend_yield', float('nan'))):>7} "
                 f"{c['last_price']:>10.2f}"
             )
 

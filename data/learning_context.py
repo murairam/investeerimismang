@@ -6,6 +6,7 @@ This is what makes the AI actually improve over the pre-game training period —
 it sees what rationales worked, which tickers underperformed, and what
 systematic biases to correct, before generating today's proposal.
 """
+import json
 import logging
 import os
 
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 _LEARNING_PATH = os.path.join(os.path.dirname(__file__), "..", "PREGAME_LEARNING.md")
 _CRITIQUE_PATH = os.path.join(os.path.dirname(__file__), "..", "AI_SELF_CRITIQUE.md")
+_PORTFOLIO_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
 
 
 def get_learning_context() -> str:
@@ -30,6 +32,10 @@ def get_learning_context() -> str:
     critique = _extract_critique_summary()
     if critique:
         sections.append(critique)
+
+    signal_report = _generate_signal_summary()
+    if signal_report:
+        sections.append(signal_report)
 
     if not sections:
         return ""
@@ -91,6 +97,26 @@ def _extract_learning_summary() -> str:
         parts.append("Action plan:\n" + "\n".join(action[:4]))
 
     return "\n\n".join(parts) if parts else ""
+
+
+def _generate_signal_summary() -> str:
+    """Generate structured signal performance table from portfolio history."""
+    abs_path = os.path.abspath(_PORTFOLIO_PATH)
+    if not os.path.exists(abs_path):
+        return ""
+    try:
+        with open(abs_path) as f:
+            data = json.load(f)
+        performance_history = data.get("performance_history", [])
+    except Exception:
+        return ""
+
+    try:
+        from data.meta_learning import generate_signal_correlation_report
+        return generate_signal_correlation_report(performance_history)
+    except Exception as exc:
+        logger.debug("Signal correlation report unavailable: %s", exc)
+        return ""
 
 
 def _extract_critique_summary() -> str:

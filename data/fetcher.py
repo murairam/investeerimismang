@@ -48,6 +48,7 @@ class CandidateInfo(TypedDict):
     vol_ratio: float      # today's volume / 20d avg volume (>1.5 = high-volume confirmation)
     macd_hist: float      # MACD histogram / last_price (positive = bullish, negative = bearish)
     atr_pct: float        # 14-day ATR as % of price (daily expected move)
+    dividend_yield: float # trailing 12-month dividend yield (game auto-reinvests — free return)
 
 
 class MarketSnapshot(TypedDict):
@@ -202,6 +203,49 @@ class DataFetcher:
         atr = true_range.rolling(window, min_periods=window // 2).mean()
         last_close = close.iloc[-1].replace(0, np.nan)
         return (atr.iloc[-1] / last_close).rename("atr_pct")
+
+    def fetch_dividend_yields(self, tickers: list[str], close: pd.DataFrame) -> pd.Series:
+        """Trailing 12-month dividend yield: sum(annual dividends) / last close price.
+        The game auto-reinvests dividends — yield is free additional return on top of price gains.
+        """
+        try:
+            data = yf.download(
+                tickers,
+                period="1y",
+                auto_adjust=True,
+                actions=True,
+                progress=False,
+                threads=True,
+            )
+            if data.empty:
+                return pd.Series(dtype=float)
+
+            if isinstance(data.columns, pd.MultiIndex):
+                if "Dividends" not in data.columns.get_level_values(0):
+                    return pd.Series(dtype=float)
+                divs = data["Dividends"].fillna(0.0)
+            else:
+                if "Dividends" not in data.columns:
+                    return pd.Series(dtype=float)
+                single = tickers[0] if len(tickers) == 1 else None
+                if single:
+                    divs = data[["Dividends"]].rename(columns={"Dividends": single}).fillna(0.0)
+                else:
+                    return pd.Series(dtype=float)
+
+            yields: dict[str, float] = {}
+            for ticker in tickers:
+                if ticker not in divs.columns:
+                    yields[ticker] = float("nan")
+                    continue
+                annual_div = float(divs[ticker].sum())
+                last_price_s = close[ticker].dropna() if ticker in close.columns else pd.Series(dtype=float)
+                last_price = float(last_price_s.iloc[-1]) if not last_price_s.empty else 0.0
+                yields[ticker] = annual_div / last_price if last_price > 0 else float("nan")
+            return pd.Series(yields, name="dividend_yield")
+        except Exception as exc:
+            logger.warning("Dividend yield fetch failed: %s", exc)
+            return pd.Series(dtype=float)
 
     def fetch_credit_spread(self) -> float:
         """20-day change in HYG/LQD ratio as a credit spread proxy.
@@ -413,6 +457,10 @@ class DataFetcher:
         # 52-week high
         high_52w = close.rolling(252, min_periods=60).max().iloc[-1]
 
+        # Dividend yields (trailing 12-month; game auto-reinvests — free return)
+        logger.info("Fetching dividend yields …")
+        div_yield = self.fetch_dividend_yields(flat_tickers, close)
+
         # Valid tickers: must have 20d momentum
         valid_tickers = momentum_20d.dropna().index.tolist()
         dropped = len(flat_tickers) - len(valid_tickers)
@@ -457,6 +505,7 @@ class DataFetcher:
                 "vol_ratio": vr,
                 "macd_hist": mh,
                 "atr_pct": at,
+                "dividend_yield": float(div_yield.get(ticker, float("nan"))) if not div_yield.empty and ticker in div_yield.index else float("nan"),
             })
 
         # Sort by Sharpe descending, apply market cap, correlation filter, take top N
