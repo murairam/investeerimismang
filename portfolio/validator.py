@@ -154,3 +154,84 @@ class PortfolioValidator:
             reasoning=proposal.reasoning,
             confidence=proposal.confidence,
         )
+
+    def enforce_sector_cap(
+        self, proposal: PortfolioProposal, candidates: list[dict]
+    ) -> PortfolioProposal:
+        """
+        If any sector exceeds max_sector_weight (35%), replace the weakest
+        position in that sector with the best available candidate from an
+        underrepresented sector.
+
+        'Weakest' = lowest sharpe_20d for that sector among current positions.
+        'Best available' = highest sharpe_20d candidate not already in portfolio
+                          and not in the over-weighted sector.
+
+        Runs up to 5 iterations to converge.
+        """
+        max_sw = self.c.get("max_sector_weight", 1.0)
+        if max_sw >= 1.0:
+            return proposal
+
+        sharpe_map = {c["ticker"]: c.get("sharpe_20d", 0.0) for c in candidates}
+
+        positions = list(proposal.positions)
+
+        for _ in range(5):
+            # Compute current sector weights
+            sector_weights: dict[str, float] = {}
+            for p in positions:
+                s = SECTOR_MAP.get(p.ticker, "?")
+                sector_weights[s] = sector_weights.get(s, 0.0) + p.weight
+
+            over = {s: w for s, w in sector_weights.items() if w > max_sw + 1e-9}
+            if not over:
+                break  # All sectors within cap
+
+            current_tickers = {p.ticker for p in positions}
+
+            # Pick the most over-weight sector
+            bad_sector = max(over, key=lambda s: over[s])
+
+            # Find weakest position in that sector
+            sector_positions = [p for p in positions if SECTOR_MAP.get(p.ticker, "?") == bad_sector]
+            if not sector_positions:
+                break
+            weakest = min(sector_positions, key=lambda p: sharpe_map.get(p.ticker, 0.0))
+
+            # Find best available replacement: not in portfolio, not in bad_sector
+            replacements = [
+                c for c in candidates
+                if c["ticker"] not in current_tickers
+                and SECTOR_MAP.get(c["ticker"], "?") != bad_sector
+            ]
+            if not replacements:
+                logger.warning("Sector cap: no replacement candidates for %s sector — cannot fix", bad_sector)
+                break
+
+            best_replacement = max(replacements, key=lambda c: c.get("sharpe_20d", 0.0))
+
+            logger.info(
+                "Sector cap enforcement: replacing %s (%s sector, sharpe %.2f) "
+                "with %s (%s sector, sharpe %.2f) — %s sector was %.0f%% > %.0f%% cap",
+                weakest.ticker, bad_sector, sharpe_map.get(weakest.ticker, 0.0),
+                best_replacement["ticker"], SECTOR_MAP.get(best_replacement["ticker"], "?"),
+                best_replacement.get("sharpe_20d", 0.0),
+                bad_sector, sector_weights[bad_sector] * 100, max_sw * 100,
+            )
+
+            positions = [
+                Position(
+                    ticker=best_replacement["ticker"],
+                    weight=weakest.weight,
+                    rationale=f"Sector cap replacement for {weakest.ticker} ({bad_sector} sector >{max_sw:.0%})",
+                )
+                if p.ticker == weakest.ticker else p
+                for p in positions
+            ]
+
+        return PortfolioProposal(
+            positions=positions,
+            reasoning=proposal.reasoning,
+            confidence=proposal.confidence,
+        )

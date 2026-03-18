@@ -229,6 +229,13 @@ class AlphaSharkOrchestrator:
                 logger.error("Portfolio still invalid after normalisation: %s", result.errors)
                 sys.exit(1)
 
+        # Step 5a: Enforce sector cap — swap out weakest positions in over-weight sectors
+        final_proposal = self.validator.enforce_sector_cap(
+            final_proposal, snapshot["candidates"]
+        )
+        # Re-normalise after sector swaps (weights unchanged, but re-clip just in case)
+        final_proposal = self.validator.normalize(final_proposal)
+
         # Step 5b: decide whether to keep residual cash or deploy to 100%
         total = sum(p.weight for p in final_proposal.positions)
         if total < self.validator.c["max_total_weight"] - 1e-9:

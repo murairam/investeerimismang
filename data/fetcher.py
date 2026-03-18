@@ -210,6 +210,29 @@ class DataFetcher:
         last_close = close.iloc[-1].replace(0, np.nan)
         return (atr.iloc[-1] / last_close).rename("atr_pct")
 
+    def _fetch_in_batches(
+        self, tickers: list[str], period: str = "1y", batch_size: int = 10
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        """Fetch OHLCV for *tickers* in small sub-batches, merging results.
+        Used as a retry pass for tickers that returned NaN in the bulk download.
+        """
+        all_close, all_volume, all_high, all_low = (
+            pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+        )
+        for i in range(0, len(tickers), batch_size):
+            batch = tickers[i : i + batch_size]
+            try:
+                c, v, h, l, _ = self.fetch_ohlcv(batch, period=period)
+                if not c.empty:
+                    all_close  = all_close.join(c, how="outer")  if not all_close.empty  else c
+                    all_volume = all_volume.join(v, how="outer") if not all_volume.empty and not v.empty else (v if all_volume.empty else all_volume)
+                    all_high   = all_high.join(h, how="outer")   if not all_high.empty   and not h.empty else (h if all_high.empty   else all_high)
+                    all_low    = all_low.join(l, how="outer")    if not all_low.empty    and not l.empty else (l if all_low.empty    else all_low)
+            except Exception as exc:
+                logger.debug("Batch retry failed for %s: %s", batch, exc)
+        empty = pd.DataFrame()
+        return all_close, all_volume, all_high, all_low, empty
+
     def _fetch_dividend_yields_targeted(self, tickers: list[str], close: pd.DataFrame) -> pd.Series:
         """Trailing 12-month dividend yield for a small focused set of tickers.
         Uses auto_adjust=False to avoid NaN issues; divides raw dividends by adjusted close.
@@ -404,12 +427,33 @@ class DataFetcher:
         # Dividend yields are fetched separately on just the top-N candidates after filtering.
         close, volume, high, low, _ = self.fetch_ohlcv(flat_tickers, period="1y")
 
-        returned = set(close.columns)
-        missing = [t for t in flat_tickers if t not in returned]
+        # Retry tickers that returned no data OR too-short history in the batch download.
+        # Large yfinance batches often return truncated/NaN history for non-US tickers.
+        # Fetching in small sub-batches of 10 recovers the full 1-year history.
+        _min_rows = MOMENTUM_WINDOW + 5  # need at least 25 rows for signal computation
+        missing = [
+            t for t in flat_tickers
+            if t not in close.columns
+            or len(close[t].dropna()) < _min_rows
+        ]
         if missing:
+            logger.info("Retrying %d/%d failed tickers in small batches …", len(missing), len(flat_tickers))
+            r_close, r_volume, r_high, r_low, _ = self._fetch_in_batches(missing, period="1y", batch_size=10)
+            if not r_close.empty:
+                # Drop the all-NaN columns from main download before merging
+                close = close.drop(columns=[t for t in missing if t in close.columns], errors="ignore")
+                close  = close.join(r_close,  how="outer") if not close.empty  else r_close
+                volume = volume.join(r_volume, how="outer") if not volume.empty and not r_volume.empty else (r_volume if volume.empty else volume)
+                high   = high.join(r_high,    how="outer") if not high.empty   and not r_high.empty   else (r_high   if high.empty   else high)
+                low    = low.join(r_low,      how="outer") if not low.empty    and not r_low.empty    else (r_low    if low.empty    else low)
+                recovered = [t for t in missing if t in r_close.columns and not r_close[t].dropna().empty]
+                logger.info("Retry recovered %d/%d tickers: %s", len(recovered), len(missing), recovered)
+
+        still_missing = [t for t in flat_tickers if t not in close.columns or len(close[t].dropna()) < _min_rows]
+        if still_missing:
             logger.warning(
-                "%d/%d tickers returned no data from yfinance: %s",
-                len(missing), len(flat_tickers), missing,
+                "%d/%d tickers still missing after retry: %s",
+                len(still_missing), len(flat_tickers), still_missing,
             )
 
         # Benchmark + regime
@@ -426,20 +470,26 @@ class DataFetcher:
             vix_term_ratio if not math.isnan(vix_term_ratio) else 0,
         )
 
+        # Forward-fill close prices before signal computation.
+        # European/Baltic stocks don't trade on US market holidays, producing NaN gaps
+        # in the aligned DataFrame. Forward-filling carries the last known price forward
+        # so momentum and RSI calculations don't silently drop these tickers.
+        close_ff = close.ffill()
+
         # Compute all signals
-        momentum_20d = self.compute_momentum(close, MOMENTUM_WINDOW)
-        momentum_5d = self.compute_momentum(close, MOM_SHORT)
-        momentum_60d = self.compute_momentum(close, MOM_LONG)
-        vol_20d = self.compute_vol(close, MOMENTUM_WINDOW)
-        rsi = self.compute_rsi(close, RSI_WINDOW)
-        beta = self.compute_beta(close, bench_close)
+        momentum_20d = self.compute_momentum(close_ff, MOMENTUM_WINDOW)
+        momentum_5d = self.compute_momentum(close_ff, MOM_SHORT)
+        momentum_60d = self.compute_momentum(close_ff, MOM_LONG)
+        vol_20d = self.compute_vol(close_ff, MOMENTUM_WINDOW)
+        rsi = self.compute_rsi(close_ff, RSI_WINDOW)
+        beta = self.compute_beta(close_ff, bench_close)
         vol_ratio = self.compute_vol_ratio(volume, MOMENTUM_WINDOW)
-        macd_hist = self.compute_macd(close)
-        atr_pct = self.compute_atr(high, low, close)
+        macd_hist = self.compute_macd(close_ff)
+        atr_pct = self.compute_atr(high, low, close_ff)
 
         # Market breadth: % of universe stocks above their 50d SMA
-        sma_50 = close.rolling(50, min_periods=30).mean().iloc[-1]
-        above_50 = (close.iloc[-1] > sma_50).sum()
+        sma_50 = close_ff.rolling(50, min_periods=30).mean().iloc[-1]
+        above_50 = (close_ff.iloc[-1] > sma_50).sum()
         valid_breadth = int(sma_50.notna().sum())
         breadth_pct = float(above_50 / valid_breadth) if valid_breadth > 0 else float("nan")
 
@@ -461,8 +511,8 @@ class DataFetcher:
             bench_close.iloc[-1] / bench_close.iloc[-MOMENTUM_WINDOW - 1] - 1
         ) if len(bench_close) > MOMENTUM_WINDOW else 0.0
 
-        # 52-week high
-        high_52w = close.rolling(252, min_periods=60).max().iloc[-1]
+        # 52-week high (use forward-filled prices for consistent 52w lookback)
+        high_52w = close_ff.rolling(252, min_periods=60).max().iloc[-1]
 
         # Dividend yields are fetched AFTER candidate filtering (targeted ~40-ticker call, not full universe)
 
@@ -486,7 +536,7 @@ class DataFetcher:
                 continue
 
             sharpe = mom / vol if (not math.isnan(vol) and vol > 0) else 0.0
-            last_price = float(close[ticker].dropna().iloc[-1]) if ticker in close.columns else 0.0
+            last_price = float(close_ff[ticker].dropna().iloc[-1]) if ticker in close_ff.columns else 0.0
             high = float(high_52w.get(ticker, np.nan)) if ticker in high_52w.index else float("nan")
             pct_from_high = (last_price / high - 1) if (not math.isnan(high) and high > 0) else float("nan")
 

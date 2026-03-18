@@ -37,7 +37,8 @@ _REGIME_GUIDANCE = {
     ),
     "NEUTRAL": (
         "Market regime: NEUTRAL (SPX near 200d SMA). "
-        "Target 12–15 positions for broad diversification at no cost. "
+        "MANDATORY: output exactly 12–15 positions. This game has ZERO transaction costs — every position "
+        "costs nothing to hold. A 5% position in a solid stock is free alpha. Do NOT self-censor to 8-10. "
         "Prefer quality momentum (high Sharpe) over raw beta; mix growth and defensive names. "
         "With 12+ positions you can afford meaningful weights (7-10%) on each without sacrificing diversification."
     ),
