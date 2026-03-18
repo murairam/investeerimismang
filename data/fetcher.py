@@ -3,6 +3,7 @@ Market data fetching and momentum signal computation.
 """
 import logging
 import math
+from datetime import date
 from typing import TypedDict
 
 import numpy as np
@@ -474,7 +475,7 @@ class DataFetcher:
         records.sort(key=lambda x: x["sharpe_20d"], reverse=True)
         top = records[:TOP_N_CANDIDATES]
 
-        as_of = str(close.index[-1].date()) if len(close) > 0 else "unknown"
+        as_of = date.today().isoformat()
 
         # 1-day returns for ALL tickers (for P&L computation)
         returns_1d_series = (close.iloc[-1] / close.iloc[-2] - 1) if len(close) >= 2 else pd.Series(dtype=float)

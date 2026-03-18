@@ -5,6 +5,7 @@ Checks if portfolio verification was done today.
 If not, sends a Discord reminder.
 
 This is called by GitHub Actions 30 minutes after the main run.
+Runs in both pregame (mock game) and live mode.
 """
 import os
 import sys
@@ -18,20 +19,21 @@ from data.mode_guard import enforce_mode_and_freeze
 from data.verification_tracker import is_verified_today
 
 
-def send_discord_reminder(webhook_url: str) -> None:
+def send_discord_reminder(webhook_url: str, pregame: bool = False) -> None:
     """Send a Discord reminder that verification is needed."""
+    mode_label = "📝 PREGAME" if pregame else "🔴 LIVE"
     payload = {
         "embeds": [{
-            "title": "⚠️ Portfolio Verification Reminder",
+            "title": f"⚠️ Portfolio Verification Reminder  {mode_label}",
             "description": (
                 "**You haven't verified your portfolio yet today!**\n\n"
                 "Please:\n"
                 "1. Confirm your game portfolio matches the recommendation\n"
                 "2. Run `python verify.py` to sync the system\n\n"
-                "⏰ **Deadline: 10:00 EEST**\n\n"
+                "⏰ **Deadline: 10:00 EET**\n\n"
                 "Without verification, tomorrow's AI decisions may be based on outdated data."
             ),
-            "color": 0xE74C3C,  # Red
+            "color": 0xF39C12 if pregame else 0xE74C3C,  # Orange for pregame, red for live
         }]
     }
 
@@ -46,12 +48,8 @@ def send_discord_reminder(webhook_url: str) -> None:
 def main() -> None:
     today_str = date.today().isoformat()
 
-    # Check if we're in LIVE mode (only send reminders after April 6)
     mode_info = enforce_mode_and_freeze(today_str, game_start_date="2026-04-06")
-
-    if mode_info["mode"] != "LIVE":
-        print(f"📝 Pregame mode - no verification needed (days to live: {mode_info['days_to_live']})")
-        return
+    is_pregame = mode_info["mode"] != "LIVE"
 
     # Check if verification was done
     if is_verified_today(today_str):
@@ -59,14 +57,15 @@ def main() -> None:
         return
 
     # Send reminder
-    print(f"⚠️ Portfolio NOT verified for {today_str} - sending Discord reminder...")
+    mode_str = f"pregame ({mode_info['days_to_live']} days to live)" if is_pregame else "live"
+    print(f"⚠️ Portfolio NOT verified for {today_str} ({mode_str}) - sending Discord reminder...")
 
     webhook_url = os.environ.get("DISCORD_WEBHOOK_URL")
     if not webhook_url:
         print("❌ DISCORD_WEBHOOK_URL not set", file=sys.stderr)
         return
 
-    send_discord_reminder(webhook_url)
+    send_discord_reminder(webhook_url, pregame=is_pregame)
 
 
 if __name__ == "__main__":

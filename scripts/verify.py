@@ -14,9 +14,12 @@ import sys
 from datetime import date
 from typing import Optional
 
+# Ensure project root is on the path regardless of where the script is invoked from
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from data.verification_tracker import mark_verified
 
-_STORE_PATH = os.path.join(os.path.dirname(__file__), "portfolio_history.json")
+_STORE_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
 
 
 def load() -> Optional[dict]:
