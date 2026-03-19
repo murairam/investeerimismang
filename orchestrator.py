@@ -235,6 +235,36 @@ class AlphaSharkOrchestrator:
         else:
             logger.info("Challenger unavailable — meta-analyst will use strategist only")
 
+        # Check actual strategist vs challenger overlap — re-call if too similar
+        if strategist_proposal.positions and challenger_proposal.positions:
+            strat_set = {p.ticker for p in strategist_proposal.positions}
+            chall_set = {p.ticker for p in challenger_proposal.positions}
+            overlap = strat_set & chall_set
+            overlap_pct = len(overlap) / len(chall_set)
+            logger.info(
+                "Strategist vs challenger overlap: %d/%d tickers (%.0f%%)",
+                len(overlap), len(chall_set), overlap_pct * 100,
+            )
+            if overlap_pct > 0.65:
+                logger.warning(
+                    "Overlap %.0f%% > 65%% — re-calling challenger with %d forbidden tickers: %s",
+                    overlap_pct * 100, len(overlap), ", ".join(sorted(overlap)),
+                )
+                try:
+                    challenger_proposal = self.challenger.propose_contrarian(
+                        snapshot, prior_portfolio, forbidden_tickers=overlap
+                    )
+                    new_chall_set = {p.ticker for p in challenger_proposal.positions}
+                    new_overlap = strat_set & new_chall_set
+                    logger.info(
+                        "Challenger re-call: %d positions, overlap now %d/%d (%.0f%%)",
+                        len(challenger_proposal.positions),
+                        len(new_overlap), len(new_chall_set),
+                        len(new_overlap) / len(new_chall_set) * 100 if new_chall_set else 0,
+                    )
+                except Exception as exc:
+                    logger.warning("Challenger re-call failed (%s) — using original", exc)
+
         # Step 3c: Devil's advocate — free Gemini call that argues against the top picks
         logger.info("Calling GeminiDevil — stress-testing top picks …")
         bear_cases: dict = {}

@@ -118,17 +118,17 @@ class GeminiChallenger(BaseAgent):
             return PortfolioProposal()
 
     @staticmethod
-    def _log_overlap(proposal: PortfolioProposal, strategist_tickers: set[str], source: str) -> None:
-        """Log how contrarian the challenger actually is vs the strategist."""
+    def _log_overlap(proposal: PortfolioProposal, prior_tickers: set[str], source: str) -> None:
+        """Log how much the challenger overlaps with yesterday's portfolio."""
         if not proposal.positions:
             logger.warning("Challenger (%s) produced 0 positions", source)
             return
         challenger_tickers = {p.ticker for p in proposal.positions}
-        overlap = challenger_tickers & strategist_tickers
-        unique = challenger_tickers - strategist_tickers
+        overlap = challenger_tickers & prior_tickers
+        unique = challenger_tickers - prior_tickers
         overlap_pct = len(overlap) / len(challenger_tickers) if challenger_tickers else 0
         logger.info(
-            "Challenger (%s): %d positions (confidence %.0f%%) — %d unique vs strategist, %d overlap (%.0f%%)",
+            "Challenger (%s): %d positions (confidence %.0f%%) — %d new vs yesterday, %d held over (%.0f%%)",
             source,
             len(proposal.positions),
             proposal.confidence * 100,
@@ -136,12 +136,34 @@ class GeminiChallenger(BaseAgent):
             len(overlap),
             overlap_pct * 100,
         )
-        if overlap_pct > 0.7:
-            logger.warning(
-                "Challenger overlap with strategist is %.0f%% — not contrarian enough. "
-                "Risk manager will have limited diversification to work with.",
-                overlap_pct * 100,
+
+    def propose_contrarian(
+        self,
+        snapshot: MarketSnapshot,
+        prior_proposal: Optional[PortfolioProposal],
+        forbidden_tickers: set[str],
+    ) -> PortfolioProposal:
+        """Re-call with an explicit forbidden list when overlap with strategist is too high."""
+        forbidden_str = ", ".join(sorted(forbidden_tickers))
+        extra = (
+            f"\n\nCRITICAL OVERRIDE: The strategist already holds these tickers — "
+            f"you are FORBIDDEN from including ANY of them: {forbidden_str}. "
+            f"Your entire value is finding what the strategist missed. "
+            f"Build a portfolio with ZERO overlap with the forbidden list."
+        )
+        user_message = self._build_user_message(snapshot, prior_proposal) + extra
+        regime = snapshot.get("regime", "NEUTRAL")
+        learning_context = snapshot.get("learning_context", "")
+        try:
+            proposal = self._call_gemini(user_message, regime, learning_context)
+            logger.info(
+                "Challenger re-call (contrarian): %d positions, %d forbidden tickers avoided",
+                len(proposal.positions), len(forbidden_tickers),
             )
+            return proposal
+        except Exception as exc:
+            logger.warning("Challenger re-call (Gemini) failed: %s — trying OpenAI fallback", exc)
+            return self._call_openai_fallback(user_message, regime, learning_context)
 
     def _build_user_message(
         self,

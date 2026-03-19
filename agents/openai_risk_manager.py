@@ -137,6 +137,9 @@ class OpenAIRiskManager(BaseAgent):
             return float("nan")
         return sum(w * b for w, b in covered) / covered_weight
 
+    # Empirical average S&P 500 beta for Nordic/Baltic stocks (structurally low US-market correlation)
+    _NON_US_ASSUMED_BETA = 0.30
+
     def _enforce_beta(
         self,
         proposal: PortfolioProposal,
@@ -144,20 +147,50 @@ class OpenAIRiskManager(BaseAgent):
         regime: str,
         beta_targets: dict,
     ) -> PortfolioProposal:
-        """Check portfolio beta against regime targets; log a warning if out of range."""
+        """Check portfolio beta against regime targets, adjusted for non-US exposure.
+
+        Non-US tickers (identified by having '.' in the symbol, e.g. TELIA.ST, DNB.OL)
+        naturally have low S&P 500 beta (~0.30). The raw beta targets (0.95-1.15 for NEUTRAL)
+        were designed for US-only portfolios. We scale the target down proportionally to
+        how much of the portfolio is in non-US stocks.
+        """
         actual_beta = self._portfolio_beta(proposal, snapshot)
         if math.isnan(actual_beta):
             return proposal
+
+        us_weight = sum(p.weight for p in proposal.positions if "." not in p.ticker)
+        non_us_weight = 1.0 - us_weight
+
+        # Skip check if almost no US exposure — beta vs S&P 500 is meaningless
+        if us_weight < 0.25:
+            logger.info(
+                "Portfolio beta check skipped: only %.0f%% US exposure "
+                "(non-US stocks have structurally low S&P 500 beta — actual beta %.2f)",
+                us_weight * 100, actual_beta,
+            )
+            return proposal
+
+        # Adjust target range for non-US exposure
         lo, hi = beta_targets.get(regime, (None, None))
-        in_range = (lo is None or actual_beta >= lo) and (hi is None or actual_beta <= hi)
-        target_str = f"{lo or '?'}–{hi or '?'}"
+        adj_lo = (lo * us_weight + self._NON_US_ASSUMED_BETA * non_us_weight) if lo else None
+        adj_hi = (hi * us_weight + self._NON_US_ASSUMED_BETA * non_us_weight) if hi else None
+
+        in_range = (adj_lo is None or actual_beta >= adj_lo) and (adj_hi is None or actual_beta <= adj_hi)
+        raw_str = f"{lo or '?'}–{hi or '?'}"
+        adj_str = f"{adj_lo:.2f}–{adj_hi:.2f}" if (adj_lo and adj_hi) else f"≤{adj_hi:.2f}" if adj_hi else "?"
+
         if in_range:
-            logger.info("Portfolio beta %.2f is within %s target (%s regime)", actual_beta, target_str, regime)
+            logger.info(
+                "Portfolio beta %.2f within adjusted target %s "
+                "(raw %s scaled for %.0f%% non-US exposure)",
+                actual_beta, adj_str, raw_str, non_us_weight * 100,
+            )
         else:
             logger.warning(
-                "Portfolio beta %.2f is OUTSIDE %s target (%s regime) — "
-                "risk manager ignored beta constraint; proceeding anyway",
-                actual_beta, target_str, regime,
+                "Portfolio beta %.2f outside adjusted target %s "
+                "(raw %s, %.0f%% US + %.0f%% non-US at assumed beta %.2f)",
+                actual_beta, adj_str, raw_str,
+                us_weight * 100, non_us_weight * 100, self._NON_US_ASSUMED_BETA,
             )
         return proposal
 
