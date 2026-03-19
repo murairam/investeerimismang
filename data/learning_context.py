@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 _LEARNING_PATH = os.path.join(os.path.dirname(__file__), "..", "PREGAME_LEARNING.md")
 _CRITIQUE_PATH = os.path.join(os.path.dirname(__file__), "..", "AI_SELF_CRITIQUE.md")
 _PORTFOLIO_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
+_STRATEGY_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "strategy_principles.md")
 
 
 def get_learning_context() -> str:
@@ -24,6 +25,10 @@ def get_learning_context() -> str:
     Returns empty string if no data is available yet (first run).
     """
     sections = []
+
+    strategy = _read_file(_STRATEGY_PATH)
+    if strategy:
+        sections.append("=== PERMANENT STRATEGY PRINCIPLES (highest priority) ===\n" + strategy)
 
     learning = _extract_learning_summary()
     if learning:

@@ -57,6 +57,57 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 | `portfolio/models.py` | `Position`, `PortfolioProposal`, `MarketSnapshot` dataclasses |
 | `portfolio/validator.py` | Constraint validation + weight normalisation |
 
+## Game Constraints — Hard Rules (from docs/rules.txt)
+
+These are competition rules that NO code may violate. Enforced by `portfolio/validator.py`.
+
+| Rule | Value |
+|------|-------|
+| Stocks | 5–20 |
+| Position weight | 5–25% (inclusive) |
+| Max cash | 25% (must invest ≥75%) |
+| Sector concentration | No cap — 100% in one sector is legal |
+| Markets | US S&P 500, Baltic, OMX Helsinki, OMX Stockholm, OBX Norway, OMX Copenhagen |
+| Execution | Baltic/Nordic orders at 10:00 EET open; US at 16:30 EET open |
+| Fees | Zero transaction fees |
+| Game period | 6 April – 19 June 2026 (75 trading days) |
+
+Never write portfolio logic that violates these rules. The validator in `portfolio/validator.py`
+enforces them — always run validation before committing a portfolio proposal.
+
+## Strategic Mandate — Aggressive Hedge Fund (Updated 2026-03-19)
+
+We are no longer a conservative fund. We are an aggressive, high-beta, catalyst-driven hedge fund
+competing in a short-term 10-week game. The objective is to **WIN**, not to preserve capital.
+
+- Prioritize: high-beta breakouts, sector momentum leaders, pre-earnings catalysts
+- Concentrate: 5–8 positions maximum. Diversification is for managing money, not winning competitions.
+- Current regime (as of March 2026): Energy rotation year. Brent ~$103, energy +25% YTD.
+  Tech in correction. Favour XOM, CVX, EQNR.OL, KONG.OL, LLY, DSV.CO.
+- Avoid: low-beta telecom, Nordic banks as filler, shipping with SELL consensus (Mærsk)
+- Tech stack: yfinance for data, vectorized pandas for math (no TA-Lib or bloated libraries),
+  Python 3.10+ type hints throughout, `logging` (not `print`) for all output.
+
+## Memory Loop — Mandatory Reading
+
+Before writing any new trading logic or modifying agent prompts, you MUST:
+1. Read `AI_SELF_CRITIQUE.md` — start your first response with a 1-sentence summary of the
+   last recorded mistake so we do not repeat it.
+2. Read `PREGAME_LEARNING.md` — check the action plan section for active constraints.
+3. Read `docs/strategy_principles.md` — the persistent strategic pivot document that survives
+   daily auto-generation of `AI_SELF_CRITIQUE.md`.
+
+## Agent Testing Protocol
+
+After modifying any portfolio logic, validator, or agent prompt:
+1. Run `python scripts/verify.py --show` to display current portfolio without prompts.
+2. Run `python main.py` to execute the full pipeline end-to-end.
+3. Check logs for: turnover %, position count, sector weights, held-over %.
+4. Confirm no validation errors in the output.
+5. Run `python scripts/status.py` to confirm learning report is updated.
+
+Note: `verify.py` in interactive mode requires manual input — use `--show` flag for autonomous checks.
+
 ## Game Constraints (`config.GAME_CONSTRAINTS`, enforced by validator)
 
 | Rule | Value |
@@ -64,8 +115,8 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 | Stocks | 5–20 |
 | Position weight | 5–25% |
 | Min total invested | 75% (max 25% cash) |
-| Max sector concentration | 35% |
-| Regime-based target count | BULL 6-8, NEUTRAL 8-10, BEAR 10-14 |
+| Sector concentration | No cap |
+| Regime-based target count | BULL 5-7, NEUTRAL 6-8, BEAR 8-12 |
 
 ## Operational Modes
 

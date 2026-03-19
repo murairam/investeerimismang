@@ -343,7 +343,71 @@
       "input_tokens": 2679,
       "output_tokens": 417,
       "cost_usd": 0.000652
+    },
+    {
+      "date": "2026-03-19",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-4o",
+      "input_tokens": 11566,
+      "output_tokens": 436,
+      "cost_usd": 0.033275
+    },
+    {
+      "date": "2026-03-19",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-4o-mini",
+      "input_tokens": 2934,
+      "output_tokens": 394,
+      "cost_usd": 0.000677
+    },
+    {
+      "date": "2026-03-19",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-4o",
+      "input_tokens": 11684,
+      "output_tokens": 418,
+      "cost_usd": 0.03339
+    },
+    {
+      "date": "2026-03-19",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-4o-mini",
+      "input_tokens": 3131,
+      "output_tokens": 413,
+      "cost_usd": 0.000717
+    },
+    {
+      "date": "2026-03-19",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-4o",
+      "input_tokens": 12006,
+      "output_tokens": 427,
+      "cost_usd": 0.034285
+    },
+    {
+      "date": "2026-03-19",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-4o-mini",
+      "input_tokens": 2951,
+      "output_tokens": 396,
+      "cost_usd": 0.00068
+    },
+    {
+      "date": "2026-03-19",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-4o",
+      "input_tokens": 12100,
+      "output_tokens": 411,
+      "cost_usd": 0.03436
+    },
+    {
+      "date": "2026-03-19",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-4o-mini",
+      "input_tokens": 3032,
+      "output_tokens": 330,
+      "cost_usd": 0.000653
     }
   ],
-  "total_cost": 0.483524
+  "total_cost": 0.62156
 }

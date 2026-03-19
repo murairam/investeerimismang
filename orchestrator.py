@@ -39,6 +39,7 @@ from data.trends_fetcher import fetch_search_interest, format_trends_context
 from data.paper_account import rebalance_to_proposal, reset_for_live
 from data.portfolio_store import load_last, load_yesterday_prices, save as save_portfolio
 from output.dispatcher import WebhookDispatcher
+from portfolio.models import PortfolioProposal, Position
 from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
@@ -286,6 +287,56 @@ class AlphaSharkOrchestrator:
             bear_cases=bear_cases if bear_cases else None,
         )
 
+        # Step 4b: Enforce minimum hold rate — at least 40% of weight must carry over
+        # This prevents 100% daily turnover which systematically buys yesterday's momentum at a premium
+        MIN_HOLD_RATE = 0.40
+        if prior_portfolio and prior_portfolio.positions:
+            prior_map = {p.ticker: p for p in prior_portfolio.positions}
+            held_weight = sum(p.weight for p in final_proposal.positions if p.ticker in prior_map)
+            logger.info(
+                "Turnover check: %.0f%% held over, %.0f%% new (limit: ≥%.0f%% must hold)",
+                held_weight * 100, (1.0 - held_weight) * 100, MIN_HOLD_RATE * 100,
+            )
+            if held_weight < MIN_HOLD_RATE:
+                new_tickers = {p.ticker for p in final_proposal.positions}
+                exited = sorted(
+                    [p for p in prior_portfolio.positions if p.ticker not in new_tickers],
+                    key=lambda p: -p.weight,
+                )
+                forced: list[Position] = []
+                still_needed = MIN_HOLD_RATE - held_weight
+                for p in exited:
+                    if still_needed <= 0:
+                        break
+                    forced.append(Position(
+                        ticker=p.ticker,
+                        weight=p.weight,
+                        rationale="[held: turnover limit — prior position retained]",
+                    ))
+                    still_needed -= p.weight
+
+                if forced:
+                    forced_weight = sum(p.weight for p in forced)
+                    existing = list(final_proposal.positions)
+                    existing_total = sum(p.weight for p in existing)
+                    available = 1.0 - forced_weight
+                    if existing_total > 0 and available > 0:
+                        scale = min(1.0, available / existing_total)
+                        existing = [
+                            Position(ticker=p.ticker, weight=p.weight * scale, rationale=p.rationale)
+                            for p in existing
+                        ]
+                    final_proposal = PortfolioProposal(
+                        positions=existing + forced,
+                        reasoning=final_proposal.reasoning + f" [Turnover limit: {len(forced)} prior position(s) held over.]",
+                        confidence=final_proposal.confidence,
+                    )
+                    new_held = sum(p.weight for p in final_proposal.positions if p.ticker in prior_map)
+                    logger.info(
+                        "Turnover enforcement applied: %.0f%% now held over (%d position(s) forced)",
+                        new_held * 100, len(forced),
+                    )
+
         # Step 5: Validate & normalise
         result = self.validator.validate(final_proposal, regime=snapshot.get("regime"))
         if not result.ok:
@@ -296,13 +347,6 @@ class AlphaSharkOrchestrator:
             if not result.ok:
                 logger.error("Portfolio still invalid after normalisation: %s", result.errors)
                 sys.exit(1)
-
-        # Step 5a: Enforce sector cap — swap out weakest positions in over-weight sectors
-        final_proposal = self.validator.enforce_sector_cap(
-            final_proposal, snapshot["candidates"]
-        )
-        # Re-normalise after sector swaps (weights unchanged, but re-clip just in case)
-        final_proposal = self.validator.normalize(final_proposal)
 
         # Step 5b: decide whether to keep residual cash or deploy to 100%
         total = sum(p.weight for p in final_proposal.positions)

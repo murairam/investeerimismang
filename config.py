@@ -10,16 +10,16 @@ GAME_CONSTRAINTS = {
     "max_weight": 0.25,        # 25%
     "max_total_weight": 1.00,  # 100%
     "min_total_weight": 0.75,  # 75% game-rule minimum; cash policy targets higher deployment
-    "max_sector_weight": 0.35, # 35% cap per sector to prevent concentration blow-ups
+
 }
 
 # Preferred stock-count bands by market regime (still bounded by GAME_CONSTRAINTS)
 # Competition logic: daily rebalancing replaces insurance positions.
 # Concentrate on highest-signal picks; no token 5% diversifiers.
 POSITION_TARGETS_BY_REGIME = {
-    "BULL": {"min_stocks": 6, "max_stocks": 8},
-    "NEUTRAL": {"min_stocks": 8, "max_stocks": 10},
-    "BEAR": {"min_stocks": 10, "max_stocks": 14},
+    "BULL":    {"min_stocks": 5, "max_stocks": 7},   # concentrate hard — competition won by big bets
+    "NEUTRAL": {"min_stocks": 6, "max_stocks": 8},   # still concentrate (was 8-10)
+    "BEAR":    {"min_stocks": 8, "max_stocks": 12},  # spread risk (was 10-14)
 }
 
 # Cash policy (used when proposed allocation is below 100%)
@@ -85,6 +85,7 @@ SECTOR_MAP: dict[str, str] = {
     "TEL.OL": "Tel", "MOWI.OL": "Cons", "ORK.OL": "Cons",
     "YAR.OL": "Mat", "SCATC.OL": "Energy", "SUBC.OL": "Energy",
     "SALM.OL": "Cons", "RECSI.OL": "Energy",
+    "KONG.OL": "Ind", "AKRBP.OL": "Energy",  # Kongsberg (defense/tech) + Aker BP (oil) — top OBX performers 2026
     # Denmark — OMXC25
     "NOVO-B.CO": "Health", "DSV.CO": "Ind", "ORSTED.CO": "Energy",
     "CARL-B.CO": "Cons", "GMAB.CO": "Health", "MAERSK-B.CO": "Ind",
@@ -125,7 +126,7 @@ UNIVERSE: dict[str, list[str]] = {
     "OBX": [
         "EQNR.OL", "DNB.OL", "NHY.OL", "TEL.OL", "MOWI.OL",
         "ORK.OL", "YAR.OL", "SCATC.OL", "SUBC.OL",
-        "SALM.OL", "RECSI.OL",
+        "SALM.OL", "RECSI.OL", "KONG.OL", "AKRBP.OL",
     ],
     # Denmark — OMX Copenhagen 25 (OMXC25)
     "OMXC25": [

@@ -78,17 +78,30 @@
         "FORTUM.HE": 0.004966,
         "XOM": 0.006549
       }
+    },
+    {
+      "date": "2026-03-19",
+      "benchmark_return_20d": -0.0373,
+      "portfolio_return_1d": -0.013475,
+      "benchmark_return_1d": -0.013608,
+      "alpha_1d": 0.000133,
+      "position_returns": {
+        "MAERSK-B.CO": -0.008591,
+        "SHB-A.ST": -0.023759,
+        "DNB.OL": -0.00876,
+        "NHY.OL": -0.051747,
+        "TELIA.ST": -0.00947,
+        "ERIC-B.ST": -0.024669
+      }
     }
   ],
+  "source": "verified",
   "close_prices": {
-    "ALFA.ST": 527.5999755859375,
-    "CVX": 200.6199951171875,
-    "DNB.OL": 296.79998779296875,
-    "ERIC-B.ST": 109.44999694824219,
-    "MAERSK-B.CO": 18625.0,
-    "SHB-A.ST": 141.0,
-    "TELIA.ST": 47.52000045776367,
-    "XOM": 159.85000610351562
-  },
-  "source": "verified"
+    "CVX": 198.61000061035156,
+    "DNB.OL": 294.20001220703125,
+    "MAERSK-B.CO": 18465.0,
+    "SHB-A.ST": 137.64999389648438,
+    "TAL1T.TL": 0.6179999709129333,
+    "XOM": 157.58999633789062
+  }
 }
