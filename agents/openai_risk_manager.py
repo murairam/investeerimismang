@@ -99,8 +99,16 @@ class OpenAIRiskManager(BaseAgent):
 
         user_message = self._build_message(prior_proposal, challenger_proposal, snapshot, bear_cases or {})
 
+        regime = snapshot.get("regime", "NEUTRAL")
+        beta_targets = {
+            "BULL": (None, 1.30),
+            "NEUTRAL": (0.95, 1.15),
+            "BEAR": (None, 0.90),
+        }
+
         try:
             result = self._call_openai(user_message)
+            result = self._enforce_beta(result, snapshot, regime, beta_targets)
             logger.info(
                 "Meta-analyst: synthesised %d positions from strategist(%d) + challenger(%d) (conf %.0f%%)",
                 len(result.positions),
@@ -110,8 +118,8 @@ class OpenAIRiskManager(BaseAgent):
             )
             return result
         except Exception as exc:
-            logger.warning("Meta-analyst failed (%s) — falling back to strategist proposal", exc)
-            return prior_proposal
+            logger.warning("Meta-analyst failed (%s) — falling back to 60/40 merge", exc)
+            return self._merge_proposals(prior_proposal, challenger_proposal)
 
     @staticmethod
     def _portfolio_beta(proposal: PortfolioProposal, snapshot: MarketSnapshot) -> float:
@@ -128,6 +136,63 @@ class OpenAIRiskManager(BaseAgent):
         if covered_weight == 0:
             return float("nan")
         return sum(w * b for w, b in covered) / covered_weight
+
+    def _enforce_beta(
+        self,
+        proposal: PortfolioProposal,
+        snapshot: MarketSnapshot,
+        regime: str,
+        beta_targets: dict,
+    ) -> PortfolioProposal:
+        """Check portfolio beta against regime targets; log a warning if out of range."""
+        actual_beta = self._portfolio_beta(proposal, snapshot)
+        if math.isnan(actual_beta):
+            return proposal
+        lo, hi = beta_targets.get(regime, (None, None))
+        in_range = (lo is None or actual_beta >= lo) and (hi is None or actual_beta <= hi)
+        target_str = f"{lo or '?'}–{hi or '?'}"
+        if in_range:
+            logger.info("Portfolio beta %.2f is within %s target (%s regime)", actual_beta, target_str, regime)
+        else:
+            logger.warning(
+                "Portfolio beta %.2f is OUTSIDE %s target (%s regime) — "
+                "risk manager ignored beta constraint; proceeding anyway",
+                actual_beta, target_str, regime,
+            )
+        return proposal
+
+    @staticmethod
+    def _merge_proposals(
+        strategist: PortfolioProposal,
+        challenger: Optional[PortfolioProposal],
+    ) -> PortfolioProposal:
+        """60/40 weight-merge fallback when meta-analyst fails entirely."""
+        if not challenger or not challenger.positions:
+            return strategist
+        merged: dict[str, list] = {}
+        for p in strategist.positions:
+            merged.setdefault(p.ticker, []).append((p.weight * 0.6, p.rationale))
+        for p in challenger.positions:
+            if p.ticker in merged:
+                old_w, old_r = merged[p.ticker][0]
+                merged[p.ticker] = [(old_w + p.weight * 0.4, old_r)]
+            else:
+                merged.setdefault(p.ticker, []).append((p.weight * 0.4, p.rationale))
+        positions = [
+            Position(ticker=t, weight=min(0.25, max(0.05, w)), rationale=r)
+            for t, [(w, r)] in merged.items()
+        ]
+        total = sum(p.weight for p in positions)
+        if total > 0:
+            positions = [
+                Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale)
+                for p in positions
+            ]
+        return PortfolioProposal(
+            positions=positions,
+            reasoning="60/40 merge fallback (meta-analyst unavailable)",
+            confidence=0.5,
+        )
 
     def _build_message(
         self,

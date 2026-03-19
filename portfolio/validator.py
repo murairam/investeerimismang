@@ -149,6 +149,19 @@ class PortfolioValidator:
                     for p in positions
                 ]
 
+        final_total = sum(p.weight for p in positions)
+        if abs(final_total - self.c["max_total_weight"]) > 1e-6:
+            logger.warning(
+                "normalize() did not reach exactly 100%% — final total %.4f%%. "
+                "Applying proportional correction.",
+                final_total * 100,
+            )
+            if final_total > 1e-9:
+                positions = [
+                    Position(ticker=p.ticker, weight=p.weight / final_total, rationale=p.rationale)
+                    for p in positions
+                ]
+
         return PortfolioProposal(
             positions=positions,
             reasoning=proposal.reasoning,
@@ -195,7 +208,7 @@ class PortfolioValidator:
         if max_sw >= 1.0:
             return proposal
 
-        sharpe_map = {c["ticker"]: c.get("sharpe_20d", 0.0) for c in candidates}
+        sharpe_map = {c["ticker"]: c.get("sharpe_20d", float("-inf")) for c in candidates}
 
         positions = list(proposal.positions)
 

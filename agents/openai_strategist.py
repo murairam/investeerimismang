@@ -162,10 +162,11 @@ class OpenAIStrategist(BaseAgent):
         user_message = self._build_user_message(snapshot, prior_proposal)
         regime = snapshot.get("regime", "NEUTRAL")
         vix = snapshot.get("vix_level", float("nan"))
+        learning_context = snapshot.get("learning_context", "")
 
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
-                proposal = self._call_openai(user_message, regime, vix)
+                proposal = self._call_openai(user_message, regime, vix, learning_context)
                 logger.info(
                     "Strategist produced %d positions (confidence %.0f%%)",
                     len(proposal.positions),
@@ -367,9 +368,6 @@ class OpenAIStrategist(BaseAgent):
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]
 
-        if snapshot.get("learning_context"):
-            lines += ["", snapshot["learning_context"]]
-
         if snapshot.get("news_headlines"):
             lines += ["", snapshot["news_headlines"]]
 
@@ -386,13 +384,23 @@ class OpenAIStrategist(BaseAgent):
         ]
         return "\n".join(lines)
 
-    def _call_openai(self, user_message: str, regime: str = "NEUTRAL", vix: float = float("nan")) -> PortfolioProposal:
+    def _call_openai(
+        self,
+        user_message: str,
+        regime: str = "NEUTRAL",
+        vix: float = float("nan"),
+        learning_context: str = "",
+    ) -> PortfolioProposal:
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = _SYSTEM_PROMPT_TEMPLATE.format(
             today=date.today().isoformat(),
             regime_guidance=regime_guidance,
             vix_guidance=_vix_guidance(vix),
         )
+        # Inject learning context into the system prompt so it has mandatory-instruction weight.
+        # Placed after the strategy rules so it acts as a live override, not a soft suggestion.
+        if learning_context:
+            system_prompt += f"\n\n## Live learning — MANDATORY overrides from past runs\n{learning_context}"
 
         response = self.client.chat.completions.create(
             model=self.MODEL,

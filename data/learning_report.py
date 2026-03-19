@@ -99,17 +99,28 @@ def generate_pregame_learning_report(target_date: str = "2026-04-06") -> dict:
 
     action_items: list[str] = []
     if avg_alpha < 0:
-        action_items.append("Reduce trade churn: require stronger edge before replacing existing positions.")
+        action_items.append(
+            f"Alpha is negative ({avg_alpha:+.2%} avg). Require stronger edge before replacing positions: "
+            "replacement must have Sharpe_20d ≥ 0.3 higher than the stock being exited."
+        )
     if avg_turnover > 0.35:
-        action_items.append("Turnover is high: cap daily reallocation and keep a stable core of winners.")
+        action_items.append(
+            f"Turnover is {avg_turnover:.0%} — target ≤35%. Keep at least 50% of weight in yesterday's "
+            "holdings. Only replace a position if the new pick's Sharpe_20d is ≥20% higher."
+        )
     if max_dd > 0.05:
-        action_items.append("Drawdown is elevated: lower max single-position risk and avoid low-volume breakouts.")
+        action_items.append(
+            f"Max drawdown is {max_dd:.1%} — above 5% threshold. Cap the largest position at 18% "
+            "and avoid stocks with vol_ratio < 0.8 (low-volume moves have low conviction)."
+        )
     if strong_tickers:
         winners = ", ".join(row["ticker"] for row in strong_tickers[:3])
-        action_items.append(f"Keep proven winners as a core basket when signals remain valid: {winners}.")
+        action_items.append(f"Core basket — keep these unless Sharpe_20d drops below 0.2: {winners}.")
     if weak_tickers:
         losers = ", ".join(row["ticker"] for row in weak_tickers[:3])
-        action_items.append(f"Tighten exit discipline for recurring underperformers: {losers}.")
+        action_items.append(
+            f"Avoid or underweight these recurring underperformers (max 7% each if held at all): {losers}."
+        )
     if not action_items:
         action_items.append("Collect at least 3-5 daily observations before changing the strategy rules.")
 

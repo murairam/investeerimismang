@@ -161,7 +161,10 @@ class AlphaSharkOrchestrator:
         # Compute actual P&L for prior portfolio using yesterday's saved prices
         daily_pnl: dict = {}
         portfolio_return_1d = 0.0
-        benchmark_1d = snapshot.get("benchmark_return_1d", 0.0)
+        benchmark_1d = snapshot.get("benchmark_return_1d", float("nan"))
+        if math.isnan(benchmark_1d):
+            logger.warning("benchmark_return_1d missing from snapshot — alpha will be unreliable; defaulting to 0")
+            benchmark_1d = 0.0
         alpha_1d = 0.0
         yesterday_prices = load_yesterday_prices()
         if prior_portfolio and yesterday_prices:
@@ -171,9 +174,18 @@ class AlphaSharkOrchestrator:
                     daily_pnl[pos.ticker] = r
                     portfolio_return_1d += pos.weight * r
             alpha_1d = portfolio_return_1d - benchmark_1d
+            regime = snapshot.get("regime", "NEUTRAL")
+            # Regime-aware interpretation: in falling markets, positive alpha matters more than absolute return
+            alpha_context = ""
+            if regime == "BEAR" and alpha_1d > 0:
+                alpha_context = " [BEAR: positive alpha = good defensive positioning]"
+            elif regime == "NEUTRAL" and alpha_1d > 0.002:
+                alpha_context = " [NEUTRAL: outperforming benchmark]"
+            elif alpha_1d < -0.005:
+                alpha_context = " [underperforming — review position sizing]"
             logger.info(
-                "Yesterday: portfolio %.2f%% vs benchmark %.2f%% (alpha: %+.2f%%)",
-                portfolio_return_1d * 100, benchmark_1d * 100, alpha_1d * 100,
+                "Yesterday: portfolio %.2f%% vs benchmark %.2f%% (alpha: %+.2f%%)%s",
+                portfolio_return_1d * 100, benchmark_1d * 100, alpha_1d * 100, alpha_context,
             )
             winners = sorted([(t, r) for t, r in daily_pnl.items() if r > 0], key=lambda x: -x[1])
             losers = sorted([(t, r) for t, r in daily_pnl.items() if r < 0], key=lambda x: x[1])

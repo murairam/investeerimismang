@@ -88,15 +88,14 @@ class GeminiChallenger(BaseAgent):
     ) -> PortfolioProposal:
         user_message = self._build_user_message(snapshot, prior_proposal)
         regime = snapshot.get("regime", "NEUTRAL")
+        learning_context = snapshot.get("learning_context", "")
+
+        prior_tickers = {p.ticker for p in prior_proposal.positions} if prior_proposal else set()
 
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
-                proposal = self._call_gemini(user_message, regime)
-                logger.info(
-                    "Challenger (Gemini) produced %d positions (confidence %.0f%%)",
-                    len(proposal.positions),
-                    proposal.confidence * 100,
-                )
+                proposal = self._call_gemini(user_message, regime, learning_context)
+                self._log_overlap(proposal, prior_tickers, source="Gemini")
                 return proposal
             except Exception as exc:
                 logger.warning(
@@ -111,16 +110,38 @@ class GeminiChallenger(BaseAgent):
         # Fallback: use gpt-4o-mini as challenger with higher temperature for diverse picks
         logger.info("Gemini unavailable — falling back to OpenAI challenger (gpt-4o-mini) …")
         try:
-            proposal = self._call_openai_fallback(user_message, regime)
-            logger.info(
-                "Challenger (OpenAI fallback) produced %d positions (confidence %.0f%%)",
-                len(proposal.positions),
-                proposal.confidence * 100,
-            )
+            proposal = self._call_openai_fallback(user_message, regime, learning_context)
+            self._log_overlap(proposal, prior_tickers, source="OpenAI fallback")
             return proposal
         except Exception as exc:
             logger.warning("OpenAI fallback challenger also failed: %s", exc)
             return PortfolioProposal()
+
+    @staticmethod
+    def _log_overlap(proposal: PortfolioProposal, strategist_tickers: set[str], source: str) -> None:
+        """Log how contrarian the challenger actually is vs the strategist."""
+        if not proposal.positions:
+            logger.warning("Challenger (%s) produced 0 positions", source)
+            return
+        challenger_tickers = {p.ticker for p in proposal.positions}
+        overlap = challenger_tickers & strategist_tickers
+        unique = challenger_tickers - strategist_tickers
+        overlap_pct = len(overlap) / len(challenger_tickers) if challenger_tickers else 0
+        logger.info(
+            "Challenger (%s): %d positions (confidence %.0f%%) — %d unique vs strategist, %d overlap (%.0f%%)",
+            source,
+            len(proposal.positions),
+            proposal.confidence * 100,
+            len(unique),
+            len(overlap),
+            overlap_pct * 100,
+        )
+        if overlap_pct > 0.7:
+            logger.warning(
+                "Challenger overlap with strategist is %.0f%% — not contrarian enough. "
+                "Risk manager will have limited diversification to work with.",
+                overlap_pct * 100,
+            )
 
     def _build_user_message(
         self,
@@ -194,9 +215,6 @@ class GeminiChallenger(BaseAgent):
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]
 
-        if snapshot.get("learning_context"):
-            lines += ["", snapshot["learning_context"]]
-
         if snapshot.get("news_headlines"):
             lines += ["", snapshot["news_headlines"]]
 
@@ -209,17 +227,19 @@ class GeminiChallenger(BaseAgent):
         lines += ["", "Build your independent portfolio. Return valid JSON only."]
         return "\n".join(lines)
 
-    def _call_openai_fallback(self, user_message: str, regime: str = "NEUTRAL") -> PortfolioProposal:
+    def _call_openai_fallback(self, user_message: str, regime: str = "NEUTRAL", learning_context: str = "") -> PortfolioProposal:
         """GPT-4o-mini as challenger fallback. Higher temperature = more diverse picks."""
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = _SYSTEM_PROMPT.format(
             today=date.today().isoformat(),
             regime_guidance=regime_guidance,
         )
+        if learning_context:
+            system_prompt += f"\n\n## Live learning — MANDATORY overrides from past runs\n{learning_context}"
         response = self._openai.chat.completions.create(
             model="gpt-4o-mini",
             response_format={"type": "json_object"},
-            temperature=1.0,  # high temp = diverse from the main GPT-4o strategist
+            temperature=0.7,  # diverse but still coherent; 1.0 was close to random
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message},
@@ -248,12 +268,14 @@ class GeminiChallenger(BaseAgent):
             confidence=float(data.get("confidence", 0.5)),
         )
 
-    def _call_gemini(self, user_message: str, regime: str = "NEUTRAL") -> PortfolioProposal:
+    def _call_gemini(self, user_message: str, regime: str = "NEUTRAL", learning_context: str = "") -> PortfolioProposal:
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = _SYSTEM_PROMPT.format(
             today=date.today().isoformat(),
             regime_guidance=regime_guidance,
         )
+        if learning_context:
+            system_prompt += f"\n\n## Live learning — MANDATORY overrides from past runs\n{learning_context}"
 
         response = self._gemini.models.generate_content(
             model=self.MODEL,
