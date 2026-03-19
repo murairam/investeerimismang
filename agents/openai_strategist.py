@@ -1,8 +1,8 @@
 """
-OpenAIStrategist — GPT-4o-powered alpha generator.
-Uses gpt-4o with JSON mode for reliable structured output.
+OpenAIStrategist — GPT-5.4-powered alpha generator.
+Uses gpt-5.4 with JSON mode for reliable structured output.
 
-Cost estimate: ~$0.010 per run, ~$0.94 for the full game (94 days).
+Cost estimate: ~$0.055 per run, ~$4.10 for the full game (75 days).
 """
 import json
 import logging
@@ -26,22 +26,18 @@ logger = logging.getLogger(__name__)
 _REGIME_GUIDANCE = {
     "BULL": (
         "Market regime: BULL (SPX above 200d SMA by ≥2%). "
-        "Concentrate hard — 5–7 positions only. Top 2-3 consensus picks at 20-25% each. "
-        "No position below 10%. Cut anything with Sharpe below the median. "
-        "High beta, high conviction — this is the regime to make big gains."
+        "5–8 positions — pick count based on how many names genuinely clear your signal bar. "
+        "High beta (up to 2.0), high conviction — this is the regime to make big gains."
     ),
     "BEAR": (
         "Market regime: BEAR (SPX below 200d SMA by ≥2%). "
-        "Spread risk across 8–12 positions. Cap individual at 12%. "
-        "Favour low-beta quality names (healthcare, staples, utilities). No position below 6%. "
-        "Diversification here is real risk management, not dilution."
+        "Spread risk across 6–12 positions. Cap individual at 15%. "
+        "Favour lower-beta quality names. Diversification here is real risk management."
     ),
     "NEUTRAL": (
         "Market regime: NEUTRAL (SPX near 200d SMA). "
-        "Target 6–8 high-conviction positions. No token positions — minimum 8% per pick. "
-        "Top 2-3 consensus picks at 18-22%. Mid-tier picks at 10-14%. Tail picks at 8-10%. "
-        "Daily rebalancing replaces insurance positions — if a pick is not worth 8%, skip it entirely. "
-        "Quality over quantity: 7 strong picks beat 12 mediocre ones."
+        "5–10 positions — use as many slots as you have genuinely strong picks for. "
+        "Quality over quantity: do not pad with weak names, but do not cap at 5 if more are compelling."
     ),
 }
 
@@ -76,7 +72,7 @@ Today's date: {today}. The market snapshot provided below is your ONLY source of
 ## Competition context — 838 participants, 75-day game
 Goal: highest absolute return by 19 June 2026. Concentration wins short competitions — 6–7 high-conviction bets have far higher expected return than 12 diluted ones.
 
-One practical signal to consider: a stock that has already had a massive Sharpe run may have less remaining upside than one with accelerating momentum that hasn't fully moved yet. The question for each candidate is not "is this popular?" but "does this still have legs for the next 75 days?" Use RSI, vol_ratio, and vs_index to distinguish between momentum that is still running vs. momentum that is exhausted. Recovering stocks (RSI 30–55, mom_5d > mom_20d, vs_index just turned positive) are often better forward bets than stocks already at RSI 70+ with slowing volume.
+You are the Momentum Strategist — your signal table shows trend/momentum signals only (Sharpe, returns, vs_index, 52wH%, beta, MACD). A separate Catalyst agent evaluates RSI, vol_ratio, short interest, and IV. Focus on smooth, persistent uptrends with strong Sharpe and positive vs_index.
 
 ## Game rules you MUST follow
 - Portfolio must hold between 5 and 20 different stocks.
@@ -90,22 +86,17 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - Favour stocks with the strongest risk-adjusted momentum (Sharpe_20d = 20d return / annualised vol).
 - High Sharpe means a smooth, persistent uptrend — much better than a volatile spike.
 - Prefer high-beta names in bull-market conditions — they amplify gains.
-- Regime-based position count: BULL 5–7, NEUTRAL 6–8, BEAR 8–12. Daily rebalancing replaces diversification — rotate out losers tomorrow rather than holding insurance positions today. Minimum 8% per position (NEUTRAL/BULL). No token 5-6% picks unless BEAR regime.
+- Regime-based position count: BULL 5–8, NEUTRAL 5–10, BEAR 6–12. You decide the exact count based on signal quality — more positions only if multiple names genuinely earn their slot. Daily rebalancing replaces diversification — rotate out losers tomorrow. No token 5% picks unless a name has a clear catalyst reason.
 - Diversify across at least 2 markets to reduce single-market risk.
 - Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them.
 - vs_index > 0 means the stock beat its own market — pure alpha signal.
-- vol_ratio = today's volume / 20d average volume. >1.5 means the move has high-volume confirmation (strong signal). <0.7 means low-volume move (weak signal, be cautious).
+- MACD histogram: positive = accelerating momentum, negative = decelerating. Use it to distinguish fresh breakouts from fading moves.
 - Goal: BEAT other game participants — take conviction bets, not passive exposure.
-- **Diversify from the crowd**: if your top 5 picks are all US mega-cap tech, you are running the same portfolio as every other participant. You MUST include at least 2 picks from non-US markets (Nordic, Baltic, or European). This is required for every portfolio.
+- **Diversify from the crowd**: consider non-US markets (Nordic, Baltic) — they often carry differentiated alpha and are overlooked by other participants. But do not force non-US picks if US signals are clearly stronger.
 - **No sector cap**: The game enforces no sector concentration limit. If a single sector (e.g. Energy, Tech, AI) has extreme momentum, you are fully authorized to put 100% of the portfolio into that sector (e.g. 4 stocks at 25% each). Concentrate wherever the alpha is.
-- **DivYld column**: The game auto-reinvests dividends — a 4% yield stock earns ~1.5% free return over the 75-day game on top of price gains. Nordic utilities and Baltic stocks often carry 3–6% yields; factor this in when comparing otherwise-similar candidates.
 
-## 2026 macro regime — competition context
-Current macro environment (March–April 2026): This is an **Energy + Defense rotation year**. Brent crude is ~$103/barrel driven by Iran conflict and Strait of Hormuz disruptions. Energy sector (XOM, CVX, EQNR, AKRBP) is up 25%+ YTD. Technology is in a correction (-15% to -20% for AI/semiconductor names from 2025 highs). This means:
-- **Favour:** Energy (XOM, CVX, EQNR.OL, AKRBP.OL, SUBC.OL), Healthcare with growth catalysts (LLY), Nordic logistics (DSV.CO), Norwegian defense/tech (KONG.OL — Kongsberg Gruppen, top 2026 OBX performer)
-- **Be cautious with:** Pure AI/tech names (correction in progress), shipping (overcapacity headwinds), telecom (low-beta, won't win a competition)
-- **Mærsk-specific warning:** Despite strong recent Sharpe, Mærsk (MAERSK-B.CO) carries a SELL analyst consensus (11 sell / 1 buy) with structural industry overcapacity. If Mærsk appears in top candidates due to past momentum, weight it max 10% and verify the 5d momentum is still positive.
-- **KONG.OL (Kongsberg Gruppen):** Norwegian defense/maritime technology company — strong 2026 performer driven by European rearmament and energy sector exposure. Check its Sharpe and momentum signals; if above median, include at 10-15%.
+## Macro regime
+Follow the signals — no hardcoded sector or stock bias. Whatever has the strongest momentum, Sharpe, and volume confirmation today is the right pick. The market snapshot is your only source of truth.
 
 ## Baltic market specialist guidance
 Baltic stocks behave differently from US/Nordic names — apply specific caution:
@@ -114,10 +105,8 @@ Baltic stocks behave differently from US/Nordic names — apply specific caution
 - **Baltic edge**: local competitors may overlook Baltic stocks; if fundamentals and momentum align, Baltic picks are differentiated alpha
 - **Dividend strength**: LHV1T.TL, GRG1L.VS, APG1L.VS often carry 3–6% yields — genuine free return in this game
 
-## Portfolio turnover — MANDATORY HOLD RATE
-At least 40% of total portfolio weight must remain in positions held from yesterday. This prevents chasing noise and avoids systematic open-price slippage (you always buy at the next day's open, so excessive turnover means buying yesterday's momentum at a premium).
-- A current holding should be KEPT unless the replacement candidate has Sharpe_20d ≥ 20% higher.
-- Exception: exit immediately if a holding shows negative vs_index AND RSI > 70 (overbought with weakening alpha).
+## Portfolio turnover
+Let winners ride. Only exit a current holding if momentum has broken (negative vs_index, declining MACD, and 5d return turning negative) or a clearly superior alternative exists (Sharpe_20d ≥ 20% higher). Do not rotate for marginal gains — each trade executes at next-day open price.
 
 ## Position sizing — MANDATORY RULES
 You MUST size by conviction. Equal-weighting is forbidden.
@@ -145,7 +134,8 @@ You must respond with a valid JSON object and nothing else.
     }}
   ],
   "reasoning": "2-3 sentence thesis: which are your top picks and why are they sized that way.",
-  "confidence": 0.75
+  "confidence": 0.75,
+  "learning_reflection": "One sentence: how today's picks adapt based on recent learning context."
 }}
 
 Rules:
@@ -161,7 +151,7 @@ Rules:
 
 class OpenAIStrategist(BaseAgent):
     MAX_RETRIES = 3
-    MODEL = "gpt-4o"
+    MODEL = "gpt-5.4"
 
     def __init__(self) -> None:
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
@@ -220,8 +210,8 @@ class OpenAIStrategist(BaseAgent):
 
         header = (
             f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d Ret':>8} {'Sharpe':>7} "
-            f"{'5d Ret':>7} {'60d Ret':>8} {'RSI':>6} {'vs Idx':>8} "
-            f"{'52wH%':>7} {'Beta':>6} {'VolRatio':>9} {'MACD':>7} {'ATR%':>6} {'DivYld':>7} {'Price':>10}"
+            f"{'5d Ret':>7} {'60d Ret':>8} {'vs Idx':>8} "
+            f"{'52wH%':>7} {'Beta':>6} {'MACD':>7} {'Price':>10}"
         )
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
@@ -230,8 +220,7 @@ class OpenAIStrategist(BaseAgent):
             f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} (>1=calm, <0.9=fear) | Credit spreads 20d: {credit_str} (positive=risk-on)",
             f"Composite regime score: {rscore}/100 — {score_label} (0–30=defensive, 31–49=cautious, 50–69=neutral, 70+=bullish)",
             "",
-            "Top candidates (sorted by Sharpe_20d, RSI>75 filtered out):",
-            "ATR% = daily expected move as % of price — size smaller when ATR% is high.",
+            "Top candidates (sorted by Sharpe_20d) — MOMENTUM signals only:",
             "",
             header,
             "-" * len(header),
@@ -247,14 +236,10 @@ class OpenAIStrategist(BaseAgent):
                 f"{fmt(c['sharpe_20d'], '.2f'):>7} "
                 f"{fmt(c['mom_5d']):>7} "
                 f"{fmt(c['mom_60d']):>8} "
-                f"{fmt(c['rsi_14'], '.1f'):>6} "
                 f"{fmt(c['vs_index']):>8} "
                 f"{fmt(c['pct_from_52w_high']):>7} "
                 f"{fmt(c['beta'], '.2f'):>6} "
-                f"{fmt(c['vol_ratio'], '.2f'):>9} "
                 f"{fmt(c.get('macd_hist', float('nan'))):>7} "
-                f"{fmt(c.get('atr_pct', float('nan'))):>6} "
-                f"{fmt(c.get('dividend_yield', float('nan'))):>7} "
                 f"{c['last_price']:>10.2f}"
             )
 
@@ -417,7 +402,7 @@ class OpenAIStrategist(BaseAgent):
         response = self.client.chat.completions.create(
             model=self.MODEL,
             response_format={"type": "json_object"},
-            temperature=0.2,
+            temperature=0.1,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message},
@@ -452,4 +437,5 @@ class OpenAIStrategist(BaseAgent):
             positions=positions,
             reasoning=data.get("reasoning", ""),
             confidence=float(data.get("confidence", 0.5)),
+            learning_reflection=data.get("learning_reflection", ""),
         )

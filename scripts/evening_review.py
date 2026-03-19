@@ -8,16 +8,24 @@ By 21:00 EET:
   - Baltic / Scandinavian markets: closed → final prices
   - US markets: still open (close 23:00 EET / 22:00 EEST) → intraday prices
 """
+from __future__ import annotations
+
 import json
 import logging
 import os
 import sys
 from datetime import date, datetime
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import requests
 import yfinance as yf
+
+from output.dispatcher import format_security_label
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 logger = logging.getLogger(__name__)
@@ -59,7 +67,7 @@ def _fetch_prices(tickers: list[str]) -> dict[str, tuple[float, float]]:
 
 
 def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float, alpha: float, prize_context: str = "") -> str:
-    """One-sentence AI recommendation via OpenAI gpt-4o-mini (~$0.0005/call)."""
+    """One-sentence AI recommendation via OpenAI gpt-5.4-nano (~$0.0001/call)."""
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         return "_AI recommendation unavailable (no API key)._"
@@ -68,7 +76,7 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
         client = OpenAI(api_key=api_key)
         extra = f"\n\nAdditional context: {prize_context}" if prize_context else ""
         resp = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-5.4-nano",
             messages=[
                 {
                     "role": "system",
@@ -152,6 +160,10 @@ def main() -> None:
         rows.append(f"{ticker:<12} {weight:>4.0%}  {arrow}{abs(ret):>5.1%}  {price:.2f}")
     rows.append("```")
     table = "\n".join(rows)
+    search_list = "\n".join(
+        f"{i}. {format_security_label(ticker)}"
+        for i, (ticker, *_rest) in enumerate(pos_returns, 1)
+    )
 
     # Performance headline
     alpha_emoji = "🟢" if alpha > 0.003 else ("🔴" if alpha < -0.003 else "🟡")
@@ -167,7 +179,11 @@ def main() -> None:
     if us_tickers:
         us_note = f"\n_US positions ({', '.join(us_tickers)}) are intraday — markets still open._"
 
-    action_note = "\n\n📋 **To change tomorrow's portfolio:** update on the game website.\nDeadline: **10:00 EET** (orders before 10:00 execute at tomorrow's open)."
+    action_note = (
+        "1. Review the weakest names below.\n"
+        "2. If changing tomorrow's portfolio, update the game website before **10:00 EET**.\n"
+        "3. Use the Game Search List to find the exact names quickly."
+    )
 
     # Weekly prize awareness (snapshot taken Monday 09:00 EET) — built BEFORE AI call so AI gets context
     weekday = datetime.today().weekday()  # 0=Mon, 3=Thu, 4=Fri
@@ -185,12 +201,29 @@ def main() -> None:
     positions_summary = ", ".join(f"{t} {r:+.1%}" for t, _, r, _ in pos_returns)
     recommendation = _ai_take(positions_summary, portfolio_ret, benchmark_ret, alpha, prize_context)
 
-    description = f"{perf_line}{us_note}\n\n{table}\n💬 {recommendation}{prize_note}{action_note}"
+    description = f"{perf_line}{us_note}\n\n💬 {recommendation}{prize_note}"
 
     embed = {
         "title": f"🌙 AlphaShark Evening Review — {date.today().isoformat()}",
         "description": description,
         "color": _EMBED_COLOUR,
+        "fields": [
+            {
+                "name": "Game Search List",
+                "value": search_list[:1024],
+                "inline": False,
+            },
+            {
+                "name": "Today's Position Moves",
+                "value": table[:1024],
+                "inline": False,
+            },
+            {
+                "name": "Action For Tomorrow Morning",
+                "value": action_note,
+                "inline": False,
+            },
+        ],
         "footer": {
             "text": f"{len(pos_returns)} positions · Changes before 10:00 EET execute at tomorrow's open"
         },

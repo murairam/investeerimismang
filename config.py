@@ -17,9 +17,9 @@ GAME_CONSTRAINTS = {
 # Competition logic: daily rebalancing replaces insurance positions.
 # Concentrate on highest-signal picks; no token 5% diversifiers.
 POSITION_TARGETS_BY_REGIME = {
-    "BULL":    {"min_stocks": 5, "max_stocks": 7},   # concentrate hard — competition won by big bets
-    "NEUTRAL": {"min_stocks": 6, "max_stocks": 8},   # still concentrate (was 8-10)
-    "BEAR":    {"min_stocks": 8, "max_stocks": 12},  # spread risk (was 10-14)
+    "BULL":    {"min_stocks": 5, "max_stocks": 8},   # concentrate but AI picks count based on signal quality
+    "NEUTRAL": {"min_stocks": 5, "max_stocks": 10},  # AI decides — more candidates = more range
+    "BEAR":    {"min_stocks": 6, "max_stocks": 12},  # spread risk in downturns
 }
 
 # Cash policy (used when proposed allocation is below 100%)
@@ -34,14 +34,12 @@ CASH_POLICY = {
 MOMENTUM_WINDOW = 20        # trading days for momentum calculation
 BETA_WINDOW = 60            # trading days for beta calculation
 BETA_BENCHMARK = "^GSPC"    # S&P 500 as benchmark
-TOP_N_CANDIDATES = 111      # full universe — no stocks hidden from agents
+TOP_N_CANDIDATES = 200      # max candidates passed to agents — pure signal meritocracy, no per-market caps
 RSI_WINDOW = 14             # RSI lookback period
 MOM_SHORT = 5               # short-term momentum window (days)
 MOM_LONG = 60               # long-term momentum window (days)
 SMA_REGIME_WINDOW = 200     # days for market regime SMA
 REGIME_THRESHOLD = 0.02     # 2% band for BULL/BEAR classification
-SP500_MARKET_CAP = 111      # effectively disabled — all tickers visible
-OTHER_MARKET_CAP = 111      # effectively disabled — all tickers visible
 CORR_WINDOW = 60            # days for correlation filter
 CORR_THRESHOLD = 0.85       # correlation above this → keep higher Sharpe
 
@@ -85,7 +83,7 @@ SECTOR_MAP: dict[str, str] = {
     "TEL.OL": "Tel", "MOWI.OL": "Cons", "ORK.OL": "Cons",
     "YAR.OL": "Mat", "SCATC.OL": "Energy", "SUBC.OL": "Energy",
     "SALM.OL": "Cons", "RECSI.OL": "Energy",
-    "KONG.OL": "Ind", "AKRBP.OL": "Energy",  # Kongsberg (defense/tech) + Aker BP (oil) — top OBX performers 2026
+    "KOG.OL": "Ind", "AKRBP.OL": "Energy",  # Kongsberg (defense/tech) + Aker BP (oil) — top OBX performers 2026
     # Denmark — OMXC25
     "NOVO-B.CO": "Health", "DSV.CO": "Ind", "ORSTED.CO": "Energy",
     "CARL-B.CO": "Cons", "GMAB.CO": "Health", "MAERSK-B.CO": "Ind",
@@ -126,7 +124,7 @@ UNIVERSE: dict[str, list[str]] = {
     "OBX": [
         "EQNR.OL", "DNB.OL", "NHY.OL", "TEL.OL", "MOWI.OL",
         "ORK.OL", "YAR.OL", "SCATC.OL", "SUBC.OL",
-        "SALM.OL", "RECSI.OL", "KONG.OL", "AKRBP.OL",
+        "SALM.OL", "RECSI.OL", "KOG.OL", "AKRBP.OL",
     ],
     # Denmark — OMX Copenhagen 25 (OMXC25)
     "OMXC25": [

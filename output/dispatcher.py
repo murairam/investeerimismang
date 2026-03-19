@@ -9,6 +9,7 @@ from typing import Optional
 import requests
 
 from data.fetcher import MarketSnapshot
+from data.symbol_master import get_symbol_record
 from portfolio.models import PortfolioProposal
 
 logger = logging.getLogger(__name__)
@@ -81,9 +82,43 @@ GAME_NAMES: dict[str, str] = {
 }
 
 
+def _prettify_ticker(ticker: str) -> str:
+    base = ticker.split(".", 1)[0]
+    parts = [part for part in base.replace("-", " ").split() if part]
+    if not parts:
+        return ticker
+    pretty = " ".join(
+        part.upper() if len(part) <= 3 else part.capitalize()
+        for part in parts
+    )
+    if "." in ticker:
+        suffix = ticker.rsplit(".", 1)[-1]
+        market_label = {
+            "HE": " (FI)",
+            "ST": " (SE)",
+            "OL": " (NO)",
+            "CO": " (DK)",
+            "TL": " (EE)",
+            "VS": " (LT)",
+        }.get(suffix, "")
+        return pretty + market_label
+    return pretty
+
+
 def _display(ticker: str) -> str:
     """Return game display name for a ticker, fallback to ticker itself."""
-    return GAME_NAMES.get(ticker, ticker)
+    record = get_symbol_record(ticker)
+    if record and record.get("company_name"):
+        return str(record["company_name"]).strip()
+    return GAME_NAMES.get(ticker, _prettify_ticker(ticker))
+
+
+def display_security_name(ticker: str) -> str:
+    return _display(ticker)
+
+
+def format_security_label(ticker: str) -> str:
+    return f"{_display(ticker)} ({ticker})"
 
 
 class WebhookDispatcher:
@@ -145,21 +180,23 @@ class WebhookDispatcher:
         )
 
         rounded_pcts = _round_weights(proposal.positions)
-        rows = ["```", f"{'#':<3} {'Stock':<26} {'%':>4}", "-" * 36]
+        rows = ["```", f"{'#':<3} {'Stock':<42} {'%':>4}", "-" * 52]
         for i, (pos, w_int) in enumerate(zip(proposal.positions, rounded_pcts), 1):
-            name = _display(pos.ticker)
-            rows.append(f"{i:<3} {name:<26} {w_int:>3}%")
-        rows.append("-" * 36)
-        rows.append(f"{'TOTAL':<30} {sum(rounded_pcts):>3}%")
+            name = format_security_label(pos.ticker)
+            if len(name) > 42:
+                name = name[:41] + "…"
+            rows.append(f"{i:<3} {name:<42} {w_int:>3}%")
+        rows.append("-" * 52)
+        rows.append(f"{'TOTAL':<46} {sum(rounded_pcts):>3}%")
         rows.append("```")
         holdings_table = "\n".join(rows)
 
         rationale_lines = []
         for i, pos in enumerate(proposal.positions, 1):
             rationale = pos.rationale.strip()
-            if len(rationale) > 90:
-                rationale = rationale[:89] + "…"
-            rationale_lines.append(f"{i}. **{_display(pos.ticker)}** — {rationale}")
+            if len(rationale) > 200:
+                rationale = rationale[:199] + "…"
+            rationale_lines.append(f"{i}. **{_display(pos.ticker)}** `({pos.ticker})` — {rationale}")
         rationale_block = "\n".join(rationale_lines[:8])
 
         change_lines: list[str] = []
@@ -177,14 +214,14 @@ class WebhookDispatcher:
 
             if added or removed or resized:
                 for ticker in added[:3]:
-                    change_lines.append(f"➕ {_display(ticker)} {int(current_map[ticker] * 100)}%")
+                    change_lines.append(f"➕ {_display(ticker)} ({ticker}) {int(current_map[ticker] * 100)}%")
                 for ticker in removed[:3]:
-                    change_lines.append(f"➖ {_display(ticker)} (was {int(prior_map[ticker] * 100)}%)")
+                    change_lines.append(f"➖ {_display(ticker)} ({ticker}) (was {int(prior_map[ticker] * 100)}%)")
                 for ticker in resized[:4]:
                     diff = current_map[ticker] - prior_map[ticker]
                     arrow = "▲" if diff > 0 else "▼"
                     change_lines.append(
-                        f"{arrow} {_display(ticker)} {int(prior_map[ticker] * 100)}%→{int(current_map[ticker] * 100)}% ({diff:+.0%})"
+                        f"{arrow} {_display(ticker)} ({ticker}) {int(prior_map[ticker] * 100)}%→{int(current_map[ticker] * 100)}% ({diff:+.0%})"
                     )
             else:
                 change_lines.append("No material changes vs yesterday")
@@ -219,26 +256,55 @@ class WebhookDispatcher:
                 )
 
         description = (
-            f"**Thesis:** {proposal.reasoning}\n\n"
+            f"**PM Thesis:** {proposal.reasoning}\n\n"
             f"{context_line}\n"
             f"{alpha_line}\n"
             f"{blended_line}\n"
-            f"{cash_line}{paper_line}\n\n"
-            f"**Changes Since Yesterday**\n{changes_block}\n\n"
-            f"**Holdings**\n{holdings_table}\n"
-            f"**Rationales**\n{rationale_block}"
+            f"{cash_line}{paper_line}"
         )
         if len(description) > _MAX_EMBED_DESCRIPTION:
             description = description[: _MAX_EMBED_DESCRIPTION - 3] + "…"
 
-        verification_reminder = (
-            "\n\n⚠️ **ACTION REQUIRED:** Update your game portfolio on the website, then run `python verify.py` to confirm sync."
-        )
+        game_search_lines = [
+            f"{i}. {format_security_label(pos.ticker)}"
+            for i, pos in enumerate(proposal.positions, 1)
+        ]
 
         return {
             "title": f"🦈 AlphaShark Portfolio — {today} {run_time_str}",
-            "description": description + verification_reminder,
+            "description": description,
             "color": _EMBED_COLOUR,
+            "fields": [
+                {
+                    "name": "Game Search List",
+                    "value": "\n".join(game_search_lines[:10]),
+                    "inline": False,
+                },
+                {
+                    "name": "Changes Since Yesterday",
+                    "value": changes_block[:1024],
+                    "inline": False,
+                },
+                {
+                    "name": "Holdings",
+                    "value": holdings_table[:1024],
+                    "inline": False,
+                },
+                {
+                    "name": "Why These Names",
+                    "value": rationale_block[:1024],
+                    "inline": False,
+                },
+                {
+                    "name": "Action",
+                    "value": (
+                        "1. Update the game portfolio on the website.\n"
+                        "2. Use the search list above to find the exact company names.\n"
+                        "3. Run `python scripts/verify.py` after updating."
+                    ),
+                    "inline": False,
+                },
+            ],
             "footer": {
                 "text": (
                     f"Confidence: {confidence_pct}% · "

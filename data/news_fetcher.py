@@ -9,8 +9,8 @@ import yfinance as yf
 
 logger = logging.getLogger(__name__)
 
-_MAX_PER_TICKER = 2
-_MAX_TOTAL = 15
+_MAX_PER_TICKER = 3
+_MAX_TOTAL = 45
 
 
 def fetch_candidate_news(tickers: list[str]) -> list[dict]:

@@ -4,10 +4,11 @@ AlphaSharkOrchestrator — wires the full pipeline end-to-end.
 Pipeline:
   1. DataFetcher.get_market_snapshot()
   2. Load previous portfolio from portfolio_history.json (if exists)
-  3a. OpenAIStrategist (GPT-4o)       ─┐ run IN PARALLEL (ThreadPoolExecutor)
-  3b. GeminiChallenger (gemini-flash)  ─┤ (challenger falls back to gpt-4o-mini on quota)
-                                        ↓
-  4. OpenAIRiskManager (GPT-4o-mini): meta-analyst, synthesises both proposals
+  3a. OpenAIStrategist (GPT-5.4)        ─┐ run IN PARALLEL (ThreadPoolExecutor 3 workers)
+  3b. GeminiChallenger (Gemini 2.5 Flash)─┤ (Catalyst Hunter — FREE, independent)
+  3c. OpenAIFullAnalyst (gpt-5.4-nano)   ─┘ (All-signal analyst — independent)
+  3d. OpenAIDevil (gpt-5.4-nano): stress-tests top picks from all 3 proposals
+  4. OpenAIRiskManager (GPT-5.4): synthesises all 3 proposals + bear cases
   5. PortfolioValidator.validate() → normalize if needed
   6. Save portfolio to portfolio_history.json
   7. Append entry to DAILY_LOG.md
@@ -21,7 +22,8 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 from agents.gemini_challenger import GeminiChallenger
-from agents.gemini_devil import GeminiDevil
+from agents.openai_challenger import OpenAIFullAnalyst
+from agents.openai_devil import OpenAIDevil
 from agents.openai_risk_manager import OpenAIRiskManager
 from agents.openai_strategist import OpenAIStrategist
 from config import CASH_POLICY
@@ -29,6 +31,7 @@ from data.cost_tracker import get_total_cost
 from data.diary import append_entry as append_daily_log
 from data.fetcher import DataFetcher
 from data.learning_context import get_learning_context
+from data.learning_state import load_learning_state
 from data.learning_report import generate_pregame_learning_report
 from data.meta_learning import generate_meta_learning_report
 from data.mode_guard import enforce_mode_and_freeze, generate_live_handoff_if_due
@@ -37,20 +40,31 @@ from data.news_fetcher import fetch_candidate_news, format_news_for_prompt
 from data.insider_fetcher import fetch_insider_trades, format_insider_context
 from data.trends_fetcher import fetch_search_interest, format_trends_context
 from data.paper_account import rebalance_to_proposal, reset_for_live
-from data.portfolio_store import load_last, load_yesterday_prices, save as save_portfolio
-from output.dispatcher import WebhookDispatcher
-from portfolio.models import PortfolioProposal, Position
+from data.portfolio_store import (
+    build_signal_snapshot,
+    load_last,
+    load_yesterday_prices,
+    save as save_portfolio,
+)
+from output.dispatcher import WebhookDispatcher, display_security_name
+
+from portfolio.models import PortfolioProposal
 from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
+
+
+def _display_name(ticker: str) -> str:
+    return display_security_name(ticker)
 
 
 class AlphaSharkOrchestrator:
     def __init__(self) -> None:
         self.fetcher = DataFetcher()
         self.strategist = OpenAIStrategist()
-        self.challenger = GeminiChallenger()
-        self.devil = GeminiDevil()
+        self.gemini_challenger = GeminiChallenger()
+        self.full_analyst = OpenAIFullAnalyst()
+        self.devil = OpenAIDevil()
         self.risk_manager = OpenAIRiskManager()
         self.validator = PortfolioValidator()
         self.dispatcher = WebhookDispatcher()
@@ -60,7 +74,6 @@ class AlphaSharkOrchestrator:
 
         # Step 1: market data
         snapshot = self.fetcher.get_market_snapshot()
-        import math as _math
         breadth = snapshot.get("breadth_pct", float("nan"))
         term = snapshot.get("vix_term_ratio", float("nan"))
         logger.info(
@@ -68,27 +81,35 @@ class AlphaSharkOrchestrator:
             len(snapshot["candidates"]),
             snapshot["benchmark_return"] * 100,
             snapshot["regime"],
-            breadth * 100 if not _math.isnan(breadth) else 0,
-            term if not _math.isnan(term) else 0,
+            breadth * 100 if not math.isnan(breadth) else 0,
+            term if not math.isnan(term) else 0,
         )
 
         # Step 1b: inject learning context (what worked / didn't in past runs)
         learning_context = get_learning_context()
         snapshot["learning_context"] = learning_context
+        learning_state = load_learning_state()
         if learning_context:
             logger.info("Learning context loaded (%d chars) — injecting into agent prompts", len(learning_context))
+            logger.info(
+                "Learning state: %d hard rules, %d biases, %d tracked winners, %d tracked losers",
+                len(learning_state.get("hard_rules", [])),
+                len(learning_state.get("biases_to_avoid", [])),
+                len(learning_state.get("validated_winners", [])),
+                len(learning_state.get("recurring_losers", [])),
+            )
         else:
             logger.info("No learning context yet (first run or files missing)")
 
         # Steps 1c–1f: fetch news, earnings, insider trades, and trends IN PARALLEL
-        top_tickers_20 = [c["ticker"] for c in snapshot["candidates"][:20]]
+        top_tickers_50 = [c["ticker"] for c in snapshot["candidates"][:50]]
         us_candidates = [c["ticker"] for c in snapshot["candidates"] if "." not in c["ticker"]]
         all_candidate_tickers = [c["ticker"] for c in snapshot["candidates"]]
 
         def _fetch_news():
             try:
-                items = fetch_candidate_news(top_tickers_20)
-                logger.info("Fetched %d news headlines for %d tickers", len(items), len(top_tickers_20))
+                items = fetch_candidate_news(top_tickers_50)
+                logger.info("Fetched %d news headlines for %d tickers", len(items), len(top_tickers_50))
                 return "news_headlines", format_news_for_prompt(items)
             except Exception as exc:
                 logger.warning("News fetch failed (non-fatal): %s", exc)
@@ -96,7 +117,7 @@ class AlphaSharkOrchestrator:
 
         def _fetch_earnings():
             try:
-                earnings = fetch_upcoming_earnings(top_tickers_20)
+                earnings = fetch_upcoming_earnings(top_tickers_50)
                 if earnings:
                     logger.info("Earnings within 7 days: %s",
                                 ", ".join(f"{e['ticker']} {e['earnings_date']}" for e in earnings))
@@ -195,16 +216,23 @@ class AlphaSharkOrchestrator:
             if losers:
                 logger.info("Losers: %s", ", ".join(f"{t} {r:+.1%}" for t, r in losers[:3]))
 
-        # Steps 3a + 3b: run strategist and challenger IN PARALLEL — they're fully independent
-        logger.info("Calling OpenAIStrategist (GPT-4o) + GeminiChallenger in parallel …")
+        # Steps 3a + 3b + 3c: run all 3 analysts IN PARALLEL — fully independent
+        logger.info(
+            "Calling OpenAIStrategist (GPT-5.4) + GeminiChallenger (Gemini 2.5 Flash) "
+            "+ OpenAIFullAnalyst (gpt-5.4-nano) in parallel …"
+        )
         strategist_proposal = None
         challenger_proposal = None
-        with ThreadPoolExecutor(max_workers=2) as executor:
+        full_analyst_proposal = None
+        with ThreadPoolExecutor(max_workers=3) as executor:
             future_strategist = executor.submit(
                 self.strategist.propose, snapshot, prior_portfolio
             )
             future_challenger = executor.submit(
-                self.challenger.propose, snapshot, prior_portfolio
+                self.gemini_challenger.propose, snapshot, prior_portfolio
+            )
+            future_full = executor.submit(
+                self.full_analyst.propose, snapshot, prior_portfolio
             )
 
             try:
@@ -215,133 +243,94 @@ class AlphaSharkOrchestrator:
             try:
                 challenger_proposal = future_challenger.result()
             except Exception as exc:
-                logger.exception("Challenger failed: %s", exc)
+                logger.exception("GeminiChallenger failed: %s", exc)
 
-        # Fail-safe routing
-        if strategist_proposal is None and challenger_proposal is None:
-            logger.error("Both strategist and challenger failed — aborting run")
+            try:
+                full_analyst_proposal = future_full.result()
+            except Exception as exc:
+                logger.exception("FullAnalyst failed: %s", exc)
+
+        # Fail-safe: need at least one proposal
+        active_proposals = [p for p in [strategist_proposal, challenger_proposal, full_analyst_proposal] if p is not None]
+        if not active_proposals:
+            logger.error("All 3 analysts failed — aborting run")
             sys.exit(1)
 
-        if strategist_proposal is None and challenger_proposal is not None:
-            logger.warning("Strategist unavailable — using challenger proposal as base")
-            strategist_proposal = challenger_proposal
+        if strategist_proposal is None:
+            logger.warning("Strategist unavailable — using first available proposal as base")
+            strategist_proposal = active_proposals[0]
 
-        if challenger_proposal is None:
-            logger.warning("Challenger unavailable — meta-analyst will use strategist only")
-            challenger_proposal = type(strategist_proposal)()
+        if not challenger_proposal or not challenger_proposal.positions:
+            logger.warning("GeminiChallenger unavailable — meta-analyst will use 2 proposals only")
+
+        if not full_analyst_proposal or not full_analyst_proposal.positions:
+            logger.warning("FullAnalyst unavailable — meta-analyst will use 2 proposals only")
 
         logger.info("Strategist produced %d positions", len(strategist_proposal.positions))
-        if challenger_proposal.positions:
-            logger.info("Challenger produced %d positions", len(challenger_proposal.positions))
-        else:
-            logger.info("Challenger unavailable — meta-analyst will use strategist only")
+        if challenger_proposal and challenger_proposal.positions:
+            logger.info("GeminiChallenger produced %d positions", len(challenger_proposal.positions))
+        if full_analyst_proposal and full_analyst_proposal.positions:
+            logger.info("FullAnalyst produced %d positions", len(full_analyst_proposal.positions))
 
-        # Check actual strategist vs challenger overlap — re-call if too similar
-        if strategist_proposal.positions and challenger_proposal.positions:
-            strat_set = {p.ticker for p in strategist_proposal.positions}
-            chall_set = {p.ticker for p in challenger_proposal.positions}
-            overlap = strat_set & chall_set
-            overlap_pct = len(overlap) / len(chall_set)
-            logger.info(
-                "Strategist vs challenger overlap: %d/%d tickers (%.0f%%)",
-                len(overlap), len(chall_set), overlap_pct * 100,
-            )
-            if overlap_pct > 0.65:
-                logger.warning(
-                    "Overlap %.0f%% > 65%% — re-calling challenger with %d forbidden tickers: %s",
-                    overlap_pct * 100, len(overlap), ", ".join(sorted(overlap)),
-                )
-                try:
-                    challenger_proposal = self.challenger.propose_contrarian(
-                        snapshot, prior_portfolio, forbidden_tickers=overlap
-                    )
-                    new_chall_set = {p.ticker for p in challenger_proposal.positions}
-                    new_overlap = strat_set & new_chall_set
-                    logger.info(
-                        "Challenger re-call: %d positions, overlap now %d/%d (%.0f%%)",
-                        len(challenger_proposal.positions),
-                        len(new_overlap), len(new_chall_set),
-                        len(new_overlap) / len(new_chall_set) * 100 if new_chall_set else 0,
-                    )
-                except Exception as exc:
-                    logger.warning("Challenger re-call failed (%s) — using original", exc)
+        # Log 3-way overlap — high cross-proposal overlap = strong conviction signal
+        all_tickers = {p.ticker for p in strategist_proposal.positions}
+        if challenger_proposal and challenger_proposal.positions:
+            all_tickers |= {p.ticker for p in challenger_proposal.positions}
+        if full_analyst_proposal and full_analyst_proposal.positions:
+            all_tickers |= {p.ticker for p in full_analyst_proposal.positions}
 
-        # Step 3c: Devil's advocate — free Gemini call that argues against the top picks
-        logger.info("Calling GeminiDevil — stress-testing top picks …")
+        strat_set = {p.ticker for p in strategist_proposal.positions}
+        chall_set = {p.ticker for p in challenger_proposal.positions} if challenger_proposal and challenger_proposal.positions else set()
+        full_set = {p.ticker for p in full_analyst_proposal.positions} if full_analyst_proposal and full_analyst_proposal.positions else set()
+        consensus = {t for t in all_tickers if sum([t in strat_set, t in chall_set, t in full_set]) >= 2}
+        triple = {t for t in all_tickers if sum([t in strat_set, t in chall_set, t in full_set]) == 3}
+
+        logger.info(
+            "3-way consensus: %d triple picks, %d double picks across %d unique tickers",
+            len(triple), len(consensus) - len(triple), len(all_tickers),
+        )
+        if triple:
+            logger.info("Triple consensus (all 3 agents): %s", ", ".join(sorted(triple)))
+        if consensus - triple:
+            logger.info("Double consensus (2/3 agents): %s", ", ".join(sorted(consensus - triple)))
+
+        # Step 3d: Devil's advocate — stress-tests top picks from all 3 proposals
+        logger.info("Calling OpenAIDevil — stress-testing top picks …")
         bear_cases: dict = {}
+        # Build a merged "challenger" view for Devil (union of all non-strategist picks)
+        devil_challenger = PortfolioProposal(
+            positions=(
+                (challenger_proposal.positions if challenger_proposal and challenger_proposal.positions else []) +
+                (full_analyst_proposal.positions if full_analyst_proposal and full_analyst_proposal.positions else [])
+            )
+        )
         try:
             bear_cases = self.devil.challenge(
                 strategist_proposal,
-                challenger_proposal,
+                devil_challenger,
                 snapshot,
             )
         except Exception as exc:
             logger.warning("Devil's advocate failed (non-fatal): %s", exc)
 
-        # Step 4: Meta-analyst synthesises both proposals + bear cases
-        logger.info("Calling OpenAIRiskManager (GPT-4o-mini) — synthesising …")
+        # Step 4: Meta-analyst synthesises all 3 proposals + bear cases
+        logger.info("Calling OpenAIRiskManager (GPT-5.4) — synthesising 3 proposals …")
         final_proposal = self.risk_manager.propose(
             snapshot,
             prior_proposal=strategist_proposal,
-            challenger_proposal=challenger_proposal if challenger_proposal.positions else None,
+            challenger_proposal=challenger_proposal if (challenger_proposal and challenger_proposal.positions) else None,
             bear_cases=bear_cases if bear_cases else None,
+            full_analyst_proposal=full_analyst_proposal if (full_analyst_proposal and full_analyst_proposal.positions) else None,
         )
-
-        # Step 4b: Enforce minimum hold rate — at least 40% of weight must carry over
-        # This prevents 100% daily turnover which systematically buys yesterday's momentum at a premium
-        MIN_HOLD_RATE = 0.40
-        if prior_portfolio and prior_portfolio.positions:
-            prior_map = {p.ticker: p for p in prior_portfolio.positions}
-            held_weight = sum(p.weight for p in final_proposal.positions if p.ticker in prior_map)
-            logger.info(
-                "Turnover check: %.0f%% held over, %.0f%% new (limit: ≥%.0f%% must hold)",
-                held_weight * 100, (1.0 - held_weight) * 100, MIN_HOLD_RATE * 100,
-            )
-            if held_weight < MIN_HOLD_RATE:
-                new_tickers = {p.ticker for p in final_proposal.positions}
-                exited = sorted(
-                    [p for p in prior_portfolio.positions if p.ticker not in new_tickers],
-                    key=lambda p: -p.weight,
-                )
-                forced: list[Position] = []
-                still_needed = MIN_HOLD_RATE - held_weight
-                for p in exited:
-                    if still_needed <= 0:
-                        break
-                    forced.append(Position(
-                        ticker=p.ticker,
-                        weight=p.weight,
-                        rationale="[held: turnover limit — prior position retained]",
-                    ))
-                    still_needed -= p.weight
-
-                if forced:
-                    forced_weight = sum(p.weight for p in forced)
-                    existing = list(final_proposal.positions)
-                    existing_total = sum(p.weight for p in existing)
-                    available = 1.0 - forced_weight
-                    if existing_total > 0 and available > 0:
-                        scale = min(1.0, available / existing_total)
-                        existing = [
-                            Position(ticker=p.ticker, weight=p.weight * scale, rationale=p.rationale)
-                            for p in existing
-                        ]
-                    final_proposal = PortfolioProposal(
-                        positions=existing + forced,
-                        reasoning=final_proposal.reasoning + f" [Turnover limit: {len(forced)} prior position(s) held over.]",
-                        confidence=final_proposal.confidence,
-                    )
-                    new_held = sum(p.weight for p in final_proposal.positions if p.ticker in prior_map)
-                    logger.info(
-                        "Turnover enforcement applied: %.0f%% now held over (%d position(s) forced)",
-                        new_held * 100, len(forced),
-                    )
 
         # Step 5: Validate & normalise
         result = self.validator.validate(final_proposal, regime=snapshot.get("regime"))
+        validation_errors_before = list(result.errors)
+        normalized = False
         if not result.ok:
             logger.warning("Validation errors — normalising: %s", result.errors)
             final_proposal = self.validator.normalize(final_proposal)
+            normalized = True
 
             result = self.validator.validate(final_proposal, regime=snapshot.get("regime"))
             if not result.ok:
@@ -386,7 +375,13 @@ class AlphaSharkOrchestrator:
             final_proposal.confidence * 100,
         )
         for pos in final_proposal.positions:
-            logger.info("  %-12s  %5.1f%%  %s", pos.ticker, pos.weight * 100, pos.rationale[:60])
+            logger.info(
+                "  %-12s  %-24s %5.1f%%  %s",
+                pos.ticker,
+                _display_name(pos.ticker)[:24],
+                pos.weight * 100,
+                pos.rationale[:120],
+            )
 
         # Devil's advocate audit: show how bear-case flags map to final weights
         if bear_cases:
@@ -404,14 +399,26 @@ class AlphaSharkOrchestrator:
             for pos, info in sorted(flagged_in_portfolio, key=lambda x: x[1]["risk"]):
                 risk_icon = "🔴" if info["risk"] == "HIGH" else ("🟡" if info["risk"] == "MEDIUM" else "🟢")
                 logger.info(
-                    "  %s %-12s %5.1f%% [%s] %s",
-                    risk_icon, pos.ticker, pos.weight * 100, info["risk"], info["bear_case"][:80],
+                    "  %s %-12s %-20s %5.1f%% [%s] %s",
+                    risk_icon,
+                    pos.ticker,
+                    _display_name(pos.ticker)[:20],
+                    pos.weight * 100,
+                    info["risk"],
+                    info["bear_case"][:80],
                 )
             if not_included:
                 logger.info("  Excluded by Risk Manager (flagged but not in final portfolio):")
                 for ticker, info in not_included:
                     risk_icon = "🔴" if info["risk"] == "HIGH" else ("🟡" if info["risk"] == "MEDIUM" else "🟢")
-                    logger.info("    %s %-12s [%s] %s", risk_icon, ticker, info["risk"], info["bear_case"][:80])
+                    logger.info(
+                        "    %s %-12s %-20s [%s] %s",
+                        risk_icon,
+                        ticker,
+                        _display_name(ticker)[:20],
+                        info["risk"],
+                        info["bear_case"][:80],
+                    )
             logger.info("──────────────────────────────────")
 
         # Step 6: Persist portfolio for tomorrow's run (include benchmark + P&L data)
@@ -427,12 +434,54 @@ class AlphaSharkOrchestrator:
                 "alpha_1d": alpha_1d,
                 "position_returns": daily_pnl,
             }
+
+        signal_tickers = {
+            pos.ticker for pos in final_proposal.positions
+        } | {
+            pos.ticker for pos in strategist_proposal.positions
+        } | (
+            {pos.ticker for pos in challenger_proposal.positions} if challenger_proposal and challenger_proposal.positions else set()
+        ) | (
+            {pos.ticker for pos in full_analyst_proposal.positions} if full_analyst_proposal and full_analyst_proposal.positions else set()
+        )
+        selected_now = {pos.ticker for pos in final_proposal.positions}
+        candidate_alternatives = [
+            {
+                "ticker": candidate["ticker"],
+                "selection_score": round(float(candidate.get("selection_score", 0.0)), 6),
+                "mom_5d": round(float(candidate.get("mom_5d", 0.0)), 6) if candidate.get("mom_5d") is not None else None,
+                "vol_ratio": round(float(candidate.get("vol_ratio", 0.0)), 6) if candidate.get("vol_ratio") is not None else None,
+            }
+            for candidate in snapshot["candidates"]
+            if candidate["ticker"] not in selected_now
+        ][:5]
+        decision_context = {
+            "strategist_proposal": strategist_proposal,
+            "challenger_proposal": challenger_proposal if (challenger_proposal and challenger_proposal.positions) else None,
+            "full_analyst_proposal": full_analyst_proposal if (full_analyst_proposal and full_analyst_proposal.positions) else None,
+            "prior_portfolio": prior_portfolio,
+            "bear_cases": bear_cases,
+            "validation": {
+                "normalized": normalized,
+                "errors_before_normalization": validation_errors_before,
+                "rounded_to_whole_pct": True,
+                "post_round_total_weight": round(sum(p.weight for p in final_proposal.positions), 6),
+            },
+            "candidate_alternatives": candidate_alternatives,
+            "signal_snapshot": build_signal_snapshot(
+                snapshot["candidates"],
+                signal_tickers,
+                earnings_warning=snapshot.get("earnings_warning", ""),
+            ),
+            "returns_1d": snapshot.get("returns_1d", {}),
+        }
         save_portfolio(
             final_proposal,
             snapshot["as_of_date"],
             benchmark_return=snapshot["benchmark_return"],
             close_prices=close_prices_for_positions,
             daily_performance=daily_performance,
+            decision_context=decision_context,
         )
 
         # Step 6b: paper trading account (virtual €10,000 baseline)
@@ -475,13 +524,22 @@ class AlphaSharkOrchestrator:
 
         # Step 7c: generate meta-learning report (AI critiques its own reasoning quality)
         meta_summary = generate_meta_learning_report(target_date="2026-04-06")
-        logger.info(
-            "Meta-learning report updated: accuracy %.0f%%, insights %d, biases %d, alpha hit rate %.0f%%",
-            meta_summary["accuracy_score"] * 100,
-            meta_summary["insights_count"],
-            meta_summary["biases_count"],
-            meta_summary["alpha_hit_rate"] * 100,
-        )
+        accuracy_score = meta_summary.get("accuracy_score")
+        if accuracy_score is None:
+            logger.info(
+                "Meta-learning report updated: accuracy N/A (insufficient data), insights %d, biases %d, alpha hit rate %.0f%%",
+                meta_summary["insights_count"],
+                meta_summary["biases_count"],
+                meta_summary["alpha_hit_rate"] * 100,
+            )
+        else:
+            logger.info(
+                "Meta-learning report updated: accuracy %.0f%%, insights %d, biases %d, alpha hit rate %.0f%%",
+                accuracy_score * 100,
+                meta_summary["insights_count"],
+                meta_summary["biases_count"],
+                meta_summary["alpha_hit_rate"] * 100,
+            )
 
         # On/after live date, emit one-time handoff summary automatically
         handoff_info = generate_live_handoff_if_due(snapshot["as_of_date"], game_start_date="2026-04-06")

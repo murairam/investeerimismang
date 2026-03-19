@@ -13,20 +13,30 @@ from typing import Optional
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _COST_LOG_PATH = os.path.join(_ROOT, "cost_log.json")
 
-# OpenAI pricing (as of Jan 2025)
+# OpenAI pricing per 1M tokens (verified 2026-03-19)
 PRICING = {
-    "gpt-4o": {
-        "input": 2.50 / 1_000_000,   # $2.50 per 1M input tokens
-        "output": 10.0 / 1_000_000,  # $10.00 per 1M output tokens
-    },
-    "gpt-4o-mini": {
-        "input": 0.150 / 1_000_000,  # $0.15 per 1M input tokens
-        "output": 0.600 / 1_000_000, # $0.60 per 1M output tokens
-    },
-    "gemini-2.0-flash-exp": {
-        "input": 0.0,  # Free tier (1500 req/day)
-        "output": 0.0,
-    },
+    # GPT-4o family
+    "gpt-4o":            {"input": 2.50  / 1_000_000, "output": 10.00 / 1_000_000},
+    "gpt-4o-mini":       {"input": 0.150 / 1_000_000, "output":  0.60 / 1_000_000},
+    # GPT-4.1 family
+    "gpt-4.1":           {"input": 2.00  / 1_000_000, "output":  8.00 / 1_000_000},
+    "gpt-4.1-mini":      {"input": 0.40  / 1_000_000, "output":  1.60 / 1_000_000},
+    "gpt-4.1-nano":      {"input": 0.10  / 1_000_000, "output":  0.40 / 1_000_000},
+    # GPT-5 family
+    "gpt-5":             {"input": 1.25  / 1_000_000, "output": 10.00 / 1_000_000},
+    "gpt-5-mini":        {"input": 0.25  / 1_000_000, "output":  2.00 / 1_000_000},
+    "gpt-5-nano":        {"input": 0.05  / 1_000_000, "output":  0.40 / 1_000_000},
+    "gpt-5-pro":         {"input": 15.00 / 1_000_000, "output": 120.00 / 1_000_000},
+    "gpt-5.1":           {"input": 1.25  / 1_000_000, "output": 10.00 / 1_000_000},
+    "gpt-5.2":           {"input": 1.75  / 1_000_000, "output": 14.00 / 1_000_000},
+    "gpt-5.4":           {"input": 2.50  / 1_000_000, "output": 15.00 / 1_000_000},
+    "gpt-5.4-nano":      {"input": 0.20  / 1_000_000, "output":  1.25 / 1_000_000},
+    # Reasoning models
+    "o4-mini":           {"input": 1.10  / 1_000_000, "output":  4.40 / 1_000_000},
+    "o3":                {"input": 2.00  / 1_000_000, "output":  8.00 / 1_000_000},
+    "o3-mini":           {"input": 1.10  / 1_000_000, "output":  4.40 / 1_000_000},
+    # Gemini (free tier)
+    "gemini-2.0-flash-exp": {"input": 0.0, "output": 0.0},
 }
 
 

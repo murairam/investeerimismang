@@ -59,8 +59,10 @@ def _resolve_ticker(raw: str) -> Optional[str]:
 
     return None
 
+from data.portfolio_store import save_verified
 from data.verification_tracker import mark_verified
 from data.paper_account import sync_verified_positions
+from data.diary import mark_verified_entry
 
 _STORE_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
 
@@ -70,21 +72,6 @@ def load() -> Optional[dict]:
         return None
     with open(_STORE_PATH) as f:
         return json.load(f)
-
-
-def save(data: dict) -> None:
-    """Write portfolio_history.json, preserving performance_history and close_prices."""
-    existing: dict = {}
-    if os.path.exists(_STORE_PATH):
-        try:
-            with open(_STORE_PATH) as f:
-                existing = json.load(f)
-        except Exception:
-            pass
-    # Always update positions/date/reasoning/confidence; keep historical fields intact
-    merged = {**existing, **data}
-    with open(_STORE_PATH, "w") as f:
-        json.dump(merged, f, indent=2)
 
 
 def print_portfolio(data: dict) -> None:
@@ -121,7 +108,10 @@ def main() -> None:
     answer = input("  > ").strip().lower()
 
     if answer == "y":
-        mark_verified(data.get("date", date.today().isoformat()))
+        today = date.today().isoformat()
+        save_verified(data.get("positions", []), today, close_prices=data.get("close_prices"))
+        mark_verified(today)
+        mark_verified_entry(today, mode=_mode_for_date(today))
         print("\n  ✅ Portfolio confirmed. Record is up to date.\n")
 
     elif answer == "n":
@@ -209,13 +199,7 @@ def _enter_manual(existing: dict) -> None:
     equity = _ask_equity()
 
     today = date.today().isoformat()
-    data = {
-        "date": today,
-        "positions": positions,
-        "reasoning": existing.get("reasoning", "manually entered portfolio"),
-        "confidence": existing.get("confidence", 0.5),
-    }
-    save(data)
+    save_verified(positions, today)
 
     # Also sync paper account so equity tracking matches the real game
     price_map = _fetch_prices([p["ticker"] for p in positions])
@@ -226,7 +210,12 @@ def _enter_manual(existing: dict) -> None:
         print("  ⚠️  Could not fetch prices — paper account not updated.")
 
     mark_verified(today)
+    mark_verified_entry(today, mode=_mode_for_date(today))
     print("  ✅ Saved. The system will use this as the baseline for tomorrow.\n")
+
+
+def _mode_for_date(day: str) -> str:
+    return "LIVE" if day >= "2026-04-06" else "PREGAME"
 
 
 if __name__ == "__main__":

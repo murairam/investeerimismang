@@ -14,6 +14,10 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     stream=sys.stdout,
 )
+# yfinance logs ERROR for individual ticker failures inside batch downloads
+# (e.g. TypeError on NoneType). Our retry/except handlers already deal with
+# these gracefully — suppress the noise so the log stays readable.
+logging.getLogger("yfinance").setLevel(logging.CRITICAL)
 
 from orchestrator import AlphaSharkOrchestrator  # noqa: E402 (after dotenv)
 

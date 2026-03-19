@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**AlphaShark** is an autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions (Mon–Fri 06:30 UTC), fetches live market data, uses a 3-model AI ensemble to build a momentum portfolio, validates it against game rules, and posts the recommendation to Discord.
+**AlphaShark** is an autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data across the full game-sized universe, uses a multi-agent AI ensemble to build a momentum portfolio, validates it against game rules, and posts the recommendation to Discord.
 
 **Game period:** 6 April – 19 June 2026
-**6 markets:** US S&P 500, OMX Helsinki/Stockholm/Copenhagen, OBX Norway, Baltic Main List (~111 tickers total)
+**6 markets:** US S&P 500, OMX Helsinki/Stockholm/Copenhagen, OBX Norway, Baltic Main List (~630 selectable tickers after game-availability filtering)
 
 ## Running Locally
 
@@ -20,26 +20,27 @@ python scripts/verify.py   # confirm portfolio (LIVE mode after submission)
 python scripts/pregame_review.py  # refresh pre-game learning summary
 ```
 
-Required env vars: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`, optionally `DISCORD_USER_ID`.
+Required env vars: `OPENAI_API_KEY`, `DISCORD_WEBHOOK_URL`, optionally `DISCORD_USER_ID`.
 
 No formal test suite — validate changes with `python main.py` and `python scripts/status.py`.
 
 ## Architecture
 
 ```
-yfinance market data
+yfinance primary market data + EODHD fallback for edge-case Nordic/Baltic symbols
     ↓
 data/fetcher.py — 15 signals per stock + macro context (regime score 0-100, VIX, breadth)
     ↓ (parallel)
-agents/openai_strategist.py (GPT-4o)      ─┐
-agents/gemini_challenger.py (Gemini 2.5)  ─┤→ agents/openai_risk_manager.py (GPT-4o-mini)
+agents/openai_strategist.py (GPT-5.4)     ─┐
+agents/openai_challenger.py (GPT-5.4)     ─┤→ agents/openai_devil.py (GPT-5.4-nano)
+                                            │→ agents/openai_risk_manager.py (GPT-5.4)
                                             │   synthesises both proposals → PortfolioProposal
     ↓
 portfolio/validator.py — enforces game constraints, normalises weights
     ↓
 data/paper_account.py — virtual P&L rebalancing (PREGAME) / portfolio_history.json
     ↓
-Learning loop: PREGAME_LEARNING.md + AI_SELF_CRITIQUE.md → injected into next morning's prompts
+Structured learning loop: portfolio_history.json → learning_state.json → derived markdown reports
     ↓
 output/dispatcher.py — Discord webhook embed
 ```
@@ -91,10 +92,10 @@ competing in a short-term 10-week game. The objective is to **WIN**, not to pres
 ## Memory Loop — Mandatory Reading
 
 Before writing any new trading logic or modifying agent prompts, you MUST:
-1. Read `AI_SELF_CRITIQUE.md` — start your first response with a 1-sentence summary of the
-   last recorded mistake so we do not repeat it.
-2. Read `PREGAME_LEARNING.md` — check the action plan section for active constraints.
-3. Read `docs/strategy_principles.md` — the persistent strategic pivot document that survives
+1. Read `learning_state.json` or `data/learning_state.py` outputs first — this is the machine source of truth.
+2. Read `AI_SELF_CRITIQUE.md` — use it as a human-readable audit, not the primary state source.
+3. Read `PREGAME_LEARNING.md` — use it as a human-readable training summary.
+4. Read `docs/strategy_principles.md` — the persistent strategic pivot document that survives
    daily auto-generation of `AI_SELF_CRITIQUE.md`.
 
 ## Agent Testing Protocol
@@ -116,11 +117,11 @@ Note: `verify.py` in interactive mode requires manual input — use `--show` fla
 | Position weight | 5–25% |
 | Min total invested | 75% (max 25% cash) |
 | Sector concentration | No cap |
-| Regime-based target count | BULL 5-7, NEUTRAL 6-8, BEAR 8-12 |
+| Regime-based target count | concentrated book, typically 5-8 names depending on current risk-manager policy |
 
 ## Operational Modes
 
-- **PREGAME (before 2026-04-06):** Writes to `PREGAME_LOG.md`, tracks virtual €10k in `paper_account.json`, generates learning files.
+- **PREGAME (before 2026-04-06):** Updates one canonical `PREGAME_LOG.md` entry per date, appends full reruns to `PREGAME_RUNS.md`, tracks virtual €10k in `paper_account.json`, and generates structured learning files.
 - **LIVE (on/after 2026-04-06):** Writes to `DAILY_LOG.md`. `live_mode_lock.json` SHA256-locks strategy files — do not edit it manually.
 
 ## Coding Conventions
@@ -133,11 +134,11 @@ Note: `verify.py` in interactive mode requires manual input — use `--show` fla
 
 ## Auto-generated Files (do not edit manually)
 
-These are overwritten on each run: `portfolio_history.json`, `paper_account.json`, `cost_log.json`, `verification_tracker.json`, `live_mode_lock.json`, `PREGAME_LOG.md`, `PREGAME_LEARNING.md`, `AI_SELF_CRITIQUE.md`.
+These are updated automatically by the pipeline: `portfolio_history.json`, `paper_account.json`, `cost_log.json`, `verification_tracker.json`, `live_mode_lock.json`, `PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`, `AI_SELF_CRITIQUE.md`, `learning_state.json`.
 
 ## Common Tasks
 
-**Add a stock:** Edit `config.UNIVERSE` (yfinance ticker) and `config.SECTOR_MAP` (sector tag).
+**Add / remove a game ticker:** Update the universe loader / game-availability layer, not a small hardcoded shortlist.
 
 **Add a signal:** Compute in `data/fetcher.py`, add to `MarketSnapshot`, update agent prompt templates.
 
@@ -153,4 +154,4 @@ These are overwritten on each run: `portfolio_history.json`, `paper_account.json
 | `verification_reminder.yml` | Mon–Fri 07:00 UTC | Discord reminder if portfolio not verified (LIVE only) |
 | `evening_review.yml` | Post-market | Optional evening review |
 
-GitHub secrets required: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`, optionally `DISCORD_USER_ID`.
+GitHub secrets required: `OPENAI_API_KEY`, `DISCORD_WEBHOOK_URL`, optionally `DISCORD_USER_ID`.

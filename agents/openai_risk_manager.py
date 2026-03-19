@@ -1,13 +1,13 @@
 """
-OpenAIRiskManager — GPT-4o-mini meta-analyst.
+OpenAIRiskManager — GPT-5.4 meta-analyst.
 
-Receives two independent portfolio proposals (GPT-4o Strategist + Gemini Challenger)
+Receives two independent portfolio proposals (GPT-5.4 Strategist + GPT-5.4 Challenger)
 and synthesizes a final portfolio:
   - Stocks in BOTH proposals = independently validated = higher conviction weight
   - Unique picks from each = considered on their own merits
   - Applies risk filters: equal-weight check, regime fit, market concentration
 
-Cost: ~$0.0006/run, ~$0.06 for the full game.
+Cost depends on current OpenAI GPT-5.4 pricing and prompt size.
 """
 import json
 import logging
@@ -25,20 +25,25 @@ from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """You are a meta-analyst for the Äripäev/SEB Investment Game (Estonia). You receive two independent portfolio proposals — one from GPT-4o Strategist (momentum-focused) and one from a Contrarian Challenger — and synthesize the best final portfolio.
+_SYSTEM_PROMPT = """You are a meta-analyst for the Äripäev/SEB Investment Game (Estonia). You receive THREE independent portfolio proposals and synthesize the best final portfolio:
+- Proposal A: GPT-5.4 Momentum Strategist (sees only trend/Sharpe signals)
+- Proposal B: Gemini Catalyst Hunter (sees only catalyst signals: vol_ratio, RSI, short interest, IV)
+- Proposal C: GPT-5.4-nano Full Analyst (sees ALL signals — fresh independent view)
+
+A pick appearing in 2+ proposals is independently validated consensus — treat it as higher conviction.
 
 Game ends 19 June 2026. Goal: highest absolute return, beating other participants.
 
-## 2026 macro regime
-Energy (+25% YTD, Brent ~$103, Iran conflict) is the dominant sector. Tech is in correction. Favour energy (XOM, CVX, EQNR.OL), healthcare growth (LLY), Nordic logistics (DSV.CO). Mærsk SELL consensus — cap at 10% even if Sharpe looks good. Competition rewards right-tail outcomes: concentrate in 5-8 names with real momentum catalysts.
+## Competition mandate
+Follow the signals. Do not apply any sector or stock bias — the data tells you what is working today. Competition rewards right-tail outcomes: concentrate in 5-8 names with real momentum catalysts.
 
 ## Synthesis rules
-0. **Target position count by regime** (HARD requirement):
-   - BULL: 5–7 positions. Concentrate hard. No position below 10%.
-   - NEUTRAL: 6–8 positions. No position below 8%. Daily rebalancing is your risk management — skip any pick you wouldn't hold at 8%+.
-   - BEAR: 8–12 positions. Cap each at 12%. Spread risk for single-name protection.
-   Build the portfolio in order: (1) all consensus picks, (2) best unique picks by signal quality. Stop when you hit the regime ceiling. Do NOT pad with weak picks to reach a higher count.
-1. **Consensus picks** (appear in BOTH proposals): independently validated. Give them higher conviction weights (18–25%) unless there is a specific risk reason not to.
+0. **Target position count by regime** — you decide the exact count based on signal quality:
+   - BULL: 5–8 positions. More if multiple names have equally strong signals.
+   - NEUTRAL: 5–10 positions. Use your judgement — 5 if signals are concentrated, more if many names have strong setups.
+   - BEAR: 6–12 positions. Spread risk more broadly.
+   Build in order: (1) consensus picks, (2) best unique picks. Do NOT pad with weak picks to reach a higher count. Do NOT cap at 5 if 6–8 names all have compelling signals.
+1. **Consensus picks** (appear in 2+ of the 3 proposals): independently validated across different signal lenses. Give them higher conviction weights (18–25%) unless there is a specific risk reason not to. A pick found by BOTH the momentum strategist and the catalyst hunter is especially strong — it wins on two different signal dimensions.
 2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, vol_ratio, regime fit. Include the best ones.
 3. **Ignore weak unique picks**: if only one model picked something and its signals are mediocre, skip it. But do NOT skip picks just to keep the portfolio small — the game has no transaction costs.
 4. **DO NOT equal-weight**. Size by conviction:
@@ -50,15 +55,21 @@ Energy (+25% YTD, Brent ~$103, Iran conflict) is the dominant sector. Tech is in
 7. **Check regime fit and portfolio beta**:
    - You will be given the portfolio-weighted beta computed from the proposals.
    - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
-   - BULL regime: portfolio beta up to 1.30 is acceptable. Concentrate on top names.
-   - NEUTRAL: target portfolio beta between 0.95 and 1.15.
-8. **Target regime-based position count** across at least 2 markets:
-    - BULL: 5–7 positions (concentrate hard, no position < 10%)
-    - NEUTRAL: 6–8 positions (no position < 8%, quality beats quantity)
-    - BEAR: 8–12 positions (spread risk, cap at 12% each)
-9. **No sector cap**: The game enforces no sector concentration limit. If a single sector shows extreme momentum, you are fully authorized to put 100% of the portfolio into that sector (e.g. 4 Energy stocks at 25% each: XOM + CVX + EQNR + AKRBP). Concentrate wherever the alpha is.
+   - BULL regime: portfolio beta up to 2.0 is acceptable. Concentrate on top names — high beta wins in bull markets.
+   - NEUTRAL: target portfolio beta between 0.95 and 1.30.
+8. **Target regime-based position count**:
+    - BULL: 5–8 positions. No position < 5%. Cap strongest at 25%.
+    - NEUTRAL: 5–10 positions. Size by conviction — top picks 20–25%, diversifiers 5–10%.
+    - BEAR: 6–12 positions. Cap at 20% each.
+9. **No sector cap**: The game enforces zero sector concentration limits. 100% in one sector is fully legal (e.g. 4 Energy stocks at 25% each). Concentrate wherever the alpha is.
 10. **Vol_ratio signal**: prefer positions where vol_ratio > 1.2 (high-volume confirmation). Be cautious about positions where vol_ratio < 0.7 (low-volume, potentially weak move).
-11. **Contrarian insight**: the challenger picks represent what the momentum crowd is ignoring. If the challenger's picks have strong signals (recovering RSI, accelerating 5d momentum, positive vs_index), include at least 1–2 of them even if they're not consensus.
+11. **Catalyst insight**: the challenger picks represent high-momentum catalysts. If the challenger's picks have strong signals (high short interest, premarket gap-up, IV spike + momentum), include at least 1–2 of them even if they're not consensus.
+12. **Do NOT penalize non-US stocks for missing Short Interest data.** Their IV column shows 20d annualized realized vol (not options IV) — treat it as a volatility level indicator. Evaluate European/Baltic stocks on volume breakouts, momentum, premarket gaps, and realized vol so we don't accidentally build a 100% US portfolio.
+13. **Earnings safety valve**: if a stock has an upcoming earnings report within the next 3 days (based on the `earnings_warning` context), cap its maximum weight at 10%, regardless of conviction.
+14. **Dead-money exclusion rule**: in this competition, a stock is dead money if vol_ratio < 0.90 and mom_5d <= +1.0%. Do NOT call a stock dead money if vol_ratio is above 1.0. HIGH-risk dead-money names should normally be excluded, not merely downsized.
+15. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
+16. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists. A 5-stock portfolio means each slot is scarce capital.
+17. **Regime-score selectivity inside NEUTRAL**: when regime_score is below 50 (CAUTIOUS), still hold exactly 5 names, but be more selective. Do NOT use caution as an excuse to add slow names; instead remove weak-acceleration names and keep only the sharpest 5.
 
 ## Hard constraints
 - 5 to 20 stocks.
@@ -79,13 +90,14 @@ CRITICAL: "weight" must be a DECIMAL between 0.05 and 0.25. NOT a percentage.
       "rationale": "consensus/unique pick + one-sentence reason for this weight."
     }
   ],
-  "reasoning": "2–3 sentences: what consensus existed, what contrarian picks you included, and portfolio beta vs target.",
-  "confidence": 0.80
+  "reasoning": "2–3 sentences: what consensus existed, what catalyst picks you included, and portfolio beta vs target.",
+  "confidence": 0.80,
+  "learning_reflection": "One sentence: how today's synthesis adapts based on recent learning context."
 }"""
 
 
 class OpenAIRiskManager(BaseAgent):
-    MODEL = "gpt-4o-mini"
+    MODEL = "gpt-5.4"
 
     def __init__(self) -> None:
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
@@ -96,33 +108,39 @@ class OpenAIRiskManager(BaseAgent):
         prior_proposal: Optional[PortfolioProposal] = None,
         challenger_proposal: Optional[PortfolioProposal] = None,
         bear_cases: Optional[dict] = None,
+        full_analyst_proposal: Optional[PortfolioProposal] = None,
     ) -> PortfolioProposal:
         if prior_proposal is None:
             raise ValueError("OpenAIRiskManager requires prior_proposal from Strategist.")
 
-        user_message = self._build_message(prior_proposal, challenger_proposal, snapshot, bear_cases or {})
+        user_message = self._build_message(
+            prior_proposal, challenger_proposal, snapshot, bear_cases or {},
+            full_analyst=full_analyst_proposal,
+        )
 
         regime = snapshot.get("regime", "NEUTRAL")
         beta_targets = {
-            "BULL": (None, 1.30),
-            "NEUTRAL": (0.95, 1.15),
+            "BULL": (None, 2.0),
+            "NEUTRAL": (0.95, 1.30),
             "BEAR": (None, 0.90),
         }
 
         try:
             result = self._call_openai(user_message)
             result = self._enforce_beta(result, snapshot, regime, beta_targets)
+            result = self._enforce_selection_quality(result, snapshot, bear_cases or {})
             logger.info(
-                "Meta-analyst: synthesised %d positions from strategist(%d) + challenger(%d) (conf %.0f%%)",
+                "Meta-analyst: synthesised %d positions from strategist(%d) + gemini(%d) + full(%d) (conf %.0f%%)",
                 len(result.positions),
                 len(prior_proposal.positions),
                 len(challenger_proposal.positions) if challenger_proposal else 0,
+                len(full_analyst_proposal.positions) if full_analyst_proposal else 0,
                 result.confidence * 100,
             )
             return result
         except Exception as exc:
-            logger.warning("Meta-analyst failed (%s) — falling back to 60/40 merge", exc)
-            return self._merge_proposals(prior_proposal, challenger_proposal)
+            logger.warning("Meta-analyst failed (%s) — falling back to merge", exc)
+            return self._merge_proposals(prior_proposal, challenger_proposal, full_analyst_proposal)
 
     @staticmethod
     def _portfolio_beta(proposal: PortfolioProposal, snapshot: MarketSnapshot) -> float:
@@ -179,7 +197,7 @@ class OpenAIRiskManager(BaseAgent):
         adj_hi = (hi * us_weight + self._NON_US_ASSUMED_BETA * non_us_weight) if hi else None
 
         in_range = (adj_lo is None or actual_beta >= adj_lo) and (adj_hi is None or actual_beta <= adj_hi)
-        raw_str = f"{lo or '?'}–{hi or '?'}"
+        raw_str = f"{lo if lo is not None else '?'}–{hi if hi is not None else '?'}"
         adj_str = f"{adj_lo:.2f}–{adj_hi:.2f}" if (adj_lo and adj_hi) else f"≤{adj_hi:.2f}" if adj_hi else "?"
 
         if in_range:
@@ -197,23 +215,141 @@ class OpenAIRiskManager(BaseAgent):
             )
         return proposal
 
+    def _enforce_selection_quality(
+        self,
+        proposal: PortfolioProposal,
+        snapshot: MarketSnapshot,
+        bear_cases: dict[str, dict],
+    ) -> PortfolioProposal:
+        candidate_map = {c["ticker"]: c for c in snapshot["candidates"]}
+        regime_score = snapshot.get("regime_score", 50)
+        minimum_positions = 5
+
+        def is_dead_money(ticker: str) -> bool:
+            c = candidate_map.get(ticker, {})
+            vol_ratio = c.get("vol_ratio", float("nan"))
+            mom_5d = c.get("mom_5d", float("nan"))
+            if math.isnan(vol_ratio) or math.isnan(mom_5d):
+                return False
+            return vol_ratio < 0.90 and mom_5d <= 0.01
+
+        def candidate_score(ticker: str) -> float:
+            c = candidate_map.get(ticker, {})
+            score = 0.0
+            sharpe = c.get("sharpe_20d", float("nan"))
+            if not math.isnan(sharpe):
+                score += max(-1.0, min(2.0, sharpe))
+            mom_5d = c.get("mom_5d", float("nan"))
+            if not math.isnan(mom_5d):
+                score += max(-1.5, min(2.5, mom_5d * 18.0))
+            vol_ratio = c.get("vol_ratio", float("nan"))
+            if not math.isnan(vol_ratio):
+                score += max(-1.0, min(2.0, (vol_ratio - 1.0) * 2.0))
+            vs_index = c.get("vs_index", float("nan"))
+            if not math.isnan(vs_index):
+                score += max(-1.0, min(2.0, vs_index * 12.0))
+            if is_dead_money(ticker):
+                score -= 2.0
+            bear = bear_cases.get(ticker)
+            if bear and bear.get("risk") == "HIGH":
+                score -= 2.5
+            elif bear and bear.get("risk") == "MEDIUM":
+                score -= 0.8
+            return score
+
+        kept: list[Position] = []
+        removed: list[str] = []
+        for pos in proposal.positions:
+            ticker = pos.ticker
+            bear = bear_cases.get(ticker, {})
+            if bear.get("risk") == "HIGH" and is_dead_money(ticker):
+                removed.append(ticker)
+                continue
+            if regime_score < 50:
+                c = candidate_map.get(ticker, {})
+                mom_5d = c.get("mom_5d", float("nan"))
+                vol_ratio = c.get("vol_ratio", float("nan"))
+                if ((not math.isnan(mom_5d) and mom_5d < 0.0) or
+                        (not math.isnan(vol_ratio) and vol_ratio < 0.80 and not math.isnan(mom_5d) and mom_5d < 0.02)):
+                    removed.append(ticker)
+                    continue
+            kept.append(pos)
+
+        if len(kept) < minimum_positions:
+            existing = {p.ticker for p in kept}
+            ranked_candidates = sorted(
+                [c["ticker"] for c in snapshot["candidates"] if c["ticker"] not in existing],
+                key=candidate_score,
+                reverse=True,
+            )
+            for ticker in ranked_candidates:
+                if len(kept) >= minimum_positions:
+                    break
+                if candidate_score(ticker) < 0.15:
+                    continue
+                c = candidate_map[ticker]
+                kept.append(
+                    Position(
+                        ticker=ticker,
+                        weight=0.05,
+                        rationale=(
+                            "Replacement selected by slot-cost filter: stronger short-term acceleration "
+                            "or cleaner momentum than removed alternatives."
+                        ),
+                    )
+                )
+
+        if removed:
+            logger.info("Selection-quality filter removed: %s", ", ".join(sorted(removed)))
+
+        if not kept:
+            return proposal
+
+        total_weight = sum(p.weight for p in kept)
+        if total_weight <= 0:
+            return proposal
+
+        weights = [p.weight / total_weight for p in kept]
+        kept = [
+            Position(ticker=p.ticker, weight=w, rationale=p.rationale)
+            for p, w in zip(kept, weights)
+        ]
+
+        return PortfolioProposal(
+            positions=kept,
+            reasoning=proposal.reasoning,
+            confidence=proposal.confidence,
+            learning_reflection=proposal.learning_reflection,
+        )
+
     @staticmethod
     def _merge_proposals(
         strategist: PortfolioProposal,
         challenger: Optional[PortfolioProposal],
+        full_analyst: Optional[PortfolioProposal] = None,
     ) -> PortfolioProposal:
-        """60/40 weight-merge fallback when meta-analyst fails entirely."""
-        if not challenger or not challenger.positions:
-            return strategist
+        """Equal-weight merge fallback when meta-analyst fails entirely."""
+        proposals = [strategist]
+        weights_per_proposal = [0.50]
+        if challenger and challenger.positions:
+            proposals.append(challenger)
+            weights_per_proposal = [0.40, 0.35]
+        if full_analyst and full_analyst.positions:
+            proposals.append(full_analyst)
+            # Normalize weights to sum to 1
+            total_w = sum(weights_per_proposal) + 0.25
+            weights_per_proposal = [w / total_w for w in weights_per_proposal] + [0.25 / total_w]
+
         merged: dict[str, list] = {}
-        for p in strategist.positions:
-            merged.setdefault(p.ticker, []).append((p.weight * 0.6, p.rationale))
-        for p in challenger.positions:
-            if p.ticker in merged:
-                old_w, old_r = merged[p.ticker][0]
-                merged[p.ticker] = [(old_w + p.weight * 0.4, old_r)]
-            else:
-                merged.setdefault(p.ticker, []).append((p.weight * 0.4, p.rationale))
+        for proposal, prop_weight in zip(proposals, weights_per_proposal):
+            for p in proposal.positions:
+                w = p.weight * prop_weight
+                if p.ticker in merged:
+                    old_w, old_r = merged[p.ticker][0]
+                    merged[p.ticker] = [(old_w + w, old_r)]
+                else:
+                    merged[p.ticker] = [(w, p.rationale)]
+
         positions = [
             Position(ticker=t, weight=min(0.25, max(0.05, w)), rationale=r)
             for t, [(w, r)] in merged.items()
@@ -226,7 +362,7 @@ class OpenAIRiskManager(BaseAgent):
             ]
         return PortfolioProposal(
             positions=positions,
-            reasoning="60/40 merge fallback (meta-analyst unavailable)",
+            reasoning="Weighted merge fallback (meta-analyst unavailable)",
             confidence=0.5,
         )
 
@@ -236,6 +372,7 @@ class OpenAIRiskManager(BaseAgent):
         challenger: Optional[PortfolioProposal],
         snapshot: MarketSnapshot,
         bear_cases: Optional[dict] = None,
+        full_analyst: Optional[PortfolioProposal] = None,
     ) -> str:
         regime = snapshot.get("regime", "NEUTRAL")
         spx_vs = snapshot.get("spx_vs_200d", 0.0)
@@ -245,7 +382,7 @@ class OpenAIRiskManager(BaseAgent):
         # Compute portfolio betas for context
         strat_beta = self._portfolio_beta(strategist, snapshot)
         strat_beta_str = f"{strat_beta:.2f}" if not math.isnan(strat_beta) else "N/A"
-        beta_targets = {"BULL": "target ≤1.30", "BEAR": "target ≤0.90", "NEUTRAL": "target 0.95–1.15"}
+        beta_targets = {"BULL": "target ≤2.0", "BEAR": "target ≤0.90", "NEUTRAL": "target 0.95–1.30"}
         beta_target_str = beta_targets.get(regime, "target 0.95–1.15")
 
         breadth = snapshot.get("breadth_pct", float("nan"))
@@ -271,47 +408,125 @@ class OpenAIRiskManager(BaseAgent):
             "",
         ]
 
-        # Find consensus tickers
+        candidate_map = {c["ticker"]: c for c in snapshot["candidates"]}
+
+        # Find consensus tickers (appear in 2+ of the 3 proposals)
         strat_tickers = {p.ticker for p in strategist.positions}
         chall_tickers = {p.ticker for p in challenger.positions} if challenger and challenger.positions else set()
-        consensus = strat_tickers & chall_tickers
+        full_tickers = {p.ticker for p in full_analyst.positions} if full_analyst and full_analyst.positions else set()
 
-        if consensus:
-            lines.append(f"⭐ CONSENSUS picks (in BOTH proposals — higher conviction): {', '.join(sorted(consensus))}")
+        # Count appearances across proposals
+        all_tickers = strat_tickers | chall_tickers | full_tickers
+        consensus = {t for t in all_tickers if sum([t in strat_tickers, t in chall_tickers, t in full_tickers]) >= 2}
+        triple = {t for t in all_tickers if sum([t in strat_tickers, t in chall_tickers, t in full_tickers]) == 3}
+
+        if triple:
+            lines.append(f"🌟 TRIPLE CONSENSUS (all 3 proposals — maximum conviction): {', '.join(sorted(triple))}")
             lines.append("")
+        if consensus - triple:
+            lines.append(f"⭐ DOUBLE CONSENSUS (2/3 proposals — high conviction): {', '.join(sorted(consensus - triple))}")
+            lines.append("")
+
+        def _fmt_row(p, consensus_set: set, candidate_map: dict) -> str:
+            tag = " 🌟" if p.ticker in triple else (" ⭐" if p.ticker in consensus_set else "")
+            c = candidate_map.get(p.ticker, {})
+            mom_5d = c.get("mom_5d", float("nan"))
+            vol_ratio = c.get("vol_ratio", float("nan"))
+            accel = (
+                f" | 5d {mom_5d:+.1%} | vol {vol_ratio:.2f}"
+                if not math.isnan(mom_5d) and not math.isnan(vol_ratio)
+                else ""
+            )
+            return f"{p.ticker:<12} {p.weight:>7.1%}{tag}  {p.rationale[:40]}{accel}"
 
         # Strategist proposal
         strat_total = sum(p.weight for p in strategist.positions)
         lines += [
-            f"### Proposal A — GPT-4o Strategist ({len(strategist.positions)} positions, {strat_total:.0%} total)",
+            f"### Proposal A — GPT-5.4 Momentum Strategist ({len(strategist.positions)} positions, {strat_total:.0%} total)",
             f"Thesis: {strategist.reasoning}",
             "",
             f"{'Ticker':<12} {'Weight':>8}  Rationale",
             "-" * 65,
         ]
         for p in strategist.positions:
-            tag = " ⭐" if p.ticker in consensus else ""
-            lines.append(f"{p.ticker:<12} {p.weight:>7.1%}{tag}  {p.rationale[:50]}")
+            lines.append(_fmt_row(p, consensus, candidate_map))
 
         lines.append("")
 
-        # Challenger proposal (if available)
+        # Gemini Challenger proposal
         if challenger and challenger.positions:
             chall_total = sum(p.weight for p in challenger.positions)
             lines += [
-                f"### Proposal B — Gemini Challenger ({len(challenger.positions)} positions, {chall_total:.0%} total)",
+                f"### Proposal B — Gemini Catalyst Hunter ({len(challenger.positions)} positions, {chall_total:.0%} total)",
                 f"Thesis: {challenger.reasoning}",
                 "",
                 f"{'Ticker':<12} {'Weight':>8}  Rationale",
                 "-" * 65,
             ]
             for p in challenger.positions:
-                tag = " ⭐" if p.ticker in consensus else ""
-                lines.append(f"{p.ticker:<12} {p.weight:>7.1%}{tag}  {p.rationale[:50]}")
+                lines.append(_fmt_row(p, consensus, candidate_map))
         else:
             lines += [
-                "### Proposal B — Gemini Challenger",
-                "Not available (fallback — use Proposal A as base, apply risk rules).",
+                "### Proposal B — Gemini Catalyst Hunter",
+                "Not available — weight Proposal A and C more heavily.",
+            ]
+
+        lines.append("")
+
+        # Full Analyst proposal
+        if full_analyst and full_analyst.positions:
+            full_total = sum(p.weight for p in full_analyst.positions)
+            lines += [
+                f"### Proposal C — GPT-5.4-nano Full Analyst ({len(full_analyst.positions)} positions, {full_total:.0%} total)",
+                f"Thesis: {full_analyst.reasoning}",
+                "",
+                f"{'Ticker':<12} {'Weight':>8}  Rationale",
+                "-" * 65,
+            ]
+            for p in full_analyst.positions:
+                lines.append(_fmt_row(p, consensus, candidate_map))
+        else:
+            lines += [
+                "### Proposal C — GPT-5.4-nano Full Analyst",
+                "Not available — use Proposals A and B.",
+            ]
+
+        # Sector concentration summary across all proposals
+        all_proposals = [
+            ("Strategist", strategist),
+            ("Gemini", challenger),
+            ("FullAnalyst", full_analyst),
+        ]
+        sector_weights: dict[str, float] = {}
+        total_weight_all = 0.0
+        for _, proposal in all_proposals:
+            if proposal and proposal.positions:
+                for p in proposal.positions:
+                    sec = candidate_map.get(p.ticker, {}).get("sector", "?")
+                    sector_weights[sec] = sector_weights.get(sec, 0.0) + p.weight
+                    total_weight_all += p.weight
+        if sector_weights and total_weight_all > 0:
+            top_sectors = sorted(sector_weights.items(), key=lambda x: -x[1])
+            sector_lines = [f"{s}: {w / total_weight_all:.0%}" for s, w in top_sectors[:5]]
+            dominant = top_sectors[0]
+            concentration_note = ""
+            if dominant[1] / total_weight_all > 0.60:
+                concentration_note = (
+                    f" ⚠️ {dominant[0]} dominates at {dominant[1]/total_weight_all:.0%} of combined proposals. "
+                    "If signals genuinely justify concentration, that is fine — but explicitly state your reasoning. "
+                    "Consider whether 1 non-correlated pick would improve risk-adjusted return without sacrificing conviction."
+                )
+            lines += [
+                "",
+                f"### Sector concentration across all proposals: {' | '.join(sector_lines)}{concentration_note}",
+            ]
+
+        # High-overlap consensus warning (must appear prominently before other context)
+        if snapshot.get("consensus_warning"):
+            lines += [
+                "",
+                "### ⚠️ CONSENSUS WARNING — DAILY TRADING MANDATE",
+                snapshot["consensus_warning"],
             ]
 
         if snapshot.get("earnings_warning"):
@@ -347,6 +562,10 @@ class OpenAIRiskManager(BaseAgent):
 
         lines += [
             "",
+            "### Slot-Cost and Selectivity Rules",
+            "Every slot must beat the next-best alternative. In a 5-stock competition portfolio, do not keep a merely acceptable name if another proposal offered a cleaner, faster mover.",
+            "CAUTIOUS regime-score handling: remain concentrated, but cut slow or dead-money names rather than padding with soft holdings.",
+            "",
             "Synthesise the final portfolio. Weight consensus picks higher. "
             "For HIGH-RISK picks flagged above: reduce weight by at least 30% vs what you'd otherwise give, or exclude. "
             "Apply regime and concentration rules. Respond ONLY with the JSON object.",
@@ -357,7 +576,7 @@ class OpenAIRiskManager(BaseAgent):
         response = self.client.chat.completions.create(
             model=self.MODEL,
             response_format={"type": "json_object"},
-            temperature=0.3,
+            temperature=0.15,
             messages=[
                 {"role": "system", "content": _SYSTEM_PROMPT},
                 {"role": "user", "content": user_message},
@@ -399,4 +618,5 @@ class OpenAIRiskManager(BaseAgent):
             positions=positions,
             reasoning=data.get("reasoning", ""),
             confidence=float(data.get("confidence", 0.5)),
+            learning_reflection=data.get("learning_reflection", ""),
         )

@@ -26,13 +26,30 @@ def send_discord_reminder(webhook_url: str, pregame: bool = False) -> None:
         "embeds": [{
             "title": f"⚠️ Portfolio Verification Reminder  {mode_label}",
             "description": (
-                "**You haven't verified your portfolio yet today!**\n\n"
-                "Please:\n"
-                "1. Confirm your game portfolio matches the recommendation\n"
-                "2. Run `python verify.py` to sync the system\n\n"
-                "⏰ **Deadline: 10:00 EET**\n\n"
-                "Without verification, tomorrow's AI decisions may be based on outdated data."
+                "**You haven't verified your portfolio yet today.**\n\n"
+                "Without verification, tomorrow's AI decisions may be based on outdated holdings."
             ),
+            "fields": [
+                {
+                    "name": "Do This Now",
+                    "value": (
+                        "1. Open the game portfolio.\n"
+                        "2. Confirm it matches the latest AlphaShark recommendation.\n"
+                        "3. Run `python scripts/verify.py`."
+                    ),
+                    "inline": False,
+                },
+                {
+                    "name": "Deadline",
+                    "value": "**10:00 EET**",
+                    "inline": True,
+                },
+                {
+                    "name": "Why It Matters",
+                    "value": "Verification keeps tomorrow's learning and portfolio decisions synced with reality.",
+                    "inline": True,
+                },
+            ],
             "color": 0xF39C12 if pregame else 0xE74C3C,  # Orange for pregame, red for live
         }]
     }

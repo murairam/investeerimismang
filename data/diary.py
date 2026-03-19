@@ -1,9 +1,11 @@
 """
-Diary writer — appends a human-readable daily entry to DIARY.md after each run.
+Diary writer — maintains one canonical human-readable entry per date and,
+in pregame mode, appends every rerun to a separate debug log.
 """
 import logging
 import math
 import os
+import re
 from datetime import datetime
 from typing import Optional
 
@@ -14,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 _PREGAME_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "PREGAME_LOG.md")
 _LIVE_LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "DAILY_LOG.md")
+_PREGAME_RUNS_PATH = os.path.join(os.path.dirname(__file__), "..", "PREGAME_RUNS.md")
 
 
 def append_entry(
@@ -24,30 +27,37 @@ def append_entry(
     paper_metrics: Optional[dict] = None,
     mode: str = "PREGAME",
 ) -> None:
-    """Append today's portfolio entry to the appropriate log file.
+    """Upsert today's canonical portfolio entry to the appropriate log file.
 
-    PREGAME runs write to PREGAME_LOG.md (training record).
-    LIVE runs write to DAILY_LOG.md (the real competition log, starts clean on April 6).
+    PREGAME runs update PREGAME_LOG.md and append debug entries to PREGAME_RUNS.md.
+    LIVE runs update DAILY_LOG.md.
     """
     if mode == "LIVE":
         path = os.path.abspath(_LIVE_LOG_PATH)
         title = "AlphaShark — Daily Portfolio Log"
-        subtitle = "Each entry is written automatically after the daily run."
+        subtitle = "One canonical entry per date. Verified entries reflect the actual submitted portfolio."
+        debug_path = None
     else:
         path = os.path.abspath(_PREGAME_LOG_PATH)
         title = "AlphaShark — Pre-Game Training Log"
-        subtitle = "Training runs before the game starts (April 6). Values reset to €10,000 on game day."
+        subtitle = "One canonical entry per date. Same-day reruns update that day's entry; full rerun history lives in PREGAME_RUNS.md."
+        debug_path = os.path.abspath(_PREGAME_RUNS_PATH)
 
     entry = _build_entry(final, snapshot, prior, performance, paper_metrics)
 
-    if not os.path.exists(path):
-        with open(path, "w") as f:
-            f.write(f"# {title}\n\n{subtitle}\n\n---\n\n")
+    _ensure_log_file(path, title, subtitle)
+    _upsert_entry(path, snapshot["as_of_date"], entry)
 
-    with open(path, "a") as f:
-        f.write(entry)
+    if debug_path:
+        _ensure_log_file(
+            debug_path,
+            "AlphaShark — Pregame Run Debug Log",
+            "Every pregame run is appended here for debugging. This file does not drive learning.",
+        )
+        with open(debug_path, "a") as f:
+            f.write(entry)
 
-    logger.info("Diary entry appended to %s", path)
+    logger.info("Diary entry updated in %s", path)
 
 
 def _build_entry(
@@ -73,6 +83,8 @@ def _build_entry(
         f"**Market:** {regime} regime · SPX vs 200d SMA: {spx_vs:+.1%} · "
         f"VIX: {vix_str} · "
         f"S&P 500 20d: {bench:+.1%}",
+        "",
+        "**Verification:** Pending manual confirmation via `python scripts/verify.py`.",
         "",
     ]
 
@@ -175,3 +187,68 @@ def _build_entry(
 
     lines += ["", "---", ""]
     return "\n".join(lines)
+
+
+def mark_verified_entry(date: str, mode: str = "PREGAME", verified_at: Optional[str] = None) -> None:
+    path = os.path.abspath(_LIVE_LOG_PATH if mode == "LIVE" else _PREGAME_LOG_PATH)
+    if not os.path.exists(path):
+        return
+
+    try:
+        with open(path, "r") as f:
+            content = f.read()
+    except Exception as exc:
+        logger.warning("Could not read diary for verification update: %s", exc)
+        return
+
+    pattern = re.compile(rf"(^## {re.escape(date)}[^\n]*\n)(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
+    match = pattern.search(content)
+    if not match:
+        return
+
+    section = match.group(2)
+    timestamp = verified_at or datetime.now().strftime("%H:%M:%S")
+    verified_line = f"**Verification:** Verified against actual game holdings at {timestamp}."
+
+    if "**Verification:**" in section:
+        section = re.sub(r"^\*\*Verification:\*\*.*$", verified_line, section, count=1, flags=re.MULTILINE)
+    else:
+        section = verified_line + "\n\n" + section
+
+    updated = content[:match.start(2)] + section + content[match.end(2):]
+    with open(path, "w") as f:
+        f.write(updated)
+
+
+def _ensure_log_file(path: str, title: str, subtitle: str) -> None:
+    if os.path.exists(path):
+        return
+    with open(path, "w") as f:
+        f.write(f"# {title}\n\n{subtitle}\n\n---\n\n")
+
+
+def _upsert_entry(path: str, date: str, entry: str) -> None:
+    with open(path, "r") as f:
+        content = f.read()
+
+    pattern = re.compile(rf"^## {re.escape(date)}[^\n]*\n.*?(?=^## |\Z)", re.MULTILINE | re.DOTALL)
+    matches = list(pattern.finditer(content))
+    if matches:
+        first = matches[0]
+        rebuilt = []
+        cursor = 0
+        rebuilt.append(content[:first.start()])
+        rebuilt.append(entry.rstrip() + "\n\n")
+        cursor = first.end()
+        for match in matches[1:]:
+            rebuilt.append(content[cursor:match.start()])
+            cursor = match.end()
+        rebuilt.append(content[cursor:])
+        content = "".join(rebuilt)
+    else:
+        if not content.endswith("\n"):
+            content += "\n"
+        content += entry
+
+    with open(path, "w") as f:
+        f.write(content)

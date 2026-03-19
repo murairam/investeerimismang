@@ -2,13 +2,18 @@
 Refresh and print the pre-game learning reports.
 
 Usage:
-    python pregame_review.py
+    python scripts/pregame_review.py
 
 Shows:
 - Performance learning (win rate, alpha)
 - Meta-learning (AI reasoning quality)
 - Cost tracking (API spending)
 """
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from data.learning_report import generate_pregame_learning_report
 from data.meta_learning import generate_meta_learning_report
 from data.cost_tracker import get_total_cost
@@ -32,7 +37,10 @@ def main() -> None:
     # Meta-Learning
     print("\n🧠 Meta-Learning Report (AI Self-Critique)")
     meta_summary = generate_meta_learning_report(target_date="2026-04-06")
-    print(f"   Reasoning accuracy score: {meta_summary['accuracy_score']:.0%}")
+    if meta_summary.get("accuracy_score") is None:
+        print("   Reasoning accuracy score: N/A (insufficient data)")
+    else:
+        print(f"   Reasoning accuracy score: {meta_summary['accuracy_score']:.0%}")
     print(f"   Insights (what's working): {meta_summary['insights_count']}")
     print(f"   Biases detected (what's failing): {meta_summary['biases_count']}")
     print(f"   Alpha hit rate: {meta_summary['alpha_hit_rate']:.0%}")
@@ -58,7 +66,7 @@ def main() -> None:
         print(f"   Latest run ({latest_date}): ${latest_cost:.4f}")
 
     print("\n" + "=" * 70)
-    print("\n💡 Tip: Run 'python status.py' for a full project dashboard\n")
+    print("\n💡 Tip: Run 'python scripts/status.py' for a full project dashboard\n")
 
 
 if __name__ == "__main__":

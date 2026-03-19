@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**AlphaShark** is an autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data, uses a 3-model AI ensemble (GPT-4o Strategist + Gemini 2.5 Flash Challenger + GPT-4o-mini Risk Manager) to build a momentum portfolio, validates it against game rules, and posts the daily recommendation to Discord.
+**AlphaShark** is an autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data, uses a 4-model AI ensemble (GPT-5.4 Strategist + GPT-5.4 Challenger + GPT-5.4-nano Devil + GPT-5.4 Risk Manager) to build a momentum portfolio, validates it against game rules, and posts the daily recommendation to Discord.
 
 **Game period:** 6 April – 19 June 2026  
 **Daily execution:** GitHub Actions fires at 06:30 UTC on weekdays (Mon–Fri)
@@ -12,7 +12,7 @@
 ## Technology Stack
 
 - **Language:** Python 3.12
-- **AI models:** OpenAI (GPT-4o, GPT-4o-mini), Google Gemini 2.5 Flash
+- **AI models:** OpenAI (GPT-5.4, GPT-5.4-nano)
 - **Market data:** `yfinance` (free, no API key required)
 - **Libraries:** `pandas`, `numpy`, `openai`, `google-genai`, `anthropic`, `requests`, `python-dotenv`, `pytrends`
 - **Automation:** GitHub Actions (`.github/workflows/`)
@@ -27,10 +27,12 @@ Market data (yfinance)
     ↓
 data/fetcher.py — 15 signals per stock + macro context (regime score, VIX, breadth)
     ↓
-GPT-4o Strategist  ──────────────────────────────────────────┐  (run in parallel)
-Gemini 2.5 Flash Challenger ─────────────────────────────────┤
+GPT-5.4 Strategist ──────────────────────────────────────────┐  (run in parallel)
+GPT-5.4 Challenger ──────────────────────────────────────────┤
                                                               ↓
-GPT-4o-mini Risk Manager — synthesises both proposals, weights consensus picks higher
+GPT-5.4-nano Devil — bear-case stress test for top picks
+                                                              ↓
+GPT-5.4 Risk Manager — synthesises both proposals, weights consensus picks higher
     ↓
 portfolio/validator.py — enforces game constraints, cash floor (min 75% invested)
     ↓
@@ -49,9 +51,10 @@ PREGAME_LOG.md / DAILY_LOG.md — human-readable entry appended
 | `orchestrator.py` | Full pipeline wiring |
 | `config.py` | Universe, signal params, game constraints, sector map |
 | `agents/base_agent.py` | Abstract base class all LLM agents must implement |
-| `agents/openai_strategist.py` | GPT-4o momentum-driven portfolio selection |
-| `agents/gemini_challenger.py` | Gemini 2.5 Flash contrarian second opinion |
-| `agents/openai_risk_manager.py` | GPT-4o-mini that synthesises both proposals |
+| `agents/openai_strategist.py` | GPT-5.4 momentum-driven portfolio selection |
+| `agents/openai_challenger.py` | GPT-5.4 contrarian second opinion |
+| `agents/openai_devil.py` | GPT-5.4-nano bear-case stress tester |
+| `agents/openai_risk_manager.py` | GPT-5.4 that synthesises both proposals |
 | `data/fetcher.py` | Market data + 15 signal computations + macro context |
 | `data/earnings_fetcher.py` | Upcoming earnings calendar (7-day risk warnings) |
 | `data/news_fetcher.py` | Recent headlines for top candidates |
@@ -94,8 +97,7 @@ python scripts/verify.py   # confirm portfolio (LIVE mode)
 ### Required environment variables (see `.env.example`)
 
 ```
-OPENAI_API_KEY=...          # GPT-4o + GPT-4o-mini
-GEMINI_API_KEY=...          # Gemini 2.5 Flash (free tier, 1500 req/day)
+OPENAI_API_KEY=...          # GPT-5.4 + GPT-5.4-nano
 DISCORD_WEBHOOK_URL=...     # Discord channel webhook
 DISCORD_USER_ID=...         # Optional: enables @mentions in LIVE mode
 ```

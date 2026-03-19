@@ -152,6 +152,7 @@ class PortfolioValidator:
             positions=positions,
             reasoning=proposal.reasoning,
             confidence=proposal.confidence,
+            learning_reflection=proposal.learning_reflection,
         )
 
     def round_to_whole_pct(self, proposal: PortfolioProposal) -> PortfolioProposal:
@@ -174,5 +175,6 @@ class PortfolioValidator:
             positions=positions,
             reasoning=proposal.reasoning,
             confidence=proposal.confidence,
+            learning_reflection=proposal.learning_reflection,
         )
 

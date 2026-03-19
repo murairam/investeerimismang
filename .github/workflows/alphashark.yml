@@ -3,9 +3,9 @@ name: AlphaShark Daily Run
 
 on:
   schedule:
-    # 05:30 UTC = 08:30 EEST (UTC+3, summer / game period)
-    # Runs Mon–Fri, ~90 min before the 10:00 EET submission cutoff
-    - cron: '30 5 * * 1-5'
+    # 06:00 UTC = 09:00 EEST (UTC+3, summer / game period)
+    # Runs Mon–Fri, ~60 min before the 10:00 EET submission cutoff — fresher data
+    - cron: '0 6 * * 1-5'
   workflow_dispatch:   # allow manual trigger for testing
 
 jobs:
@@ -32,6 +32,8 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          EODHD_API_KEY: ${{ secrets.EODHD_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: python main.py
 
@@ -48,7 +50,7 @@ jobs:
         run: |
           git config user.name "AlphaShark Bot"
           git config user.email "alphashark@noreply"
-          git add portfolio_history.json DAILY_LOG.md PREGAME_LOG.md paper_account.json PREGAME_LEARNING.md AI_SELF_CRITIQUE.md cost_log.json verification_tracker.json LIVE_HANDOFF*.md || true
+          git add portfolio_history.json DAILY_LOG.md PREGAME_LOG.md paper_account.json PREGAME_LEARNING.md AI_SELF_CRITIQUE.md cost_log.json verification_tracker.json live_mode_lock.json LIVE_HANDOFF*.md || true
           TODAY=$(date +%Y-%m-%d)
           git diff --staged --quiet || git commit -m "chore: daily portfolio update $TODAY"
           git push

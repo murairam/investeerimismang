@@ -10,9 +10,18 @@ Shows:
 """
 import json
 import os
+import sys
 from datetime import date, datetime
 
-ROOT = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from data.game_availability import load_unavailable_tickers
+from data.symbol_master import summarize_symbol_master
+from data.universe_loader import load_game_universe
+from data.verification_tracker import get_last_verification
+from data.yahoo_symbols import get_eodhd_budget_status
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def load_json(filename):
@@ -83,6 +92,24 @@ def main():
         print(f"\n📊 Performance Learning")
         print(f"   No performance data yet (run python main.py)")
 
+    latest_record = (portfolio_history.get("history") or [])[-1] if portfolio_history.get("history") else None
+    verification = get_last_verification()
+    print(f"\n🗂️  Daily State")
+    print(f"   Latest AI proposal date: {portfolio_history.get('date') or 'N/A'}")
+    print(f"   Latest canonical provenance: {latest_record.get('provenance', 'N/A') if latest_record else 'N/A'}")
+    print(f"   Latest verified date: {verification.get('last_date') or 'N/A'}")
+
+    universe = load_game_universe()
+    exclusions = load_unavailable_tickers()
+    symbol_master = summarize_symbol_master()
+    eodhd_budget = get_eodhd_budget_status()
+    print(f"\n🌐 Game Universe")
+    print(f"   Total tracked tickers: {sum(len(v) for v in universe.values())}")
+    print(f"   By market: { {market: len(tickers) for market, tickers in universe.items()} }")
+    print(f"   Manual game exclusions: {len(exclusions)}")
+    print(f"   Symbol master: {symbol_master['total']} records ({symbol_master['status_counts']})")
+    print(f"   EODHD budget: {eodhd_budget['used']}/{eodhd_budget['cap']} used today")
+
     # Paper Trading
     paper_account = load_json("paper_account.json")
     if paper_account:
@@ -106,6 +133,8 @@ def main():
     files = [
         ("portfolio_history.json", "Portfolio decisions & P&L"),
         ("paper_account.json", "Virtual trading ledger"),
+        ("PREGAME_LOG.md", "Canonical pregame daily log"),
+        ("PREGAME_RUNS.md", "Pregame debug run log"),
         ("DAILY_LOG.md", "Human-readable decision log"),
         ("PREGAME_LEARNING.md", "Win rate & ticker lessons"),
         ("AI_SELF_CRITIQUE.md", "AI reasoning quality analysis"),
@@ -127,25 +156,25 @@ def main():
     print(f"\n🎯 Next Steps")
     if days_until_live > 0:
         print(f"   1. System runs automatically Mon-Fri at 09:30 EEST")
-        print(f"   2. Learning data accumulates daily (this is CORRECT - it's training mode!)")
-        print(f"   3. Review progress: python status.py")
+        print(f"   2. One canonical daily record updates per day; rerun details can accumulate in PREGAME_RUNS.md")
+        print(f"   3. Review progress: python scripts/status.py")
         print(f"   4. Check learning: cat PREGAME_LEARNING.md")
         print(f"   5. Check AI reasoning: cat AI_SELF_CRITIQUE.md")
         print(f"   6. On April 6, system switches to LIVE mode automatically")
     else:
         print(f"   1. Check Discord for daily portfolio recommendation")
         print(f"   2. Update game website before 10:00 EET")
-        print(f"   3. Run: python verify.py to confirm sync")
+        print(f"   3. Run: python scripts/verify.py to confirm sync")
         print(f"   4. Review meta-learning: cat AI_SELF_CRITIQUE.md")
 
     # Important Notes
     print(f"\n⚠️  Important Notes")
     if days_until_live > 0:
-        print(f"   • Files ARE SUPPOSED to have data now (this is pregame training!)")
+        print(f"   • Files ARE SUPPOSED to have data now (this is pregame training)")
         print(f"   • The AI needs {days_until_live} more days of learning before going live")
-        print(f"   • All data accumulation is INTENTIONAL and CORRECT ✅")
+        print(f"   • Only one canonical record per date should drive learning")
     else:
-        print(f"   • You are in LIVE mode - verify portfolio daily with: python verify.py")
+        print(f"   • You are in LIVE mode - verify portfolio daily with: python scripts/verify.py")
         print(f"   • Game portfolio must be updated manually on the website")
 
     print("\n" + "=" * 70 + "\n")

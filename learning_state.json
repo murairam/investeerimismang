@@ -1,0 +1,38 @@
+{
+  "generated_from_days": 3,
+  "position_observations": 0,
+  "minimums": {
+    "strong_daily_observations": 5,
+    "strong_ticker_observations": 5,
+    "strong_rationale_observations": 5
+  },
+  "hard_rules": [],
+  "biases_to_avoid": [],
+  "validated_winners": [],
+  "recurring_losers": [],
+  "weight_caps": [],
+  "turnover_guidance": {
+    "instruction": "Keep at least 50% of weight in existing holdings unless a replacement has materially stronger signals.",
+    "min_hold_weight": 0.5,
+    "replacement_sharpe_delta": 0.2
+  },
+  "decision_quality": {
+    "avg_hold_vs_replace_1d": 0.0,
+    "positive_hold_vs_replace_rate": 0.0,
+    "avg_slot_opportunity_cost_1d": 0.0,
+    "avg_turnover_estimate": 1.0,
+    "observations": 0,
+    "status": "insufficient_data"
+  },
+  "confidence_notes": [],
+  "rationale_stats": {},
+  "conviction_tiers": {
+    "tier1_avg_return_1d": 0.0,
+    "tier2_avg_return_1d": 0.0,
+    "tier3_avg_return_1d": 0.0,
+    "tier1_observations": 0,
+    "tier2_observations": 0,
+    "tier3_observations": 0
+  },
+  "changed_hard_rules": []
+}

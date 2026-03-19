@@ -3,11 +3,13 @@ Market data fetching and momentum signal computation.
 """
 import logging
 import math
-from datetime import date
-from typing import TypedDict
+import os
+from datetime import date, timedelta
+from typing import Optional, TypedDict
 
 import numpy as np
 import pandas as pd
+import requests
 import yfinance as yf
 
 from config import (
@@ -18,17 +20,27 @@ from config import (
     MOMENTUM_WINDOW,
     MOM_LONG,
     MOM_SHORT,
-    OTHER_MARKET_CAP,
+
     REGIME_THRESHOLD,
     RSI_WINDOW,
     SECTOR_MAP,
     SMA_REGIME_WINDOW,
-    SP500_MARKET_CAP,
+
     TOP_N_CANDIDATES,
-    UNIVERSE,
+)
+from data.provider_overrides import get_provider_override
+from data.universe_loader import load_game_universe
+from data.symbol_master import upsert_symbol_records
+from data.yahoo_symbols import (
+    auto_resolve_aliases,
+    filter_known_unavailable,
+    mark_unavailable,
+    resolve_yahoo_ticker,
 )
 
 logger = logging.getLogger(__name__)
+_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_EODHD_CACHE_DIR = os.path.join(_ROOT, ".cache", "eodhd_prices")
 
 
 class CandidateInfo(TypedDict):
@@ -65,9 +77,82 @@ class MarketSnapshot(TypedDict):
     price_map: dict       # {ticker: last_close_price} for ALL fetched tickers
     returns_1d: dict      # {ticker: 1-day return} for ALL fetched tickers
     benchmark_return_1d: float  # S&P 500 1-day return
+    short_interest: dict  # {ticker: float | None} short % of float; None for Baltic/Nordic
+    premarket_gap: dict   # {ticker: float | None} gap vs prior close; US=after-hours, EU=morning gap
+    iv_proxy: dict        # {ticker: float | None} implied volatility; None if no options chain
 
 
 class DataFetcher:
+    @staticmethod
+    def _sector_tag(ticker: str, market: str) -> str:
+        if ticker in SECTOR_MAP:
+            return SECTOR_MAP[ticker]
+        fallback = {
+            "SP500": "US",
+            "OMXHLCPI": "Fin",
+            "OMXS30": "Swe",
+            "OBX": "Nor",
+            "OMXC25": "Den",
+            "BALTIC": "Baltic",
+        }
+        return fallback.get(market, "Other")
+
+    @staticmethod
+    def _selection_score(record: dict, regime_score: int = 50) -> float:
+        score = 0.0
+        sharpe = record.get("sharpe_20d", float("nan"))
+        if not math.isnan(sharpe):
+            score += max(-1.0, min(2.0, sharpe))
+
+        mom_5d = record.get("mom_5d", float("nan"))
+        if not math.isnan(mom_5d):
+            score += max(-1.5, min(2.5, mom_5d * 18.0))
+
+        vs_index = record.get("vs_index", float("nan"))
+        if not math.isnan(vs_index):
+            score += max(-1.0, min(2.0, vs_index * 10.0))
+
+        vol_ratio = record.get("vol_ratio", float("nan"))
+        if not math.isnan(vol_ratio):
+            score += max(-1.0, min(2.0, (vol_ratio - 1.0) * 1.8))
+
+        macd_hist = record.get("macd_hist", float("nan"))
+        if not math.isnan(macd_hist):
+            score += max(-0.8, min(0.8, macd_hist * 900.0))
+
+        pct_from_high = record.get("pct_from_52w_high", float("nan"))
+        if not math.isnan(pct_from_high):
+            score += max(-0.5, min(0.5, (0.02 + pct_from_high) * 8.0))
+
+        beta = record.get("beta", float("nan"))
+        if not math.isnan(beta) and beta < 0.25:
+            score -= 0.3
+
+        rsi = record.get("rsi_14", float("nan"))
+        if not math.isnan(rsi):
+            if 55 <= rsi <= 78:
+                score += 0.25
+            elif rsi > 88 and regime_score < 50:
+                score -= 0.45
+
+        atr_pct = record.get("atr_pct", float("nan"))
+        if not math.isnan(atr_pct) and atr_pct < 0.012:
+            score -= 0.2
+
+        dead_money = (
+            not math.isnan(vol_ratio) and vol_ratio < 0.9 and
+            not math.isnan(mom_5d) and mom_5d <= 0.01
+        )
+        if dead_money:
+            score -= 1.2 if regime_score < 50 else 0.8
+
+        if regime_score < 50 and not math.isnan(mom_5d) and mom_5d < 0:
+            score -= 0.6
+        if regime_score >= 60 and not math.isnan(beta) and beta >= 0.8 and not math.isnan(mom_5d) and mom_5d > 0:
+            score += 0.3
+
+        return score
+
     def fetch_ohlcv(
         self, tickers: list[str], period: str = "1y", actions: bool = False
     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -105,6 +190,94 @@ class DataFetcher:
             return df.dropna(how="all") if not df.empty else df
 
         return _clean(close), _clean(volume), _clean(high), _clean(low), dividends
+
+    def fetch_eodhd_ohlcv(
+        self,
+        tickers: list[str],
+        period: str = "1y",
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        api_key = os.environ.get("EODHD_API_KEY", "").strip()
+        if not api_key or not tickers:
+            empty = pd.DataFrame()
+            return empty, empty, empty, empty
+
+        from_date = (date.today() - timedelta(days=370)).isoformat() if period == "1y" else (date.today() - timedelta(days=60)).isoformat()
+        to_date = date.today().isoformat()
+
+        close_map: dict[str, pd.Series] = {}
+        volume_map: dict[str, pd.Series] = {}
+        high_map: dict[str, pd.Series] = {}
+        low_map: dict[str, pd.Series] = {}
+
+        for ticker in tickers:
+            override = get_provider_override(ticker)
+            provider_symbol = override.get("provider_symbol", ticker)
+            rows = self._load_eodhd_series(provider_symbol, from_date, to_date, api_key)
+            if not rows:
+                continue
+            frame = pd.DataFrame(rows)
+            if "date" not in frame.columns:
+                continue
+            frame["date"] = pd.to_datetime(frame["date"])
+            frame = frame.set_index("date").sort_index()
+
+            close_col = "adjusted_close" if "adjusted_close" in frame.columns else "close"
+            if close_col in frame.columns:
+                close_map[ticker] = pd.to_numeric(frame[close_col], errors="coerce")
+            if "volume" in frame.columns:
+                volume_map[ticker] = pd.to_numeric(frame["volume"], errors="coerce")
+            if "high" in frame.columns:
+                high_map[ticker] = pd.to_numeric(frame["high"], errors="coerce")
+            if "low" in frame.columns:
+                low_map[ticker] = pd.to_numeric(frame["low"], errors="coerce")
+
+        def _to_df(series_map: dict[str, pd.Series]) -> pd.DataFrame:
+            if not series_map:
+                return pd.DataFrame()
+            return pd.DataFrame(series_map).sort_index().dropna(how="all")
+
+        return _to_df(close_map), _to_df(volume_map), _to_df(high_map), _to_df(low_map)
+
+    def _load_eodhd_series(self, provider_symbol: str, from_date: str, to_date: str, api_key: str) -> list[dict]:
+        os.makedirs(_EODHD_CACHE_DIR, exist_ok=True)
+        safe_symbol = provider_symbol.replace("/", "_").replace(".", "_")
+        cache_path = os.path.join(_EODHD_CACHE_DIR, f"{safe_symbol}_{to_date}.json")
+        if os.path.exists(cache_path):
+            try:
+                import json
+                with open(cache_path, "r") as f:
+                    payload = json.load(f)
+                return payload.get("rows", [])
+            except Exception:
+                pass
+
+        try:
+            response = requests.get(
+                f"https://eodhd.com/api/eod/{provider_symbol}",
+                params={
+                    "api_token": api_key,
+                    "fmt": "json",
+                    "from": from_date,
+                    "to": to_date,
+                    "period": "d",
+                },
+                timeout=20,
+            )
+            response.raise_for_status()
+            rows = response.json()
+            if not isinstance(rows, list):
+                rows = []
+        except Exception as exc:
+            logger.warning("EODHD price fetch failed for %s: %s", provider_symbol, exc)
+            return []
+
+        try:
+            import json
+            with open(cache_path, "w") as f:
+                json.dump({"provider_symbol": provider_symbol, "rows": rows}, f)
+        except Exception:
+            pass
+        return rows
 
     def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
         """Ratio of latest volume to prior 20d average volume. >1.5 = high-volume confirmation."""
@@ -239,9 +412,11 @@ class DataFetcher:
         """
         if not tickers:
             return pd.Series(dtype=float)
+        game_to_yahoo = {ticker: resolve_yahoo_ticker(ticker) for ticker in tickers}
+        yahoo_to_game = {yahoo: game for game, yahoo in game_to_yahoo.items()}
         try:
             data = yf.download(
-                tickers,
+                list(game_to_yahoo.values()),
                 period="1y",
                 auto_adjust=False,
                 actions=True,
@@ -262,10 +437,11 @@ class DataFetcher:
 
             yields: dict[str, float] = {}
             for ticker in tickers:
-                if ticker not in divs.columns:
+                yahoo_ticker = game_to_yahoo[ticker]
+                if yahoo_ticker not in divs.columns:
                     yields[ticker] = float("nan")
                     continue
-                annual_div = float(divs[ticker].sum())
+                annual_div = float(divs[yahoo_ticker].sum())
                 lp_s = close[ticker].dropna() if ticker in close.columns else pd.Series(dtype=float)
                 lp = float(lp_s.iloc[-1]) if not lp_s.empty else 0.0
                 yields[ticker] = annual_div / lp if lp > 0 else float("nan")
@@ -370,7 +546,7 @@ class DataFetcher:
             return records
 
         corr_matrix = ret_slice.corr()
-        sharpe_map = {r["ticker"]: r["sharpe_20d"] for r in records}
+        record_map = {r["ticker"]: r for r in records}
         to_remove: set[str] = set()
 
         for i, t1 in enumerate(available):
@@ -381,9 +557,13 @@ class DataFetcher:
                     continue
                 if t1 not in corr_matrix.index or t2 not in corr_matrix.columns:
                     continue
+                if record_map[t1]["market"] != record_map[t2]["market"]:
+                    continue
                 if corr_matrix.loc[t1, t2] > CORR_THRESHOLD:
-                    # Keep the one with higher Sharpe
-                    if sharpe_map.get(t1, 0) >= sharpe_map.get(t2, 0):
+                    # Keep the one with stronger composite selection score.
+                    score1 = float(record_map[t1].get("selection_score", self._selection_score(record_map[t1])))
+                    score2 = float(record_map[t2].get("selection_score", self._selection_score(record_map[t2])))
+                    if score1 >= score2:
                         to_remove.add(t2)
                     else:
                         to_remove.add(t1)
@@ -393,19 +573,131 @@ class DataFetcher:
             logger.info("Correlation filter removed %d tickers: %s", len(to_remove), sorted(to_remove))
         return filtered
 
-    def apply_market_cap(self, records: list[dict]) -> list[dict]:
-        """
-        Cap candidates per market: SP500 max 15, all others max 5 each.
-        Records must already be sorted by sharpe_20d descending.
-        """
-        counts: dict[str, int] = {}
-        result = []
-        for r in records:
-            market = r["market"]
-            limit = SP500_MARKET_CAP if market == "SP500" else OTHER_MARKET_CAP
-            if counts.get(market, 0) < limit:
-                result.append(r)
-                counts[market] = counts.get(market, 0) + 1
+    def fetch_short_interest(self, tickers: list[str]) -> dict[str, Optional[float]]:
+        """Short % of float for each ticker. Returns None for Baltic/Nordic (no data).
+        All failures are silently caught and returned as None."""
+        result: dict[str, Optional[float]] = {}
+        for t in tickers:
+            try:
+                info = yf.Ticker(resolve_yahoo_ticker(t)).info
+                val = info.get("shortPercentOfFloat")
+                result[t] = float(val) if val is not None else None
+            except Exception:
+                result[t] = None
+        return result
+
+    def fetch_premarket_movers(self, tickers: list[str], market_map: dict[str, str]) -> dict[str, Optional[float]]:
+        """Gap vs prior close. US tickers: last after-hours candle vs prior close (prepost=True).
+        European/Nordic: today's open vs prior close (morning gap after early trading).
+        Returns None on any failure."""
+        result: dict[str, Optional[float]] = {}
+        us_tickers = [t for t in tickers if market_map.get(t) == "SP500"]
+        eu_tickers = [t for t in tickers if market_map.get(t) != "SP500"]
+        eu_map = {ticker: resolve_yahoo_ticker(ticker) for ticker in eu_tickers}
+        us_map = {ticker: resolve_yahoo_ticker(ticker) for ticker in us_tickers}
+
+        # European/Nordic: 5d daily data, compute prior-close to latest-open gap
+        if eu_tickers:
+            try:
+                data = yf.download(
+                    list(eu_map.values()), period="5d", interval="1d",
+                    auto_adjust=True, progress=False, threads=True,
+                )
+                if isinstance(data.columns, pd.MultiIndex):
+                    opens = data["Open"] if "Open" in data.columns.get_level_values(0) else pd.DataFrame()
+                    closes = data["Close"] if "Close" in data.columns.get_level_values(0) else pd.DataFrame()
+                else:
+                    opens = data[["Open"]].rename(columns={"Open": eu_tickers[0]}) if "Open" in data.columns else pd.DataFrame()
+                    closes = data[["Close"]].rename(columns={"Close": eu_tickers[0]}) if "Close" in data.columns else pd.DataFrame()
+
+                for t in eu_tickers:
+                    yahoo_ticker = eu_map[t]
+                    try:
+                        if yahoo_ticker in opens.columns and yahoo_ticker in closes.columns:
+                            o = opens[yahoo_ticker].dropna()
+                            c = closes[yahoo_ticker].dropna()
+                            if len(o) >= 1 and len(c) >= 2:
+                                today_open = float(o.iloc[-1])
+                                prior_close = float(c.iloc[-2])
+                                result[t] = (today_open / prior_close - 1) if prior_close > 0 else None
+                            else:
+                                result[t] = None
+                        else:
+                            result[t] = None
+                    except Exception:
+                        result[t] = None
+            except Exception as exc:
+                logger.debug("EU premarket fetch failed: %s", exc)
+                for t in eu_tickers:
+                    result[t] = None
+
+        # US tickers: 60m bars with prepost=True, find last after-hours candle (16:00–20:00 ET)
+        if us_tickers:
+            try:
+                data = yf.download(
+                    list(us_map.values()), period="5d", interval="60m",
+                    prepost=True, auto_adjust=True, progress=False, threads=True,
+                )
+                if isinstance(data.columns, pd.MultiIndex):
+                    closes = data["Close"] if "Close" in data.columns.get_level_values(0) else pd.DataFrame()
+                else:
+                    closes = data[["Close"]].rename(columns={"Close": us_tickers[0]}) if "Close" in data.columns else pd.DataFrame()
+
+                for t in us_tickers:
+                    yahoo_ticker = us_map[t]
+                    try:
+                        if yahoo_ticker in closes.columns:
+                            s = closes[yahoo_ticker].dropna()
+                            if len(s) >= 2:
+                                # Last candle vs the regular-hours close two candles back (rough proxy)
+                                last_price = float(s.iloc[-1])
+                                prev_price = float(s.iloc[-2])
+                                result[t] = (last_price / prev_price - 1) if prev_price > 0 else None
+                            else:
+                                result[t] = None
+                        else:
+                            result[t] = None
+                    except Exception:
+                        result[t] = None
+            except Exception as exc:
+                logger.debug("US premarket fetch failed: %s", exc)
+                for t in us_tickers:
+                    result[t] = None
+
+        return result
+
+    def fetch_iv_proxy(self, tickers: list[str], price_map: Optional[dict[str, float]] = None) -> dict[str, Optional[float]]:
+        """ATM implied volatility from nearest options expiry.
+        Returns None for Baltic/Nordic (no options chain).
+        price_map: pre-computed last close prices — avoids unreliable info['regularMarketPrice'] after hours."""
+        result: dict[str, Optional[float]] = {}
+        prices = price_map or {}
+        for t in tickers:
+            try:
+                ticker_obj = yf.Ticker(resolve_yahoo_ticker(t))
+                expirations = ticker_obj.options
+                if not expirations:
+                    result[t] = None
+                    continue
+                last_price = prices.get(t, 0.0)
+                if last_price <= 0:
+                    result[t] = None
+                    continue
+                chain = ticker_obj.option_chain(expirations[0])
+                calls = chain.calls[["strike", "impliedVolatility"]].dropna()
+                puts = chain.puts[["strike", "impliedVolatility"]].dropna()
+                if calls.empty and puts.empty:
+                    result[t] = None
+                    continue
+                all_strikes = pd.concat([calls, puts])
+                all_strikes = all_strikes[all_strikes["impliedVolatility"] > 0]
+                if all_strikes.empty:
+                    result[t] = None
+                    continue
+                idx = (all_strikes["strike"] - last_price).abs().idxmin()
+                result[t] = float(all_strikes.loc[idx, "impliedVolatility"])
+            except Exception:
+                result[t] = None
         return result
 
     def get_market_snapshot(self) -> MarketSnapshot:
@@ -413,19 +705,65 @@ class DataFetcher:
         Downloads price data for the full universe, computes rich signals,
         and returns the TOP_N_CANDIDATES best-Sharpe stocks as a MarketSnapshot.
         """
+        universe = load_game_universe()
         all_tickers: list[tuple[str, str]] = [
             (ticker, market)
-            for market, tickers in UNIVERSE.items()
+            for market, tickers in universe.items()
             for ticker in tickers
         ]
-        flat_tickers = [t for t, _ in all_tickers]
+        game_tickers = [t for t, _ in all_tickers]
         market_map = {t: m for t, m in all_tickers}
+        eodhd_tickers = [
+            ticker for ticker in game_tickers
+            if get_provider_override(ticker).get("price_provider") == "eodhd"
+        ]
+        yahoo_game_tickers = [ticker for ticker in game_tickers if ticker not in eodhd_tickers]
+        fetchable_game_tickers, quarantined = filter_known_unavailable(yahoo_game_tickers)
+        if quarantined:
+            recovered_aliases = auto_resolve_aliases(quarantined, market_map, use_eodhd=False)
+            if recovered_aliases:
+                recovered_tickers = sorted(recovered_aliases.keys())
+                fetchable_game_tickers.extend(recovered_tickers)
+                fetchable_game_tickers = list(dict.fromkeys(fetchable_game_tickers))
+                quarantined = [ticker for ticker in quarantined if ticker not in recovered_aliases]
+                logger.info(
+                    "Recovered %d previously quarantined tickers via alias resolution: %s",
+                    len(recovered_tickers),
+                    recovered_aliases,
+                )
+            if quarantined:
+                logger.info(
+                    "Skipping %d game tickers quarantined from prior Yahoo failures: %s",
+                    len(quarantined),
+                    quarantined[:20],
+                )
+
+        game_to_yahoo = {ticker: resolve_yahoo_ticker(ticker) for ticker in fetchable_game_tickers}
+        yahoo_to_game = {yahoo: game for game, yahoo in game_to_yahoo.items()}
+        flat_tickers = list(game_to_yahoo.values())
+
+        logger.info(
+            "Universe loaded: %s (total %d)",
+            {market: len(tickers) for market, tickers in universe.items()},
+            len(game_tickers),
+        )
 
         logger.info("Fetching OHLCV for %d tickers …", len(flat_tickers))
         # Use actions=False for the main universe download — combining auto_adjust=True + actions=True
         # in large batches causes yfinance to return NaN close prices for many tickers.
         # Dividend yields are fetched separately on just the top-N candidates after filtering.
         close, volume, high, low, _ = self.fetch_ohlcv(flat_tickers, period="1y")
+        if eodhd_tickers:
+            logger.info("Fetching OHLCV via EODHD fallback for %d tickers …", len(eodhd_tickers))
+            e_close, e_volume, e_high, e_low = self.fetch_eodhd_ohlcv(eodhd_tickers, period="1y")
+            if not e_close.empty:
+                close = close.join(e_close, how="outer") if not close.empty else e_close
+            if not e_volume.empty:
+                volume = volume.join(e_volume, how="outer") if not volume.empty else e_volume
+            if not e_high.empty:
+                high = high.join(e_high, how="outer") if not high.empty else e_high
+            if not e_low.empty:
+                low = low.join(e_low, how="outer") if not low.empty else e_low
 
         # Retry tickers that returned no data OR too-short history in the batch download.
         # Large yfinance batches often return truncated/NaN history for non-US tickers.
@@ -437,11 +775,26 @@ class DataFetcher:
             or len(close[t].dropna()) < _min_rows
         ]
         if missing:
+            missing_game_tickers = [yahoo_to_game.get(ticker, ticker) for ticker in missing]
+            resolved_aliases = auto_resolve_aliases(missing_game_tickers, market_map, use_eodhd=False)
+            if resolved_aliases:
+                for game_ticker, yahoo_ticker in resolved_aliases.items():
+                    game_to_yahoo[game_ticker] = yahoo_ticker
+                    yahoo_to_game[yahoo_ticker] = game_ticker
+                missing = [game_to_yahoo.get(game_ticker, game_ticker) for game_ticker in missing_game_tickers]
+                logger.info(
+                    "Resolved %d failed Yahoo symbols before retry: %s",
+                    len(resolved_aliases),
+                    resolved_aliases,
+                )
             logger.info("Retrying %d/%d failed tickers in small batches …", len(missing), len(flat_tickers))
             r_close, r_volume, r_high, r_low, _ = self._fetch_in_batches(missing, period="1y", batch_size=10)
             if not r_close.empty:
-                # Drop the all-NaN columns from main download before merging
-                close = close.drop(columns=[t for t in missing if t in close.columns], errors="ignore")
+                # Drop the failed tickers from main download before merging to avoid column overlap
+                close  = close.drop(columns=[t for t in missing if t in close.columns], errors="ignore")
+                volume = volume.drop(columns=[t for t in missing if t in volume.columns], errors="ignore")
+                high   = high.drop(columns=[t for t in missing if t in high.columns], errors="ignore")
+                low    = low.drop(columns=[t for t in missing if t in low.columns], errors="ignore")
                 close  = close.join(r_close,  how="outer") if not close.empty  else r_close
                 volume = volume.join(r_volume, how="outer") if not volume.empty and not r_volume.empty else (r_volume if volume.empty else volume)
                 high   = high.join(r_high,    how="outer") if not high.empty   and not r_high.empty   else (r_high   if high.empty   else high)
@@ -451,10 +804,40 @@ class DataFetcher:
 
         still_missing = [t for t in flat_tickers if t not in close.columns or len(close[t].dropna()) < _min_rows]
         if still_missing:
+            missing_game_tickers = [yahoo_to_game.get(ticker, ticker) for ticker in still_missing]
+            mark_unavailable(missing_game_tickers, reason="yahoo_no_data")
             logger.warning(
                 "%d/%d tickers still missing after retry: %s",
-                len(still_missing), len(flat_tickers), still_missing,
+                len(still_missing), len(flat_tickers), missing_game_tickers,
             )
+
+        close = close.rename(columns=yahoo_to_game)
+        volume = volume.rename(columns=yahoo_to_game)
+        high = high.rename(columns=yahoo_to_game)
+        low = low.rename(columns=yahoo_to_game)
+        symbol_records = {}
+        for ticker in close.columns:
+            series = close[ticker].dropna()
+            if len(series) < _min_rows:
+                continue
+            yahoo_ticker = game_to_yahoo.get(ticker, ticker)
+            override = get_provider_override(ticker)
+            price_provider = override.get("price_provider", "yahoo")
+            provider_symbol = override.get("provider_symbol", yahoo_ticker)
+            symbol_records[ticker] = {
+                "game_ticker": ticker,
+                "yahoo_ticker": yahoo_ticker,
+                "company_name": "",
+                "exchange": "",
+                "isin": "",
+                "market": market_map.get(ticker, "UNKNOWN"),
+                "status": "verified",
+                "resolution_source": "manual_alias" if yahoo_ticker != ticker else "direct_yahoo",
+                "price_provider": price_provider,
+                "provider_symbol": provider_symbol,
+                "last_verified_at": date.today().isoformat(),
+            }
+        upsert_symbol_records(symbol_records)
 
         # Benchmark + regime
         logger.info("Fetching benchmark %s …", BETA_BENCHMARK)
@@ -518,11 +901,11 @@ class DataFetcher:
 
         # Valid tickers: must have 20d momentum
         valid_tickers = momentum_20d.dropna().index.tolist()
-        dropped = len(flat_tickers) - len(valid_tickers)
+        dropped = len(game_tickers) - len(valid_tickers)
         if dropped:
             logger.warning(
                 "Universe shrank: %d/%d tickers dropped (insufficient history)",
-                dropped, len(flat_tickers),
+                dropped, len(game_tickers),
             )
 
         records: list[dict] = []
@@ -530,10 +913,6 @@ class DataFetcher:
             mom = float(momentum_20d.get(ticker, 0.0))
             vol = float(vol_20d.get(ticker, np.nan))
             rsi_val = float(rsi.get(ticker, np.nan)) if ticker in rsi.index else float("nan")
-
-            # Skip overbought
-            if not math.isnan(rsi_val) and rsi_val > 75:
-                continue
 
             sharpe = mom / vol if (not math.isnan(vol) and vol > 0) else 0.0
             last_price = float(close_ff[ticker].dropna().iloc[-1]) if ticker in close_ff.columns else 0.0
@@ -546,7 +925,7 @@ class DataFetcher:
             records.append({
                 "ticker": ticker,
                 "market": market_map.get(ticker, "UNKNOWN"),
-                "sector": SECTOR_MAP.get(ticker, "?"),
+                "sector": self._sector_tag(ticker, market_map.get(ticker, "UNKNOWN")),
                 "momentum": mom,
                 "mom_5d": float(momentum_5d.get(ticker, np.nan)) if ticker in momentum_5d.index else float("nan"),
                 "mom_60d": float(momentum_60d.get(ticker, np.nan)) if ticker in momentum_60d.index else float("nan"),
@@ -563,20 +942,13 @@ class DataFetcher:
                 "dividend_yield": float("nan"),  # filled in after top-N filtering via _fetch_dividend_yields_targeted
             })
 
-        # Sort by Sharpe descending, apply market cap, correlation filter, take top N
-        records.sort(key=lambda x: x["sharpe_20d"], reverse=True)
-        records = self.apply_market_cap(records)
-        after_cap = records[:]
-        records = self.apply_correlation_filter(records, close)
-        # Guard: if filtering left too few candidates, fall back to pre-correlation set
-        _MIN_CANDIDATES = 10
-        if len(records) < _MIN_CANDIDATES:
-            logger.warning(
-                "Correlation filter left only %d candidates (< %d) — using pre-filter set",
-                len(records), _MIN_CANDIDATES,
-            )
-            records = after_cap
-        records.sort(key=lambda x: x["sharpe_20d"], reverse=True)
+        for record in records:
+            record["selection_score"] = self._selection_score(record, regime_score=regime_score)
+
+        # Sort by composite score, take top N. Pure signal meritocracy — no per-market caps.
+        # Any per-market cap risks filtering out actual winners (e.g. LRCX, WDC ranked high on Sharpe
+        # but capped out). The AI sees all strong candidates regardless of market origin.
+        records.sort(key=lambda x: (x["selection_score"], x["sharpe_20d"]), reverse=True)
         top = records[:TOP_N_CANDIDATES]
 
         # Targeted dividend yield fetch — only for the ~40 candidates, not the full 111-ticker universe.
@@ -585,6 +957,36 @@ class DataFetcher:
         div_yield = self._fetch_dividend_yields_targeted(top_tickers, close)
         for r in top:
             r["dividend_yield"] = float(div_yield.get(r["ticker"], float("nan"))) if not div_yield.empty and r["ticker"] in div_yield.index else float("nan")
+
+        # New catalyst signals: short interest, premarket gap, IV proxy (all fail-soft)
+        logger.info("Fetching catalyst signals (short interest, premarket gap, IV proxy) …")
+        short_interest = self.fetch_short_interest(top_tickers)
+        premarket_gap = self.fetch_premarket_movers(top_tickers, market_map)
+        _iv_prices = {t: float(close_ff[t].dropna().iloc[-1]) for t in top_tickers if t in close_ff.columns and not close_ff[t].dropna().empty}
+        iv_proxy = self.fetch_iv_proxy(top_tickers, price_map=_iv_prices)
+
+        # For tickers without options chains (all Nordic/Baltic), fall back to
+        # 20-day annualized realized HV as an IV-proxy substitute.
+        # Same unit as options IV (annualized %) so catalyst scoring stays valid.
+        _sqrt252 = math.sqrt(252)
+        hv_filled = 0
+        for t in top_tickers:
+            if iv_proxy.get(t) is None and t in close_ff.columns:
+                prices = close_ff[t].dropna()
+                if len(prices) >= 21:
+                    hv = float(prices.pct_change().dropna().iloc[-20:].std()) * _sqrt252
+                    if hv > 0:
+                        iv_proxy[t] = hv
+                        hv_filled += 1
+
+        si_count = sum(1 for v in short_interest.values() if v is not None)
+        pm_count = sum(1 for v in premarket_gap.values() if v is not None)
+        iv_count = sum(1 for v in iv_proxy.values() if v is not None)
+        iv_options = iv_count - hv_filled
+        logger.info(
+            "Catalyst signals: short_interest=%d/%d, premarket_gap=%d/%d, iv_proxy=%d/%d (%d options, %d realized HV)",
+            si_count, len(top_tickers), pm_count, len(top_tickers), iv_count, len(top_tickers), iv_options, hv_filled,
+        )
 
         as_of = date.today().isoformat()
 
@@ -616,4 +1018,7 @@ class DataFetcher:
             price_map=price_map,
             returns_1d=returns_1d,
             benchmark_return_1d=benchmark_return_1d,
+            short_interest=short_interest,
+            premarket_gap=premarket_gap,
+            iv_proxy=iv_proxy,
         )

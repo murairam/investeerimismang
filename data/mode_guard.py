@@ -24,7 +24,8 @@ _PROTECTED_FILES = [
     "config.py",
     "docs/rules.txt",
     "agents/openai_strategist.py",
-    "agents/gemini_challenger.py",
+    "agents/openai_challenger.py",
+    "agents/openai_devil.py",
     "agents/openai_risk_manager.py",
 ]
 
