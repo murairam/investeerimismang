@@ -13,6 +13,24 @@ from portfolio.models import PortfolioProposal
 
 logger = logging.getLogger(__name__)
 
+
+def _round_weights(positions: list) -> list[int]:
+    """Round position weights to integers using the largest-remainder method.
+
+    Guarantees the rounded values sum to round(total * 100) so the numbers
+    the user sees in Discord add up cleanly (e.g. 100% instead of 95%).
+    """
+    raw = [p.weight * 100 for p in positions]
+    total_pct = round(sum(raw))
+    floors = [int(w) for w in raw]
+    needed = total_pct - sum(floors)
+    indices_by_remainder = sorted(range(len(raw)), key=lambda i: raw[i] - floors[i], reverse=True)
+    result = floors[:]
+    for i in indices_by_remainder[:needed]:
+        result[i] += 1
+    return result
+
+
 _EMBED_COLOUR = 0x2ECC71
 _MAX_EMBED_DESCRIPTION = 4096
 
@@ -126,12 +144,13 @@ class WebhookDispatcher:
             f"📊 Context: {regime} regime · VIX {vix_str} · Candidates {len(snapshot['candidates'])} · Run {run_time_str}"
         )
 
+        rounded_pcts = _round_weights(proposal.positions)
         rows = ["```", f"{'#':<3} {'Stock':<26} {'%':>4}", "-" * 36]
-        for i, pos in enumerate(proposal.positions, 1):
+        for i, (pos, w_int) in enumerate(zip(proposal.positions, rounded_pcts), 1):
             name = _display(pos.ticker)
-            rows.append(f"{i:<3} {name:<26} {int(pos.weight * 100):>3}%")
+            rows.append(f"{i:<3} {name:<26} {w_int:>3}%")
         rows.append("-" * 36)
-        rows.append(f"{'TOTAL':<30} {int(total_weight * 100):>3}%")
+        rows.append(f"{'TOTAL':<30} {sum(rounded_pcts):>3}%")
         rows.append("```")
         holdings_table = "\n".join(rows)
 

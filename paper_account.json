@@ -3,14 +3,14 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "MAERSK-B.CO": 0.96088457,
-    "CVX": 11.4914223,
-    "XOM": 8.67145788,
-    "DNB.OL": 44.88165398,
-    "SHB-A.ST": 75.93186023,
-    "TELIA.ST": 202.77257934,
-    "ERIC-B.ST": 78.25595315,
-    "ALFA.ST": 10.14631614
+    "MAERSK-B.CO": 0.86604185,
+    "CVX": 9.12710202,
+    "XOM": 9.34606382,
+    "SHB-A.ST": 84.67279712,
+    "DNB.OL": 36.58127013,
+    "NHY.OL": 125.00005256,
+    "TELIA.ST": 225.37289634,
+    "ERIC-B.ST": 79.42871657
   },
   "history": [
     {
@@ -47,8 +47,27 @@
         "ALFA.ST": 10.14631614
       },
       "source": "verified"
+    },
+    {
+      "date": "2026-03-19",
+      "equity": 9876.0,
+      "cash": 0.0,
+      "daily_return": 0.0,
+      "return_since_start": -0.0124,
+      "turnover": 1.0,
+      "positions": {
+        "MAERSK-B.CO": 0.86604185,
+        "CVX": 9.12710202,
+        "XOM": 9.34606382,
+        "SHB-A.ST": 84.67279712,
+        "DNB.OL": 36.58127013,
+        "NHY.OL": 125.00005256,
+        "TELIA.ST": 225.37289634,
+        "ERIC-B.ST": 79.42871657
+      },
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-03-18",
-  "last_equity": 9979.0
+  "last_rebalanced_date": "2026-03-19",
+  "last_equity": 9876.0
 }
