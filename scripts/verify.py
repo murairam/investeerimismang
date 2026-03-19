@@ -5,8 +5,9 @@ Run this after updating your game portfolio to confirm the system's
 record matches what you actually hold in the Äripäev/SEB game.
 
 Usage:
-    python verify.py          — show current portfolio + confirm / correct it
-    python verify.py --show   — just print, no prompts
+    python verify.py                                      — show + confirm interactively
+    python verify.py --show                               — print only, no prompts
+    python verify.py --input "EQNR.OL 25, APA 20" --equity 9978   — one-liner confirm
 """
 import json
 import os
@@ -18,6 +19,7 @@ from typing import Optional
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from output.dispatcher import GAME_NAMES
+from data.symbol_master import load_symbol_master
 
 def _norm(s: str) -> str:
     """Lowercase + replace Nordic chars so 'maersk' matches 'Mærsk', 'orsted' matches 'Ørsted'."""
@@ -27,8 +29,19 @@ def _norm(s: str) -> str:
     return s
 
 
+def _build_name_map() -> dict[str, str]:
+    """Reverse map: normalised name → ticker, from GAME_NAMES + full symbol master."""
+    result: dict[str, str] = {_norm(name): ticker for ticker, name in GAME_NAMES.items()}
+    master = load_symbol_master()
+    for ticker, record in master.get("tickers", {}).items():
+        name = record.get("company_name", "")
+        if name:
+            result[_norm(name)] = ticker
+    return result
+
+
 # Reverse map: normalised game name → ticker
-_NAME_TO_TICKER: dict[str, str] = {_norm(name): ticker for ticker, name in GAME_NAMES.items()}
+_NAME_TO_TICKER: dict[str, str] = _build_name_map()
 
 
 def _resolve_ticker(raw: str) -> Optional[str]:
@@ -91,8 +104,77 @@ def print_portfolio(data: dict) -> None:
     print()
 
 
+def _parse_input_arg() -> Optional[str]:
+    for i, arg in enumerate(sys.argv):
+        if arg == "--input" and i + 1 < len(sys.argv):
+            return sys.argv[i + 1]
+    return None
+
+
+def _parse_equity_arg() -> Optional[float]:
+    for i, arg in enumerate(sys.argv):
+        if arg == "--equity" and i + 1 < len(sys.argv):
+            try:
+                return float(sys.argv[i + 1].replace(",", ".").replace("€", "").strip())
+            except ValueError:
+                pass
+    return None
+
+
+def _input_from_string(raw: str, equity: Optional[float]) -> None:
+    """Parse 'TICKER WEIGHT, TICKER WEIGHT, …' and save directly."""
+    positions = []
+    for entry in raw.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        parts = entry.rsplit(None, 1)
+        if len(parts) != 2:
+            print(f"  Bad entry '{entry}' — expected 'TICKER WEIGHT'")
+            sys.exit(1)
+        name_raw, weight_raw = parts
+        try:
+            weight = float(weight_raw.replace("%", "")) / 100
+        except ValueError:
+            print(f"  Bad weight '{weight_raw}'")
+            sys.exit(1)
+        ticker = _resolve_ticker(name_raw.strip())
+        if ticker is None:
+            print(f"  ❓ Could not recognise '{name_raw}' — use the ticker symbol directly")
+            sys.exit(1)
+        game_name = GAME_NAMES.get(ticker, ticker)
+        print(f"  ✓ {game_name} ({ticker}) {weight:.0%}")
+        positions.append({"ticker": ticker, "weight": weight, "rationale": "manually entered"})
+
+    total = sum(p["weight"] for p in positions)
+    print(f"\n  {len(positions)} positions, total {total:.1%}")
+
+    if equity is None:
+        equity = _ask_equity()
+
+    today = date.today().isoformat()
+    save_verified(positions, today)
+
+    price_map = _fetch_prices([p["ticker"] for p in positions])
+    if price_map and equity > 0:
+        sync_verified_positions(positions, equity, today, price_map)
+        print(f"  Paper account synced: equity €{equity:.0f}, {len(price_map)} prices fetched.")
+    else:
+        print("  ⚠️  Could not fetch prices — paper account not updated.")
+
+    mark_verified(today)
+    mark_verified_entry(today, mode=_mode_for_date(today))
+    print("  ✅ Saved.\n")
+
+
 def main() -> None:
     show_only = "--show" in sys.argv
+    input_str = _parse_input_arg()
+
+    if input_str is not None:
+        equity = _parse_equity_arg()
+        _input_from_string(input_str, equity)
+        return
 
     data = load()
     if data is None:

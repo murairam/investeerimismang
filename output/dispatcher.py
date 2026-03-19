@@ -53,6 +53,11 @@ GAME_NAMES: dict[str, str] = {
     "UPS": "UPS", "LOW": "Lowe's", "QCOM": "Qualcomm",
     "AMGN": "Amgen", "IBM": "IBM", "GS": "Goldman Sachs",
     "CAT": "Caterpillar", "HON": "Honeywell", "BA": "Boeing", "SPGI": "S&P Global",
+    "MU": "Micron Technology", "APA": "APA Corporation", "DVN": "Devon Energy",
+    "CIEN": "Ciena", "EOG": "EOG Resources", "COP": "ConocoPhillips",
+    "OXY": "Occidental Petroleum", "HAL": "Halliburton", "SLB": "SLB",
+    "FANG": "Diamondback Energy", "MRO": "Marathon Oil", "HES": "Hess",
+    "STX": "Seagate Technology", "WDC": "Western Digital", "SNDK": "SanDisk",
     # Finland
     "NOKIA.HE": "Nokia", "FORTUM.HE": "Fortum", "SAMPO.HE": "Sampo A",
     "NESTE.HE": "Neste", "KNEBV.HE": "Kone B", "WRT1V.HE": "Wärtsilä",
@@ -70,6 +75,8 @@ GAME_NAMES: dict[str, str] = {
     "TEL.OL": "Telenor", "MOWI.OL": "Mowi", "ORK.OL": "Orkla",
     "YAR.OL": "Yara", "SCATC.OL": "Scatec", "SUBC.OL": "Subsea 7",
     "SALM.OL": "SalMar", "RECSI.OL": "REC Silicon",
+    "AKRBP.OL": "Aker BP", "KOG.OL": "Kongsberg", "PGSOL.OL": "PGS",
+    "TGS.OL": "TGS", "BORR.OL": "Borr Drilling",
     # Denmark
     "NOVO-B.CO": "Novo Nordisk B", "DSV.CO": "DSV", "ORSTED.CO": "Ørsted",
     "CARL-B.CO": "Carlsberg B", "GMAB.CO": "Genmab", "MAERSK-B.CO": "A.P. Møller - Mærsk B",
