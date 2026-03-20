@@ -25,6 +25,8 @@ RATIONALE_TAGS = (
     "diversifier",
     "earnings_risk",
     "non_us_differentiator",
+    "overbought",       # RSI > 80 at entry — tracks whether buying overbought names hurts returns
+    "at_52w_high",      # within 2% of 52-week high at entry — tracks exhaustion/pullback risk
 )
 
 
@@ -145,6 +147,16 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
     add(
         "non_us_differentiator",
         "." in ticker or any(token in text for token in ("baltic", "nordic", "non-us", "non us")),
+    )
+    add(
+        "overbought",
+        any(token in text for token in ("overbought", "rsi", "extended"))
+        or signal.get("rsi_14", 0.0) > 80,
+    )
+    add(
+        "at_52w_high",
+        any(token in text for token in ("52-week high", "52w high", "52 week high", "all-time high"))
+        or signal.get("pct_from_52w_high", -1.0) >= -0.02,
     )
 
     return tags
