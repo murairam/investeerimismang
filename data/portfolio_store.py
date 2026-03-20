@@ -42,11 +42,22 @@ def _safe_read() -> dict:
         return {}
 
 
+def _sanitize(obj):
+    """Recursively replace float NaN/Inf with None so json.dump produces valid JSON."""
+    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+        return None
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize(v) for v in obj]
+    return obj
+
+
 def _safe_write(data: dict) -> None:
     path = os.path.abspath(_STORE_PATH)
     try:
         with open(path, "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump(_sanitize(data), f, indent=2)
         logger.info("Saved portfolio to %s", path)
     except Exception as exc:
         logger.warning("Could not save portfolio history: %s", exc)

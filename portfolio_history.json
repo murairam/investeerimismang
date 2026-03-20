@@ -1,47 +1,83 @@
 {
-  "date": "2026-03-19",
-  "source": "verified",
+  "date": "2026-03-20",
   "positions": [
     {
-      "ticker": "EQNR.OL",
+      "ticker": "APA",
       "weight": 0.25,
-      "rationale": "verified from game portfolio 2026-03-19",
-      "tags": []
+      "rationale": "Triple-consensus top pick and the clearest energy rotation leader; despite stretched RSI, it appears in all three proposals and keeps full conviction because consensus and trend strength dominate in this competition.",
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "consensus",
+        "overbought",
+        "at_52w_high"
+      ]
     },
     {
       "ticker": "AKRBP.OL",
-      "weight": 0.22,
-      "rationale": "verified from game portfolio 2026-03-19",
-      "tags": []
-    },
-    {
-      "ticker": "APA",
-      "weight": 0.2,
-      "rationale": "verified from game portfolio 2026-03-19",
-      "tags": []
+      "weight": 0.21,
+      "rationale": "Triple-consensus energy name with strong 5d acceleration and repeated cross-model validation; sized below APA because low volume confirmation and medium risk argue for a modest haircut.",
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "consensus",
+        "non_us_differentiator"
+      ]
     },
     {
       "ticker": "NESTE.HE",
-      "weight": 0.15,
-      "rationale": "verified from game portfolio 2026-03-19",
-      "tags": []
+      "weight": 0.16,
+      "rationale": "Triple-consensus pick with strong recent momentum, but low vol_ratio and overbought conditions near the 52-week high trigger the 15% cap.",
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "breakout",
+        "consensus",
+        "non_us_differentiator",
+        "overbought",
+        "at_52w_high"
+      ]
     },
     {
-      "ticker": "DVN",
-      "weight": 0.1,
-      "rationale": "verified from game portfolio 2026-03-19",
-      "tags": []
+      "ticker": "LYB",
+      "weight": 0.16,
+      "rationale": "Double-consensus non-pure-energy proxy that earns a core slot as the best unique/secondary consensus diversifier, adding beta and catalyst exposure without being dead money.",
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "consensus",
+        "catalyst",
+        "diversifier",
+        "overbought",
+        "at_52w_high"
+      ]
     },
     {
-      "ticker": "MU",
-      "weight": 0.08,
-      "rationale": "verified from game portfolio 2026-03-19",
-      "tags": []
+      "ticker": "SNDK",
+      "weight": 0.11,
+      "rationale": "Double-consensus catalyst/high-beta satellite included to satisfy the mandate for active challenger-style upside, but capped at 10% because the Devil flagged it HIGH risk.",
+      "tags": [
+        "momentum",
+        "consensus",
+        "catalyst",
+        "at_52w_high"
+      ]
+    },
+    {
+      "ticker": "EQNR.OL",
+      "weight": 0.11,
+      "rationale": "Triple-consensus name with excellent recent acceleration, but the Devil's HIGH-risk flag and very weak vol_ratio force a hard 10% cap despite broad agreement.",
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "consensus",
+        "non_us_differentiator"
+      ]
     }
   ],
-  "reasoning": "The final portfolio includes strong consensus picks from both proposals, weighted higher for conviction, while also integrating unique contrarian picks that show recovering momentum. The portfolio beta is within the target range for a NEUTRAL regime, ensuring a balanced risk profile.",
-  "confidence": 0.85,
-  "learning_reflection": "Today's synthesis prioritizes high-momentum energy stocks while adjusting for overbought risks, aligning with the aggressive strategy mandate.",
+  "reasoning": "I kept exactly 6 names in this cautious-NEUTRAL regime, prioritizing all four triple-consensus energy leaders plus the two double-consensus names that add catalyst and beta. EQNR.OL and SNDK were both hard-capped at 10% due to accurate Devil HIGH-risk guidance, while NESTE.HE was capped at 15% by the overbought-at-peak rule. The result stays concentrated, follows the energy rotation, and lifts portfolio beta above the strategist's too-low 0.34 while remaining appropriate for a cautious neutral tape.",
+  "confidence": 0.84,
+  "learning_reflection": "I adapted by staying concentrated in the validated energy rotation cluster but avoided the prior conservative mistake of adding slow fillers, instead using LYB and SNDK as the only non-core upside extensions.",
   "performance_history": [
     {
       "date": "2026-03-17",
@@ -93,6 +129,18 @@
         "TELIA.ST": -0.011574,
         "ERIC-B.ST": -0.020557
       }
+    },
+    {
+      "date": "2026-03-20",
+      "benchmark_return_20d": -0.0372,
+      "portfolio_return_1d": -0.013974,
+      "benchmark_return_1d": -0.002749,
+      "alpha_1d": -0.011225,
+      "position_returns": {
+        "AKRBP.OL": -0.048528,
+        "NESTE.HE": -0.006397,
+        "EQNR.OL": -0.025088
+      }
     }
   ],
   "history": [
@@ -142,19 +190,576 @@
         "confidence": 0.85,
         "learning_reflection": "Today's synthesis prioritizes high-momentum energy stocks while adjusting for overbought risks, aligning with the aggressive strategy mandate."
       },
-      "performance": {},
+      "performance": {
+        "date": "2026-03-20",
+        "portfolio_return_1d": -0.013974,
+        "benchmark_return_1d": -0.002749,
+        "alpha_1d": -0.011225,
+        "position_returns": {
+          "AKRBP.OL": -0.048528,
+          "NESTE.HE": -0.006397,
+          "EQNR.OL": -0.025088
+        }
+      },
       "signal_snapshot": {},
       "validation": {
         "verified_override": true
+      },
+      "outcomes": {
+        "1d": {
+          "portfolio_return": -0.013974,
+          "benchmark_return": -0.002749,
+          "alpha": -0.011225,
+          "position_returns": {
+            "AKRBP.OL": -0.048528,
+            "NESTE.HE": -0.006397,
+            "EQNR.OL": -0.025088
+          }
+        }
+      },
+      "decision_evaluation": {
+        "new_avg_return_1d": null,
+        "dropped_avg_return_1d": null,
+        "hold_vs_replace_1d": null,
+        "selected_avg_return_1d": null,
+        "alternatives_avg_return_1d": null,
+        "slot_opportunity_cost_1d": null
       }
+    },
+    {
+      "date": "2026-03-20",
+      "provenance": "ai_proposed",
+      "final_portfolio": {
+        "positions": [
+          {
+            "ticker": "APA",
+            "weight": 0.25,
+            "rationale": "Triple-consensus leader in the energy rotation with broad independent validation and still one of the strongest absolute-return setups despite crowding; full weight is justified because its overbought-at-high condition is not hard-capped by the stated rule.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "consensus",
+              "overbought"
+            ]
+          },
+          {
+            "ticker": "LYB",
+            "weight": 0.23,
+            "rationale": "Triple-consensus cyclical winner with cleaner risk than the high-risk names, and consensus across all three models supports a top-tier conviction weight even if near-term acceleration is less explosive.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "consensus",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "EQNR.OL",
+            "weight": 0.21,
+            "rationale": "Double-consensus Nordic energy anchor with strong 5-day momentum and low retail crowding; kept large for diversification away from the US-heavy slate and because energy remains the dominant regime trend.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "consensus",
+              "diversifier",
+              "non_us_differentiator",
+              "overbought"
+            ]
+          },
+          {
+            "ticker": "WDC",
+            "weight": 0.11,
+            "rationale": "Triple-consensus breakout/catalyst name, but Devil flagged HIGH risk and the learning context says accurate HIGH-risk flags should hard-cap weight at 10%, so it stays as a controlled upside kicker.",
+            "tags": [
+              "momentum",
+              "breakout",
+              "consensus",
+              "catalyst"
+            ]
+          },
+          {
+            "ticker": "NESTE.HE",
+            "weight": 0.11,
+            "rationale": "Double-consensus non-US energy pick, but extreme RSI near the 52-week high plus very weak volume confirmation and a HIGH-risk flag force a reduced 10% weight.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "consensus",
+              "non_us_differentiator",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "VLO",
+            "weight": 0.09,
+            "rationale": "Best unique momentum add from Proposal A: another energy-rotation beneficiary with acceptable trend quality and better slot value than slower catalyst-only names like DOW or TKM1T.TL.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "catalyst"
+            ]
+          }
+        ],
+        "reasoning": "I built around the five consensus names first, with APA, LYB, and EQNR.OL carrying the portfolio because they were independently validated across momentum, catalyst, and full-signal views. I still included one unique catalyst/momentum extension in VLO, while respecting the hard 10% cap on HIGH-risk WDC and NESTE.HE; the result stays concentrated at 6 names, keeps non-US exposure meaningful, and lifts beta above the strategist's too-low 0.42 toward a more competitive NEUTRAL-range profile.",
+        "confidence": 0.84,
+        "learning_reflection": "Today's synthesis stays aggressive and concentrated in the energy-rotation winners, but adapts by cutting flagged high-risk overbought names to capped weights instead of blindly maximizing consensus exposure."
+      },
+      "strategist_proposal": {
+        "positions": [
+          {
+            "ticker": "EQNR.OL",
+            "weight": 0.25,
+            "rationale": "Top-tier energy leader with 42.0% 20d return, 0.77 Sharpe, 14.7% 5d momentum, strongest vs-index in the list, and positive MACD, so it earns maximum conviction despite yesterday's pullback.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "non_us_differentiator"
+            ]
+          },
+          {
+            "ticker": "APA",
+            "weight": 0.21,
+            "rationale": "APA keeps its large weight because its 0.79 Sharpe is the best in the table, it sits at a 52-week high with 10.4% 5d momentum and 34.7% relative outperformance, though I trim slightly for crowding risk and low beta quality concerns.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "NESTE.HE",
+            "weight": 0.17,
+            "rationale": "NESTE remains a high-quality Nordic energy breakout with 38.6% 20d return, 0.67 Sharpe, 8.5% 5d strength, 42.3% vs-index, and a near-high setup supported by strong MACD.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "non_us_differentiator",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "LYB",
+            "weight": 0.14,
+            "rationale": "LYB still qualifies as a smooth cyclical winner with 33.2% 20d return, 0.59 Sharpe, strong 60d trend, positive alpha versus its index, and a still-constructive MACD near highs.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "VLO",
+            "weight": 0.12,
+            "rationale": "VLO is the best fresh refiner add with 20.6% 20d return, 0.56 Sharpe, a clean 52-week-high breakout, positive MACD, and better trend persistence than lower-quality rebound names.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "overbought"
+            ]
+          },
+          {
+            "ticker": "WDC",
+            "weight": 0.11,
+            "rationale": "WDC replaces the weaker SNDK slot because its 16.4% 5d surge, 76.6% 60d return, exact 52-week-high breakout, very high beta, and positive MACD offer the strongest non-energy upside kicker in the universe.",
+            "tags": [
+              "momentum",
+              "breakout"
+            ]
+          }
+        ],
+        "reasoning": "I am staying concentrated in the strongest momentum cluster\u2014energy and cyclicals\u2014because the table shows the cleanest high-Sharpe, positive-vs-index trends there, with EQNR and APA as the two clear anchors. I only make one meaningful rotation by upgrading SNDK into WDC, which offers a stronger breakout profile, while VLO adds a differentiated refiner trend and keeps the portfolio diversified across US and Nordic markets without diluting conviction.",
+        "confidence": 0.82,
+        "learning_reflection": "After recent negative alpha, I am tightening the book around the highest-Sharpe leaders and removing the weaker legacy semiconductor exposure in favor of a cleaner breakout while preserving concentrated energy leadership."
+      },
+      "challenger_proposal": {
+        "positions": [
+          {
+            "ticker": "WDC",
+            "weight": 0.25,
+            "rationale": "Top catalyst score with strong 5-day return, at 52-week high, and high implied volatility (IV) indicating significant event expectation. Positive premarket gap confirms early momentum, making it a high-conviction breakout candidate.",
+            "tags": [
+              "momentum",
+              "breakout",
+              "catalyst",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "LYB",
+            "weight": 0.2,
+            "rationale": "Strong momentum near its 52-week high, confirmed by a significant positive premarket gap and high IV. The attractive 6.4% dividend yield further enhances its appeal as a catalyst-driven pick, aligning with the 'conflict profits' narrative for chemical stocks.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "catalyst",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "TKM1T.TL",
+            "weight": 0.18,
+            "rationale": "A high-conviction Baltic pick demonstrating a strong volume breakout (VolRatio 2.12) and trading near its 52-week high. Its 6.6% dividend yield provides an additional edge, fulfilling the non-US and dividend mandate.",
+            "tags": [
+              "momentum",
+              "breakout",
+              "non_us_differentiator",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "DOW",
+            "weight": 0.15,
+            "rationale": "Strong RSI and near its 52-week high, supported by a robust positive premarket gap and an attractive 4.7% dividend yield. Headlines suggest 'conflict profits,' providing a clear near-term catalyst in the chemical sector.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "catalyst",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "APA",
+            "weight": 0.12,
+            "rationale": "Maintains strong momentum and is at its 52-week high, benefiting from the energy rotation theme. Position weight is capped due to its very high RSI (>82), indicating potential exhaustion without a confirming volume breakout.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "GN.CO",
+            "weight": 0.1,
+            "rationale": "A strong non-US healthcare pick with a significant 5-day return, extremely high IV (0.93), and a very strong positive premarket gap, signaling a powerful event-driven catalyst despite a lower VolRatio.",
+            "tags": [
+              "catalyst",
+              "non_us_differentiator"
+            ]
+          }
+        ],
+        "reasoning": "The portfolio is aggressively positioned in high-momentum stocks exhibiting clear catalyst signals such as 52-week highs, high implied volatility, strong premarket gaps, and confirmed volume breakouts. It prioritizes the 'Energy rotation year' mandate while diversifying with strong non-US picks and managing risk by capping overextended RSI positions.",
+        "confidence": 0.9,
+        "learning_reflection": "Today's picks prioritize confirmed volume breakouts and high IV spikes, while carefully managing positions with very high RSI to avoid exhaustion, ensuring a truly catalyst-driven approach over pure trend following."
+      },
+      "bear_cases": {
+        "APA": {
+          "bear_case": "RSI is very high (83.2) with no 52-week drawdown (pct_from_52w_high 0.0%), but momentum is only modest (mom_5d 10.4%) and the Sharpe is sub-1 (0.79), suggesting the move may be late and vulnerable to a fade after the breakout.",
+          "risk": "MEDIUM"
+        },
+        "LYB": {
+          "bear_case": "Despite strong RSI (80.4), the stock is only slightly off the 52-week high (pct_from_52w_high -0.8%) while momentum is weak (mom_5d 3.1%) and beta is low (0.17), implying limited upside follow-through and potential for underperformance if the rally stalls.",
+          "risk": "MEDIUM"
+        },
+        "WDC": {
+          "bear_case": "Sharpe is very weak (0.15) and the stock is still near the 52-week high (pct_from_52w_high 0.0%) with elevated beta (3.49) and only moderate momentum (mom_5d 16.4%), making it prone to sharp drawdowns if conditions turn.",
+          "risk": "HIGH"
+        },
+        "EQNR.OL": {
+          "bear_case": "Deeply below the 52-week high (pct_from_52w_high -2.5%) with negative beta (-0.32) and only moderate momentum (mom_5d 14.7%)\u2014the negative beta can make performance hard to predict and the correction suggests upside may be capped.",
+          "risk": "MEDIUM"
+        },
+        "NESTE.HE": {
+          "bear_case": "RSI is extremely elevated (83.5) while the stock is slightly below its 52-week high (pct_from_52w_high -0.6%) and volume confirmation is thin (vol_ratio 0.26); that combination raises the risk the strength is not broadly supported and could reverse.",
+          "risk": "HIGH"
+        },
+        "TKM1T.TL": {
+          "bear_case": "Momentum is essentially flat (mom_5d 0.2%) with a very low Sharpe (0.25) and the stock is slightly below the 52-week high (pct_from_52w_high -0.2%); with vol_ratio 2.12, the lack of follow-through suggests the move may not be translating into returns.",
+          "risk": "MEDIUM"
+        },
+        "DOW": {
+          "bear_case": "RSI is high (78.3) but the stock is slightly below the 52-week high (pct_from_52w_high -0.5%) and momentum is weak (mom_5d 2.4%) with only moderate Sharpe (0.49), implying the rally could stall without stronger trend confirmation.",
+          "risk": "MEDIUM"
+        },
+        "VLO": {
+          "bear_case": "RSI is elevated (72.0) while the stock is at the 52-week high (pct_from_52w_high 0.0%) but momentum is modest (mom_5d 5.0%) and Sharpe is only 0.56; if the breakout fails, returns may mean-revert quickly.",
+          "risk": "MEDIUM"
+        },
+        "GN.CO": {
+          "bear_case": "The stock is far below its 52-week high (pct_from_52w_high -20.7%) with very high beta (2.57) and negative Sharpe (-0.01), indicating poor risk-adjusted performance and heightened downside sensitivity if the downtrend persists.",
+          "risk": "HIGH"
+        },
+        "STX": {
+          "bear_case": "Sharpe is extremely low (0.08) and the stock is meaningfully below its 52-week high (pct_from_52w_high -2.7%) with high beta (2.85) and only moderate momentum (mom_5d 13.3%), suggesting weak return quality with amplified drawdown risk.",
+          "risk": "HIGH"
+        }
+      },
+      "validation": {
+        "normalized": true,
+        "errors_before_normalization": [
+          "APA: weight 26.3% > 25% maximum"
+        ],
+        "rounded_to_whole_pct": true,
+        "post_round_total_weight": 1.0
+      },
+      "signal_snapshot": {
+        "WDC": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.110541,
+          "mom_5d": 0.163943,
+          "mom_60d": 0.765881,
+          "sharpe_20d": 0.148013,
+          "rsi_14": 65.57351,
+          "vs_index": 0.147761,
+          "pct_from_52w_high": 0.0,
+          "beta": 3.48694,
+          "vol_ratio": null,
+          "macd_hist": 0.015413,
+          "atr_pct": 0.062789,
+          "dividend_yield": 0.00142,
+          "last_price": 316.929993,
+          "has_earnings_warning": false
+        },
+        "APA": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.309704,
+          "mom_5d": 0.104149,
+          "mom_60d": 0.577255,
+          "sharpe_20d": 0.791252,
+          "rsi_14": 83.211676,
+          "vs_index": 0.346924,
+          "pct_from_52w_high": 0.0,
+          "beta": 0.085635,
+          "vol_ratio": null,
+          "macd_hist": 0.012672,
+          "atr_pct": 0.037552,
+          "dividend_yield": 0.026274,
+          "last_price": 38.060001,
+          "has_earnings_warning": false
+        },
+        "EQNR.OL": {
+          "market": "OBX",
+          "sector": "Energy",
+          "momentum": 0.419803,
+          "mom_5d": 0.146651,
+          "mom_60d": 0.69735,
+          "sharpe_20d": 0.766793,
+          "rsi_14": 78.767135,
+          "vs_index": 0.457023,
+          "pct_from_52w_high": -0.025088,
+          "beta": -0.316278,
+          "vol_ratio": 0.494476,
+          "macd_hist": 0.017298,
+          "atr_pct": 0.038692,
+          "dividend_yield": 0.038221,
+          "last_price": 388.600006,
+          "has_earnings_warning": false
+        },
+        "VLO": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.205768,
+          "mom_5d": 0.049785,
+          "mom_60d": 0.48082,
+          "sharpe_20d": 0.555319,
+          "rsi_14": 71.988341,
+          "vs_index": 0.242988,
+          "pct_from_52w_high": 0.0,
+          "beta": 0.343832,
+          "vol_ratio": null,
+          "macd_hist": 0.004985,
+          "atr_pct": 0.036359,
+          "dividend_yield": 0.018961,
+          "last_price": 242.070007,
+          "has_earnings_warning": false
+        },
+        "STX": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.057138,
+          "mom_5d": 0.132626,
+          "mom_60d": 0.523469,
+          "sharpe_20d": 0.082051,
+          "rsi_14": 64.056759,
+          "vs_index": 0.094358,
+          "pct_from_52w_high": -0.026804,
+          "beta": 2.845508,
+          "vol_ratio": null,
+          "macd_hist": 0.012117,
+          "atr_pct": 0.059241,
+          "dividend_yield": 0.006673,
+          "last_price": 434.600006,
+          "has_earnings_warning": false
+        },
+        "DOW": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.242924,
+          "mom_5d": 0.023758,
+          "mom_60d": 0.645015,
+          "sharpe_20d": 0.494263,
+          "rsi_14": 78.3073,
+          "vs_index": 0.280144,
+          "pct_from_52w_high": -0.005306,
+          "beta": 0.663067,
+          "vol_ratio": null,
+          "macd_hist": 0.008014,
+          "atr_pct": 0.046568,
+          "dividend_yield": 0.046679,
+          "last_price": 37.490002,
+          "has_earnings_warning": false
+        },
+        "NESTE.HE": {
+          "market": "OMXHLCPI",
+          "sector": "Energy",
+          "momentum": 0.386097,
+          "mom_5d": 0.084926,
+          "mom_60d": 0.562616,
+          "sharpe_20d": 0.665409,
+          "rsi_14": 83.513259,
+          "vs_index": 0.423317,
+          "pct_from_52w_high": -0.006397,
+          "beta": 0.179587,
+          "vol_ratio": 0.262395,
+          "macd_hist": 0.01638,
+          "atr_pct": 0.044247,
+          "dividend_yield": 0.006777,
+          "last_price": 29.51,
+          "has_earnings_warning": false
+        },
+        "LYB": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.33184,
+          "mom_5d": 0.031397,
+          "mom_60d": 0.760564,
+          "sharpe_20d": 0.594395,
+          "rsi_14": 80.400734,
+          "vs_index": 0.36906,
+          "pct_from_52w_high": -0.008378,
+          "beta": 0.166012,
+          "vol_ratio": null,
+          "macd_hist": 0.009078,
+          "atr_pct": 0.052362,
+          "dividend_yield": 0.064369,
+          "last_price": 74.57,
+          "has_earnings_warning": false
+        },
+        "TKM1T.TL": {
+          "market": "BALTIC",
+          "sector": "Cons",
+          "momentum": 0.010246,
+          "mom_5d": 0.002032,
+          "mom_60d": 0.048936,
+          "sharpe_20d": 0.24841,
+          "rsi_14": 65.384587,
+          "vs_index": 0.047466,
+          "pct_from_52w_high": -0.002024,
+          "beta": 0.045982,
+          "vol_ratio": 2.115442,
+          "macd_hist": -0.000528,
+          "atr_pct": 0.004491,
+          "dividend_yield": 0.065923,
+          "last_price": 9.86,
+          "has_earnings_warning": false
+        },
+        "GN.CO": {
+          "market": "OMXC25",
+          "sector": "Health",
+          "momentum": -0.007344,
+          "mom_5d": 0.119908,
+          "mom_60d": -0.066475,
+          "sharpe_20d": -0.007832,
+          "rsi_14": 52.776731,
+          "vs_index": 0.029876,
+          "pct_from_52w_high": -0.206846,
+          "beta": 2.572978,
+          "vol_ratio": 0.508304,
+          "macd_hist": 0.011097,
+          "atr_pct": 0.067517,
+          "dividend_yield": 0.0,
+          "last_price": 97.32,
+          "has_earnings_warning": false
+        }
+      },
+      "decision_metrics": {
+        "selected_tickers": [
+          "APA",
+          "EQNR.OL",
+          "LYB",
+          "NESTE.HE",
+          "VLO",
+          "WDC"
+        ],
+        "held_tickers": [
+          "APA",
+          "EQNR.OL",
+          "LYB",
+          "NESTE.HE"
+        ],
+        "new_tickers": [
+          "VLO",
+          "WDC"
+        ],
+        "dropped_tickers": [
+          "AKRBP.OL",
+          "SNDK"
+        ],
+        "held_count": 4,
+        "new_count": 2,
+        "dropped_count": 2,
+        "overlap_weight": 0.63,
+        "turnover_estimate": 0.37,
+        "candidate_alternatives": [
+          {
+            "ticker": "MPC",
+            "selection_score": 4.506579,
+            "mom_5d": 0.042444,
+            "vol_ratio": null
+          },
+          {
+            "ticker": "STX",
+            "selection_score": 4.40847,
+            "mom_5d": 0.132626,
+            "vol_ratio": null
+          },
+          {
+            "ticker": "HAL",
+            "selection_score": 4.063855,
+            "mom_5d": 0.096171,
+            "vol_ratio": null
+          },
+          {
+            "ticker": "AKRBP.OL",
+            "selection_score": 3.856144,
+            "mom_5d": 0.09473,
+            "vol_ratio": 0.489781
+          },
+          {
+            "ticker": "DOW",
+            "selection_score": 3.839448,
+            "mom_5d": 0.023758,
+            "vol_ratio": null
+          }
+        ]
+      },
+      "performance": {},
+      "outcomes": {}
     }
   ],
+  "source": "ai_proposed",
   "close_prices": {
-    "AKRBP.OL": 366.79998779296875,
     "APA": 38.060001373291016,
-    "CTY1S.HE": 3.9119999408721924,
-    "DVN": 48.790000915527344,
-    "EQNR.OL": 398.6000061035156,
-    "NESTE.HE": 29.700000762939453
+    "EQNR.OL": 388.6000061035156,
+    "LYB": 74.56999969482422,
+    "NESTE.HE": 29.510000228881836,
+    "VLO": 242.07000732421875,
+    "WDC": 316.92999267578125
   }
 }
