@@ -126,14 +126,14 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
         if cond and tag not in tags:
             tags.append(tag)
 
-    add("momentum", "momentum" in text or signal.get("momentum", 0.0) > 0)
-    add("high_sharpe", "sharpe" in text or signal.get("sharpe_20d", 0.0) >= 0.35)
+    add("momentum", "momentum" in text or (signal.get("momentum") or 0.0) > 0)
+    add("high_sharpe", "sharpe" in text or (signal.get("sharpe_20d") or 0.0) >= 0.35)
     add(
         "breakout",
         any(token in text for token in ("breakout", "52-week", "52 week", "parabolic"))
         or (
-            signal.get("vol_ratio", 0.0) >= 1.5 and
-            signal.get("pct_from_52w_high", -1.0) >= -0.03
+            (signal.get("vol_ratio") or 0.0) >= 1.5 and
+            (signal.get("pct_from_52w_high") or -1.0) >= -0.03
         ),
     )
     add("consensus", "consensus" in text)
@@ -151,12 +151,12 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
     add(
         "overbought",
         any(token in text for token in ("overbought", "rsi", "extended"))
-        or signal.get("rsi_14", 0.0) > 80,
+        or (signal.get("rsi_14") or 0.0) > 80,
     )
     add(
         "at_52w_high",
         any(token in text for token in ("52-week high", "52w high", "52 week high", "all-time high"))
-        or signal.get("pct_from_52w_high", -1.0) >= -0.02,
+        or (signal.get("pct_from_52w_high") or -1.0) >= -0.02,
     )
 
     return tags
