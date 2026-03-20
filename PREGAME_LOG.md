@@ -820,7 +820,7 @@ Winners: MAERSK-B.CO +3.5%, CVX +1.3%, XOM +0.7% | Losers: NOKIA.HE -1.8%, NEE -
 
 **Market:** NEUTRAL regime · SPX vs 200d SMA: -0.2% · VIX: 24.1 · S&P 500 20d: -3.7%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 23:55:16.
 
 **Yesterday's P&L:** Portfolio -1.2% · Benchmark -0.3% · Alpha -0.9%
 Winners: CVX +1.4%, XOM +0.4% | Losers: NHY.OL -5.4%, SHB-A.ST -2.1%, ERIC-B.ST -2.1%
