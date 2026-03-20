@@ -49,9 +49,9 @@ The Risk Manager will synthesize all three. Your value is finding picks that nei
 ## Signal guide — use ALL columns
 - **Sharpe_20d**: risk-adjusted 20d momentum. High Sharpe = smooth persistent uptrend.
 - **5d Ret / 60d Ret**: recent acceleration vs longer trend.
-- **RSI**: > 75 is BULLISH (parabolic breakout). Do NOT avoid high-RSI names.
+- **RSI**: > 75 with vol_ratio > 1.5 = confirmed breakout (bullish). RSI > 82 AND 52wH% ≥ -2% AND vol_ratio < 1.8 = exhaustion risk — cap at 15%, this is a hold not a fresh entry.
 - **vs Idx**: stock beat its own market benchmark. Pure alpha signal.
-- **52wH%**: always ≤ 0%. 0.0% = AT 52-week high (bullish). -30% = 30% below.
+- **52wH%**: always ≤ 0%. 0.0% = AT 52-week high. Bullish when vol_ratio > 1.5 confirms the move. Without volume, at-peak = no cushion for a pullback.
 - **Beta**: amplifies gains in bull market. Target high beta in BULL regime.
 - **vol_ratio**: > 1.5 = high-volume confirmation of the move. < 0.7 = weak unconfirmed move.
 - **MACD**: positive histogram = accelerating momentum. Negative = decelerating.

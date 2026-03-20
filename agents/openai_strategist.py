@@ -88,7 +88,7 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - Prefer high-beta names in bull-market conditions — they amplify gains.
 - Regime-based position count: BULL 5–8, NEUTRAL 5–10, BEAR 6–12. You decide the exact count based on signal quality — more positions only if multiple names genuinely earn their slot. Daily rebalancing replaces diversification — rotate out losers tomorrow. No token 5% picks unless a name has a clear catalyst reason.
 - Diversify across at least 2 markets to reduce single-market risk.
-- Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them.
+- Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them IF 5d momentum is strong (> 5%). If a stock is at its 52w high but 5d momentum is weak (< 3%) and MACD is flat or negative, the move is likely exhausted — treat it as a hold candidate, not a fresh entry at full size.
 - vs_index > 0 means the stock beat its own market — pure alpha signal.
 - MACD histogram: positive = accelerating momentum, negative = decelerating. Use it to distinguish fresh breakouts from fading moves.
 - Goal: BEAT other game participants — take conviction bets, not passive exposure.
