@@ -199,6 +199,8 @@ def generate_learning_state() -> dict:
                 }
             )
 
+    devil_accuracy = _devil_accuracy(history)
+
     state = {
         "generated_from_days": max(len(history), len(legacy_performance)),
         "position_observations": len(rows),
@@ -233,9 +235,51 @@ def generate_learning_state() -> dict:
             "tier3_observations": len(tier_returns["tier3"]),
         },
         "changed_hard_rules": _changed_rules(previous.get("hard_rules", []), hard_rules),
+        "devil_accuracy": devil_accuracy,
     }
     save_learning_state(state)
     return state
+
+
+def _devil_accuracy(history: list[dict]) -> dict:
+    """
+    Compare 1d returns of HIGH vs LOW/unflagged positions across all days
+    where bear_cases + position_returns are both present.
+    Returns accuracy stats for injecting into agent prompts.
+    """
+    high_returns: list[float] = []
+    low_returns: list[float] = []  # LOW-flagged or unflagged (in portfolio but not HIGH)
+
+    for day in history:
+        bear_cases: dict = day.get("bear_cases", {}) or {}
+        outcomes = (day.get("outcomes", {}) or {}).get("1d", {})
+        pos_returns: dict = outcomes.get("position_returns", {}) or day.get("performance", {}).get("position_returns", {})
+        if not pos_returns:
+            continue
+        for ticker, ret in pos_returns.items():
+            risk_level = (bear_cases.get(ticker) or {}).get("risk_level", "LOW")
+            if risk_level == "HIGH":
+                high_returns.append(float(ret))
+            else:
+                low_returns.append(float(ret))
+
+    if not high_returns or not low_returns:
+        return {"status": "insufficient_data", "observations": 0}
+
+    high_avg = _avg(high_returns)
+    low_avg = _avg(low_returns)
+    high_neg_rate = sum(1 for r in high_returns if r < 0) / len(high_returns)
+    accuracy = high_neg_rate  # % of HIGH-risk flags that correctly predicted negative return
+
+    return {
+        "status": "actionable" if len(high_returns) >= 5 else "early_data",
+        "observations": len(high_returns),
+        "high_risk_avg_return_1d": round(high_avg, 6),
+        "low_risk_avg_return_1d": round(low_avg, 6),
+        "high_risk_negative_rate": round(high_neg_rate, 4),
+        "accuracy": round(accuracy, 4),
+        "devil_is_accurate": accuracy >= 0.60 and len(high_returns) >= 5,
+    }
 
 
 def _changed_rules(previous: list[str], current: list[str]) -> list[str]:
@@ -276,6 +320,20 @@ def build_prompt_learning_context(
                 f"- {item['ticker']}: avg {item['avg_return_1d']:+.2%} over {item['observations']} obs"
                 for item in losers[:3]
             )
+        devil = state.get("devil_accuracy", {})
+        if devil.get("status") in ("actionable", "early_data") and devil.get("observations", 0) > 0:
+            da = devil
+            if da.get("devil_is_accurate"):
+                lines.append(
+                    f"Devil's advocate accuracy: HIGH-risk flags have been correct {da['high_risk_negative_rate']:.0%} of the time "
+                    f"({da['observations']} obs). HIGH-risk picks avg {da['high_risk_avg_return_1d']:+.2%}/day vs "
+                    f"LOW-risk {da['low_risk_avg_return_1d']:+.2%}/day. TREAT HIGH-RISK FLAGS AS A 10% WEIGHT CAP TODAY."
+                )
+            else:
+                lines.append(
+                    f"Devil's advocate accuracy so far: {da.get('high_risk_negative_rate', 0):.0%} of HIGH-risk flags went negative "
+                    f"({da['observations']} obs, threshold for action: 60%). Use your own judgement on flagged picks."
+                )
         sections.append("\n".join(lines))
 
     if fallback_sections and not state:

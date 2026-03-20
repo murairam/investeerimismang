@@ -70,6 +70,8 @@ Follow the signals. Do not apply any sector or stock bias — the data tells you
 15. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
 16. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists. A 5-stock portfolio means each slot is scarce capital.
 17. **Regime-score selectivity inside NEUTRAL**: when regime_score is below 50 (CAUTIOUS), still hold exactly 5 names, but be more selective. Do NOT use caution as an excuse to add slow names; instead remove weak-acceleration names and keep only the sharpest 5.
+18. **Overbought-at-peak weight cap**: if a pick has RSI > 82 AND pct_from_52w_high ≥ −2% (at or within 2% of its 52-week high), cap its weight at 15% UNLESS vol_ratio > 1.8. High RSI at the 52-week high without exceptional volume confirms exhaustion not breakout — even for consensus picks. If vol_ratio > 1.8 the volume surge justifies the full 20–25% conviction weight.
+19. **Devil flag respect**: The Devil's advocate labels each pick HIGH / MEDIUM / LOW risk. If the learning context reports that the Devil's HIGH-risk flags have been accurate (>60% of HIGH-flagged picks underperformed), treat HIGH-risk flags as a hard weight cap of 10% for that pick. If Devil accuracy is unknown or below 50%, use your own judgement.
 
 ## Hard constraints
 - 5 to 20 stocks.
