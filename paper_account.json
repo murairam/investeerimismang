@@ -10,7 +10,17 @@
     "DVN": 23.68648562,
     "MU": 2.08101143
   },
-  "pending_order": null,
+  "pending_order": {
+    "submitted_date": "2026-03-20",
+    "positions": [
+      { "ticker": "APA",       "weight": 0.25 },
+      { "ticker": "AKRBP.OL", "weight": 0.21 },
+      { "ticker": "NESTE.HE", "weight": 0.16 },
+      { "ticker": "LYB",      "weight": 0.16 },
+      { "ticker": "SNDK",     "weight": 0.11 },
+      { "ticker": "EQNR.OL",  "weight": 0.11 }
+    ]
+  },
   "history": [
     {
       "date": "2026-03-17",
@@ -64,8 +74,26 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-03-20",
+      "equity": 9878.0,
+      "cash": 0.0,
+      "daily_return": -0.01002,
+      "return_since_start": -0.0122,
+      "turnover": 0.0,
+      "positions": {
+        "EQNR.OL": 68.79586489,
+        "AKRBP.OL": 65.78895613,
+        "APA": 60.72851359,
+        "NESTE.HE": 50.3939381,
+        "DVN": 23.68648562,
+        "MU": 2.08101143
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-03-19",
-  "last_equity": 9978.0
+  "last_rebalanced_date": "2026-03-20",
+  "last_equity": 9878.0
 }

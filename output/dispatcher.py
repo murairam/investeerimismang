@@ -2,6 +2,7 @@
 WebhookDispatcher — formats a PortfolioProposal as a Discord embed and POSTs it.
 """
 import logging
+import math
 import os
 from datetime import datetime
 from typing import Optional
@@ -153,11 +154,8 @@ class WebhookDispatcher:
             for p in proposal.positions
             if p.ticker in candidate_map
         ]
-        avg_vs_index = (
-            sum(selected_vs_index) / len(selected_vs_index)
-            if selected_vs_index
-            else None
-        )
+        clean_vs = [v for v in selected_vs_index if v is not None and not math.isnan(v)]
+        avg_vs_index = sum(clean_vs) / len(clean_vs) if clean_vs else None
 
         market_momentum_buckets: dict[str, list[float]] = {}
         for candidate in snapshot["candidates"]:
@@ -181,7 +179,7 @@ class WebhookDispatcher:
 
         regime = snapshot.get("regime", "N/A")
         vix_level = snapshot.get("vix_level", float("nan"))
-        vix_str = "N/A" if (vix_level != vix_level) else f"{vix_level:.1f}"
+        vix_str = "N/A" if math.isnan(vix_level) else f"{vix_level:.1f}"
         context_line = (
             f"📊 Context: {regime} regime · VIX {vix_str} · Candidates {len(snapshot['candidates'])} · Run {run_time_str}"
         )
@@ -203,10 +201,13 @@ class WebhookDispatcher:
             rationale = pos.rationale.strip()
             if len(rationale) > 200:
                 rationale = rationale[:199] + "…"
-            rationale_lines.append(f"{i}. **{_display(pos.ticker)}** `({pos.ticker})` — {rationale}")
-        rationale_block = "\n".join(rationale_lines[:8])
+            rationale_lines.append(f"**{_display(pos.ticker)}** — {rationale}")
+        rationale_block = "\n".join(rationale_lines[:10])
 
+        # Build actionable changes summary
         change_lines: list[str] = []
+        action_summary: list[str] = []
+
         if prior_proposal and prior_proposal.positions:
             prior_map = {p.ticker: p.weight for p in prior_proposal.positions}
             current_map = {p.ticker: p.weight for p in proposal.positions}
@@ -220,22 +221,34 @@ class WebhookDispatcher:
             ]
 
             if added or removed or resized:
-                for ticker in added[:3]:
-                    change_lines.append(f"➕ {_display(ticker)} ({ticker}) {int(current_map[ticker] * 100)}%")
-                for ticker in removed[:3]:
-                    change_lines.append(f"➖ {_display(ticker)} ({ticker}) (was {int(prior_map[ticker] * 100)}%)")
-                for ticker in resized[:4]:
+                # Action summary header
+                if added:
+                    action_summary.append(f"**ADD {len(added)}:** {', '.join(_display(t) for t in added)}")
+                if removed:
+                    action_summary.append(f"**REMOVE {len(removed)}:** {', '.join(_display(t) for t in removed)}")
+                if resized:
+                    action_summary.append(f"**RESIZE {len(resized)}:** {', '.join(_display(t) for t in resized)}")
+
+                change_lines.append("\n".join(action_summary))
+                change_lines.append("")  # blank line
+
+                # Detailed changes
+                for ticker in added:
+                    change_lines.append(f"➕ **{_display(ticker)}** → {int(current_map[ticker] * 100)}%")
+                for ticker in removed:
+                    change_lines.append(f"➖ **{_display(ticker)}** (was {int(prior_map[ticker] * 100)}%)")
+                for ticker in resized:
                     diff = current_map[ticker] - prior_map[ticker]
                     arrow = "▲" if diff > 0 else "▼"
                     change_lines.append(
-                        f"{arrow} {_display(ticker)} ({ticker}) {int(prior_map[ticker] * 100)}%→{int(current_map[ticker] * 100)}% ({diff:+.0%})"
+                        f"{arrow} **{_display(ticker)}** {int(prior_map[ticker] * 100)}%→{int(current_map[ticker] * 100)}%"
                     )
             else:
-                change_lines.append("No material changes vs yesterday")
+                change_lines.append("✅ **No changes** — portfolio unchanged from yesterday")
         else:
-            change_lines.append("First run / no prior portfolio")
+            change_lines.append("📋 **First run** — no prior portfolio to compare")
 
-        changes_block = "\n".join(change_lines[:8])
+        changes_block = "\n".join(change_lines)
 
         alpha_line = (
             f"🧠 Alpha (avg selected vs index, 20d): {avg_vs_index:+.1%}"
@@ -262,8 +275,12 @@ class WebhookDispatcher:
                     f"({daily_return:+.2%} today, {since_start:+.2%} since start)"
                 )
 
+        thesis = proposal.reasoning.strip()
+        if len(thesis) > 500:
+            thesis = thesis[:499] + "…"
+
         description = (
-            f"**PM Thesis:** {proposal.reasoning}\n\n"
+            f"**Thesis:** {thesis}\n\n"
             f"{context_line}\n"
             f"{alpha_line}\n"
             f"{blended_line}\n"
@@ -273,7 +290,7 @@ class WebhookDispatcher:
             description = description[: _MAX_EMBED_DESCRIPTION - 3] + "…"
 
         game_search_lines = [
-            f"{i}. {format_security_label(pos.ticker)}"
+            f"{i}. {_display(pos.ticker)}"
             for i, pos in enumerate(proposal.positions, 1)
         ]
 
@@ -283,31 +300,31 @@ class WebhookDispatcher:
             "color": _EMBED_COLOUR,
             "fields": [
                 {
-                    "name": "Game Search List",
-                    "value": "\n".join(game_search_lines[:10]),
-                    "inline": False,
-                },
-                {
-                    "name": "Changes Since Yesterday",
+                    "name": "📝 Changes from Yesterday",
                     "value": changes_block[:1024],
                     "inline": False,
                 },
                 {
-                    "name": "Holdings",
+                    "name": "🔍 Game Search Terms (use these on website)",
+                    "value": "\n".join(game_search_lines[:20]),
+                    "inline": False,
+                },
+                {
+                    "name": "📊 Current Holdings",
                     "value": holdings_table[:1024],
                     "inline": False,
                 },
                 {
-                    "name": "Why These Names",
+                    "name": "💡 Key Points",
                     "value": rationale_block[:1024],
                     "inline": False,
                 },
                 {
-                    "name": "Action",
+                    "name": "✅ Next Steps",
                     "value": (
-                        "1. Update the game portfolio on the website.\n"
-                        "2. Use the search list above to find the exact company names.\n"
-                        "3. Run `python scripts/verify.py` after updating."
+                        "1. Review changes above\n"
+                        "2. Update portfolio on game website\n"
+                        "3. Run `python scripts/verify.py` to confirm"
                     ),
                     "inline": False,
                 },

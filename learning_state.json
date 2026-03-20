@@ -1,6 +1,6 @@
 {
-  "generated_from_days": 3,
-  "position_observations": 0,
+  "generated_from_days": 4,
+  "position_observations": 6,
   "minimums": {
     "strong_daily_observations": 5,
     "strong_ticker_observations": 5,
@@ -20,19 +20,23 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 1.0,
+    "avg_turnover_estimate": 0.41,
     "observations": 0,
     "status": "insufficient_data"
   },
   "confidence_notes": [],
   "rationale_stats": {},
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.0,
-    "tier2_avg_return_1d": 0.0,
-    "tier3_avg_return_1d": 0.0,
-    "tier1_observations": 0,
-    "tier2_observations": 0,
-    "tier3_observations": 0
+    "tier1_avg_return_1d": -0.00539,
+    "tier2_avg_return_1d": -0.007407,
+    "tier3_avg_return_1d": -0.012216,
+    "tier1_observations": 3,
+    "tier2_observations": 1,
+    "tier3_observations": 2
   },
-  "changed_hard_rules": []
+  "changed_hard_rules": [],
+  "devil_accuracy": {
+    "status": "insufficient_data",
+    "observations": 0
+  }
 }

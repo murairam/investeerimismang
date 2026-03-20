@@ -61,6 +61,8 @@ class CandidateInfo(TypedDict):
     macd_hist: float      # MACD histogram / last_price (positive = bullish, negative = bearish)
     atr_pct: float        # 14-day ATR as % of price (daily expected move)
     dividend_yield: float # trailing 12-month dividend yield (game auto-reinvests — free return)
+    analyst_rating: float # analyst consensus 1.0=Strong Buy → 5.0=Strong Sell (NaN if unavailable)
+    analyst_upside: float # (target_mean_price / last_price) - 1; NaN if no coverage
 
 
 class MarketSnapshot(TypedDict):
@@ -273,8 +275,17 @@ class DataFetcher:
 
         try:
             import json
+            import time
             with open(cache_path, "w") as f:
                 json.dump({"provider_symbol": provider_symbol, "rows": rows}, f)
+            # Clean up cache files older than 2 days to prevent accumulation
+            for old_file in os.listdir(_EODHD_CACHE_DIR):
+                old_path = os.path.join(_EODHD_CACHE_DIR, old_file)
+                if os.path.isfile(old_path) and os.path.getmtime(old_path) < time.time() - 2 * 86400:
+                    try:
+                        os.remove(old_path)
+                    except Exception:
+                        pass
         except Exception:
             pass
         return rows
@@ -449,6 +460,67 @@ class DataFetcher:
         except Exception as exc:
             logger.warning("Dividend yield fetch failed: %s", exc)
             return pd.Series(dtype=float)
+
+    def _fetch_analyst_consensus_targeted(
+        self, tickers: list[str], price_map: dict[str, float]
+    ) -> dict[str, dict]:
+        """Analyst consensus rating and mean price target for a focused set of tickers.
+        Uses yfinance Ticker.info: recommendationMean (1=Strong Buy, 5=Strong Sell),
+        targetMeanPrice, numberOfAnalystOpinions. Coverage: good for US, partial for Nordic.
+        analyst_upside is only computed for US tickers (no dot in ticker) to avoid
+        currency mismatch (yfinance targets are USD, Nordic prices are local currency).
+        Fail-soft: returns NaN for tickers with missing data or any exception.
+        """
+        results: dict[str, dict] = {}
+        for ticker in tickers:
+            results[ticker] = {"analyst_rating": float("nan"), "analyst_upside": float("nan")}
+            try:
+                yahoo_ticker = resolve_yahoo_ticker(ticker)
+                info = yf.Ticker(yahoo_ticker).info
+                rating = info.get("recommendationMean")
+                if rating is not None:
+                    results[ticker]["analyst_rating"] = float(rating)
+                # Only compute analyst_upside for US tickers (no currency mismatch risk)
+                is_us = "." not in ticker
+                if is_us:
+                    target = info.get("targetMeanPrice")
+                    last_price = price_map.get(ticker, 0.0)
+                    if target is not None and last_price > 0:
+                        results[ticker]["analyst_upside"] = float(target) / last_price - 1
+            except Exception as exc:
+                logger.debug("Analyst consensus fetch failed for %s: %s", ticker, exc)
+        return results
+
+    def fetch_commodity_context(self) -> dict:
+        """Fetch commodity prices and 20d/5d momentum: Brent (BZ=F), WTI (CL=F), NatGas (NG=F).
+        Returns a dict with price and return fields; NaN for any failure.
+        """
+        result: dict = {
+            "brent_price": float("nan"), "brent_20d": float("nan"), "brent_5d": float("nan"),
+            "wti_price": float("nan"), "wti_20d": float("nan"),
+            "natgas_price": float("nan"), "natgas_20d": float("nan"),
+        }
+        try:
+            data, *_ = self.fetch_ohlcv(["BZ=F", "CL=F", "NG=F"], period="3mo")
+            specs = [
+                ("BZ=F", "brent_price", "brent_20d", "brent_5d"),
+                ("CL=F", "wti_price",   "wti_20d",   None),
+                ("NG=F", "natgas_price", "natgas_20d", None),
+            ]
+            for sym, price_key, mom20_key, mom5_key in specs:
+                if sym not in data.columns:
+                    continue
+                col = data[sym].dropna()
+                if len(col) < 2:
+                    continue
+                result[price_key] = float(col.iloc[-1])
+                if len(col) > 21:
+                    result[mom20_key] = float(col.iloc[-1] / col.iloc[-22] - 1)
+                if mom5_key and len(col) > 5:
+                    result[mom5_key] = float(col.iloc[-1] / col.iloc[-6] - 1)
+        except Exception as exc:
+            logger.warning("Commodity context fetch failed: %s", exc)
+        return result
 
     def fetch_credit_spread(self) -> float:
         """20-day change in HYG/LQD ratio as a credit spread proxy.
@@ -901,11 +973,11 @@ class DataFetcher:
 
         # Valid tickers: must have 20d momentum
         valid_tickers = momentum_20d.dropna().index.tolist()
-        dropped = len(game_tickers) - len(valid_tickers)
-        if dropped:
+        dropped_tickers = [t for t in game_tickers if t not in valid_tickers]
+        if dropped_tickers:
             logger.warning(
-                "Universe shrank: %d/%d tickers dropped (insufficient history)",
-                dropped, len(game_tickers),
+                "Universe shrank: %d/%d tickers dropped (insufficient history): %s",
+                len(dropped_tickers), len(game_tickers), ", ".join(dropped_tickers),
             )
 
         records: list[dict] = []
@@ -939,7 +1011,9 @@ class DataFetcher:
                 "vol_ratio": vr,
                 "macd_hist": mh,
                 "atr_pct": at,
-                "dividend_yield": float("nan"),  # filled in after top-N filtering via _fetch_dividend_yields_targeted
+                "dividend_yield": float("nan"),   # filled in after top-N filtering via _fetch_dividend_yields_targeted
+                "analyst_rating": float("nan"),   # filled in after top-N filtering via _fetch_analyst_consensus_targeted
+                "analyst_upside": float("nan"),   # filled in after top-N filtering via _fetch_analyst_consensus_targeted
             })
 
         for record in records:
@@ -957,6 +1031,14 @@ class DataFetcher:
         div_yield = self._fetch_dividend_yields_targeted(top_tickers, close)
         for r in top:
             r["dividend_yield"] = float(div_yield.get(r["ticker"], float("nan"))) if not div_yield.empty and r["ticker"] in div_yield.index else float("nan")
+
+        # Analyst consensus + price target (top-N only; NaN for most Nordic/Baltic)
+        top_price_map = {r["ticker"]: r["last_price"] for r in top}
+        analyst_data = self._fetch_analyst_consensus_targeted(top_tickers, top_price_map)
+        for r in top:
+            ad = analyst_data.get(r["ticker"], {})
+            r["analyst_rating"] = ad.get("analyst_rating", float("nan"))
+            r["analyst_upside"] = ad.get("analyst_upside", float("nan"))
 
         # New catalyst signals: short interest, premarket gap, IV proxy (all fail-soft)
         logger.info("Fetching catalyst signals (short interest, premarket gap, IV proxy) …")

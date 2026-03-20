@@ -21,14 +21,6 @@ class PortfolioValidator:
     def __init__(self) -> None:
         self.c = GAME_CONSTRAINTS
 
-    def _position_limits(self, regime: Optional[str]) -> tuple[int, int]:
-        if regime and regime in POSITION_TARGETS_BY_REGIME:
-            target = POSITION_TARGETS_BY_REGIME[regime]
-            min_stocks = max(self.c["min_stocks"], target["min_stocks"])
-            max_stocks = min(self.c["max_stocks"], target["max_stocks"])
-            return min_stocks, max_stocks
-        return self.c["min_stocks"], self.c["max_stocks"]
-
     def validate(self, proposal: PortfolioProposal, regime: Optional[str] = None) -> ValidationResult:
         errors: list[str] = []
         min_stocks = self.c["min_stocks"]
@@ -142,11 +134,15 @@ class PortfolioValidator:
                 "Applying proportional correction.",
                 final_total * 100,
             )
-            if final_total > 1e-9:
-                positions = [
-                    Position(ticker=p.ticker, weight=p.weight / final_total, rationale=p.rationale)
-                    for p in positions
-                ]
+            if final_total <= 1e-9:
+                raise ValueError(
+                    f"normalize() produced zero-sum weights ({final_total:.2e}). "
+                    "All positions were reduced to zero — this indicates a configuration error."
+                )
+            positions = [
+                Position(ticker=p.ticker, weight=p.weight / final_total, rationale=p.rationale)
+                for p in positions
+            ]
 
         return PortfolioProposal(
             positions=positions,

@@ -170,17 +170,40 @@ class OpenAIFullAnalyst(BaseAgent):
             f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d Ret':>8} {'Sharpe':>7} "
             f"{'5d Ret':>7} {'60d Ret':>8} {'RSI':>6} {'vs Idx':>8} {'52wH%':>7} "
             f"{'Beta':>6} {'VolR':>6} {'MACD':>7} {'ATR%':>6} "
-            f"{'ShrtInt':>8} {'PreMkt':>8} {'IV':>7} {'DivYld':>7} {'Price':>10}"
+            f"{'ShrtInt':>8} {'PreMkt':>8} {'IV':>7} {'DivYld':>7} "
+            f"{'AnaRtg':>7} {'AnaUp%':>8} {'Price':>10}"
         )
+
+        comm = snapshot.get("commodity_context", {})
+        comm_line = ""
+        brent = comm.get("brent_price", float("nan"))
+        if not math.isnan(brent):
+            brent_20d = comm.get("brent_20d", float("nan"))
+            wti = comm.get("wti_price", float("nan"))
+            wti_20d = comm.get("wti_20d", float("nan"))
+            natgas = comm.get("natgas_price", float("nan"))
+            natgas_20d = comm.get("natgas_20d", float("nan"))
+            comm_line = (
+                f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d) | "
+                f"WTI ${wti:.1f} ({wti_20d:+.1%} 20d) | "
+                f"NatGas ${natgas:.2f} ({natgas_20d:+.1%} 20d)"
+                if not math.isnan(wti) and not math.isnan(natgas) else
+                f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d)"
+            )
 
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
             f"Benchmark (S&P 500) {MOMENTUM_WINDOW}-day return: {snapshot['benchmark_return']:.1%}",
             f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",
+        ]
+        if comm_line:
+            lines.append(comm_line)
+        lines += [
             "",
             "Top candidates (sorted by combined score) — ALL signals:",
             "ShrtInt = short % of float (N/A for Baltic/Nordic). PreMkt = premarket gap. IV = implied vol or realized HV fallback.",
+            "AnaRtg: analyst consensus 1=StrongBuy→5=StrongSell. AnaUp%: implied upside to mean target. High momentum + positive upside = conviction. High momentum + negative upside = stretched/crowded.",
             "",
             header,
             "-" * len(header),
@@ -214,6 +237,8 @@ class OpenAIFullAnalyst(BaseAgent):
                 f"{fmt_opt(pm, '+.1%'):>8} "
                 f"{fmt_opt(iv, '.2f'):>7} "
                 f"{fmt(c.get('dividend_yield', float('nan'))):>7} "
+                f"{fmt(c.get('analyst_rating', float('nan')), '.1f'):>7} "
+                f"{fmt(c.get('analyst_upside', float('nan'))):>8} "
                 f"{c['last_price']:>10.2f}"
             )
 

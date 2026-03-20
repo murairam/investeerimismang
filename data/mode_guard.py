@@ -27,6 +27,7 @@ _PROTECTED_FILES = [
     "agents/openai_challenger.py",
     "agents/openai_devil.py",
     "agents/openai_risk_manager.py",
+    "agents/gemini_challenger.py",
 ]
 
 
@@ -46,8 +47,12 @@ def _collect_fingerprints() -> dict[str, str]:
     fingerprints: dict[str, str] = {}
     for rel_path in _PROTECTED_FILES:
         abs_path = os.path.join(_ROOT, rel_path)
-        if os.path.exists(abs_path):
-            fingerprints[rel_path] = _sha256_file(abs_path)
+        if not os.path.exists(abs_path):
+            raise RuntimeError(
+                f"Protected file missing: {rel_path}. "
+                "If intentionally removed, recreate live_mode_lock.json manually."
+            )
+        fingerprints[rel_path] = _sha256_file(abs_path)
     return fingerprints
 
 
@@ -79,8 +84,14 @@ def enforce_mode_and_freeze(as_of_date: str, game_start_date: str = _GAME_START_
             "lock_path": _LOCK_PATH,
         }
 
-    with open(_LOCK_PATH, "r") as f:
-        locked = json.load(f)
+    try:
+        with open(_LOCK_PATH, "r") as f:
+            locked = json.load(f)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"Corrupted live_mode_lock.json: {exc}. "
+            "Delete the file and let the pipeline reinitialize it on the next run."
+        ) from exc
 
     locked_fp = locked.get("fingerprints", {})
     changed_files = [

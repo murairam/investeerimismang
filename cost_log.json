@@ -1551,7 +1551,263 @@
       "input_tokens": 4893,
       "output_tokens": 632,
       "cost_usd": 0.021713
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIFullAnalyst",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 22761,
+      "output_tokens": 951,
+      "cost_usd": 0.005741
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 16345,
+      "output_tokens": 621,
+      "cost_usd": 0.050177
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIDevil",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 1265,
+      "output_tokens": 993,
+      "cost_usd": 0.001494
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 4891,
+      "output_tokens": 641,
+      "cost_usd": 0.021843
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIFullAnalyst",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 22625,
+      "output_tokens": 889,
+      "cost_usd": 0.005636
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 16210,
+      "output_tokens": 637,
+      "cost_usd": 0.05008
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIDevil",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 1133,
+      "output_tokens": 752,
+      "cost_usd": 0.001167
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 4592,
+      "output_tokens": 560,
+      "cost_usd": 0.01988
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIFullAnalyst",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 22746,
+      "output_tokens": 873,
+      "cost_usd": 0.00564
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 16368,
+      "output_tokens": 661,
+      "cost_usd": 0.050835
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIDevil",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 1173,
+      "output_tokens": 802,
+      "cost_usd": 0.001237
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 4719,
+      "output_tokens": 580,
+      "cost_usd": 0.020498
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIFullAnalyst",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 26021,
+      "output_tokens": 825,
+      "cost_usd": 0.006235
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 19351,
+      "output_tokens": 788,
+      "cost_usd": 0.060198
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIDevil",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 1280,
+      "output_tokens": 914,
+      "cost_usd": 0.001399
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 4951,
+      "output_tokens": 545,
+      "cost_usd": 0.020553
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIFullAnalyst",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 26285,
+      "output_tokens": 949,
+      "cost_usd": 0.006443
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 19635,
+      "output_tokens": 739,
+      "cost_usd": 0.060173
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIDevil",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 1280,
+      "output_tokens": 869,
+      "cost_usd": 0.001342
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 5154,
+      "output_tokens": 632,
+      "cost_usd": 0.022365
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIFullAnalyst",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 28386,
+      "output_tokens": 1024,
+      "cost_usd": 0.006957
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 19680,
+      "output_tokens": 664,
+      "cost_usd": 0.05916
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIDevil",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 1279,
+      "output_tokens": 934,
+      "cost_usd": 0.001423
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 5407,
+      "output_tokens": 557,
+      "cost_usd": 0.021873
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIFullAnalyst",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 28252,
+      "output_tokens": 917,
+      "cost_usd": 0.006797
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 19624,
+      "output_tokens": 729,
+      "cost_usd": 0.059995
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIDevil",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 1283,
+      "output_tokens": 1003,
+      "cost_usd": 0.00151
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 5427,
+      "output_tokens": 627,
+      "cost_usd": 0.022972
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIFullAnalyst",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 28274,
+      "output_tokens": 921,
+      "cost_usd": 0.006806
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 19759,
+      "output_tokens": 780,
+      "cost_usd": 0.061098
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIDevil",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 1237,
+      "output_tokens": 993,
+      "cost_usd": 0.001489
+    },
+    {
+      "date": "2026-03-20",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 5400,
+      "output_tokens": 697,
+      "cost_usd": 0.023955
     }
   ],
-  "total_cost": 4.404475
+  "total_cost": 5.091444
 }

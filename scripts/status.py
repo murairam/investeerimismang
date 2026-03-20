@@ -16,6 +16,7 @@ from datetime import date, datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from data.game_availability import load_unavailable_tickers
+from data.learning_state import load_learning_state
 from data.symbol_master import summarize_symbol_master
 from data.universe_loader import load_game_universe
 from data.verification_tracker import get_last_verification
@@ -121,6 +122,41 @@ def main():
         print(f"   Initial capital: €{initial:,.2f}")
         print(f"   Current equity: €{current:,.2f}")
         print(f"   Return: {return_pct:+.2%}")
+
+    # Devil Accuracy & Hard Rules
+    learning_state = load_learning_state()
+    devil = learning_state.get("devil_accuracy", {})
+    print(f"\n😈 Devil's Advocate Accuracy")
+    if devil.get("status") == "insufficient_data" or not devil:
+        print(f"   Status: insufficient data (need ≥5 HIGH-risk observations)")
+    else:
+        is_accurate = devil.get("devil_is_accurate", False)
+        accuracy = devil.get("accuracy", 0.0)
+        obs = devil.get("observations", 0)
+        status = devil.get("status", "unknown")
+        print(f"   Status: {status}")
+        print(f"   HIGH-risk observations: {obs}")
+        print(f"   Accuracy (HIGH flags that correctly predicted negative return): {accuracy:.0%}")
+        print(f"   Devil is accurate (>60%): {is_accurate}")
+        if is_accurate:
+            print(f"   >>> ACTIVE: HIGH-flagged picks hard-capped at 10% weight <<<")
+        high_avg = devil.get("high_risk_avg_return_1d")
+        low_avg = devil.get("low_risk_avg_return_1d")
+        if high_avg is not None:
+            print(f"   Avg 1d return — HIGH-risk: {high_avg:+.3%} | non-HIGH: {low_avg:+.3%}")
+
+    hard_rules = learning_state.get("hard_rules", [])
+    weight_caps = learning_state.get("weight_caps", [])
+    if hard_rules:
+        print(f"\n📏 Active Hard Rules ({len(hard_rules)})")
+        for rule in hard_rules:
+            print(f"   • {rule}")
+    if weight_caps:
+        print(f"\n⚖️  Active Weight Caps ({len(weight_caps)})")
+        for cap in weight_caps:
+            scope = cap.get("scope", "?")
+            ticker = f" [{cap['ticker']}]" if cap.get("ticker") else ""
+            print(f"   • {scope}{ticker}: max {cap.get('max_weight', '?'):.0%} — {cap.get('reason', '?')}")
 
     # Meta-Learning
     if os.path.exists(os.path.join(ROOT, "AI_SELF_CRITIQUE.md")):

@@ -31,10 +31,13 @@ yfinance primary market data + EODHD fallback for edge-case Nordic/Baltic symbol
     ↓
 data/fetcher.py — 15 signals per stock + macro context (regime score 0-100, VIX, breadth)
     ↓ (parallel)
-agents/openai_strategist.py (GPT-5.4)     ─┐
-agents/openai_challenger.py (GPT-5.4)     ─┤→ agents/openai_devil.py (GPT-5.4-nano)
-                                            │→ agents/openai_risk_manager.py (GPT-5.4)
-                                            │   synthesises both proposals → PortfolioProposal
+agents/openai_strategist.py (GPT-5.4)          ─┐ Proposal A: momentum strategist
+agents/gemini_challenger.py (Gemini 2.5 Flash)  ─┤ Proposal B: catalyst hunter
+agents/openai_challenger.py (GPT-5.4-nano)      ─┘ Proposal C: full analyst (all signals)
+    ↓
+agents/openai_devil.py (GPT-5.4-nano)  — stress-tests top picks → bear cases
+    ↓
+agents/openai_risk_manager.py (GPT-5.4) — synthesises all 3 proposals + bear cases → PortfolioProposal
     ↓
 portfolio/validator.py — enforces game constraints, normalises weights
     ↓
@@ -57,6 +60,48 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 | `data/mode_guard.py` | PREGAME/LIVE switch; LIVE locks strategy params via SHA256 in `live_mode_lock.json` |
 | `portfolio/models.py` | `Position`, `PortfolioProposal`, `MarketSnapshot` dataclasses |
 | `portfolio/validator.py` | Constraint validation + weight normalisation |
+| `data/learning_state.py` | Structured learning rules, Devil accuracy tracking, rationale tag analysis |
+
+## Risk Control Features (Added March 2026)
+
+### Overbought Weight Cap
+- **When triggered:** RSI > 82 AND position within 2% of 52-week high
+- **Action:** Cap position weight at 15% — **code-enforced in `_enforce_selection_quality()` (Pass A)**
+- **Exception:** If volume_ratio > 1.8 (strong breakout volume), full 25% is allowed
+- **Rationale:** Prevents max-sizing obvious exhaustion patterns while allowing genuine volume breakouts
+
+### Devil's Accuracy Feedback Loop
+- **What it measures:** Devil's advocate flagged picks as HIGH-risk — tracked against 1-day returns
+- **Where stored:** `learning_state.json['devil_accuracy']`
+- **Activation criterion:** Once ≥5 HIGH-flag observations exist, accuracy score is evaluated
+- **If accuracy > 60%:** HIGH-flagged picks are hard-capped at 10% — **code-enforced in `_enforce_selection_quality()` (Pass B)**
+- **If accuracy ≤ 60%:** Risk Manager uses own judgment (Devil is noisy, lighter weight)
+- **How to inspect:** Run `python scripts/status.py` — shows Devil accuracy, active rules, and weight caps
+
+### BEAR Regime Beta Cap
+- **When triggered:** BEAR regime AND portfolio beta exceeds adjusted target (≤0.90 scaled for non-US exposure)
+- **Action:** All individual position weights capped at 15%, then re-normalized
+- **Where enforced:** `_enforce_beta()` in `agents/openai_risk_manager.py`
+- **Rationale:** Prevents high-beta concentration in bear markets where downside risk is asymmetric
+
+### Analyst Consensus + Price Target
+- **Fields:** `analyst_rating` (1=Strong Buy → 5=Strong Sell), `analyst_upside` ((target−price)/price)
+- **Source:** `yfinance Ticker.info` — `recommendationMean`, `targetMeanPrice`
+- **Coverage:** Good for US S&P 500; `analyst_upside` is NaN for non-US tickers (currency mismatch guard); rating returned for Nordic large-caps where available
+- **Visible in:** FullAnalyst signal table (`AnaRtg` / `AnaUp%` columns); Risk Manager synthesis note
+- **Interpretation:** High momentum + positive upside = conviction; high momentum + negative upside = stretched/crowded
+
+### Commodity Price Context
+- **Fetched:** `BZ=F` (Brent crude), `CL=F` (WTI), `NG=F` (Henry Hub nat gas) via `DataFetcher.fetch_commodity_context()`
+- **Injected:** `snapshot["commodity_context"]` added in `orchestrator.py` step 1a; rendered in Strategist, FullAnalyst, and Risk Manager user messages
+- **Signals:** last price, 20d return, 5d return (Brent only) for all three commodities
+- **Purpose:** Energy stock thesis validation — agents see live commodity momentum before sizing energy positions
+
+### Signal Rationale Tagging
+- **Where tracked:** `data/learning_state.py::derive_rationale_tags()` and `learning_state.json`
+- **Tags include:** `overbought`, `at_52w_high`, `strong_volume`, `consensus`, etc.
+- **Purpose:** Structured audit trail explaining why each position was sized as it was
+- **Used in:** AI self-critique report generation + Devil accuracy analysis
 
 ## Game Constraints — Hard Rules (from docs/rules.txt)
 
@@ -145,6 +190,19 @@ These are updated automatically by the pipeline: `portfolio_history.json`, `pape
 **Add an agent:** Extend `BaseAgent`, implement `propose()`, wire into `orchestrator.py`.
 
 **Change constraints:** Edit `config.GAME_CONSTRAINTS` — validator reads from there automatically.
+
+## Pre-Push Documentation Checklist
+
+Before committing code changes, update the following documentation files if they are affected:
+
+1. **Modified agent prompts or decision logic?** → Update `docs/strategy_principles.md` with any new strategic rules or regime guidance
+2. **Added/changed signal or feature?** → Update `README.md` signals table or architecture diagram
+3. **Added/changed risk controls or constraints?** → Update this CLAUDE.md "Risk Control Features" section
+4. **Changed game universe, ticker selection, or symbol mapping?** → Update `README.md` Universe section
+5. **Changed config parameters?** → Document the change in CLAUDE.md or CLAUDE.md code comments
+6. **Fixing a JSON serialization issue?** → Document the fix approach (e.g., NaN → null conversion in `_sanitize()`)
+
+Auto-generated files (`PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`, `AI_SELF_CRITIQUE.md`, `portfolio_history.json`, `learning_state.json`) do NOT need manual updates.
 
 ## GitHub Actions
 

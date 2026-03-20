@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from datetime import date
+from datetime import date, timedelta
 
 import requests
 import yfinance as yf
@@ -93,18 +93,35 @@ def save_unavailable_yahoo_tickers(cache: dict[str, dict]) -> None:
         json.dump({"tickers": cache}, f, indent=2)
 
 
+_QUARANTINE_TTL_DAYS = 7
+
+
 def mark_unavailable(game_tickers: list[str], reason: str = "no_data") -> None:
     if not game_tickers:
         return
     cache = load_unavailable_yahoo_tickers()
+    today = date.today().isoformat()
     for ticker in game_tickers:
-        cache[ticker.upper()] = {"reason": reason}
+        cache[ticker.upper()] = {"reason": reason, "marked_on": today}
     save_unavailable_yahoo_tickers(cache)
 
 
 def filter_known_unavailable(game_tickers: list[str]) -> tuple[list[str], list[str]]:
     cache = load_unavailable_yahoo_tickers()
     aliases = load_aliases()
+
+    # Expire entries older than TTL (entries with no date are old-format — treat as expired too)
+    cutoff = (date.today() - timedelta(days=_QUARANTINE_TTL_DAYS)).isoformat()
+    stale = [t for t, v in cache.items() if v.get("marked_on", "") < cutoff]
+    if stale:
+        for t in stale:
+            del cache[t]
+        save_unavailable_yahoo_tickers(cache)
+        logger.info(
+            "Expired %d stale quarantine entries (>%dd old): %s",
+            len(stale), _QUARANTINE_TTL_DAYS, stale,
+        )
+
     kept = [
         ticker for ticker in game_tickers
         if ticker.upper() not in cache or ticker.upper() in aliases

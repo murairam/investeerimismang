@@ -257,7 +257,7 @@ def _devil_accuracy(history: list[dict]) -> dict:
         if not pos_returns:
             continue
         for ticker, ret in pos_returns.items():
-            risk_level = (bear_cases.get(ticker) or {}).get("risk_level", "LOW")
+            risk_level = (bear_cases.get(ticker) or {}).get("risk", "LOW")
             if risk_level == "HIGH":
                 high_returns.append(float(ret))
             else:

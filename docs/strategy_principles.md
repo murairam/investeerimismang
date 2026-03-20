@@ -1,6 +1,6 @@
 # AlphaShark — Permanent Strategy Principles
 
-**Last updated:** 2026-03-19
+**Last updated:** 2026-03-20
 **Status:** Active (overrides any conservative defaults in auto-generated files)
 
 This file is NOT auto-generated. It survives daily pipeline runs and is injected into every
@@ -38,7 +38,22 @@ higher-momentum candidate.
 
 ---
 
-## Hard Game Rules (never violate)
+## Risk Management Guardrails (March 2026)
+
+### Overbought Position Sizing
+- **Rule:** RSI > 82 + within 2% of 52-week high → max 15% position weight
+- **Exception:** volume_ratio > 1.8 allows full 25% (genuine breakout volume overrides overbought signal)
+- **Rationale:** Breakout moves often exhaust at peaks; strong volume confirmation trumps RSI
+- **Implementation:** `agents/openai_risk_manager.py` rules 18 & 19
+
+### Devil's Advocate Accuracy Tracking
+- **Mechanism:** Devil tracks HIGH-flagged picks and compares their 1d returns vs all other picks
+- **Data:** Stored in `learning_state.json['devil_accuracy']` (requires ≥5 HIGH-flag observations)
+- **High accuracy (>60%):** Risk Manager applies 10% hard cap on HIGH-flagged positions
+- **Low accuracy (≤60%):** Risk Manager uses own judgment; Devil is advisory only
+- **Implementation:** `data/learning_state.py::_devil_accuracy()` + prompt injection in context builder
+
+---
 
 | Rule | Value |
 |------|-------|

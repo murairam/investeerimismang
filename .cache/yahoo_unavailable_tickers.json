@@ -1,16 +1,3 @@
 {
-  "tickers": {
-    "CGCBV.HE": {
-      "reason": "yahoo_no_data"
-    },
-    "OKDAV.HE": {
-      "reason": "yahoo_no_data"
-    },
-    "KSLAV.HE": {
-      "reason": "yahoo_no_data"
-    },
-    "SAB1L.VS": {
-      "reason": "yahoo_no_data"
-    }
-  }
+  "tickers": {}
 }

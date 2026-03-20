@@ -17,7 +17,7 @@ GAME_CONSTRAINTS = {
 # Competition logic: daily rebalancing replaces insurance positions.
 # Concentrate on highest-signal picks; no token 5% diversifiers.
 POSITION_TARGETS_BY_REGIME = {
-    "BULL":    {"min_stocks": 5, "max_stocks": 8},   # concentrate but AI picks count based on signal quality
+    "BULL":    {"min_stocks": 5, "max_stocks": 6},   # tight concentration — 5 is the target, 6 only if genuinely high-conviction
     "NEUTRAL": {"min_stocks": 5, "max_stocks": 10},  # AI decides — more candidates = more range
     "BEAR":    {"min_stocks": 6, "max_stocks": 12},  # spread risk in downturns
 }
@@ -46,6 +46,18 @@ CORR_THRESHOLD = 0.85       # correlation above this → keep higher Sharpe
 # ── Sector map ───────────────────────────────────────────────────────────────
 # Abbreviated sector tags (max 6 chars) for each ticker in the universe.
 # Used by agents to detect sector concentration and diversification gaps.
+# ── Competition ranking weights ──────────────────────────────────────────────
+# Z-score normalized weights for competition-optimized candidate ranking.
+# BULL: reward momentum × beta (competition winners in bull runs).
+# NEUTRAL: balanced Sharpe + relative strength. BEAR: Sharpe + low-beta defense.
+# inv_beta = (1 − beta): computed BEFORE Z-scoring in BEAR regime.
+COMPETITION_SORT_WEIGHTS: dict[str, dict[str, float]] = {
+    "BULL":    {"mom_20d": 0.35, "mom_5d": 0.25, "sharpe_20d": 0.20, "beta": 0.20},
+    "NEUTRAL": {"sharpe_20d": 0.40, "vs_index": 0.30, "mom_20d": 0.20, "beta": 0.10},
+    "BEAR":    {"sharpe_20d": 0.50, "vs_index": 0.30, "inv_beta": 0.20},
+}
+
+# ── Sector map ───────────────────────────────────────────────────────────────
 SECTOR_MAP: dict[str, str] = {
     # SP500 — Technology
     "AAPL": "Tech", "NVDA": "Tech", "MSFT": "Tech", "GOOGL": "Tech",

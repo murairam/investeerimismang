@@ -162,22 +162,25 @@ def fetch_insider_trades(tickers: list[str]) -> list[dict]:
 
         try:
             recent = data.get("filings", {}).get("recent", {})
-            forms        = recent.get("form", [])
-            filing_dates = recent.get("filingDate", [])
-            accessions   = recent.get("accessionNumber", [])
+            forms         = recent.get("form", [])
+            filing_dates  = recent.get("filingDate", [])
+            accessions    = recent.get("accessionNumber", [])
+            primary_docs  = recent.get("primaryDocument", [])
         except Exception:
             return []
 
         qualifying = [
-            acc
-            for form, fd, acc in zip(forms, filing_dates, accessions)
+            (acc, doc)
+            for form, fd, acc, doc in zip(forms, filing_dates, accessions, primary_docs)
             if form in ("4", "4/A") and fd >= cutoff
         ][:_MAX_FILINGS_PER_TICKER]
 
         ticker_trades = []
-        for acc in qualifying:
+        for acc, primary_doc in qualifying:
             acc_nodashes = acc.replace("-", "")
-            xml_url = f"{_EDGAR_ARCHIVES}/{cik}/{acc_nodashes}/{acc_nodashes}.xml"
+            # primaryDocument may have an XSLT prefix (xslF345X05/) — strip it to get raw XML
+            raw_doc = primary_doc.split("/")[-1] if "/" in primary_doc else primary_doc
+            xml_url = f"{_EDGAR_ARCHIVES}/{cik}/{acc_nodashes}/{raw_doc}"
             try:
                 resp = requests.get(xml_url, headers=_HEADERS, timeout=8)
                 resp.raise_for_status()

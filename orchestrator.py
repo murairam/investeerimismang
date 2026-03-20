@@ -74,6 +74,9 @@ class AlphaSharkOrchestrator:
 
         # Step 1: market data
         snapshot = self.fetcher.get_market_snapshot()
+        if not snapshot.get("candidates"):
+            logger.error("Empty candidates list from fetcher — aborting")
+            sys.exit(1)
         breadth = snapshot.get("breadth_pct", float("nan"))
         term = snapshot.get("vix_term_ratio", float("nan"))
         logger.info(
@@ -84,6 +87,18 @@ class AlphaSharkOrchestrator:
             breadth * 100 if not math.isnan(breadth) else 0,
             term if not math.isnan(term) else 0,
         )
+
+        # Step 1a: commodity prices (Brent, WTI, NatGas) — energy thesis validation
+        snapshot["commodity_context"] = self.fetcher.fetch_commodity_context()
+        comm = snapshot["commodity_context"]
+        if not math.isnan(comm.get("brent_price", float("nan"))):
+            logger.info(
+                "Commodities: Brent $%.1f (%+.1f%% 20d) | WTI $%.1f | NatGas $%.2f",
+                comm["brent_price"],
+                comm.get("brent_20d", float("nan")) * 100 if not math.isnan(comm.get("brent_20d", float("nan"))) else 0,
+                comm.get("wti_price", float("nan")) if not math.isnan(comm.get("wti_price", float("nan"))) else 0,
+                comm.get("natgas_price", float("nan")) if not math.isnan(comm.get("natgas_price", float("nan"))) else 0,
+            )
 
         # Step 1b: inject learning context (what worked / didn't in past runs)
         learning_context = get_learning_context()
@@ -108,8 +123,8 @@ class AlphaSharkOrchestrator:
 
         def _fetch_news():
             try:
-                items = fetch_candidate_news(top_tickers_50)
-                logger.info("Fetched %d news headlines for %d tickers", len(items), len(top_tickers_50))
+                items = fetch_candidate_news(all_candidate_tickers)
+                logger.info("Fetched %d news headlines for %d tickers", len(items), len(all_candidate_tickers))
                 return "news_headlines", format_news_for_prompt(items)
             except Exception as exc:
                 logger.warning("News fetch failed (non-fatal): %s", exc)
@@ -130,8 +145,13 @@ class AlphaSharkOrchestrator:
             try:
                 trades = fetch_insider_trades(us_candidates)
                 if trades:
-                    logger.info("Insider buys: %d found (%s)", len(trades),
-                                ", ".join(t["ticker"] for t in trades[:5]))
+                    from collections import Counter
+                    _tc = Counter(t["ticker"] for t in trades)
+                    _summary = ", ".join(
+                        f"{tk}×{n}" if n > 1 else tk
+                        for tk, n in _tc.most_common(5)
+                    )
+                    logger.info("Insider buys: %d transactions, %d tickers (%s)", len(trades), len(_tc), _summary)
                 else:
                     logger.info("Insider buys: none above $50k threshold")
                 return "insider_context", format_insider_context(trades)
@@ -224,7 +244,8 @@ class AlphaSharkOrchestrator:
         strategist_proposal = None
         challenger_proposal = None
         full_analyst_proposal = None
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        n_agents = sum(1 for f in [self.strategist, self.gemini_challenger, self.full_analyst] if f is not None)
+        with ThreadPoolExecutor(max_workers=n_agents) as executor:
             future_strategist = executor.submit(
                 self.strategist.propose, snapshot, prior_portfolio
             )
@@ -380,7 +401,7 @@ class AlphaSharkOrchestrator:
                 pos.ticker,
                 _display_name(pos.ticker)[:24],
                 pos.weight * 100,
-                pos.rationale[:120],
+                pos.rationale,
             )
 
         # Devil's advocate audit: show how bear-case flags map to final weights
@@ -405,7 +426,7 @@ class AlphaSharkOrchestrator:
                     _display_name(pos.ticker)[:20],
                     pos.weight * 100,
                     info["risk"],
-                    info["bear_case"][:80],
+                    info["bear_case"],
                 )
             if not_included:
                 logger.info("  Excluded by Risk Manager (flagged but not in final portfolio):")
@@ -417,7 +438,7 @@ class AlphaSharkOrchestrator:
                         ticker,
                         _display_name(ticker)[:20],
                         info["risk"],
-                        info["bear_case"][:80],
+                        info["bear_case"],
                     )
             logger.info("──────────────────────────────────")
 
@@ -426,6 +447,12 @@ class AlphaSharkOrchestrator:
         close_prices_for_positions = {
             t: p for t, p in snapshot.get("price_map", {}).items() if t in final_tickers
         }
+        missing_prices = final_tickers - set(snapshot.get("price_map", {}).keys())
+        if missing_prices:
+            logger.warning(
+                "No close price for tickers (paper account may drift): %s",
+                ", ".join(sorted(missing_prices)),
+            )
         daily_performance: Optional[dict] = None
         if daily_pnl:
             daily_performance = {

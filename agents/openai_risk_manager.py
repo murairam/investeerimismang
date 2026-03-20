@@ -21,6 +21,7 @@ from openai import OpenAI
 from agents.base_agent import BaseAgent
 from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot
+from data.learning_state import load_learning_state
 from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
@@ -215,6 +216,27 @@ class OpenAIRiskManager(BaseAgent):
                 actual_beta, adj_str, raw_str,
                 us_weight * 100, non_us_weight * 100, self._NON_US_ASSUMED_BETA,
             )
+            if regime == "BEAR" and adj_hi is not None and actual_beta > adj_hi:
+                logger.warning(
+                    "BEAR regime beta too high (%.2f > %.2f) — capping positions at 15%%",
+                    actual_beta, adj_hi,
+                )
+                positions = [
+                    Position(ticker=p.ticker, weight=min(p.weight, 0.15), rationale=p.rationale)
+                    for p in proposal.positions
+                ]
+                total = sum(p.weight for p in positions)
+                if total > 0:
+                    positions = [
+                        Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale)
+                        for p in positions
+                    ]
+                proposal = PortfolioProposal(
+                    positions=positions,
+                    reasoning=proposal.reasoning,
+                    confidence=proposal.confidence,
+                    learning_reflection=proposal.learning_reflection,
+                )
         return proposal
 
     def _enforce_selection_quality(
@@ -306,6 +328,36 @@ class OpenAIRiskManager(BaseAgent):
 
         if not kept:
             return proposal
+
+        # Pass A — Overbought-at-peak cap (Rule 18): code-enforced hard cap
+        for i, pos in enumerate(kept):
+            c = candidate_map.get(pos.ticker, {})
+            rsi = c.get("rsi_14", float("nan"))
+            pct_high = c.get("pct_from_52w_high", float("nan"))
+            vol_ratio = c.get("vol_ratio", float("nan"))
+            overbought = (
+                not math.isnan(rsi) and rsi > 82
+                and not math.isnan(pct_high) and pct_high >= -0.02
+                and (math.isnan(vol_ratio) or vol_ratio <= 1.8)
+            )
+            if overbought and pos.weight > 0.15:
+                kept[i] = Position(ticker=pos.ticker, weight=0.15, rationale=pos.rationale)
+                logger.info(
+                    "Overbought-peak cap: %s → 15%% (RSI %.0f, 52wH %+.1f%%)",
+                    pos.ticker, rsi, pct_high * 100,
+                )
+
+        # Pass B — Devil accuracy cap (Rule 19): code-enforced hard cap
+        devil = load_learning_state().get("devil_accuracy", {})
+        if devil.get("devil_is_accurate"):
+            for i, pos in enumerate(kept):
+                bear = bear_cases.get(pos.ticker, {})
+                if bear.get("risk") == "HIGH" and pos.weight > 0.10:
+                    kept[i] = Position(ticker=pos.ticker, weight=0.10, rationale=pos.rationale)
+                    logger.info(
+                        "Devil accuracy cap: %s → 10%% (Devil accuracy active, HIGH flag)",
+                        pos.ticker,
+                    )
 
         total_weight = sum(p.weight for p in kept)
         if total_weight <= 0:
@@ -401,12 +453,34 @@ class OpenAIRiskManager(BaseAgent):
             "BULLISH"
         )
 
+        comm = snapshot.get("commodity_context", {})
+        comm_line = ""
+        brent = comm.get("brent_price", float("nan"))
+        if not math.isnan(brent):
+            brent_20d = comm.get("brent_20d", float("nan"))
+            wti = comm.get("wti_price", float("nan"))
+            wti_20d = comm.get("wti_20d", float("nan"))
+            natgas = comm.get("natgas_price", float("nan"))
+            natgas_20d = comm.get("natgas_20d", float("nan"))
+            comm_line = (
+                f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d) | "
+                f"WTI ${wti:.1f} ({wti_20d:+.1%} 20d) | "
+                f"NatGas ${natgas:.2f} ({natgas_20d:+.1%} 20d)"
+                if not math.isnan(wti) and not math.isnan(natgas) else
+                f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d)"
+            )
+
         lines = [
             f"## Synthesis task — {date.today().isoformat()}",
             f"Regime: {regime} | SPX vs 200d: {spx_vs:+.1%} | VIX: {vix_str} | S&P 500 20d: {snapshot['benchmark_return']:+.1%}",
             f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} | Credit spreads 20d: {credit_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",
             f"Strategist proposal portfolio beta: {strat_beta_str} ({beta_target_str} for {regime} regime)",
+        ]
+        if comm_line:
+            lines.append(comm_line)
+        lines += [
+            "Analyst consensus note: AnaRtg 1=StrongBuy→5=StrongSell; AnaUp% = (target−price)/price. Use as cross-check on weight decisions — high momentum + analyst upside = conviction; high momentum + negative analyst upside = stretched/crowded, consider capping.",
             "",
         ]
 

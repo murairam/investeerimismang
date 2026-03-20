@@ -137,21 +137,26 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
         if cond and tag not in tags:
             tags.append(tag)
 
-    add("momentum", "momentum" in text or (signal.get("momentum") or 0.0) > 0)
-    add("high_sharpe", "sharpe" in text or (signal.get("sharpe_20d") or 0.0) >= 0.35)
+    add("momentum", "momentum" in text or signal.get("momentum", 0.0) > 0)
+    add("high_sharpe", "sharpe" in text or signal.get("sharpe_20d", 0.0) >= 0.35)
+    _pct_high_breakout = signal.get("pct_from_52w_high")
+    _at_breakout = (
+        _pct_high_breakout is not None
+        and not math.isnan(_pct_high_breakout)
+        and _pct_high_breakout >= -0.03
+    )
     add(
         "breakout",
         any(token in text for token in ("breakout", "52-week", "52 week", "parabolic"))
-        or (
-            (signal.get("vol_ratio") or 0.0) >= 1.5 and
-            (signal.get("pct_from_52w_high") or -1.0) >= -0.03
-        ),
+        or (signal.get("vol_ratio", 0.0) >= 1.5 and _at_breakout),
     )
     add("consensus", "consensus" in text)
+    _si = signal.get("short_interest")
+    _si_valid = _si is not None and not (isinstance(_si, float) and math.isnan(_si))
     add(
         "catalyst",
         any(token in text for token in ("catalyst", "premarket", "gap", "squeeze", "iv spike", "event"))
-        or signal.get("short_interest") not in (None, float("nan")),
+        or "short interest" in text or _si_valid,
     )
     add("diversifier", "diversif" in text or "defensive" in text)
     add("earnings_risk", "earnings" in text or bool(signal.get("has_earnings_warning")))
@@ -162,12 +167,18 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
     add(
         "overbought",
         any(token in text for token in ("overbought", "rsi", "extended"))
-        or (signal.get("rsi_14") or 0.0) > 80,
+        or signal.get("rsi_14", 0.0) > 80,
+    )
+    _pct_high_at = signal.get("pct_from_52w_high")
+    _at_52w = (
+        _pct_high_at is not None
+        and not math.isnan(_pct_high_at)
+        and _pct_high_at >= -0.02
     )
     add(
         "at_52w_high",
         any(token in text for token in ("52-week high", "52w high", "52 week high", "all-time high"))
-        or (signal.get("pct_from_52w_high") or -1.0) >= -0.02,
+        or _at_52w,
     )
 
     return tags

@@ -109,9 +109,11 @@ derived markdown reports                  prompt-ready learning context
 - **Unequal sizing by conviction**: the prompts explicitly push top-heavy sizing instead of equal weight, typically with a 25/25/25/20/5 shape in stronger regimes
 - **Consensus first, catalysts second**: the Risk Manager prefers names selected by both Strategist and Challenger, then fills remaining slots with the best unique catalyst picks
 - **Devil's-advocate check**: top combined picks are pressure-tested before final sizing so obvious dead-money or asymmetric-risk names can be cut or downweighted
+  - **Devil accuracy feedback loop**: when Devil's accuracy at flagging true underperformers exceeds 60%, the Risk Manager applies a 10% hard cap on HIGH-flagged positions (tracked in `learning_state.json`)
+- **Overbought weight cap**: positions with RSI > 82 AND within 2% of 52w high are capped at 15% unless volume_ratio > 1.8 (exception for strong volume breakouts)
 - **No sector cap**: sector concentration is intentionally allowed if one theme has the strongest momentum
 - **Cross-market awareness**: the agents are steered away from cloning a pure US mega-cap portfolio and are encouraged to use Nordic/Baltic names when signal quality justifies it
-- **High RSI is not an auto-reject**: strong RSI plus volume confirmation is treated as a breakout clue, not a blanket overbought filter
+- **High RSI is not an auto-reject**: strong RSI plus volume confirmation is treated as a breakout clue, not a blanket overbought filter (but see overbought weight cap rule above)
 
 ---
 
