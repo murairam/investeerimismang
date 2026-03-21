@@ -15,17 +15,16 @@ import yfinance as yf
 from config import (
     BETA_BENCHMARK,
     BETA_WINDOW,
+    COMPETITION_SORT_WEIGHTS,
     CORR_THRESHOLD,
     CORR_WINDOW,
     MOMENTUM_WINDOW,
     MOM_LONG,
     MOM_SHORT,
-
     REGIME_THRESHOLD,
     RSI_WINDOW,
     SECTOR_MAP,
     SMA_REGIME_WINDOW,
-
     TOP_N_CANDIDATES,
 )
 from data.provider_overrides import get_provider_override
@@ -63,6 +62,7 @@ class CandidateInfo(TypedDict):
     dividend_yield: float # trailing 12-month dividend yield (game auto-reinvests — free return)
     analyst_rating: float # analyst consensus 1.0=Strong Buy → 5.0=Strong Sell (NaN if unavailable)
     analyst_upside: float # (target_mean_price / last_price) - 1; NaN if no coverage
+    competition_score: float  # Z-score weighted competition rank (regime-specific: BULL favours momentum×beta)
 
 
 class MarketSnapshot(TypedDict):
@@ -82,6 +82,142 @@ class MarketSnapshot(TypedDict):
     short_interest: dict  # {ticker: float | None} short % of float; None for Baltic/Nordic
     premarket_gap: dict   # {ticker: float | None} gap vs prior close; US=after-hours, EU=morning gap
     iv_proxy: dict        # {ticker: float | None} implied volatility; None if no options chain
+    sector_momentum: dict # {sector: {avg_mom_20d, avg_mom_5d, avg_rsi, breadth, count}}
+    rotation_risk: dict  # {sector: {"level": "HIGH"|"MEDIUM", "reason": str}} for exhausted leading sectors
+
+
+def _compute_competition_scores(records: list[dict], regime: str) -> None:
+    """Compute regime-specific competition scores using Z-normalized features.
+
+    BULL: rewards high momentum × high beta (competition winners in bull runs).
+    NEUTRAL: rewards risk-adjusted Sharpe + relative strength.
+    BEAR: rewards Sharpe + inv_beta (low-vol defensive plays).
+
+    Modifies records in-place by adding a 'competition_score' key.
+    """
+    weights = COMPETITION_SORT_WEIGHTS.get(regime, COMPETITION_SORT_WEIGHTS["NEUTRAL"])
+
+    # Maps weight key names → record field names
+    _field = {
+        "mom_20d": "momentum",
+        "mom_5d": "mom_5d",
+        "sharpe_20d": "sharpe_20d",
+        "vs_index": "vs_index",
+        "beta": "beta",
+        "inv_beta": "inv_beta",
+    }
+
+    # BEAR regime: compute inv_beta = 1 - beta BEFORE Z-scoring
+    if regime == "BEAR":
+        for r in records:
+            b = r.get("beta", float("nan"))
+            r["inv_beta"] = (1.0 - b) if not math.isnan(b) else float("nan")
+
+    # Compute mean + std for each feature used in this regime
+    stats: dict[str, tuple[float, float]] = {}
+    for feat in weights:
+        field = _field.get(feat, feat)
+        vals = [r.get(field, float("nan")) for r in records]
+        vals = [v for v in vals if not math.isnan(v)]
+        if not vals:
+            stats[feat] = (0.0, 1.0)
+            continue
+        mean = sum(vals) / len(vals)
+        var = sum((v - mean) ** 2 for v in vals) / len(vals)
+        stats[feat] = (mean, var ** 0.5 if var > 0 else 1.0)
+
+    # Score each record
+    for r in records:
+        score = 0.0
+        for feat, w in weights.items():
+            field = _field.get(feat, feat)
+            val = r.get(field, float("nan"))
+            if math.isnan(val):
+                z = 0.0  # missing → neutral Z-score, not penalised
+            else:
+                mean, std = stats[feat]
+                z = max(-3.0, min(3.0, (val - mean) / std))
+            score += w * z
+        r["competition_score"] = score
+
+
+def detect_rotation_risk(
+    sector_momentum: dict[str, dict],
+    sector_records: dict[str, list[dict]],
+) -> dict[str, dict]:
+    """Detect exhaustion signals for leading sectors.
+
+    Returns {sector_name: {"level": "HIGH"|"MEDIUM", "reason": str}}
+    for sectors with avg_mom_20d > 5% that show exhaustion triggers.
+    Only MEDIUM and HIGH levels are returned (LOW is suppressed to reduce noise).
+    """
+    result: dict[str, dict] = {}
+    for sector, sm in sector_momentum.items():
+        avg_mom_20d = sm.get("avg_mom_20d", float("nan"))
+        if math.isnan(avg_mom_20d) or avg_mom_20d <= 0.05:
+            continue  # only leading sectors worth watching
+
+        breadth = sm.get("breadth", float("nan"))
+        avg_mom_5d = sm.get("avg_mom_5d", float("nan"))
+        srecs = sector_records.get(sector, [])
+
+        reasons: list[str] = []
+        triggers: list[str] = []
+
+        # Trigger 1: breadth deterioration
+        if not math.isnan(breadth):
+            if breadth < 0.50:
+                triggers.append("breadth_high")
+                reasons.append(f"breadth {breadth:.0%}")
+            elif breadth < 0.65:
+                triggers.append("breadth_medium")
+                reasons.append(f"breadth {breadth:.0%}")
+
+        # Trigger 2: top-3 exhaustion (RSI overbought at 52w high with low volume)
+        if srecs:
+            sorted_recs = sorted(srecs, key=lambda r: r.get("momentum", 0.0), reverse=True)
+            top3 = sorted_recs[:3]
+            high_count = sum(
+                1 for r in top3
+                if r.get("rsi_14", float("nan")) > 80
+                and r.get("pct_from_52w_high", float("nan")) > -0.03
+                and r.get("vol_ratio", float("nan")) < 1.2
+            )
+            med_count = sum(
+                1 for r in top3
+                if r.get("rsi_14", float("nan")) > 75
+                and r.get("pct_from_52w_high", float("nan")) > -0.05
+            )
+            if high_count == len(top3) and len(top3) >= 2:
+                triggers.append("exhaustion_high")
+                reasons.append(f"top {len(top3)} RSI>80 at 52w-high, vol<1.2")
+            elif med_count >= 2:
+                triggers.append("exhaustion_medium")
+                reasons.append(f"{med_count}/{len(top3)} leaders RSI>75 near 52w-high")
+
+        # Trigger 3: deceleration (5d pace < half of 20d trend)
+        if not math.isnan(avg_mom_5d) and not math.isnan(avg_mom_20d) and avg_mom_20d > 0:
+            if avg_mom_5d < avg_mom_20d * 0.5:
+                triggers.append("deceleration")
+                reasons.append(f"decelerating (5d {avg_mom_5d:+.1%} vs 20d {avg_mom_20d:+.1%})")
+
+        # Count HIGH-severity triggers
+        high_triggers = [t for t in triggers if t.endswith("_high")]
+        med_triggers = [t for t in triggers if not t.endswith("_high")]
+        total_triggers = len(high_triggers) + len(med_triggers)
+
+        if len(high_triggers) >= 2 or (len(high_triggers) >= 1 and total_triggers >= 2):
+            level = "HIGH"
+        elif total_triggers >= 2:
+            level = "MEDIUM"
+        elif total_triggers == 1:
+            level = "MEDIUM"
+        else:
+            continue  # clean — skip
+
+        result[sector] = {"level": level, "reason": ", ".join(reasons)}
+
+    return result
 
 
 class DataFetcher:
@@ -1014,15 +1150,42 @@ class DataFetcher:
                 "dividend_yield": float("nan"),   # filled in after top-N filtering via _fetch_dividend_yields_targeted
                 "analyst_rating": float("nan"),   # filled in after top-N filtering via _fetch_analyst_consensus_targeted
                 "analyst_upside": float("nan"),   # filled in after top-N filtering via _fetch_analyst_consensus_targeted
+                "competition_score": 0.0,         # filled in by _compute_competition_scores below
             })
 
         for record in records:
             record["selection_score"] = self._selection_score(record, regime_score=regime_score)
 
-        # Sort by composite score, take top N. Pure signal meritocracy — no per-market caps.
-        # Any per-market cap risks filtering out actual winners (e.g. LRCX, WDC ranked high on Sharpe
-        # but capped out). The AI sees all strong candidates regardless of market origin.
-        records.sort(key=lambda x: (x["selection_score"], x["sharpe_20d"]), reverse=True)
+        # Compute sector momentum aggregates from ALL valid records (before top-N cut).
+        # Provides sector-level rotation signals: which sectors are leading vs lagging.
+        sector_records: dict[str, list] = {}
+        for record in records:
+            sector_records.setdefault(record.get("sector", "Other"), []).append(record)
+        sector_momentum: dict[str, dict] = {}
+        for sector, srecs in sector_records.items():
+            mom_20d_vals = [r["momentum"] for r in srecs if not math.isnan(r.get("momentum", float("nan")))]
+            mom_5d_vals = [r["mom_5d"] for r in srecs if not math.isnan(r.get("mom_5d", float("nan")))]
+            rsi_vals = [r["rsi_14"] for r in srecs if not math.isnan(r.get("rsi_14", float("nan")))]
+            # breadth = % of sector stocks with positive 5d momentum (proxy for above short-term SMA)
+            positive_5d = sum(1 for v in mom_5d_vals if v > 0)
+            sector_momentum[sector] = {
+                "avg_mom_20d": float(sum(mom_20d_vals) / len(mom_20d_vals)) if mom_20d_vals else float("nan"),
+                "avg_mom_5d": float(sum(mom_5d_vals) / len(mom_5d_vals)) if mom_5d_vals else float("nan"),
+                "avg_rsi": float(sum(rsi_vals) / len(rsi_vals)) if rsi_vals else float("nan"),
+                "breadth": float(positive_5d / len(mom_5d_vals)) if mom_5d_vals else float("nan"),
+                "count": len(srecs),
+            }
+
+        rotation_risk = detect_rotation_risk(sector_momentum, sector_records)
+        if rotation_risk:
+            logger.info("Rotation risk detected: %s", rotation_risk)
+
+        # Compute competition scores (Z-score normalised, regime-specific weights).
+        # Separate from selection_score: selection_score filters quality, competition_score ranks for display.
+        _compute_competition_scores(records, regime)
+
+        # Sort by competition score (primary) then Sharpe (tiebreak). Pure signal meritocracy.
+        records.sort(key=lambda x: (x.get("competition_score", 0.0), x["sharpe_20d"]), reverse=True)
         top = records[:TOP_N_CANDIDATES]
 
         # Targeted dividend yield fetch — only for the ~40 candidates, not the full 111-ticker universe.
@@ -1103,4 +1266,6 @@ class DataFetcher:
             short_interest=short_interest,
             premarket_gap=premarket_gap,
             iv_proxy=iv_proxy,
+            sector_momentum=sector_momentum,
+            rotation_risk=rotation_risk,
         )

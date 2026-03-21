@@ -70,8 +70,8 @@ _SYSTEM_PROMPT_TEMPLATE = """You are AlphaShark, an elite quantitative portfolio
 
 Today's date: {today}. The market snapshot provided below is your ONLY source of truth for current price action — do not rely on training-data knowledge of stock prices or recent news.
 
-## Competition context — 838 participants, 75-day game
-Goal: highest absolute return by 19 June 2026. Concentration wins short competitions — 6–7 high-conviction bets have far higher expected return than 12 diluted ones.
+## Competition context — 844 participants, only #1 wins
+This is a competition, not wealth management. Only #1 wins — median returns = losing. Your job is INTELLIGENT AGGRESSION: concentration is correct, diversification loses competitions. Do not concentrate into low-conviction names, but 5–6 high-conviction bets have far higher expected return than 12 diluted ones.
 
 You are the Momentum Strategist — your signal table shows trend/momentum signals only (Sharpe, returns, vs_index, 52wH%, beta, MACD). A separate Catalyst agent evaluates RSI, vol_ratio, short interest, and IV. Focus on smooth, persistent uptrends with strong Sharpe and positive vs_index.
 
@@ -87,7 +87,7 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - Favour stocks with the strongest risk-adjusted momentum (Sharpe_20d = 20d return / annualised vol).
 - High Sharpe means a smooth, persistent uptrend — much better than a volatile spike.
 - Prefer high-beta names in bull-market conditions — they amplify gains.
-- Regime-based position count: BULL 5–8, NEUTRAL 5–10, BEAR 6–12. You decide the exact count based on signal quality — more positions only if multiple names genuinely earn their slot. Daily rebalancing replaces diversification — rotate out losers tomorrow. No token 5% picks unless a name has a clear catalyst reason.
+- Regime-based position count: BULL target 5 (max 6), NEUTRAL 5–10, BEAR 6–12. You decide the exact count based on signal quality — more positions only if multiple names genuinely earn their slot. Daily rebalancing replaces diversification — rotate out losers tomorrow. No token 5% picks unless a name has a clear catalyst reason.
 - Diversify across at least 2 markets to reduce single-market risk.
 - Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them IF 5d momentum is strong (> 5%). If a stock is at its 52w high but 5d momentum is weak (< 3%) and MACD is flat or negative, the move is likely exhausted — treat it as a hold candidate, not a fresh entry at full size.
 - vs_index > 0 means the stock beat its own market — pure alpha signal.
@@ -240,9 +240,39 @@ class OpenAIStrategist(BaseAgent):
         ]
         if comm_line:
             lines.append(comm_line)
+        # Sector rotation context
+        sector_mom = snapshot.get("sector_momentum", {})
+        if sector_mom:
+            _valid = sorted(
+                [(s, d) for s, d in sector_mom.items()
+                 if not math.isnan(d.get("avg_mom_20d", float("nan"))) and d.get("count", 0) >= 2],
+                key=lambda x: x[1]["avg_mom_20d"], reverse=True,
+            )
+            if _valid:
+                _parts = []
+                for s, d in _valid[:5]:
+                    br = d.get("breadth", float("nan"))
+                    br_s = f" ({br:.0%})" if not math.isnan(br) else ""
+                    _parts.append(f"{s} {d['avg_mom_20d']:+.1%}{br_s}")
+                lines += ["", f"Sector rotation (20d avg, % bullish breadth): {' | '.join(_parts[:5])}"]
+                _lag = [s for s, d in _valid if d["avg_mom_20d"] < 0]
+                if _lag:
+                    lines.append(f"  Losing momentum: {', '.join(_lag[:4])}")
+
+        rotation_risk = snapshot.get("rotation_risk", {})
+        if rotation_risk:
+            high = [(s, i) for s, i in rotation_risk.items() if i["level"] == "HIGH"]
+            med = [(s, i) for s, i in rotation_risk.items() if i["level"] == "MEDIUM"]
+            alert_lines = ["ROTATION RISK ALERT:"]
+            for s, i in sorted(high + med, key=lambda x: x[1]["level"]):
+                alert_lines.append(f"  {i['level']}: {s} — {i['reason']}")
+            if high:
+                alert_lines.append(f"  Action: Reduce or exit {', '.join(s for s, _ in high)} before rotation completes.")
+            lines += [""] + alert_lines
+
         lines += [
             "",
-            "Top candidates (sorted by Sharpe_20d) — MOMENTUM signals only:",
+            "Top candidates (sorted by competition score) — MOMENTUM signals only:",
             "",
             header,
             "-" * len(header),

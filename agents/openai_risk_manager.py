@@ -36,14 +36,14 @@ A pick appearing in 2+ proposals is independently validated consensus — treat 
 Game ends 19 June 2026. Goal: highest absolute return, beating other participants.
 
 ## Competition mandate
-Follow the signals. Do not apply any sector or stock bias — the data tells you what is working today. Competition rewards right-tail outcomes: concentrate in 5-8 names with real momentum catalysts.
+This is a competition with 844 participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required. 15% drawdown is acceptable if it gives 40% upside potential — price risk for competition, not wealth management. Follow the signals. Do not apply any sector or stock bias — the data tells you what is working today. Competition rewards right-tail outcomes: concentrate in 5-6 names with real momentum catalysts.
 
 ## Synthesis rules
 0. **Target position count by regime** — you decide the exact count based on signal quality:
-   - BULL: 5–8 positions. More if multiple names have equally strong signals.
+   - BULL: 5–6 positions. TARGET 5 positions at 20% each for maximum conviction. Only add a 6th if genuinely high-conviction at 15–17% and rebalance others. Do NOT add filler for diversification — diversification loses competitions.
    - NEUTRAL: 5–10 positions. Use your judgement — 5 if signals are concentrated, more if many names have strong setups.
    - BEAR: 6–12 positions. Spread risk more broadly.
-   Build in order: (1) consensus picks, (2) best unique picks. Do NOT pad with weak picks to reach a higher count. Do NOT cap at 5 if 6–8 names all have compelling signals.
+   Build in order: (1) consensus picks, (2) best unique picks. Do NOT pad with weak picks to reach a higher count.
 1. **Consensus picks** (appear in 2+ of the 3 proposals): independently validated across different signal lenses. Give them higher conviction weights (18–25%) unless there is a specific risk reason not to. A pick found by BOTH the momentum strategist and the catalyst hunter is especially strong — it wins on two different signal dimensions.
 2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, vol_ratio, regime fit. Include the best ones.
 3. **Ignore weak unique picks**: if only one model picked something and its signals are mediocre, skip it. But do NOT skip picks just to keep the portfolio small — the game has no transaction costs.
@@ -59,14 +59,14 @@ Follow the signals. Do not apply any sector or stock bias — the data tells you
    - BULL regime: portfolio beta up to 2.0 is acceptable. Concentrate on top names — high beta wins in bull markets.
    - NEUTRAL: target portfolio beta between 0.95 and 1.30.
 8. **Target regime-based position count**:
-    - BULL: 5–8 positions. No position < 5%. Cap strongest at 25%.
+    - BULL: 5–6 positions. Target 5 at ~20% each. No position < 5%. Cap strongest at 25%.
     - NEUTRAL: 5–10 positions. Size by conviction — top picks 20–25%, diversifiers 5–10%.
     - BEAR: 6–12 positions. Cap at 20% each.
 9. **No sector cap**: The game enforces zero sector concentration limits. 100% in one sector is fully legal (e.g. 4 Energy stocks at 25% each). Concentrate wherever the alpha is.
 10. **Vol_ratio signal**: prefer positions where vol_ratio > 1.2 (high-volume confirmation). Be cautious about positions where vol_ratio < 0.7 (low-volume, potentially weak move).
 11. **Catalyst insight**: the challenger picks represent high-momentum catalysts. If the challenger's picks have strong signals (high short interest, premarket gap-up, IV spike + momentum), include at least 1–2 of them even if they're not consensus.
 12. **Do NOT penalize non-US stocks for missing Short Interest data.** Their IV column shows 20d annualized realized vol (not options IV) — treat it as a volatility level indicator. Evaluate European/Baltic stocks on volume breakouts, momentum, premarket gaps, and realized vol so we don't accidentally build a 100% US portfolio.
-13. **Earnings safety valve**: if a stock has an upcoming earnings report within the next 3 days (based on the `earnings_warning` context), cap its maximum weight at 10%, regardless of conviction.
+13. **Earnings — opportunity AND risk**: Pre-earnings momentum in high-conviction stocks is an OPPORTUNITY (academic: 3–8% drift in 2–4 days before announcement). If the snapshot shows a PRE_EARNINGS_SETUP tag for a stock: allow up to 20% weight, max 40% total pre-earnings exposure, no more than 2 names with earnings in the same week. For earnings within 1 day (announcement tomorrow): cap at 10% regardless of conviction — binary gap risk is too close.
 14. **Dead-money exclusion rule**: in this competition, a stock is dead money if vol_ratio < 0.90 and mom_5d <= +1.0%. Do NOT call a stock dead money if vol_ratio is above 1.0. HIGH-risk dead-money names should normally be excluded, not merely downsized.
 15. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
 16. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists. A 5-stock portfolio means each slot is scarce capital.
@@ -470,6 +470,26 @@ class OpenAIRiskManager(BaseAgent):
                 f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d)"
             )
 
+        # Sector rotation context
+        sector_mom = snapshot.get("sector_momentum", {})
+        sector_rotation_line = ""
+        if sector_mom:
+            _valid = sorted(
+                [(s, d) for s, d in sector_mom.items()
+                 if not math.isnan(d.get("avg_mom_20d", float("nan"))) and d.get("count", 0) >= 2],
+                key=lambda x: x[1]["avg_mom_20d"], reverse=True,
+            )
+            if _valid:
+                _parts = []
+                for s, d in _valid[:5]:
+                    br = d.get("breadth", float("nan"))
+                    br_s = f" ({br:.0%})" if not math.isnan(br) else ""
+                    _parts.append(f"{s} {d['avg_mom_20d']:+.1%}{br_s}")
+                _lag = [s for s, d in _valid if d["avg_mom_20d"] < 0]
+                sector_rotation_line = f"Sector rotation (20d, breadth): {' | '.join(_parts[:5])}"
+                if _lag:
+                    sector_rotation_line += f"  |  Laggards: {', '.join(_lag[:4])}"
+
         lines = [
             f"## Synthesis task — {date.today().isoformat()}",
             f"Regime: {regime} | SPX vs 200d: {spx_vs:+.1%} | VIX: {vix_str} | S&P 500 20d: {snapshot['benchmark_return']:+.1%}",
@@ -479,6 +499,18 @@ class OpenAIRiskManager(BaseAgent):
         ]
         if comm_line:
             lines.append(comm_line)
+        if sector_rotation_line:
+            lines.append(sector_rotation_line)
+        rotation_risk = snapshot.get("rotation_risk", {})
+        if rotation_risk:
+            high = [(s, i) for s, i in rotation_risk.items() if i["level"] == "HIGH"]
+            med = [(s, i) for s, i in rotation_risk.items() if i["level"] == "MEDIUM"]
+            alert_lines = ["ROTATION RISK ALERT:"]
+            for s, i in sorted(high + med, key=lambda x: x[1]["level"]):
+                alert_lines.append(f"  {i['level']}: {s} — {i['reason']}")
+            if high:
+                alert_lines.append(f"  Action: Reduce or exit {', '.join(s for s, _ in high)} before rotation completes.")
+            lines += [""] + alert_lines
         lines += [
             "Analyst consensus note: AnaRtg 1=StrongBuy→5=StrongSell; AnaUp% = (target−price)/price. Use as cross-check on weight decisions — high momentum + analyst upside = conviction; high momentum + negative analyst upside = stretched/crowded, consider capping.",
             "",

@@ -156,13 +156,16 @@ def sync_verified_positions(
 
     history = state.get("history", [])
     return_since_start = (equity / initial_capital - 1) if initial_capital > 0 else 0.0
+    prev_equity = float(state.get("last_equity", state.get("initial_capital", equity)))
+    daily_return = (equity / prev_equity - 1) if prev_equity > 0 else 0.0
+
     history_entry = {
         "date": as_of_date,
         "equity": round(equity, 2),
         "cash": 0.0,
-        "daily_return": 0.0,
+        "daily_return": round(daily_return, 6),
         "return_since_start": round(return_since_start, 6),
-        "turnover": 1.0,
+        "turnover": 0.0,
         "positions": target_positions,
         "pending_order": None,
         "source": "verified",

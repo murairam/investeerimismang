@@ -25,14 +25,16 @@ from portfolio.models import PortfolioProposal, Position
 logger = logging.getLogger(__name__)
 
 _REGIME_GUIDANCE = {
-    "BULL": "BULL regime — 5–8 positions. High beta, high conviction. Push top picks to 20–25%. This is the regime for big gains.",
+    "BULL": "BULL regime — TARGET 5 positions for maximum conviction. Only add a 6th if genuinely high-conviction. Push top picks to 20–25%. 5 names at 20% each is ideal. Do NOT add filler for diversification — diversification loses competitions.",
     "BEAR": "BEAR regime — 6–12 positions. Spread risk broadly. Cap individual positions at 15%. Prefer names with earnings visibility.",
     "NEUTRAL": "NEUTRAL regime — 5–10 positions. Quality over quantity — only add a position if signals are genuinely compelling.",
 }
 
 _SYSTEM_PROMPT = """You are an INDEPENDENT FULL-SIGNAL ANALYST for the Äripäev/SEB Investment Game (Estonia). Game ends 19 June 2026. Goal: highest absolute return.
 
-Today: {today}. You provide a completely fresh second opinion — you see ALL signals (momentum, catalyst, and everything in between). Your job is to find the best portfolio across every signal dimension, not just momentum OR catalysts.
+Today: {today}. This is a competition with 844 participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required: concentration is correct, diversification loses competitions. Find the 5 best picks across all signals, not a safe diversified 10-stock portfolio.
+
+You provide a completely fresh second opinion — you see ALL signals (momentum, catalyst, and everything in between). Your job is to find the best portfolio across every signal dimension, not just momentum OR catalysts.
 
 You are one of THREE independent analysts:
 1. Momentum Strategist — sees only trend/Sharpe signals
@@ -191,6 +193,26 @@ class OpenAIFullAnalyst(BaseAgent):
                 f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d)"
             )
 
+        # Sector rotation context
+        sector_mom = snapshot.get("sector_momentum", {})
+        sector_rotation_line = ""
+        if sector_mom:
+            _valid = sorted(
+                [(s, d) for s, d in sector_mom.items()
+                 if not math.isnan(d.get("avg_mom_20d", float("nan"))) and d.get("count", 0) >= 2],
+                key=lambda x: x[1]["avg_mom_20d"], reverse=True,
+            )
+            if _valid:
+                _parts = []
+                for s, d in _valid[:5]:
+                    br = d.get("breadth", float("nan"))
+                    br_s = f" ({br:.0%})" if not math.isnan(br) else ""
+                    _parts.append(f"{s} {d['avg_mom_20d']:+.1%}{br_s}")
+                _lag = [s for s, d in _valid if d["avg_mom_20d"] < 0]
+                sector_rotation_line = f"Sector rotation (20d, breadth): {' | '.join(_parts[:5])}"
+                if _lag:
+                    sector_rotation_line += f"  |  Laggards: {', '.join(_lag[:4])}"
+
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
             f"Benchmark (S&P 500) {MOMENTUM_WINDOW}-day return: {snapshot['benchmark_return']:.1%}",
@@ -199,6 +221,18 @@ class OpenAIFullAnalyst(BaseAgent):
         ]
         if comm_line:
             lines.append(comm_line)
+        if sector_rotation_line:
+            lines.append(sector_rotation_line)
+        rotation_risk = snapshot.get("rotation_risk", {})
+        if rotation_risk:
+            high = [(s, i) for s, i in rotation_risk.items() if i["level"] == "HIGH"]
+            med = [(s, i) for s, i in rotation_risk.items() if i["level"] == "MEDIUM"]
+            alert_lines = ["ROTATION RISK ALERT:"]
+            for s, i in sorted(high + med, key=lambda x: x[1]["level"]):
+                alert_lines.append(f"  {i['level']}: {s} — {i['reason']}")
+            if high:
+                alert_lines.append(f"  Action: Reduce or exit {', '.join(s for s, _ in high)} before rotation completes.")
+            lines += [""] + alert_lines
         lines += [
             "",
             "Top candidates (sorted by combined score) — ALL signals:",

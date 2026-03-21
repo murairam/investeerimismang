@@ -62,6 +62,37 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 | `portfolio/validator.py` | Constraint validation + weight normalisation |
 | `data/learning_state.py` | Structured learning rules, Devil accuracy tracking, rationale tag analysis |
 
+## Competition Optimization Features (Added March 2026)
+
+### BULL Regime Concentration
+- **Target:** 5 positions at ~20% each — only add a 6th if genuinely high-conviction
+- **Config:** `POSITION_TARGETS_BY_REGIME["BULL"]["max_stocks"] = 6` (was 8)
+- **Enforced in:** All agent system prompts + Risk Manager synthesis rules
+
+### Competition Context in Agent Prompts
+- **All 4 agents** now open with: "844 participants, only #1 wins — INTELLIGENT AGGRESSION required"
+- **Risk Manager** additionally: "15% drawdown acceptable for 40% upside potential — price for competition, not wealth management"
+
+### Sector Rotation Indicator
+- **Computed:** In `data/fetcher.py::get_market_snapshot()` from all valid records before top-N filtering
+- **Fields:** `avg_mom_20d`, `avg_mom_5d`, `avg_rsi`, `breadth` (% stocks with positive 5d return), `count`
+- **Injected:** `snapshot["sector_momentum"]` — all 4 agents render a formatted rotation table in user messages
+- **Why:** Rotation is THE alpha source in 75-day competitions — staying in exhausted sectors = 10–15% underperformance
+
+### Pre-Earnings Opportunity Signal
+- **New function:** `data/earnings_fetcher.py::format_earnings_opportunity()` — tags stocks with earnings in 2–6 days AND strong momentum (mom_5d ≥ 4% OR mom_20d ≥ 10%) AND RSI 50–75 as `PRE_EARNINGS_SETUP`
+- **Sizing limits (Risk Manager rule 13):** max 20% per pre-earnings position, max 40% total, ≤2 names same week; hard cap 10% only for earnings within 1 day
+- **Low-conviction earners** still get `EARNINGS RISK` warning via updated `format_earnings_warning(candidates=...)`
+
+### Competition-Optimized Candidate Ranking
+- **Config:** `COMPETITION_SORT_WEIGHTS` — Z-score weighted regime-specific ranking
+  - BULL: `mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%`
+  - NEUTRAL: `sharpe_20d 40% + vs_index 30% + mom_20d 20% + beta 10%`
+  - BEAR: `sharpe_20d 50% + vs_index 30% + inv_beta 20%`
+- **Function:** `data/fetcher.py::_compute_competition_scores()` — Z-normalizes features, stores `competition_score` in each record
+- **Sort key changed:** candidates now sorted by `competition_score` (was `selection_score + sharpe_20d`)
+- **BEAR note:** `inv_beta = 1 - beta` is computed BEFORE Z-scoring
+
 ## Risk Control Features (Added March 2026)
 
 ### Overbought Weight Cap

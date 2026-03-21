@@ -43,9 +43,6 @@ REGIME_THRESHOLD = 0.02     # 2% band for BULL/BEAR classification
 CORR_WINDOW = 60            # days for correlation filter
 CORR_THRESHOLD = 0.85       # correlation above this → keep higher Sharpe
 
-# ── Sector map ───────────────────────────────────────────────────────────────
-# Abbreviated sector tags (max 6 chars) for each ticker in the universe.
-# Used by agents to detect sector concentration and diversification gaps.
 # ── Competition ranking weights ──────────────────────────────────────────────
 # Z-score normalized weights for competition-optimized candidate ranking.
 # BULL: reward momentum × beta (competition winners in bull runs).
@@ -75,7 +72,9 @@ SECTOR_MAP: dict[str, str] = {
     # SP500 — Financials
     "JPM": "Fin", "V": "Fin", "MA": "Fin", "BAC": "Fin", "GS": "Fin", "SPGI": "Fin",
     # SP500 — Energy / Utilities
-    "XOM": "Energy", "CVX": "Energy", "NEE": "Util",
+    "XOM": "Energy", "CVX": "Energy", "APA": "Energy", "VLO": "Energy",
+    "DVN": "Energy", "LYB": "Chem", "NEE": "Util",
+    "MU": "Tech",
     # SP500 — Industrials
     "HON": "Ind", "CAT": "Ind", "UPS": "Ind", "BA": "Ind",
     # Finland — OMXHLCPI

@@ -32,14 +32,14 @@ logger = logging.getLogger(__name__)
 _GROQ_MODEL = "llama-3.3-70b-versatile"
 
 _REGIME_GUIDANCE = {
-    "BULL": "BULL regime — 5-8 catalyst plays. Vol_ratio > 1.5 + RSI > 75 = ideal breakout setup. Size by conviction (20-25% for top picks).",
+    "BULL": "BULL regime — TARGET 5 catalyst plays for maximum conviction. Only add a 6th if genuinely high-conviction. Vol_ratio > 1.5 + RSI > 75 = ideal breakout. Size top picks at 20-25%. No filler — diversification loses competitions.",
     "BEAR": "BEAR regime — 6-12 positions. Hunt catalysts with low correlation to broad market. Cap each at 15%.",
     "NEUTRAL": "NEUTRAL regime — 5-10 catalyst picks. Include a pick only if you have genuine conviction in its setup.",
 }
 
 _SYSTEM_PROMPT_BASE = """You are a CATALYST HUNTER for the Aripäev/SEB Investment Game (Estonia). Game ends 19 June 2026. Goal: highest absolute return by finding stocks with explosive near-term catalysts.
 
-Today: TODAY_DATE. Your role is to identify high-momentum breakout candidates using catalyst signals.
+Today: TODAY_DATE. This is a competition with 844 participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required: concentration is correct, diversification loses competitions. Find the 5 best catalyst setups, not 10 mediocre ones.
 
 You are a SECOND OPINION to a separate Momentum Strategist who sees trend/Sharpe signals. Your value is finding catalyst-driven opportunities — vol_ratio breakouts, short squeezes, premarket gap-ups, IV spikes — that a pure Sharpe ranker might miss. Mirroring a generic momentum portfolio is failure.
 
@@ -163,10 +163,44 @@ class GeminiChallenger(BaseAgent):
             f"{'PreMktGap':>10} {'IV':>7} {'ATR%':>6} {'DivYld':>7} {'CatScore':>9} {'Price':>10}"
         )
 
+        # Sector rotation context
+        sector_mom = snapshot.get("sector_momentum", {})
+        sector_rotation_line = ""
+        if sector_mom:
+            _valid = sorted(
+                [(s, d) for s, d in sector_mom.items()
+                 if not math.isnan(d.get("avg_mom_20d", float("nan"))) and d.get("count", 0) >= 2],
+                key=lambda x: x[1]["avg_mom_20d"], reverse=True,
+            )
+            if _valid:
+                _parts = []
+                for s, d in _valid[:5]:
+                    br = d.get("breadth", float("nan"))
+                    br_s = f" ({br:.0%})" if not math.isnan(br) else ""
+                    _parts.append(f"{s} {d['avg_mom_20d']:+.1%}{br_s}")
+                _lag = [s for s, d in _valid if d["avg_mom_20d"] < 0]
+                sector_rotation_line = f"Sector rotation (20d, breadth): {' | '.join(_parts[:5])}"
+                if _lag:
+                    sector_rotation_line += f"  |  Laggards: {', '.join(_lag[:4])}"
+
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
             f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",
+        ]
+        if sector_rotation_line:
+            lines.append(sector_rotation_line)
+        rotation_risk = snapshot.get("rotation_risk", {})
+        if rotation_risk:
+            high = [(s, i) for s, i in rotation_risk.items() if i["level"] == "HIGH"]
+            med = [(s, i) for s, i in rotation_risk.items() if i["level"] == "MEDIUM"]
+            alert_lines = ["ROTATION RISK ALERT:"]
+            for s, i in sorted(high + med, key=lambda x: x[1]["level"]):
+                alert_lines.append(f"  {i['level']}: {s} — {i['reason']}")
+            if high:
+                alert_lines.append(f"  Action: Reduce or exit {', '.join(s for s, _ in high)} before rotation completes.")
+            lines += [""] + alert_lines
+        lines += [
             "",
             "Top candidates (sorted by catalyst score) — CATALYST signals only:",
             "ShortInt = short % of float (N/A for Baltic/Nordic — no data, not a penalty).",

@@ -1,13 +1,16 @@
 {
-  "generated_from_days": 4,
-  "position_observations": 6,
+  "generated_from_days": 5,
+  "position_observations": 11,
   "minimums": {
     "strong_daily_observations": 5,
     "strong_ticker_observations": 5,
     "strong_rationale_observations": 5
   },
   "hard_rules": [],
-  "biases_to_avoid": [],
+  "biases_to_avoid": [
+    "Avoid overusing momentum rationales until their hit rate recovers above 40%.",
+    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%."
+  ],
   "validated_winners": [],
   "recurring_losers": [],
   "weight_caps": [],
@@ -17,21 +20,57 @@
     "replacement_sharpe_delta": 0.2
   },
   "decision_quality": {
-    "avg_hold_vs_replace_1d": 0.0,
-    "positive_hold_vs_replace_rate": 0.0,
-    "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.41,
-    "observations": 0,
+    "avg_hold_vs_replace_1d": 0.023721,
+    "positive_hold_vs_replace_rate": 1.0,
+    "avg_slot_opportunity_cost_1d": -0.013749,
+    "avg_turnover_estimate": 0.25,
+    "observations": 1,
     "status": "insufficient_data"
   },
   "confidence_notes": [],
-  "rationale_stats": {},
+  "rationale_stats": {
+    "momentum": {
+      "observations": 5,
+      "avg_return_1d": -0.007934,
+      "hit_rate": 0.2
+    },
+    "high_sharpe": {
+      "observations": 5,
+      "avg_return_1d": -0.007934,
+      "hit_rate": 0.2
+    },
+    "breakout": {
+      "observations": 1,
+      "avg_return_1d": -0.009283,
+      "hit_rate": 0.0
+    },
+    "consensus": {
+      "observations": 4,
+      "avg_return_1d": -0.008066,
+      "hit_rate": 0.25
+    },
+    "non_us_differentiator": {
+      "observations": 3,
+      "avg_return_1d": -0.019376,
+      "hit_rate": 0.0
+    },
+    "overbought": {
+      "observations": 3,
+      "avg_return_1d": 0.003633,
+      "hit_rate": 0.3333
+    },
+    "at_52w_high": {
+      "observations": 4,
+      "avg_return_1d": 0.000442,
+      "hit_rate": 0.25
+    }
+  },
   "conviction_tiers": {
-    "tier1_avg_return_1d": -0.00539,
-    "tier2_avg_return_1d": -0.007407,
-    "tier3_avg_return_1d": -0.012216,
-    "tier1_observations": 3,
-    "tier2_observations": 1,
+    "tier1_avg_return_1d": -0.016964,
+    "tier2_avg_return_1d": -0.001128,
+    "tier3_avg_return_1d": -0.01721,
+    "tier1_observations": 4,
+    "tier2_observations": 5,
     "tier3_observations": 2
   },
   "changed_hard_rules": [],

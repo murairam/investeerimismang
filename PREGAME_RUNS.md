@@ -418,3 +418,133 @@ Winners: APA +3.5%, DVN +1.1% | Losers: AKRBP.OL -4.1%, MU -3.5%, EQNR.OL -0.9%
 - ▼ **AKRBP.OL**: 22.0% → 11.0% (-11.0%)
 
 ---
+## 2026-03-20 18:22:13
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 25.4 · S&P 500 20d: -5.2%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.0% · Benchmark -0.9% · Alpha -0.2%
+Winners: APA +2.4%, DVN +0.6% | Losers: AKRBP.OL -4.1%, MU -4.0%, EQNR.OL -0.9%
+
+**Paper account:** Equity €9,878.00 (start €10,000) · Today +0.00% · Since start -1.22% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** The portfolio stays concentrated at 6 names because regime score 44 calls for selectivity, and all five consensus names are included with the triple-consensus core weighted highest. I added one non-consensus catalyst/momentum continuation name in NESTE.HE rather than slower or lower-quality alternatives like LYB, DVN, CTY1S.HE, or TKM1T.TL. Portfolio beta should remain below the normal neutral target because the validated leaders here are mostly low-beta energy names, but DELL preserves some upside torque while still respecting the HIGH-risk cap.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **AKRBP.OL** | 25.0% | Triple-consensus top conviction name with exceptional volume confirmation (vol_ratio 3.41), strong 5d acceleration, and low retail crowding; earns the maximum slot despite cautious regime. |
+| 2 | **EQNR.OL** | 18.0% | Triple-consensus energy leader with the strongest 5d thrust in the set and solid volume confirmation; capped below max because RSI is >82 and it sits within 2% of the 52-week high without vol_ratio >1.8. |
+| 3 | **APA** | 18.0% | Double-consensus momentum winner in the strongest sector, but weight is capped by overbought/at-high conditions, weak volume confirmation (0.66), and elevated retail crowding. |
+| 4 | **DELL** | 13.0% | Triple-consensus non-energy breakout adds needed beta and diversification, but Devil HIGH-risk status hard-caps sizing at 10% and the stock is extended at the high. |
+| 5 | **VLO** | 13.0% | Double-consensus refining torque play that keeps exposure in the winning energy complex, but lower volume confirmation (0.50) and weaker 5d momentum justify a smaller slot. |
+| 6 | **NESTE.HE** | 13.0% | Best unique add from the momentum book: strong 5d move with vol_ratio 1.29 and non-US energy exposure, earning the final slot over weaker low-acceleration alternatives. |
+
+**Changes from yesterday:**
+- ➕ Added **DELL** at 13.0%
+- ➕ Added **VLO** at 13.0%
+- ➖ Removed **DVN** (was 10.0%)
+- ➖ Removed **MU** (was 8.0%)
+- ▲ **AKRBP.OL**: 22.0% → 25.0% (+3.0%)
+- ▼ **EQNR.OL**: 25.0% → 18.0% (-7.0%)
+- ▼ **APA**: 20.0% → 18.0% (-2.0%)
+
+---
+## 2026-03-21 04:15:58
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 26.8 · S&P 500 20d: -5.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.1% · Benchmark -1.5% · Alpha +0.4%
+Winners: APA +2.8% | Losers: MU -4.8%, AKRBP.OL -4.1%, EQNR.OL -0.9%
+
+**Paper account:** Equity €9,838.97 (start €10,000) · Today -0.40% · Since start -1.61% · Turnover 35.2% · Cash €1,082.29
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** The portfolio is built around the four triple-consensus energy names, with AKRBP.OL receiving the highest weight because it has the best combination of consensus, acceleration, and volume confirmation. I added XOM as a strategy-aligned catalyst name and NESTE.HE as the best remaining momentum slot winner, while cutting back APA, EQNR.OL, and VLO to respect the explicit overbought/HIGH-risk constraints. Portfolio beta should move materially higher than the strategist's 0.07 and closer to a workable NEUTRAL-range profile, while staying aggressively concentrated in the only sector showing clear leadership.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **AKRBP.OL** | 25.0% | Triple-consensus pick with the strongest volume confirmation in the core group (vol_ratio 3.41) and solid 5d acceleration; earns max weight as the cleanest high-conviction energy continuation. |
+| 2 | **EQNR.OL** | 15.0% | Triple-consensus leader with exceptional 20d/5d momentum, but RSI > 82 near highs and vol_ratio below the 1.8 override triggers the overbought cap, so weight is limited to 15%. |
+| 3 | **APA** | 15.0% | Triple-consensus and top catalyst/momentum name with 5d +13.5% and vol_ratio 2.73, but Devil flagged HIGH risk and it is at the 52-week high with RSI 84.9, so weight is cut to the 15% cap. |
+| 4 | **VLO** | 10.0% | Triple-consensus refiner with outstanding volume confirmation (vol_ratio 5.22), but weaker recent acceleration than the E&Ps and a HIGH-risk Devil flag justify a smaller tactical weight. |
+| 5 | **XOM** | 20.0% | Unique catalyst pick that fits the permanent strategy guidance for the 2026 energy rotation; slower than APA but still near highs with acceptable volume and adds a steadier mega-cap energy leg. |
+| 6 | **NESTE.HE** | 15.0% | Best non-consensus add from the momentum set: 5d +8.4% with vol_ratio 1.29 gives better acceleration than LYB/DVN, and it diversifies the energy expression without becoming filler. |
+
+**Changes from yesterday:**
+- ➕ Added **VLO** at 10.0%
+- ➕ Added **XOM** at 20.0%
+- ➖ Removed **DVN** (was 10.0%)
+- ➖ Removed **MU** (was 8.0%)
+- ▲ **AKRBP.OL**: 22.0% → 25.0% (+3.0%)
+- ▼ **EQNR.OL**: 25.0% → 15.0% (-10.0%)
+- ▼ **APA**: 20.0% → 15.0% (-5.0%)
+
+---
+## 2026-03-21 04:33:51
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 26.8 · S&P 500 20d: -5.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.8% · Benchmark -1.5% · Alpha +0.7%
+Winners: APA +2.8%, XOM +1.0% | Losers: AKRBP.OL -4.1%, EQNR.OL -0.9%, VLO -0.9%
+
+**Paper account:** Equity €9,838.97 (start €10,000) · Today +0.00% · Since start -1.61% · Turnover 0.0% · Cash €1,082.29
+
+**Confidence:** 82% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I built around the strongest independently validated names: APA, EQNR.OL, AKAM, VLO, and NESTE.HE all had double consensus, while AKRBP.OL was triple-consensus but excluded because the Devil flagged it HIGH risk and the reported vol_ratio conflict made participation quality too questionable for a scarce slot. I added DELL as the best unique catalyst to keep the portfolio aggressive and concentrated while avoiding overfilling with slower names; this should raise beta materially from the strategist's 0.15 toward the neutral target range, though the Nordic mix likely keeps it around the low end of target rather than excessively defensive.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **APA** | 23.0% | Double-consensus leader with the strongest momentum/catalyst mix in the set (5d +13.5%, vol_ratio 2.73); capped below max because RSI is extreme at the 52-week high. |
+| 2 | **EQNR.OL** | 16.0% | Double-consensus Nordic energy leader with elite recent acceleration (5d +16.5%) and acceptable volume confirmation; high conviction despite overbought conditions because it still has cleaner participation than weaker alternatives. |
+| 3 | **AKAM** | 19.0% | Double-consensus non-energy breakout that helps lift portfolio beta and reduce pure energy rotation risk; strong vol_ratio 2.32 supports the move even if 5d momentum is less explosive. |
+| 4 | **VLO** | 16.0% | Double-consensus refiner with exceptional volume confirmation (vol_ratio 5.22), which overrides the near-high caution and earns a meaningful but not top-tier weight. |
+| 5 | **NESTE.HE** | 16.0% | Double-consensus European momentum name with solid 5d acceleration (+8.4%) and vol_ratio 1.29; kept at a moderate weight because RSI is stretched near highs and energy rotation risk is elevated. |
+| 6 | **DELL** | 10.0% | Best unique catalyst pick from Proposal B: event-driven, vol_ratio 2.45, and higher beta than defensive fillers; included as the sharpest non-consensus aggressor in a cautious-neutral tape. |
+
+**Changes from yesterday:**
+- ➕ Added **AKAM** at 19.0%
+- ➕ Added **DELL** at 10.0%
+- ➖ Removed **AKRBP.OL** (was 25.0%)
+- ➖ Removed **XOM** (was 20.0%)
+- ▲ **APA**: 15.0% → 23.0% (+8.0%)
+- ▲ **VLO**: 10.0% → 16.0% (+6.0%)
+
+---
+## 2026-03-21 22:26:07
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 26.8 · S&P 500 20d: -5.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.8% · Benchmark -1.5% · Alpha +0.7%
+Winners: APA +2.8%, XOM +1.0% | Losers: AKRBP.OL -4.1%, EQNR.OL -0.9%, VLO -0.9%
+
+**Paper account:** Equity €9,861.00 (start €10,000) · Today +0.00% · Since start -1.39% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 85% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept exactly 5 names because regime score 40 calls for selective concentration, and all five chosen names are independently validated consensus picks with Energy still the only clear leadership sector. I excluded LYB despite double consensus because it is the only HIGH-risk devil flag and its 5d momentum is too weak for the slot; I also skipped NEL.OL/CVX/AKAM as inferior unique alternatives. Portfolio remains intentionally energy-concentrated because the signals justify it, while weighted beta should rise materially above the strategist's too-low 0.10 and sit closer to the NEUTRAL target range.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **APA** | 23.0% | Triple-consensus leader with the strongest 5d acceleration (+13.5%) and strong volume confirmation (vol_ratio 2.73); capped below max because RSI is extreme near the 52-week high. |
+| 2 | **AKRBP.OL** | 24.0% | Triple-consensus energy leader with the best volume confirmation in the core group (vol_ratio 3.41) and strong 5d momentum (+10.3%), earning a top weight despite medium risk. |
+| 3 | **VLO** | 21.0% | Triple-consensus refiner with exceptional participation (vol_ratio 5.22) and less peak-stretch risk than APA, making it a high-conviction core holding. |
+| 4 | **EQNR.OL** | 16.0% | Double-consensus pick with the strongest 5d move in the set (+16.5%) and low crowding, but sized slightly below the top tier because vol_ratio is only moderate (1.48) and beta behavior is unusual. |
+| 5 | **NESTE.HE** | 16.0% | Double-consensus Nordic energy name with solid momentum (+8.4%), acceptable volume confirmation (1.29), and low retail crowding; slightly smaller due to RSI >82 near highs and lower beta. |
+
+**Changes from yesterday:**
+- ➖ Removed **XOM** (was 20.0%)
+- ▲ **APA**: 15.0% → 23.0% (+8.0%)
+- ▲ **VLO**: 10.0% → 21.0% (+11.0%)
+
+---
