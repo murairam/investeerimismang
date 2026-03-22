@@ -429,3 +429,58 @@ class GeminiChallenger(BaseAgent):
             confidence=float(data.get("confidence", 0.5)),
             learning_reflection=data.get("learning_reflection", ""),
         )
+
+    def cross_check(
+        self,
+        snapshot: MarketSnapshot,
+        own_proposal: PortfolioProposal,
+        peer_proposals: list[PortfolioProposal],
+    ) -> dict:
+        """Lightweight second-pass debate using Gemini (or Groq fallback)."""
+        own_str = ", ".join(f"{p.ticker} {p.weight:.0%}" for p in own_proposal.positions)
+        peer_lines = []
+        for i, peer in enumerate(peer_proposals, 1):
+            peer_lines.append(f"Peer {i}: " + ", ".join(f"{p.ticker} {p.weight:.0%}" for p in peer.positions))
+        peer_str = "\n".join(peer_lines)
+        prompt = (
+            f"Your portfolio: {own_str}\n\n"
+            f"{peer_str}\n\n"
+            "Identify:\n"
+            "(a) tickers from your portfolio that also appear in at least one peer portfolio\n"
+            "(b) any ticker a peer proposes at >=15% that you excluded — one-sentence reason you disagree or concede\n\n"
+            'Return JSON only: {"agrees": ["TICKER1", ...], "disagrees": [{"ticker": "X", "reason": "..."}]}'
+        )
+        try:
+            response = self.client.models.generate_content(
+                model=self.MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction="You are a portfolio analyst. Return JSON only.",
+                    response_mime_type="application/json",
+                    temperature=0.0,
+                ),
+            )
+            raw = response.text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            return json.loads(raw)
+        except Exception as exc:
+            logger.warning("GeminiChallenger cross_check failed (non-fatal): %s", exc)
+            # Try Groq fallback if available
+            if self._groq:
+                try:
+                    resp = self._groq.chat.completions.create(
+                        model=_GROQ_MODEL,
+                        response_format={"type": "json_object"},
+                        temperature=0.0,
+                        messages=[
+                            {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
+                            {"role": "user", "content": prompt},
+                        ],
+                    )
+                    return json.loads(resp.choices[0].message.content)
+                except Exception as exc2:
+                    logger.warning("Groq cross_check fallback also failed: %s", exc2)
+            return {}

@@ -24,3 +24,20 @@ class BaseAgent(ABC):
                             Strategist receives None; Risk Manager receives Strategist's output.
         """
         ...
+
+    def cross_check(
+        self,
+        snapshot: MarketSnapshot,
+        own_proposal: PortfolioProposal,
+        peer_proposals: list[PortfolioProposal],
+    ) -> dict:
+        """
+        Optional second-pass debate. Given own proposal and peer proposals, identify
+        agreements and disagreements on individual tickers.
+
+        Returns a dict:
+          {"agrees": ["TICKER1", ...], "disagrees": [{"ticker": "X", "reason": "..."}]}
+
+        Default: no-op (returns empty dict). Subclasses may override for richer debate.
+        """
+        return {}

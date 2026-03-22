@@ -73,6 +73,7 @@ This is a competition with 844 participants. Only #1 wins — median returns = l
 17. **Regime-score selectivity inside NEUTRAL**: when regime_score is below 50 (CAUTIOUS), still hold exactly 5 names, but be more selective. Do NOT use caution as an excuse to add slow names; instead remove weak-acceleration names and keep only the sharpest 5.
 18. **Overbought-at-peak weight cap**: if a pick has RSI > 82 AND pct_from_52w_high ≥ −2% (at or within 2% of its 52-week high), cap its weight at 15% UNLESS vol_ratio > 1.8. High RSI at the 52-week high without exceptional volume confirms exhaustion not breakout — even for consensus picks. If vol_ratio > 1.8 the volume surge justifies the full 20–25% conviction weight.
 19. **Devil flag respect**: The Devil's advocate labels each pick HIGH / MEDIUM / LOW risk. If the learning context reports that the Devil's HIGH-risk flags have been accurate (>60% of HIGH-flagged picks underperformed), treat HIGH-risk flags as a hard weight cap of 10% for that pick. If Devil accuracy is unknown or below 50%, use your own judgement.
+20. **Learning-state constraints are mandatory**: Any ticker-level weight caps, hard rules, and bias-avoidance directives in the learning context are hard constraints for today's synthesis. Do not override them with consensus arguments.
 
 ## Hard constraints
 - 5 to 20 stocks.
@@ -359,6 +360,43 @@ class OpenAIRiskManager(BaseAgent):
                         pos.ticker,
                     )
 
+        learning_state = load_learning_state()
+        raw_caps = learning_state.get("weight_caps", [])
+        ticker_caps: dict[str, tuple[float, str]] = {}
+        for cap in raw_caps:
+            if not isinstance(cap, dict):
+                continue
+            if cap.get("scope") != "ticker":
+                continue
+            ticker = cap.get("ticker")
+            max_weight = cap.get("max_weight")
+            if not isinstance(ticker, str):
+                continue
+            try:
+                cap_value = float(max_weight)
+            except (TypeError, ValueError):
+                continue
+            if cap_value <= 0:
+                continue
+            cap_reason = str(cap.get("reason", "learning_state_cap"))
+            ticker_caps[ticker] = (cap_value, cap_reason)
+
+        for i, pos in enumerate(kept):
+            cap_info = ticker_caps.get(pos.ticker)
+            if not cap_info:
+                continue
+            max_weight, cap_reason = cap_info
+            if pos.weight > max_weight:
+                old_weight = pos.weight
+                kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale)
+                logger.info(
+                    "Learning cap: %s %.0f%% → %.0f%% (%s)",
+                    pos.ticker,
+                    old_weight * 100,
+                    max_weight * 100,
+                    cap_reason,
+                )
+
         total_weight = sum(p.weight for p in kept)
         if total_weight <= 0:
             return proposal
@@ -519,6 +557,13 @@ class OpenAIRiskManager(BaseAgent):
             "",
         ]
 
+        if snapshot.get("learning_context"):
+            lines += [
+                "### LEARNING CONSTRAINTS — APPLY BEFORE SYNTHESIS",
+                snapshot["learning_context"],
+                "",
+            ]
+
         candidate_map = {c["ticker"]: c for c in snapshot["candidates"]}
 
         # Find consensus tickers (appear in 2+ of the 3 proposals)
@@ -643,8 +688,21 @@ class OpenAIRiskManager(BaseAgent):
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]
 
-        if snapshot.get("learning_context"):
-            lines += ["", snapshot["learning_context"]]
+        debate_summary = snapshot.get("debate_summary", "")
+        if debate_summary:
+            lines += ["", "### Cross-Agent Debate Summary", debate_summary]
+
+        decay = snapshot.get("strategy_decay", {})
+        if decay.get("decay_detected"):
+            lines += [
+                "",
+                f"### STRATEGY DECAY ALERT",
+                f"Recent alpha has dropped to {decay['recent_avg_alpha']:+.2%}/day "
+                f"(was {decay['prior_avg_alpha']:+.2%}/day over prior {decay['prior_days']} days, "
+                f"decay magnitude: {decay['decay_magnitude']:+.4f}).",
+                "Consider: (a) rotating into a different sector, (b) reducing highest-beta positions, "
+                "(c) checking if our top picks have become consensus crowded trades.",
+            ]
 
         if snapshot.get("insider_context"):
             lines += ["", snapshot["insider_context"]]

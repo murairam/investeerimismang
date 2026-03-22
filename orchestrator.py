@@ -33,7 +33,7 @@ from data.fetcher import DataFetcher
 from data.learning_context import get_learning_context
 from data.learning_state import load_learning_state
 from data.learning_report import generate_pregame_learning_report
-from data.meta_learning import generate_meta_learning_report
+from data.meta_learning import generate_meta_learning_report, detect_strategy_decay
 from data.mode_guard import enforce_mode_and_freeze, generate_live_handoff_if_due
 from data.earnings_fetcher import fetch_upcoming_earnings, format_earnings_opportunity, format_earnings_warning
 from data.news_fetcher import fetch_candidate_news, format_news_for_prompt
@@ -124,6 +124,41 @@ class AlphaSharkOrchestrator:
             )
         else:
             logger.info("No learning context yet (first run or files missing)")
+
+        # Signal importance: log which signals are most predictive this run (Change 1)
+        _sig_imp = learning_state.get("signal_importance", {})
+        if _sig_imp:
+            top_signals = sorted(_sig_imp.items(), key=lambda x: -x[1])
+            logger.info(
+                "Signal importance (directional accuracy): %s",
+                ", ".join(f"{s} {v:.0%}" for s, v in top_signals),
+            )
+            # Inject as context string so agents know which signals to trust most today
+            sig_lines = ["Most predictive signals today (directional accuracy vs next-day return):"]
+            sig_lines += [f"  {s}: {v:.0%} accuracy" for s, v in top_signals if v != 0.5]
+            snapshot["signal_importance_context"] = "\n".join(sig_lines)
+            # Append to learning context so all agents see it
+            if sig_lines and len(_sig_imp) >= 3:
+                existing_lc = snapshot.get("learning_context", "")
+                sig_section = "\n=== SIGNAL IMPORTANCE (from recent performance) ===\n" + "\n".join(sig_lines)
+                snapshot["learning_context"] = (existing_lc + sig_section) if existing_lc else sig_section
+
+        # Strategy decay detection: compare recent alpha to prior alpha (Change 5)
+        from data.portfolio_store import load_decision_history as _load_decision_hist
+        _hist_for_decay = _load_decision_hist(max_days=20)
+        decay_info = detect_strategy_decay(_hist_for_decay)
+        snapshot["strategy_decay"] = decay_info
+        if decay_info.get("decay_detected"):
+            logger.warning(
+                "Strategy decay detected: recent %d-day alpha %+.2f%% vs prior %d-day alpha %+.2f%% (delta %+.2f%%)",
+                decay_info["recent_days"],
+                decay_info["recent_avg_alpha"] * 100,
+                decay_info["prior_days"],
+                decay_info["prior_avg_alpha"] * 100,
+                -decay_info["decay_magnitude"] * 100,
+            )
+        else:
+            logger.info("Strategy decay check: %s", decay_info.get("status", "insufficient_data"))
 
         # Steps 1c–1f: fetch news, earnings, insider trades, and trends IN PARALLEL
         top_tickers_50 = [c["ticker"] for c in snapshot["candidates"][:50]]
@@ -334,7 +369,64 @@ class AlphaSharkOrchestrator:
         if consensus - triple:
             logger.info("Double consensus (2/3 agents): %s", ", ".join(sorted(consensus - triple)))
 
-        # Step 3d: Devil's advocate — stress-tests top picks from all 3 proposals
+        # Step 3d: Cross-agent debate — lightweight second pass to surface disagreements
+        debate_flags: dict[str, dict] = {}
+        live_proposals = [
+            ("strategist", self.strategist, strategist_proposal),
+            ("challenger", self.gemini_challenger, challenger_proposal),
+            ("full_analyst", self.full_analyst, full_analyst_proposal),
+        ]
+        live_proposals = [(name, agent, prop) for name, agent, prop in live_proposals if prop and prop.positions]
+        if len(live_proposals) >= 2:
+            with ThreadPoolExecutor(max_workers=3) as dex:
+                debate_futures = {
+                    name: dex.submit(
+                        agent.cross_check,
+                        snapshot,
+                        own,
+                        [p for n, a, p in live_proposals if p is not own],
+                    )
+                    for name, agent, own in live_proposals
+                }
+                for name, fut in debate_futures.items():
+                    try:
+                        debate_flags[name] = fut.result(timeout=45)
+                    except Exception as exc:
+                        logger.warning("Cross-check for %s failed (non-fatal): %s", name, exc)
+
+            # Compile debate flags into a summary string for the Risk Manager
+            debate_lines = []
+            all_disagrees: dict[str, list[str]] = {}
+            all_agrees: list[str] = []
+            for agent_name, result in debate_flags.items():
+                agrees = result.get("agrees", [])
+                disagrees = result.get("disagrees", [])
+                if agrees:
+                    all_agrees.extend(agrees)
+                for item in disagrees:
+                    ticker = item.get("ticker", "?")
+                    reason = item.get("reason", "")
+                    all_disagrees.setdefault(ticker, []).append(f"{agent_name}: {reason}")
+
+            if all_agrees:
+                from collections import Counter
+                agree_counts = Counter(all_agrees)
+                strong = [t for t, n in agree_counts.items() if n >= 2]
+                if strong:
+                    debate_lines.append(f"Cross-agent agreements (2+ agents agree): {', '.join(sorted(set(strong)))}")
+            if all_disagrees:
+                debate_lines.append("Cross-agent disagreements (one agent excluded while peers included at >=15%):")
+                for ticker, reasons in all_disagrees.items():
+                    debate_lines.append(f"  {ticker}: " + " | ".join(reasons[:2]))
+
+            if debate_lines:
+                snapshot["debate_summary"] = "\n".join(debate_lines)
+                logger.info("Cross-agent debate: %d agreements, %d disagreements surfaced",
+                            len(all_agrees), len(all_disagrees))
+            else:
+                logger.info("Cross-agent debate: no significant disagreements")
+
+        # Step 3e: Devil's advocate — stress-tests top picks from all 3 proposals
         logger.info("Calling OpenAIDevil — stress-testing top picks …")
         bear_cases: dict = {}
         # Build a merged "challenger" view for Devil (union of all non-strategist picks)

@@ -358,6 +358,43 @@ class OpenAIFullAnalyst(BaseAgent):
             learning_reflection=data.get("learning_reflection", ""),
         )
 
+    def cross_check(
+        self,
+        snapshot: MarketSnapshot,
+        own_proposal: PortfolioProposal,
+        peer_proposals: list[PortfolioProposal],
+    ) -> dict:
+        """Lightweight second-pass debate: identify agreements and disagreements with peer proposals."""
+        own_str = ", ".join(f"{p.ticker} {p.weight:.0%}" for p in own_proposal.positions)
+        peer_lines = []
+        for i, peer in enumerate(peer_proposals, 1):
+            peer_lines.append(f"Peer {i}: " + ", ".join(f"{p.ticker} {p.weight:.0%}" for p in peer.positions))
+        peer_str = "\n".join(peer_lines)
+        prompt = (
+            f"Your portfolio: {own_str}\n\n"
+            f"{peer_str}\n\n"
+            "Identify:\n"
+            "(a) tickers from your portfolio that also appear in at least one peer portfolio\n"
+            "(b) any ticker a peer proposes at >=15% that you excluded — one-sentence reason you disagree or concede\n\n"
+            'Return JSON only: {"agrees": ["TICKER1", ...], "disagrees": [{"ticker": "X", "reason": "..."}]}'
+        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.MODEL,
+                response_format={"type": "json_object"},
+                temperature=0.0,
+                messages=[
+                    {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            log_usage("OpenAIFullAnalyst_crosscheck", self.MODEL,
+                      response.usage.prompt_tokens, response.usage.completion_tokens)
+            return json.loads(response.choices[0].message.content)
+        except Exception as exc:
+            logger.warning("FullAnalyst cross_check failed (non-fatal): %s", exc)
+            return {}
+
 
 # Backwards-compatibility alias (orchestrator imports OpenAIChallenger)
 OpenAIChallenger = OpenAIFullAnalyst

@@ -246,6 +246,42 @@ def generate_ticker_performance_report(performance_history: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def detect_strategy_decay(history: list[dict], window_recent: int = 5, window_prior: int = 10) -> dict:
+    """
+    Compare alpha over the most recent `window_recent` days vs the prior `window_prior` days.
+    Returns a decay status dict. Positive decay_magnitude = recent alpha dropped.
+    """
+    alpha_series: list[tuple[str, float]] = []
+    for day in history:
+        outcomes = (day.get("outcomes", {}) or {}).get("1d", {})
+        perf = day.get("performance", {}) or {}
+        alpha = outcomes.get("alpha") or perf.get("alpha_1d")
+        day_date = day.get("date", "")
+        if alpha is not None and day_date:
+            alpha_series.append((day_date, float(alpha)))
+
+    alpha_series.sort(key=lambda x: x[0])
+    recent = [a for _, a in alpha_series[-window_recent:]]
+    prior = [a for _, a in alpha_series[-(window_recent + window_prior):-window_recent]]
+
+    if len(recent) < 3 or len(prior) < 3:
+        return {"status": "insufficient_data", "decay_detected": False}
+
+    recent_avg = _avg(recent)
+    prior_avg = _avg(prior)
+    decay = prior_avg - recent_avg  # positive = recent alpha dropped
+
+    return {
+        "status": "decay_detected" if decay > 0.002 else "stable",
+        "recent_avg_alpha": round(recent_avg, 6),
+        "prior_avg_alpha": round(prior_avg, 6),
+        "decay_magnitude": round(decay, 6),
+        "recent_days": len(recent),
+        "prior_days": len(prior),
+        "decay_detected": decay > 0.002,
+    }
+
+
 if __name__ == "__main__":
     result = generate_meta_learning_report()
     print(f"\nMeta-learning report generated: {result['report_path']}")

@@ -72,7 +72,7 @@
     "avg_hold_vs_replace_1d": 0.023721,
     "positive_hold_vs_replace_rate": 1.0,
     "avg_slot_opportunity_cost_1d": -0.005737,
-    "avg_turnover_estimate": 0.366667,
+    "avg_turnover_estimate": 0.25,
     "observations": 1,
     "status": "insufficient_data"
   },
@@ -136,6 +136,24 @@
   "changed_hard_rules": [],
   "devil_accuracy": {
     "status": "insufficient_data",
-    "observations": 0
+    "observations": 0,
+    "high_flagged_tickers_recent": [
+      {
+        "ticker": "LYB",
+        "flag_count": 2
+      }
+    ]
+  },
+  "signal_importance": {
+    "momentum": 0.2222,
+    "mom_5d": 0.2222,
+    "sharpe_20d": 0.2222,
+    "rsi_14": 0.2222,
+    "vs_index": 0.2222,
+    "vol_ratio": 0.2222,
+    "beta": 0.4444
+  },
+  "confidence_calibration": {
+    "status": "insufficient_data"
   }
 }

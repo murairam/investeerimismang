@@ -25,6 +25,60 @@ def _avg(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
+def compute_signal_importance(rows: list[dict]) -> dict[str, float]:
+    """
+    For each signal name, compute the fraction of positions where the signal
+    direction agreed with the next-day return direction (directional accuracy).
+    Returns signal_name -> importance_score (0.5 = random, 1.0 = perfect).
+    """
+    SIGNALS = ["momentum", "mom_5d", "sharpe_20d", "rsi_14", "vs_index", "vol_ratio", "beta"]
+    hits: dict[str, list[float]] = {s: [] for s in SIGNALS}
+    for row in rows:
+        ret = row["return_1d"]
+        sig = row.get("signal", {})
+        for s in SIGNALS:
+            val = sig.get(s)
+            if val is not None:
+                hits[s].append(1.0 if (val > 0 and ret > 0) or (val < 0 and ret < 0) else 0.0)
+    return {s: round(sum(v) / len(v), 4) for s, v in hits.items() if len(v) >= 5}
+
+
+def compute_confidence_calibration(history: list[dict]) -> dict:
+    """
+    Compare actual 1d portfolio returns on high-confidence (>=0.75) vs
+    low-confidence (<0.75) days. Returns calibration dict.
+    """
+    high_conf_returns: list[float] = []
+    low_conf_returns: list[float] = []
+    for day in history:
+        conf = float((day.get("final_portfolio") or {}).get("confidence", 0.0))
+        ret = (day.get("outcomes", {}) or {}).get("1d", {}).get("portfolio_return", None)
+        if ret is None:
+            ret = (day.get("performance") or {}).get("portfolio_return_1d", None)
+        if ret is None:
+            continue
+        if conf >= 0.75:
+            high_conf_returns.append(float(ret))
+        else:
+            low_conf_returns.append(float(ret))
+
+    if not high_conf_returns or not low_conf_returns:
+        return {"status": "insufficient_data"}
+
+    high_avg = _avg(high_conf_returns)
+    low_avg = _avg(low_conf_returns)
+    overconfident = high_avg < low_avg and len(high_conf_returns) >= 3
+
+    return {
+        "status": "actionable" if len(high_conf_returns) >= 3 else "early_data",
+        "high_confidence_avg_return": round(high_avg, 6),
+        "low_confidence_avg_return": round(low_avg, 6),
+        "high_confidence_observations": len(high_conf_returns),
+        "low_confidence_observations": len(low_conf_returns),
+        "overconfidence_detected": overconfident,
+    }
+
+
 def _position_records(history: list[dict]) -> list[dict]:
     rows: list[dict] = []
     for day in history:
@@ -236,6 +290,8 @@ def generate_learning_state() -> dict:
         },
         "changed_hard_rules": _changed_rules(previous.get("hard_rules", []), hard_rules),
         "devil_accuracy": devil_accuracy,
+        "signal_importance": compute_signal_importance(rows),
+        "confidence_calibration": compute_confidence_calibration(history),
     }
     save_learning_state(state)
     return state
@@ -263,8 +319,25 @@ def _devil_accuracy(history: list[dict]) -> dict:
             else:
                 low_returns.append(float(ret))
 
+    # Track repeat HIGH-flag offenders over the last 5 days (always computed)
+    recent_high_flagged: dict[str, int] = {}
+    for day in history[-5:]:
+        bear_cases_day: dict = day.get("bear_cases", {}) or {}
+        for ticker, info in bear_cases_day.items():
+            if (info or {}).get("risk") == "HIGH":
+                recent_high_flagged[ticker] = recent_high_flagged.get(ticker, 0) + 1
+    high_flagged_tickers_recent = [
+        {"ticker": t, "flag_count": n}
+        for t, n in sorted(recent_high_flagged.items(), key=lambda x: -x[1])
+        if n >= 2
+    ]
+
     if not high_returns or not low_returns:
-        return {"status": "insufficient_data", "observations": 0}
+        return {
+            "status": "insufficient_data",
+            "observations": 0,
+            "high_flagged_tickers_recent": high_flagged_tickers_recent,
+        }
 
     high_avg = _avg(high_returns)
     low_avg = _avg(low_returns)
@@ -279,6 +352,7 @@ def _devil_accuracy(history: list[dict]) -> dict:
         "high_risk_negative_rate": round(high_neg_rate, 4),
         "accuracy": round(accuracy, 4),
         "devil_is_accurate": accuracy >= 0.60 and len(high_returns) >= 5,
+        "high_flagged_tickers_recent": high_flagged_tickers_recent,
     }
 
 
@@ -304,8 +378,28 @@ def build_prompt_learning_context(
             lines.append("Hard constraints:")
             lines.extend(f"- {rule}" for rule in state["hard_rules"][:4])
         if state.get("biases_to_avoid"):
-            lines.append("Biases to avoid:")
-            lines.extend(f"- {rule}" for rule in state["biases_to_avoid"][:4])
+            lines.append("Biases to avoid (MANDATORY):")
+            lines.extend(
+                f"- MANDATORY: DO NOT use this as a primary thesis driver today — {rule}"
+                for rule in state["biases_to_avoid"][:4]
+            )
+        weight_caps = state.get("weight_caps", [])
+        ticker_caps = [cap for cap in weight_caps if isinstance(cap, dict) and cap.get("scope") == "ticker"]
+        if ticker_caps:
+            lines.append("Ticker weight caps (MANDATORY):")
+            for cap in ticker_caps[:8]:
+                ticker = cap.get("ticker")
+                max_weight = cap.get("max_weight")
+                reason = cap.get("reason", "learning_state_cap")
+                if not isinstance(ticker, str):
+                    continue
+                try:
+                    max_weight_float = float(max_weight)
+                except (TypeError, ValueError):
+                    continue
+                lines.append(
+                    f"- HARD CAP: {ticker} <= {max_weight_float:.0%} ({reason})"
+                )
         winners = state.get("validated_winners", [])
         if winners:
             lines.append("Validated winners:")
@@ -334,6 +428,22 @@ def build_prompt_learning_context(
                     f"Devil's advocate accuracy so far: {da.get('high_risk_negative_rate', 0):.0%} of HIGH-risk flags went negative "
                     f"({da['observations']} obs, threshold for action: 60%). Use your own judgement on flagged picks."
                 )
+        # Recent repeat flags shown regardless of accuracy status (Change 3)
+        recent_flags = devil.get("high_flagged_tickers_recent", [])
+        if recent_flags:
+            flagged_str = ", ".join(f"{f['ticker']} (x{f['flag_count']})" for f in recent_flags[:5])
+            lines.append(
+                f"Repeat HIGH-risk flags (last 5 days): {flagged_str}. "
+                "These tickers have been Devil-flagged multiple times recently — size cautiously (<=12% each)."
+            )
+        cal = state.get("confidence_calibration", {})
+        if cal.get("overconfidence_detected"):
+            lines.append(
+                f"Confidence calibration warning: high-confidence proposals (>=75%) have averaged "
+                f"{cal['high_confidence_avg_return']:+.2%}/day vs {cal['low_confidence_avg_return']:+.2%}/day "
+                f"for lower-confidence proposals ({cal['high_confidence_observations']} obs). "
+                "Confidence > 0.75 has historically preceded worse outcomes — calibrate down today."
+            )
         sections.append("\n".join(lines))
 
     if fallback_sections and not state:
