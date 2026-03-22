@@ -3,12 +3,20 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "EQNR.OL": 69.07955928,
-    "AKRBP.OL": 68.27637946,
-    "APA": 58.37133925,
-    "NESTE.HE": 50.17469549,
-    "DVN": 23.4576975,
-    "MU": 2.15928413
+    "APA": 72.96417407,
+    "VLO": 9.51764824,
+    "DVN": 46.91539501,
+    "LYB": 23.35211869,
+    "AKAM": 10.33174803,
+    "EQNR.OL": 27.63182371
+  },
+  "verified_weights": {
+    "APA": 0.25,
+    "VLO": 0.2,
+    "DVN": 0.2,
+    "LYB": 0.15,
+    "AKAM": 0.1,
+    "EQNR.OL": 0.1
   },
   "pending_order": null,
   "history": [
@@ -100,8 +108,158 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-03-22",
+      "equity": 9861.0,
+      "cash": 0.0,
+      "daily_return": -0.0,
+      "return_since_start": -0.0139,
+      "turnover": 0.0,
+      "positions": {
+        "EQNR.OL": 69.07955928,
+        "AKRBP.OL": 68.27637946,
+        "APA": 58.37133925,
+        "NESTE.HE": 50.17469549,
+        "DVN": 23.4576975,
+        "MU": 2.15928413
+      },
+      "pending_order": {
+        "submitted_date": "2026-03-22",
+        "positions": [
+          {
+            "ticker": "EQNR.OL",
+            "weight": 0.17
+          },
+          {
+            "ticker": "VLO",
+            "weight": 0.25
+          },
+          {
+            "ticker": "NESTE.HE",
+            "weight": 0.17
+          },
+          {
+            "ticker": "APA",
+            "weight": 0.12
+          },
+          {
+            "ticker": "AKRBP.OL",
+            "weight": 0.12
+          },
+          {
+            "ticker": "DVN",
+            "weight": 0.09
+          },
+          {
+            "ticker": "LYB",
+            "weight": 0.08
+          }
+        ]
+      },
+      "executed_pending": false
+    },
+    {
+      "date": "2026-03-21",
+      "equity": 9861.0,
+      "cash": 0.0,
+      "daily_return": 0.0,
+      "return_since_start": -0.0139,
+      "turnover": 0.0,
+      "positions": {
+        "EQNR.OL": 69.07955928,
+        "AKRBP.OL": 68.27637946,
+        "APA": 58.37133925,
+        "NESTE.HE": 50.17469549,
+        "DVN": 23.4576975,
+        "MU": 2.15928413
+      },
+      "pending_order": null,
+      "source": "verified"
+    },
+    {
+      "date": "2026-03-22",
+      "equity": 9861.0,
+      "cash": 0.0,
+      "daily_return": -0.0,
+      "return_since_start": -0.0139,
+      "turnover": 0.0,
+      "positions": {
+        "EQNR.OL": 69.07955928,
+        "AKRBP.OL": 68.27637946,
+        "APA": 58.37133925,
+        "NESTE.HE": 50.17469549,
+        "DVN": 23.4576975,
+        "MU": 2.15928413
+      },
+      "pending_order": {
+        "submitted_date": "2026-03-22",
+        "positions": [
+          {
+            "ticker": "APA",
+            "weight": 0.25
+          },
+          {
+            "ticker": "VLO",
+            "weight": 0.22
+          },
+          {
+            "ticker": "DELL",
+            "weight": 0.1
+          },
+          {
+            "ticker": "LYB",
+            "weight": 0.18
+          },
+          {
+            "ticker": "EQNR.OL",
+            "weight": 0.12
+          },
+          {
+            "ticker": "FORTUM.HE",
+            "weight": 0.13
+          }
+        ]
+      },
+      "executed_pending": false
+    },
+    {
+      "date": "2026-03-21",
+      "equity": 9861.0,
+      "cash": 0.0,
+      "daily_return": 0.0,
+      "return_since_start": -0.0139,
+      "turnover": 0.0,
+      "positions": {
+        "EQNR.OL": 69.07955928,
+        "AKRBP.OL": 68.27637946,
+        "APA": 58.37133925,
+        "NESTE.HE": 50.17469549,
+        "DVN": 23.4576975,
+        "MU": 2.15928413
+      },
+      "pending_order": null,
+      "source": "verified"
+    },
+    {
+      "date": "2026-03-22",
+      "equity": 9861.0,
+      "cash": 0.0,
+      "daily_return": 0.0,
+      "return_since_start": -0.0139,
+      "turnover": 0.0,
+      "positions": {
+        "APA": 72.96417407,
+        "VLO": 9.51764824,
+        "DVN": 46.91539501,
+        "LYB": 23.35211869,
+        "AKAM": 10.33174803,
+        "EQNR.OL": 27.63182371
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-03-21",
+  "last_rebalanced_date": "2026-03-22",
   "last_equity": 9861.0
 }

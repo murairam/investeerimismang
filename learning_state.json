@@ -1,6 +1,6 @@
 {
-  "generated_from_days": 5,
-  "position_observations": 11,
+  "generated_from_days": 6,
+  "position_observations": 15,
   "minimums": {
     "strong_daily_observations": 5,
     "strong_ticker_observations": 5,
@@ -9,11 +9,60 @@
   "hard_rules": [],
   "biases_to_avoid": [
     "Avoid overusing momentum rationales until their hit rate recovers above 40%.",
-    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%."
+    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.",
+    "Avoid overusing consensus rationales until their hit rate recovers above 40%.",
+    "Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%.",
+    "Avoid overusing overbought rationales until their hit rate recovers above 40%.",
+    "Avoid overusing at_52w_high rationales until their hit rate recovers above 40%."
   ],
-  "validated_winners": [],
-  "recurring_losers": [],
-  "weight_caps": [],
+  "validated_winners": [
+    {
+      "ticker": "APA",
+      "observations": 6,
+      "avg_return_1d": 0.026493,
+      "hit_rate": 1.0
+    }
+  ],
+  "recurring_losers": [
+    {
+      "ticker": "AKRBP.OL",
+      "observations": 6,
+      "avg_return_1d": -0.041439,
+      "hit_rate": 0.0
+    },
+    {
+      "ticker": "EQNR.OL",
+      "observations": 6,
+      "avg_return_1d": -0.009283,
+      "hit_rate": 0.0
+    },
+    {
+      "ticker": "NESTE.HE",
+      "observations": 6,
+      "avg_return_1d": -0.007407,
+      "hit_rate": 0.0
+    }
+  ],
+  "weight_caps": [
+    {
+      "scope": "ticker",
+      "ticker": "AKRBP.OL",
+      "max_weight": 0.07,
+      "reason": "recurring_underperformer"
+    },
+    {
+      "scope": "ticker",
+      "ticker": "EQNR.OL",
+      "max_weight": 0.07,
+      "reason": "recurring_underperformer"
+    },
+    {
+      "scope": "ticker",
+      "ticker": "NESTE.HE",
+      "max_weight": 0.07,
+      "reason": "recurring_underperformer"
+    }
+  ],
   "turnover_guidance": {
     "instruction": "Keep at least 50% of weight in existing holdings unless a replacement has materially stronger signals.",
     "min_hold_weight": 0.5,
@@ -22,55 +71,66 @@
   "decision_quality": {
     "avg_hold_vs_replace_1d": 0.023721,
     "positive_hold_vs_replace_rate": 1.0,
-    "avg_slot_opportunity_cost_1d": -0.013749,
-    "avg_turnover_estimate": 0.25,
+    "avg_slot_opportunity_cost_1d": -0.005737,
+    "avg_turnover_estimate": 0.366667,
     "observations": 1,
     "status": "insufficient_data"
   },
-  "confidence_notes": [],
+  "confidence_notes": [
+    {
+      "tag": "overbought",
+      "instruction": "Prefer overbought setups when other signals are comparable.",
+      "observations": 6
+    },
+    {
+      "tag": "at_52w_high",
+      "instruction": "Prefer at_52w_high setups when other signals are comparable.",
+      "observations": 7
+    }
+  ],
   "rationale_stats": {
     "momentum": {
-      "observations": 5,
-      "avg_return_1d": -0.007934,
-      "hit_rate": 0.2
+      "observations": 9,
+      "avg_return_1d": -0.007801,
+      "hit_rate": 0.2222
     },
     "high_sharpe": {
-      "observations": 5,
-      "avg_return_1d": -0.007934,
-      "hit_rate": 0.2
+      "observations": 9,
+      "avg_return_1d": -0.007801,
+      "hit_rate": 0.2222
     },
     "breakout": {
-      "observations": 1,
-      "avg_return_1d": -0.009283,
-      "hit_rate": 0.0
+      "observations": 2,
+      "avg_return_1d": 0.009153,
+      "hit_rate": 0.5
     },
     "consensus": {
-      "observations": 4,
-      "avg_return_1d": -0.008066,
+      "observations": 8,
+      "avg_return_1d": -0.007851,
       "hit_rate": 0.25
     },
     "non_us_differentiator": {
-      "observations": 3,
+      "observations": 6,
       "avg_return_1d": -0.019376,
       "hit_rate": 0.0
     },
     "overbought": {
-      "observations": 3,
+      "observations": 6,
       "avg_return_1d": 0.003633,
       "hit_rate": 0.3333
     },
     "at_52w_high": {
-      "observations": 4,
-      "avg_return_1d": 0.000442,
-      "hit_rate": 0.25
+      "observations": 7,
+      "avg_return_1d": 0.001809,
+      "hit_rate": 0.2857
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": -0.016964,
-    "tier2_avg_return_1d": -0.001128,
+    "tier1_avg_return_1d": -0.013618,
+    "tier2_avg_return_1d": -0.00319,
     "tier3_avg_return_1d": -0.01721,
-    "tier1_observations": 4,
-    "tier2_observations": 5,
+    "tier1_observations": 6,
+    "tier2_observations": 7,
     "tier3_observations": 2
   },
   "changed_hard_rules": [],

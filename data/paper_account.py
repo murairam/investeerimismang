@@ -176,18 +176,41 @@ def sync_verified_positions(
         history.append(history_entry)
     history = history[-60:]
 
+    verified_weights = {pos["ticker"]: round(float(pos["weight"]), 6) for pos in positions}
+
     _save_raw(
         {
             "start_date": state.get("start_date") or as_of_date,
             "initial_capital": initial_capital,
             "cash": 0.0,
             "positions": target_positions,
+            "verified_weights": verified_weights,
             "pending_order": None,
             "history": history,
             "last_rebalanced_date": as_of_date,
             "last_equity": round(equity, 8),
         }
     )
+
+
+def load_verified_as_proposal() -> "Optional[PortfolioProposal]":
+    """Load the verified game portfolio (from sync_verified_positions) as a PortfolioProposal.
+
+    Returns None if no verified portfolio has been synced yet.
+    Used by the orchestrator to show correct 'Changes from Yesterday' in Discord.
+    """
+    from portfolio.models import Position
+
+    state = _load_raw()
+    weights = state.get("verified_weights")
+    if not weights:
+        return None
+    try:
+        positions = [Position(ticker=t, weight=w, rationale="verified game position") for t, w in weights.items()]
+        return PortfolioProposal(positions=positions)
+    except Exception as exc:
+        logger.warning("Could not build verified proposal from paper account: %s", exc)
+        return None
 
 
 def reset_for_live(start_date: str) -> None:
@@ -279,18 +302,20 @@ def rebalance_to_proposal(
         history.append(history_entry)
     history = history[-60:]
 
-    _save_raw(
-        {
-            "start_date": state.get("start_date") or date.today().isoformat(),
-            "initial_capital": initial_capital,
-            "cash": round(active_cash, 8),
-            "positions": {ticker: round(shares, 8) for ticker, shares in active_positions.items()},
-            "pending_order": pending_order,
-            "history": history,
-            "last_rebalanced_date": as_of_date,
-            "last_equity": round(equity_after_execution, 8),
-        }
-    )
+    save_data: dict = {
+        "start_date": state.get("start_date") or date.today().isoformat(),
+        "initial_capital": initial_capital,
+        "cash": round(active_cash, 8),
+        "positions": {ticker: round(shares, 8) for ticker, shares in active_positions.items()},
+        "pending_order": pending_order,
+        "history": history,
+        "last_rebalanced_date": as_of_date,
+        "last_equity": round(equity_after_execution, 8),
+    }
+    # Preserve verified_weights from the game sync — never overwrite with AI proposal data
+    if state.get("verified_weights"):
+        save_data["verified_weights"] = state["verified_weights"]
+    _save_raw(save_data)
 
     return {
         "as_of_date": as_of_date,

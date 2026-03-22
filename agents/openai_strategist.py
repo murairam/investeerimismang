@@ -231,8 +231,11 @@ class OpenAIStrategist(BaseAgent):
                 f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d)"
             )
 
+        game_equity = snapshot.get("game_equity", 10000.0)
+        game_ret = snapshot.get("game_return_pct", 0.0)
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
+            f"Game account: €{game_equity:,.0f} ({game_ret:+.2%} since start, started €10,000)",
             f"Benchmark (S&P 500) {MOMENTUM_WINDOW}-day return: {snapshot['benchmark_return']:.1%}",
             f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
             f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} (>1=calm, <0.9=fear) | Credit spreads 20d: {credit_str} (positive=risk-on)",

@@ -39,7 +39,7 @@ from data.earnings_fetcher import fetch_upcoming_earnings, format_earnings_oppor
 from data.news_fetcher import fetch_candidate_news, format_news_for_prompt
 from data.insider_fetcher import fetch_insider_trades, format_insider_context
 from data.trends_fetcher import fetch_search_interest, format_trends_context
-from data.paper_account import rebalance_to_proposal, reset_for_live
+from data.paper_account import rebalance_to_proposal, reset_for_live, load_verified_as_proposal, _load_raw as _load_raw_paper_account
 from data.portfolio_store import (
     build_signal_snapshot,
     load_last,
@@ -99,6 +99,15 @@ class AlphaSharkOrchestrator:
                 comm.get("wti_price", float("nan")) if not math.isnan(comm.get("wti_price", float("nan"))) else 0,
                 comm.get("natgas_price", float("nan")) if not math.isnan(comm.get("natgas_price", float("nan"))) else 0,
             )
+
+        # Step 1b: inject verified game equity into snapshot so agents see real performance
+        _pa = _load_raw_paper_account()
+        if _pa:
+            snapshot["game_equity"] = float(_pa.get("last_equity", 10000.0))
+            snapshot["game_return_pct"] = (snapshot["game_equity"] / float(_pa.get("initial_capital", 10000.0)) - 1)
+        else:
+            snapshot["game_equity"] = 10000.0
+            snapshot["game_return_pct"] = 0.0
 
         # Step 1b: inject learning context (what worked / didn't in past runs)
         learning_context = get_learning_context()
@@ -201,9 +210,12 @@ class AlphaSharkOrchestrator:
         )
 
         # Step 2: load previous portfolio for continuity
-        prior_portfolio = load_last()
+        # Prefer the verified game portfolio (from verify.py) so agents reason about
+        # actual holdings, not the AI's prior proposal which may differ from the game.
+        prior_portfolio = load_verified_as_proposal() or load_last()
         if prior_portfolio:
-            logger.info("Prior portfolio loaded (%d positions)", len(prior_portfolio.positions))
+            source = "verified game" if load_verified_as_proposal() else "AI proposal"
+            logger.info("Prior portfolio loaded (%d positions, source: %s)", len(prior_portfolio.positions), source)
         else:
             logger.info("No previous portfolio — cold start")
 
@@ -581,10 +593,13 @@ class AlphaSharkOrchestrator:
             logger.info("Live handoff generated: %s", handoff_info["path"])
 
         # Step 8: Send to Discord
+        # Use the verified game portfolio as the diff baseline so "Changes from Yesterday"
+        # reflects actual game holdings, not the AI's previous proposal.
+        verified_prior = load_verified_as_proposal()
         embed = self.dispatcher.format_embed(
             final_proposal,
             snapshot,
-            prior_proposal=prior_portfolio,
+            prior_proposal=verified_prior or prior_portfolio,
             paper_metrics=paper_metrics,
         )
         # Mention user in LIVE mode so they get a notification

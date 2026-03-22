@@ -1,85 +1,47 @@
 {
-  "date": "2026-03-21",
+  "date": "2026-03-22",
+  "source": "verified",
   "positions": [
     {
-      "ticker": "AKRBP.OL",
-      "weight": 0.25,
-      "rationale": "Triple-consensus pick with the strongest volume confirmation in the core group (vol_ratio 3.41) and solid 5d acceleration; earns max weight as the cleanest high-conviction energy continuation.",
-      "tags": [
-        "momentum",
-        "high_sharpe",
-        "consensus",
-        "non_us_differentiator"
-      ]
-    },
-    {
-      "ticker": "EQNR.OL",
-      "weight": 0.15,
-      "rationale": "Triple-consensus leader with exceptional 20d/5d momentum, but RSI > 82 near highs and vol_ratio below the 1.8 override triggers the overbought cap, so weight is limited to 15%.",
-      "tags": [
-        "momentum",
-        "high_sharpe",
-        "consensus",
-        "non_us_differentiator",
-        "overbought",
-        "at_52w_high"
-      ]
-    },
-    {
       "ticker": "APA",
-      "weight": 0.15,
-      "rationale": "Triple-consensus and top catalyst/momentum name with 5d +13.5% and vol_ratio 2.73, but Devil flagged HIGH risk and it is at the 52-week high with RSI 84.9, so weight is cut to the 15% cap.",
-      "tags": [
-        "momentum",
-        "high_sharpe",
-        "breakout",
-        "consensus",
-        "catalyst",
-        "overbought",
-        "at_52w_high"
-      ]
+      "weight": 0.25,
+      "rationale": "verified from game portfolio 2026-03-22",
+      "tags": []
     },
     {
       "ticker": "VLO",
-      "weight": 0.1,
-      "rationale": "Triple-consensus refiner with outstanding volume confirmation (vol_ratio 5.22), but weaker recent acceleration than the E&Ps and a HIGH-risk Devil flag justify a smaller tactical weight.",
-      "tags": [
-        "momentum",
-        "high_sharpe",
-        "breakout",
-        "consensus",
-        "at_52w_high"
-      ]
-    },
-    {
-      "ticker": "XOM",
       "weight": 0.2,
-      "rationale": "Unique catalyst pick that fits the permanent strategy guidance for the 2026 energy rotation; slower than APA but still near highs with acceptable volume and adds a steadier mega-cap energy leg.",
-      "tags": [
-        "momentum",
-        "high_sharpe",
-        "catalyst",
-        "at_52w_high"
-      ]
+      "rationale": "verified from game portfolio 2026-03-22",
+      "tags": []
     },
     {
-      "ticker": "NESTE.HE",
+      "ticker": "DVN",
+      "weight": 0.2,
+      "rationale": "verified from game portfolio 2026-03-22",
+      "tags": []
+    },
+    {
+      "ticker": "LYB",
       "weight": 0.15,
-      "rationale": "Best non-consensus add from the momentum set: 5d +8.4% with vol_ratio 1.29 gives better acceleration than LYB/DVN, and it diversifies the energy expression without becoming filler.",
-      "tags": [
-        "momentum",
-        "high_sharpe",
-        "consensus",
-        "diversifier",
-        "non_us_differentiator",
-        "overbought",
-        "at_52w_high"
-      ]
+      "rationale": "verified from game portfolio 2026-03-22",
+      "tags": []
+    },
+    {
+      "ticker": "AKAM",
+      "weight": 0.1,
+      "rationale": "verified from game portfolio 2026-03-22",
+      "tags": []
+    },
+    {
+      "ticker": "EQNR.OL",
+      "weight": 0.1,
+      "rationale": "verified from game portfolio 2026-03-22",
+      "tags": []
     }
   ],
-  "reasoning": "The portfolio is built around the four triple-consensus energy names, with AKRBP.OL receiving the highest weight because it has the best combination of consensus, acceleration, and volume confirmation. I added XOM as a strategy-aligned catalyst name and NESTE.HE as the best remaining momentum slot winner, while cutting back APA, EQNR.OL, and VLO to respect the explicit overbought/HIGH-risk constraints. Portfolio beta should move materially higher than the strategist's 0.07 and closer to a workable NEUTRAL-range profile, while staying aggressively concentrated in the only sector showing clear leadership.",
-  "confidence": 0.84,
-  "learning_reflection": "I leaned into the energy-rotation mandate and kept exactly six high-conviction names, but adapted by enforcing the new overbought and Devil-risk caps instead of blindly max-weighting every consensus winner.",
+  "reasoning": "The portfolio is built around the strongest independently validated consensus cluster: EQNR.OL, VLO, NESTE.HE, APA, and AKRBP.OL, with EQNR and VLO receiving the highest weights because they combine consensus with better risk-adjusted signal quality and no hard Devil cap. I included one catalyst-driven unique pick, DVN, to keep at least one non-consensus breakout from the catalyst hunter, while sharply reducing APA and AKRBP.OL due to explicit HIGH-risk flags; portfolio beta should land near the NEUTRAL target range and far above the strategist's too-low 0.11 baseline.",
+  "confidence": 0.82,
+  "learning_reflection": "I stayed concentrated in the energy leadership pocket to preserve right-tail upside, but adapted by cutting flagged overextended names harder and avoiding slow filler in this cautious-neutral regime.",
   "performance_history": [
     {
       "date": "2026-03-17",
@@ -160,6 +122,21 @@
         "VLO": -0.00913,
         "XOM": 0.009547,
         "NESTE.HE": -0.007407
+      }
+    },
+    {
+      "date": "2026-03-22",
+      "benchmark_return_20d": -0.0583,
+      "portfolio_return_1d": -0.011145,
+      "benchmark_return_1d": -0.015138,
+      "alpha_1d": 0.003993,
+      "position_returns": {
+        "EQNR.OL": -0.009283,
+        "AKRBP.OL": -0.041439,
+        "APA": 0.027588,
+        "NESTE.HE": -0.007407,
+        "DVN": -0.002665,
+        "MU": -0.048101
       }
     }
   ],
@@ -1437,16 +1414,103 @@
           }
         ]
       },
+      "performance": {
+        "date": "2026-03-22",
+        "portfolio_return_1d": -0.011145,
+        "benchmark_return_1d": -0.015138,
+        "alpha_1d": 0.003993,
+        "position_returns": {
+          "EQNR.OL": -0.009283,
+          "AKRBP.OL": -0.041439,
+          "APA": 0.027588,
+          "NESTE.HE": -0.007407,
+          "DVN": -0.002665,
+          "MU": -0.048101
+        }
+      },
+      "outcomes": {
+        "1d": {
+          "portfolio_return": -0.011145,
+          "benchmark_return": -0.015138,
+          "alpha": 0.003993,
+          "position_returns": {
+            "EQNR.OL": -0.009283,
+            "AKRBP.OL": -0.041439,
+            "APA": 0.027588,
+            "NESTE.HE": -0.007407,
+            "DVN": -0.002665,
+            "MU": -0.048101
+          }
+        }
+      },
+      "decision_evaluation": {
+        "new_avg_return_1d": null,
+        "dropped_avg_return_1d": 0.009547,
+        "hold_vs_replace_1d": null,
+        "selected_avg_return_1d": -0.007934,
+        "alternatives_avg_return_1d": -0.005659,
+        "slot_opportunity_cost_1d": 0.002275
+      }
+    },
+    {
+      "date": "2026-03-22",
+      "provenance": "verified",
+      "final_portfolio": {
+        "positions": [
+          {
+            "ticker": "APA",
+            "weight": 0.25,
+            "rationale": "verified from game portfolio 2026-03-22",
+            "tags": []
+          },
+          {
+            "ticker": "VLO",
+            "weight": 0.2,
+            "rationale": "verified from game portfolio 2026-03-22",
+            "tags": []
+          },
+          {
+            "ticker": "DVN",
+            "weight": 0.2,
+            "rationale": "verified from game portfolio 2026-03-22",
+            "tags": []
+          },
+          {
+            "ticker": "LYB",
+            "weight": 0.15,
+            "rationale": "verified from game portfolio 2026-03-22",
+            "tags": []
+          },
+          {
+            "ticker": "AKAM",
+            "weight": 0.1,
+            "rationale": "verified from game portfolio 2026-03-22",
+            "tags": []
+          },
+          {
+            "ticker": "EQNR.OL",
+            "weight": 0.1,
+            "rationale": "verified from game portfolio 2026-03-22",
+            "tags": []
+          }
+        ],
+        "reasoning": "The portfolio is built around the strongest independently validated consensus cluster: EQNR.OL, VLO, NESTE.HE, APA, and AKRBP.OL, with EQNR and VLO receiving the highest weights because they combine consensus with better risk-adjusted signal quality and no hard Devil cap. I included one catalyst-driven unique pick, DVN, to keep at least one non-consensus breakout from the catalyst hunter, while sharply reducing APA and AKRBP.OL due to explicit HIGH-risk flags; portfolio beta should land near the NEUTRAL target range and far above the strategist's too-low 0.11 baseline.",
+        "confidence": 0.82,
+        "learning_reflection": "I stayed concentrated in the energy leadership pocket to preserve right-tail upside, but adapted by cutting flagged overextended names harder and avoiding slow filler in this cautious-neutral regime."
+      },
       "performance": {},
-      "outcomes": {}
+      "signal_snapshot": {},
+      "validation": {
+        "verified_override": true
+      }
     }
   ],
-  "source": "ai_proposed",
   "close_prices": {
-    "AKRBP.OL": 351.6000061035156,
+    "AKAM": 110.4800033569336,
     "APA": 39.11000061035156,
+    "DVN": 48.65999984741211,
     "EQNR.OL": 394.8999938964844,
-    "NESTE.HE": 29.479999542236328,
+    "LYB": 73.31999969482422,
     "VLO": 239.86000061035156
   }
 }

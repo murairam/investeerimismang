@@ -490,8 +490,11 @@ class OpenAIRiskManager(BaseAgent):
                 if _lag:
                     sector_rotation_line += f"  |  Laggards: {', '.join(_lag[:4])}"
 
+        game_equity = snapshot.get("game_equity", 10000.0)
+        game_ret = snapshot.get("game_return_pct", 0.0)
         lines = [
             f"## Synthesis task — {date.today().isoformat()}",
+            f"Game account: €{game_equity:,.0f} ({game_ret:+.2%} since start) — competition mindset required.",
             f"Regime: {regime} | SPX vs 200d: {spx_vs:+.1%} | VIX: {vix_str} | S&P 500 20d: {snapshot['benchmark_return']:+.1%}",
             f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} | Credit spreads 20d: {credit_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",

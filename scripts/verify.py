@@ -43,15 +43,18 @@ def _build_name_map() -> dict[str, str]:
 # Reverse map: normalised game name → ticker
 _NAME_TO_TICKER: dict[str, str] = _build_name_map()
 
+# All known tickers: GAME_NAMES + full symbol master (covers US tickers not in display names)
+_ALL_TICKERS: set[str] = set(GAME_NAMES.keys()) | set(load_symbol_master().get("tickers", {}).keys())
+
 
 def _resolve_ticker(raw: str) -> Optional[str]:
     """
     Accept a ticker symbol OR a game display name and return the canonical ticker.
     Tries exact match first, then prefix/substring match on normalised game names.
     """
-    # Exact ticker match (e.g. "CVX", "MAERSK-B.CO")
+    # Exact ticker match (e.g. "CVX", "VLO", "MAERSK-B.CO")
     upper = raw.upper()
-    if upper in GAME_NAMES:
+    if upper in _ALL_TICKERS:
         return upper
 
     normed = _norm(raw)
@@ -191,7 +194,17 @@ def main() -> None:
 
     if answer == "y":
         today = date.today().isoformat()
-        save_verified(data.get("positions", []), today, close_prices=data.get("close_prices"))
+        positions = data.get("positions", [])
+        save_verified(positions, today, close_prices=data.get("close_prices"))
+
+        equity = _ask_equity()
+        price_map = _fetch_prices([p["ticker"] for p in positions])
+        if price_map and equity > 0:
+            sync_verified_positions(positions, equity, today, price_map)
+            print(f"  Paper account synced: equity €{equity:.0f}.")
+        else:
+            print("  ⚠️  Could not fetch prices — paper account not updated.")
+
         mark_verified(today)
         mark_verified_entry(today, mode=_mode_for_date(today))
         print("\n  ✅ Portfolio confirmed. Record is up to date.\n")

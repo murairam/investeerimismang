@@ -923,3 +923,40 @@ Winners: APA +2.8%, XOM +1.0% | Losers: AKRBP.OL -4.1%, EQNR.OL -0.9%, VLO -0.9%
 
 ---
 
+## 2026-03-22 13:17:19
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 26.8 · S&P 500 20d: -5.8%
+
+**Verification:** Verified against actual game holdings at 13:27:03.
+
+**Yesterday's P&L:** Portfolio -1.1% · Benchmark -1.5% · Alpha +0.4%
+Winners: APA +2.8% | Losers: MU -4.8%, AKRBP.OL -4.1%, EQNR.OL -0.9%
+
+**Paper account:** Equity €9,861.00 (start €10,000) · Today +0.00% · Since start -1.39% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** Consensus was concentrated in energy, with APA and LYB triple-validated and VLO/DVN/EQNR.OL double-validated; I kept the strongest consensus names but cut weaker/low-beta repeat laggards like AKRBP.OL and excluded HIGH-risk NEL.OL. I included AKAM as the one non-energy catalyst to avoid a pure one-factor book while preserving aggression; portfolio beta should move materially above the strategist's 0.06 and into a more competitive neutral-regime range, though still tilted to the energy rotation that is clearly dominating current signals.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **APA** | 25.0% | Triple-consensus core winner with the strongest validated live track record, explosive 5d momentum and vol_ratio 2.73; despite crowding/RSI risk, the >1.8 volume exception supports full conviction weight. |
+| 2 | **VLO** | 20.0% | Double-consensus catalyst name with the best volume confirmation in the set (vol_ratio 5.22), giving a differentiated downstream energy angle and helping lift portfolio beta from the overly defensive strategist baseline. |
+| 3 | **DVN** | 20.0% | Double-consensus US energy breakout with very strong volume confirmation (vol_ratio 3.55) and better acceleration than LYB/VLO, earning a high-conviction slot despite medium risk. |
+| 4 | **LYB** | 15.0% | Triple-consensus but decelerating chemicals leader, so it stays in as independently validated exposure with strong volume support while being capped below the top energy names due to weaker 5d momentum. |
+| 5 | **AKAM** | 10.0% | Best non-energy unique catalyst pick: strong breakout-style volume (2.32), low crowding, and a cleaner slot than dead-money Baltic ideas or HIGH-risk NEL.OL, adding one non-correlated right-tail shot. |
+| 6 | **EQNR.OL** | 10.0% | Double-consensus Nordic energy leader with elite 5d momentum, but recurring-loser history and overbought-near-high conditions argue for a reduced weight rather than a core allocation. |
+
+**Changes from yesterday:**
+- ➕ Added **VLO** at 20.0%
+- ➕ Added **LYB** at 15.0%
+- ➕ Added **AKAM** at 10.0%
+- ➖ Removed **AKRBP.OL** (was 22.0%)
+- ➖ Removed **NESTE.HE** (was 15.0%)
+- ➖ Removed **MU** (was 8.0%)
+- ▲ **APA**: 20.0% → 25.0% (+5.0%)
+- ▲ **DVN**: 10.0% → 20.0% (+10.0%)
+- ▼ **EQNR.OL**: 25.0% → 10.0% (-15.0%)
+
+---
+
