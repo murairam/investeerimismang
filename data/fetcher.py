@@ -4,6 +4,7 @@ Market data fetching and momentum signal computation.
 import logging
 import math
 import os
+import re
 from datetime import date, timedelta
 from typing import Optional, TypedDict
 
@@ -67,6 +68,7 @@ class CandidateInfo(TypedDict):
 
 class MarketSnapshot(TypedDict):
     candidates: list[CandidateInfo]
+    ranked_candidates: list[dict]
     benchmark_return: float
     as_of_date: str
     regime: str           # "BULL" | "BEAR" | "NEUTRAL"
@@ -84,6 +86,11 @@ class MarketSnapshot(TypedDict):
     iv_proxy: dict        # {ticker: float | None} implied volatility; None if no options chain
     sector_momentum: dict # {sector: {avg_mom_20d, avg_mom_5d, avg_rsi, breadth, count}}
     rotation_risk: dict  # {sector: {"level": "HIGH"|"MEDIUM", "reason": str}} for exhausted leading sectors
+
+
+def sanitize_ticker(ticker: str) -> str:
+    """Remove any characters that could break prompt formatting."""
+    return re.sub(r'[^A-Z0-9.\-]', '', ticker.upper())[:12]
 
 
 def _compute_competition_scores(records: list[dict], regime: str) -> None:
@@ -378,7 +385,8 @@ class DataFetcher:
 
     def _load_eodhd_series(self, provider_symbol: str, from_date: str, to_date: str, api_key: str) -> list[dict]:
         os.makedirs(_EODHD_CACHE_DIR, exist_ok=True)
-        safe_symbol = provider_symbol.replace("/", "_").replace(".", "_")
+        # Strip all non-alphanumeric chars (including path separators) to prevent traversal
+        safe_symbol = re.sub(r"[^A-Za-z0-9_-]", "_", provider_symbol)[:40]
         cache_path = os.path.join(_EODHD_CACHE_DIR, f"{safe_symbol}_{to_date}.json")
         if os.path.exists(cache_path):
             try:
@@ -1186,6 +1194,25 @@ class DataFetcher:
 
         # Sort by competition score (primary) then Sharpe (tiebreak). Pure signal meritocracy.
         records.sort(key=lambda x: (x.get("competition_score", 0.0), x["sharpe_20d"]), reverse=True)
+
+        # Remove highly correlated pairs among the top candidates only.
+        # Intent: prevent truly substitutable picks (same-commodity pure plays, dual-class shares)
+        # from wasting adjacent slots. Only applied to the top 30 so the broader pool stays
+        # intact as alternatives — bulk-market co-movement at 0.93+ threshold is the target.
+        _corr_top = min(30, len(records))
+        _filtered_top = self.apply_correlation_filter(records[:_corr_top], close_ff)
+        _kept = {r["ticker"] for r in _filtered_top}
+        records = _filtered_top + [r for r in records[_corr_top:] if r["ticker"] not in _kept]
+
+        ranked_candidates = [
+            {
+                "ticker": r["ticker"],
+                "competition_score": float(r.get("competition_score", 0.0)),
+                "market": r.get("market", "UNKNOWN"),
+            }
+            for r in records
+        ]
+        logger.info("Ranked candidates prepared: %d tickers", len(ranked_candidates))
         top = records[:TOP_N_CANDIDATES]
 
         # Targeted dividend yield fetch — only for the ~40 candidates, not the full 111-ticker universe.
@@ -1251,6 +1278,7 @@ class DataFetcher:
         candidates: list[CandidateInfo] = [CandidateInfo(**r) for r in top]
         return MarketSnapshot(
             candidates=candidates,
+            ranked_candidates=ranked_candidates,
             benchmark_return=bench_momentum,
             as_of_date=as_of,
             regime=regime,

@@ -2,11 +2,19 @@
 Entry point — called by GitHub Actions (and usable locally).
 """
 import logging
+import os
 import sys
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Fail fast with a clear error if required secrets are missing,
+# before any agent is initialised or API calls are made.
+_REQUIRED_ENV = ["OPENAI_API_KEY", "GEMINI_API_KEY", "DISCORD_WEBHOOK_URL"]
+_missing = [k for k in _REQUIRED_ENV if not os.environ.get(k)]
+if _missing:
+    sys.exit(f"ERROR: Missing required environment variables: {', '.join(_missing)}")
 
 logging.basicConfig(
     level=logging.INFO,

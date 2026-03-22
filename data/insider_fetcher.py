@@ -7,6 +7,7 @@ No API key needed: uses the free federal SEC EDGAR database.
 import json
 import logging
 import os
+import re
 import time
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,7 +22,25 @@ _EDGAR_BASE        = "https://data.sec.gov"
 _EDGAR_ARCHIVES    = "https://www.sec.gov/Archives/edgar/data"
 _CIK_CACHE_PATH    = os.path.join(os.path.dirname(__file__), "sec_cik_cache.json")
 _CIK_CACHE_TTL     = 7 * 24 * 3600   # 7 days
-_HEADERS           = {"User-Agent": "AlphaShark/1.0 alphashark-bot@example.com"}
+# SEC EDGAR requires a valid contact email in User-Agent per their access policy
+_HEADERS           = {"User-Agent": "AlphaShark/1.0 contact@alphashark.local"}
+
+_MAX_TITLE_LEN = 80
+_INJECTION_RE = re.compile(
+    r"^\s*(ignore|disregard|forget|override|system\s*:|<[^>]+>|\[inst\])",
+    re.IGNORECASE,
+)
+
+
+def _sanitize_external_text(text: str, max_len: int = _MAX_TITLE_LEN) -> str:
+    """Strip SEC-sourced text to safe printable ASCII, reject injection patterns."""
+    if not isinstance(text, str):
+        return "Insider"
+    text = re.sub(r"[^\x20-\x7E]", " ", text)
+    text = text[:max_len].strip()
+    if _INJECTION_RE.match(text):
+        return "Insider"
+    return text or "Insider"
 _REQUEST_DELAY     = 0.11             # < 10 req/s SEC limit
 _LOOKBACK_DAYS     = 30
 _MIN_VALUE_USD     = 50_000
@@ -121,7 +140,7 @@ def _parse_form4_xml(xml_text: str, ticker: str) -> list[dict]:
         trades.append({
             "ticker":           ticker,
             "date":             tx_date,
-            "insider_title":    title or "Insider",
+            "insider_title":    _sanitize_external_text(title or "Insider"),
             "shares":           int(shares),
             "value_usd":        value_usd,
             "transaction_type": "P",

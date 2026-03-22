@@ -7,6 +7,7 @@ import json
 import logging
 import math
 import os
+import tempfile
 from collections import defaultdict
 from typing import Optional
 
@@ -117,8 +118,11 @@ def load_learning_state() -> dict:
 
 
 def save_learning_state(state: dict) -> None:
-    with open(_STATE_PATH, "w") as f:
+    dir_ = os.path.dirname(_STATE_PATH)
+    with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp") as f:
         json.dump(state, f, indent=2)
+        tmp = f.name
+    os.replace(tmp, _STATE_PATH)
 
 
 def generate_learning_state() -> dict:

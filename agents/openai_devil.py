@@ -11,10 +11,11 @@ import math
 import os
 from typing import Optional
 
-from openai import OpenAI
+from openai import APIConnectionError, APITimeoutError, BadRequestError, OpenAI
 
+import config
 from data.cost_tracker import log_usage
-from data.fetcher import MarketSnapshot
+from data.fetcher import MarketSnapshot, sanitize_ticker
 from portfolio.models import PortfolioProposal
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,27 @@ class OpenAIDevil:
     MAX_RETRIES = 2
 
     def __init__(self) -> None:
+        self._openrouter_enabled = config.USE_OPENROUTER_FOR_SECONDARY_AGENTS and bool(os.environ.get("OPENROUTER_API_KEY"))
+        if self._openrouter_enabled:
+            self.client = OpenAI(
+                api_key=os.environ["OPENROUTER_API_KEY"],
+                base_url=config.OPENROUTER_BASE_URL,
+            )
+            self.model = config.OPENROUTER_DEVIL_MODEL
+        else:
+            self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+            self.model = self.MODEL
+
+    def _switch_to_openai_fallback(self) -> None:
+        if self.model == self.MODEL:
+            return
+        logger.warning(
+            "Switching Devil from OpenRouter model '%s' to OpenAI fallback '%s'",
+            self.model,
+            self.MODEL,
+        )
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+        self.model = self.MODEL
 
     def challenge(
         self,
@@ -120,34 +141,53 @@ class OpenAIDevil:
 
         for ticker in tickers:
             c = signal_map.get(ticker)
+            safe_ticker = sanitize_ticker(ticker)
             if c:
                 lines.append(
-                    f"{ticker:<12} {fmt(c['momentum']):>8} {fmt(c['sharpe_20d'], '.2f'):>7} "
+                    f"{safe_ticker:<12} {fmt(c['momentum']):>8} {fmt(c['sharpe_20d'], '.2f'):>7} "
                     f"{fmt(c['rsi_14'], '.1f'):>6} {fmt(c['vs_index']):>8} "
                     f"{fmt(c['pct_from_52w_high']):>7} {fmt(c['beta'], '.2f'):>6} "
                     f"{fmt(c['vol_ratio'], '.2f'):>6} {fmt(c['mom_5d']):>7}"
                 )
             else:
-                lines.append(f"{ticker:<12} (not in today's candidate list)")
+                lines.append(f"{safe_ticker:<12} (not in today's candidate list)")
 
         lines += ["", "For each ticker, give the strongest reason it might FAIL. Cite the numbers. Only flag dead-money picks as HIGH risk when vol_ratio < 0.8, |mom_5d| < 1%, and beta < 0.5. Do not call vol_ratio above 1.0 low."]
         return "\n".join(lines)
 
     def _call_openai(self, user_message: str) -> dict[str, dict]:
-        response = self.client.chat.completions.create(
-            model=self.MODEL,
-            response_format={"type": "json_object"},
-            temperature=0.1,
-            messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
-                {"role": "user", "content": user_message},
-            ],
-        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                response_format={"type": "json_object"},
+                temperature=0.1,
+                timeout=config.API_TIMEOUT_SECONDS,
+                messages=[
+                    {"role": "system", "content": _SYSTEM_PROMPT},
+                    {"role": "user", "content": user_message},
+                ],
+            )
+        except (BadRequestError, APIConnectionError, APITimeoutError) as exc:
+            if self._openrouter_enabled and self.model != self.MODEL:
+                logger.warning("OpenRouter Devil request failed (%s). Falling back to OpenAI.", exc)
+                self._switch_to_openai_fallback()
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    response_format={"type": "json_object"},
+                    temperature=0.1,
+                    timeout=config.API_TIMEOUT_SECONDS,
+                    messages=[
+                        {"role": "system", "content": _SYSTEM_PROMPT},
+                        {"role": "user", "content": user_message},
+                    ],
+                )
+            else:
+                raise
 
         usage = response.usage
         cost = log_usage(
             agent_name="OpenAIDevil",
-            model=self.MODEL,
+            model=self.model,
             input_tokens=usage.prompt_tokens,
             output_tokens=usage.completion_tokens,
         )

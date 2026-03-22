@@ -1,17 +1,70 @@
 # AlphaShark
 
-An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data, scores the full trading universe, runs an all-OpenAI multi-agent pipeline, validates the final portfolio against game rules, and posts the result to Discord.
+![Python](https://img.shields.io/badge/python-3.11+-blue)
+![CI](https://github.com/marionstriz/investeerimismang/actions/workflows/alphashark.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-**Game period: 6 April – 19 June 2026**
+An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data across ~630 selectable tickers in 6 markets, scores the full universe, runs a multi-model adversarial AI ensemble, validates the final portfolio against competition rules, and posts the recommendation to Discord.
+
+**Game period: 6 April – 19 June 2026 · 844 participants · objective: rank #1**
+
+---
+
+## Engineering Highlights
+
+These are the non-obvious design decisions worth explaining in depth.
+
+**Adversarial multi-model ensemble**
+Three agents propose portfolios in parallel — GPT-5.4 (Strategist), Gemini 2.5 Flash (Challenger), and GPT-5.4-nano (Full Analyst). Using two independent model families (OpenAI + Google) reduces correlated reasoning errors that a single-provider ensemble would share. The Devil's Advocate then generates bear cases specifically for the top combined picks before the Risk Manager synthesises the final portfolio. This adversarial architecture is inspired by red-teaming practices in security.
+
+**Self-improving learning loop**
+Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record without any human labelling.
+
+**Cross-agent debate (second pass)**
+After initial proposals are generated, each agent runs a lightweight second-pass LLM call to surface explicit agreements and disagreements with the other two proposals. The debate summary is injected into the Risk Manager's context. This was added because the first pass was too independent — agents couldn't see each other's reasoning and converged on the same overbought names.
+
+**Competition-optimized quantitative ranking**
+Candidates are ranked by `competition_score`, a regime-specific Z-score composite: in BULL regimes it weights `mom_20d` 35%, `mom_5d` 25%, `sharpe_20d` 20%, `beta` 20% — different weights in NEUTRAL and BEAR. The regime is determined by a 0–100 composite score from VIX level, VIX term structure, SPX vs 200d SMA, market breadth, and credit spreads.
+
+**SHA256 strategy lock in LIVE mode**
+Once the competition starts, `live_mode_lock.json` stores SHA256 fingerprints of all strategy files. Any accidental drift (edited prompt, changed config) is caught at startup and the pipeline refuses to run. This prevents the classic mistake of iterating on a live competition system mid-game.
+
+**Symbol aliasing across 6 markets**
+Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (fallback provider). `symbol_master.json` maintains the canonical mapping. Yahoo is the primary source; EODHD is used only for a curated override set of edge-case tickers where Yahoo's coverage is unreliable.
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| Language | Python 3.11+ | Type hints, dataclasses, async-compatible |
+| AI — Strategist + Risk Manager | OpenAI GPT-5.4 | Strongest instruction-following for structured JSON portfolio output |
+| AI — Challenger | Google Gemini 2.5 Flash | Independent model family reduces correlated reasoning errors vs pure OpenAI stack |
+| AI — Challenger fallback | Groq Llama 3.3 70B | Free-tier fallback when Gemini is unavailable; accessed via OpenAI-compatible API |
+| AI — Devil + Full Analyst | OpenRouter Qwen3-32B | ~85% cost saving vs GPT-5.4-nano for secondary agents; configurable via `USE_OPENROUTER_FOR_SECONDARY_AGENTS` |
+| Market data | yfinance (primary), EODHD (fallback) | Free + reliable for S&P 500; EODHD fills Nordic/Baltic tickers where yfinance coverage is unreliable |
+| Enrichment | pytrends, SEC EDGAR Form 4 API, yfinance news | Catalyst signals not in price data |
+| Automation | GitHub Actions | Zero-infra scheduled runs; secrets management; auto-commit results |
+| Notifications | Discord webhooks | Formatted daily embeds; @mention reminders in LIVE mode |
+| Persistence | JSON files (portfolio_history, learning_state) | Human-readable, diff-friendly, no database dependency |
 
 ---
 
 ## Key Features
 
-- **All-OpenAI decision stack**: GPT-5.4 Strategist + GPT-5.4 Challenger run in parallel, GPT-5.4-nano Devil's Advocate pressure-tests the picks, and GPT-5.4 Risk Manager synthesizes the final portfolio
+- **Mixed AI decision stack**: GPT-5.4 Strategist + Gemini 2.5 Flash Challenger + OpenRouter Qwen3-32B Full Analyst run in parallel (two independent model families), Qwen3-32B Devil's Advocate pressure-tests the picks, and GPT-5.4 Risk Manager synthesizes the final portfolio. Groq Llama 3.3 70B is the automatic fallback when Gemini is unavailable.
 - **Full-universe candidate set**: agents see the current filtered universe instead of a tiny shortlist capped per market
 - **Rich signal snapshot**: momentum, Sharpe, RSI, beta, volume confirmation, MACD, ATR, dividend yield, regime data, and catalyst overlays
 - **Parallel enrichment layer**: news, earnings, insider buying, and Google Trends are fetched concurrently and injected into prompts
+- **Sector rotation indicator**: per-sector `avg_mom_20d/5d`, RSI, breadth, and count computed from the full universe and injected into all agent prompts — rotation is the primary alpha source in 75-day competitions
+- **Pre-earnings opportunity signal**: tags stocks with earnings in 2–6 days + strong momentum as `PRE_EARNINGS_SETUP`; `EARNINGS RISK` warnings for low-conviction earners
+- **Competition-optimized ranking**: regime-specific Z-score weighted `competition_score` (BULL: mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%; NEUTRAL/BEAR variants) replaces the generic selection score
+- **Commodity price context**: live Brent crude, WTI, and Henry Hub nat gas injected for energy thesis validation
+- **Cross-agent debate**: after initial proposals, each agent runs a lightweight second pass surfacing agreements/disagreements with peers; debate summary injected into the Risk Manager
+- **Dynamic signal importance**: `learning_state.py` tracks directional accuracy of each signal vs next-day returns; most predictive signals flagged in the learning context
+- **Strategy decay monitoring**: compares recent 5-day alpha vs prior 10-day alpha; Risk Manager sees a STRATEGY DECAY ALERT when momentum gap exceeds threshold
+- **Confidence calibration tracking**: flags overconfidence patterns when high-confidence days underperform expectations
 - **Structured learning loop**: `portfolio_history.json` stores the canonical daily record, `learning_state.json` drives prompt injection, and `PREGAME_LEARNING.md` / `AI_SELF_CRITIQUE.md` are derived human summaries
 - **Verification and audit trail**: whole-percent portfolio rounding, manual verification tooling, and devil's-advocate impact logging
 - **Historical shadow trader**: strict no-lookahead backtest script for open-to-open portfolio simulation over prior periods
@@ -70,35 +123,65 @@ The bot runs daily in **PREGAME** mode — all decisions are recorded but don't 
 
 ## How it works
 
-```
-Market data (yfinance, free)
-    ↓
-signal computation + catalyst overlays
-    ↓
-news + earnings + insider buys + Google Trends
-    ↓
-GPT-5.4 Strategist ───────────────────┐  run in parallel
-GPT-5.4 Challenger ───────────────────┤
-                                       ↓
-GPT-5.4-nano Devil's Advocate — generates bear cases for top combined picks
-                                       ↓
-GPT-5.4 Risk Manager — synthesises consensus picks, unique picks, and bear cases
-    ↓
-PortfolioValidator — validates, normalises if needed, and rounds to whole %
-    ↓
-portfolio_history.json — canonical daily proposal/verification state plus structured history and outcomes
-    ↓
-Discord webhook — daily embed posted
-    ↓
-PREGAME_LOG.md / DAILY_LOG.md — human-readable entry appended
+```mermaid
+flowchart TD
+    GHA["⏰ GitHub Actions\n06:30 UTC Mon–Fri"]
+
+    subgraph DATA["Data Layer"]
+        FETCH["data/fetcher.py\n15 signals per stock\n~630 universe tickers"]
+        MACRO["Macro Context\nRegime score 0–100\nVIX · Breadth · Credit spreads"]
+        ENRICH["Parallel Enrichment\nNews · Earnings calendar\nSEC insider filings · Google Trends\nBrent/WTI/NatGas prices"]
+        SCORE["competition_score\nZ-score weighted by regime\nBULL / NEUTRAL / BEAR variants"]
+        FETCH --> MACRO
+        FETCH --> ENRICH
+        MACRO & ENRICH --> SCORE
+    end
+
+    subgraph AGENTS["Agent Layer — run in parallel"]
+        S["GPT-5.4\nStrategist\nmomentum + breakouts"]
+        G["Gemini 2.5 Flash\nChallenger\ncatalyst hunter\n(Groq fallback)"]
+        F["Qwen3-32B via OpenRouter\nFull Analyst\nall-signals view"]
+    end
+
+    subgraph SYNTHESIS["Synthesis Layer"]
+        DEBATE["Cross-Agent Debate\nlightweight second pass\nagreements / disagreements"]
+        DEVIL["Qwen3-32B via OpenRouter\nDevil's Advocate\nbear cases for top picks"]
+        RM["GPT-5.4 Risk Manager\nconviction sizing\nfinal portfolio"]
+    end
+
+    GHA --> DATA
+    SCORE --> AGENTS
+    AGENTS --> DEBATE
+    DEBATE --> DEVIL
+    DEVIL --> RM
+
+    RM --> VAL["portfolio/validator.py\nconstraint enforcement\nweight normalisation"]
+    VAL --> DISCORD["Discord\ndaily embed"]
+    VAL --> HIST["portfolio_history.json\ncanonical state"]
+
+    HIST --> LEARN["learning_state.json\nsignal importance · devil accuracy\nconfidence calibration · strategy decay"]
+    LEARN -->|"next-day context injection"| AGENTS
+    LEARN -->|"next-day context injection"| RM
 ```
 
 ### The learning loop
 
-```
-Run → update structured daily history → generate learning_state.json
-  ↓                                             ↓
-derived markdown reports                  prompt-ready learning context
+```mermaid
+flowchart LR
+    RUN["Daily run"] --> HIST["portfolio_history.json\npositions + outcomes"]
+    HIST --> LS["learning_state.py"]
+
+    subgraph DERIVED["Derived State"]
+        LSJ["learning_state.json\n• signal_importance\n• devil_accuracy\n• confidence_calibration\n• strategy_decay\n• rationale_tags"]
+        MD["Markdown reports\nPREGAME_LEARNING.md\nAI_SELF_CRITIQUE.md"]
+    end
+
+    LS --> LSJ
+    LS --> MD
+
+    LSJ --> LC["learning_context.py\nstructured prompt builder\n(JSON-first, markdown fallback)"]
+    LC --> ALL["All agents\nStrategist · Challenger · Full Analyst\nDevil · Risk Manager"]
+    ALL --> RUN
 ```
 
 ---
@@ -110,6 +193,7 @@ derived markdown reports                  prompt-ready learning context
 - **Consensus first, catalysts second**: the Risk Manager prefers names selected by both Strategist and Challenger, then fills remaining slots with the best unique catalyst picks
 - **Devil's-advocate check**: top combined picks are pressure-tested before final sizing so obvious dead-money or asymmetric-risk names can be cut or downweighted
   - **Devil accuracy feedback loop**: when Devil's accuracy at flagging true underperformers exceeds 60%, the Risk Manager applies a 10% hard cap on HIGH-flagged positions (tracked in `learning_state.json`)
+  - **Devil repeat-offender pre-injection**: tickers flagged HIGH in ≥2 of the last 5 days get a ≤12% sizing warning shown to all agents regardless of overall accuracy threshold
 - **Overbought weight cap**: positions with RSI > 82 AND within 2% of 52w high are capped at 15% unless volume_ratio > 1.8 (exception for strong volume breakouts)
 - **No sector cap**: sector concentration is intentionally allowed if one theme has the strongest momentum
 - **Cross-market awareness**: the agents are steered away from cloning a pure US mega-cap portfolio and are encouraged to use Nordic/Baltic names when signal quality justifies it
@@ -133,6 +217,8 @@ derived markdown reports                  prompt-ready learning context
 | `macd_hist` | MACD histogram normalised by price — trend acceleration signal |
 | `atr_pct` | 14-day ATR as % of price — daily expected move, used for position sizing |
 | `dividend_yield` | trailing 12-month dividend yield — relevant because the game auto-reinvests dividends |
+| `analyst_rating` | analyst consensus rating 1–5 (1=Strong Buy → 5=Strong Sell); strong for US S&P 500, partial Nordic coverage |
+| `analyst_upside` | (target price − current price) / current price; NaN for non-US tickers due to currency mismatch |
 | `sector` | abbreviated sector tag (Tech, Health, Fin, Energy, Ind, Mat, Tel, Util, Cons) |
 
 ---
@@ -154,6 +240,12 @@ derived markdown reports                  prompt-ready learning context
 | Short interest | yfinance | Challenger-only catalyst signal for squeeze setups |
 | Premarket gap | yfinance intraday/daily data | Challenger-only catalyst confirmation |
 | IV proxy | yfinance options / info | Challenger-only event-volatility signal |
+| Sector rotation table | computed from full universe | Per-sector avg_mom_20d/5d, RSI, breadth, count — all agents |
+| Pre-earnings setup | earnings_fetcher.py | `PRE_EARNINGS_SETUP` tag for 2–6 day earners with strong momentum; `EARNINGS RISK` for low-conviction |
+| Commodity context | yfinance BZ=F / CL=F / NG=F | Brent, WTI, nat gas last price + 20d/5d return for energy thesis |
+| Signal importance | learning_state.json | Per-signal directional accuracy vs next-day returns |
+| Cross-agent debate | orchestrator debate step | Agreements/disagreements between Strategist and Challenger proposals |
+| Strategy decay alert | meta_learning.py | Flags when recent 5d alpha lags prior 10d alpha by >0.2%/day |
 | Learning state | learning_state.json | Structured rules, winners/losers, decision-quality metrics |
 | Learning report | PREGAME_LEARNING.md | Human-readable training summary |
 | AI self-critique | AI_SELF_CRITIQUE.md | Human-readable reasoning audit |
@@ -181,7 +273,7 @@ Candidate selection currently works like this:
 - Start from the current game-sized universe, roughly 630 selectable names
 - Use Yahoo as the primary price source, with EODHD fallback for a small provider-override set of Nordic/Baltic edge cases
 - Maintain a symbol master / alias layer so game tickers, Yahoo symbols, and fallback-provider symbols can differ safely
-- Rank candidates with the composite `selection_score` plus catalyst overlays and regime context
+- Rank candidates with a regime-specific `competition_score` (Z-score weighted: BULL = mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%; NEUTRAL/BEAR variants) plus catalyst overlays
 - Top `TOP_N_CANDIDATES` are passed downstream after filtering and scoring
 
 ---
@@ -199,7 +291,11 @@ python main.py
 1. Push the repo to GitHub
 2. Go to **Settings → Secrets and variables → Actions**
 3. Add these repository secrets:
-   - `OPENAI_API_KEY` (required)
+   - `OPENAI_API_KEY` (required — Strategist + Risk Manager)
+   - `GEMINI_API_KEY` (required — Gemini Challenger)
+   - `GROQ_API_KEY` (optional — free-tier Gemini fallback)
+   - `OPENROUTER_API_KEY` (optional — Qwen3-32B for Devil + Full Analyst; falls back to GPT-5.4-nano if absent)
+   - `EODHD_API_KEY` (required — Nordic/Baltic ticker fallback)
    - `DISCORD_WEBHOOK_URL` (required)
    - `DISCORD_USER_ID` (optional — enables @mentions in LIVE mode)
 4. The main workflow fires at **06:00 UTC** on weekdays:
@@ -211,7 +307,11 @@ python main.py
 ### Required environment variables
 
 ```
-OPENAI_API_KEY=...         # all decision agents use OpenAI
+OPENAI_API_KEY=...         # GPT-5.4 Strategist + Risk Manager
+GEMINI_API_KEY=...         # Gemini 2.5 Flash Challenger (primary)
+GROQ_API_KEY=...           # Groq Llama 3.3 70B — automatic Gemini fallback (free tier)
+OPENROUTER_API_KEY=...     # Qwen3-32B via OpenRouter for Devil + Full Analyst (~85% cheaper than GPT-5.4-nano)
+EODHD_API_KEY=...          # EODHD fallback for Nordic/Baltic tickers yfinance can't fetch
 DISCORD_WEBHOOK_URL=...    # Discord channel webhook for daily posts
 DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mode
 ```
@@ -252,11 +352,12 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 │   ├── mode_guard.py            # pregame/live switch + live parameter freeze
 │   └── diary.py                 # appends entries to PREGAME_LOG.md or DAILY_LOG.md
 ├── agents/
-│   ├── base_agent.py            # abstract base class
+│   ├── base_agent.py            # abstract base class (includes cross_check() debate hook)
 │   ├── openai_strategist.py     # GPT-5.4 — momentum-driven portfolio selection
-│   ├── openai_challenger.py     # GPT-5.4 — catalyst-hunter second opinion
-│   ├── openai_devil.py          # GPT-5.4-nano — bear-case stress test for top picks
-│   └── openai_risk_manager.py   # GPT-5.4 — synthesises both proposals into final portfolio
+│   ├── gemini_challenger.py     # Gemini 2.5 Flash — catalyst-hunter; Groq Llama 3.3 70B fallback
+│   ├── openai_challenger.py     # Qwen3-32B via OpenRouter (or GPT-5.4-nano) — full analyst third proposal
+│   ├── openai_devil.py          # Qwen3-32B via OpenRouter (or GPT-5.4-nano) — bear-case stress test
+│   └── openai_risk_manager.py   # GPT-5.4 — synthesises all proposals + debate + bear cases
 ├── portfolio/
 │   ├── models.py                # Position, PortfolioProposal dataclasses
 │   └── validator.py             # constraint validation + normalisation
@@ -275,3 +376,41 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 ├── LIVE_HANDOFF_2026-04-06.md   # one-time pregame-to-live transition summary
 └── live_mode_lock.json          # strategy file fingerprints for LIVE mode (auto-generated)
 ```
+
+---
+
+## Research References
+
+Design decisions in this project are grounded in the following papers and open-source work.
+
+### Academic Papers
+
+| Paper | arXiv | Applied to |
+|-------|-------|------------|
+| TradingAgents: Multi-Agents LLM Financial Trading Framework | [2412.20138](https://arxiv.org/abs/2412.20138) | **Cross-agent debate** — Bull/Bear debate structure shown to outperform independent parallel proposals |
+| FinCon: Synthesized LLM Multi-Agent System with Conceptual Verbal Reinforcement | [2407.06567](https://arxiv.org/abs/2407.06567) | **Devil feedback loop** — CVRF loop propagates failure modes back to all agents, not just Risk Manager |
+| Automate Strategy Finding with LLM in Quant Investment | [2409.06289](https://arxiv.org/abs/2409.06289) | **Dynamic signal weights** — dynamic weight optimisation in multi-agent pipeline |
+| AlphaAgents: LLM-Based Multi-Agents for Equity Portfolio Construction | [2508.11152](https://arxiv.org/abs/2508.11152) | **Confidence calibration** — risk-profile prompts measurably change position sizing behaviour |
+| Market-Dependent Communication in Multi-Agent Alpha Generation | [2511.13614](https://arxiv.org/abs/2511.13614) | **Strategy decay monitoring** — 30% alpha decay after 6 months, worst at regime transitions |
+| HedgeAgents: Balanced-aware Multi-agent Financial Trading | [2502.13165](https://arxiv.org/abs/2502.13165) | Supporting evidence for multi-agent ensemble architecture |
+| GuruAgents: Emulating Wise Investors with Prompt-Guided LLM Agents | [2510.01664](https://arxiv.org/abs/2510.01664) | Supporting evidence for competition concentration — 5-position book, 42.2% CAGR in benchmarks |
+| StockBench: Can LLM Agents Trade Stocks Profitably? | [2510.02209](https://arxiv.org/abs/2510.02209) | Justification for **not** adding more agents — financial knowledge ≠ trading edge |
+| TradeTrap: Are LLM-based Trading Agents Truly Reliable? | [2512.02261](https://arxiv.org/abs/2512.02261) | Justification for robustness via learning loops over adding complexity |
+| From Deep Learning to LLMs: Survey of AI in Quantitative Investment | [2503.21422](https://arxiv.org/abs/2503.21422) | Background framing — LLMs as predictors vs. agents in practical deployment |
+| FinGPT | [2306.06031](https://arxiv.org/abs/2306.06031) | Background — open-source LLM fine-tuning on financial data |
+
+### Open-Source Projects
+
+| Project | Source | Applied to |
+|---------|--------|------------|
+| FinRobot (AI4Finance) | [GitHub](https://github.com/AI4Finance-Foundation/FinRobot) | Architecture reference — 4-layer design, financial chain-of-thought |
+| ai-hedge-fund | [GitHub](https://github.com/virattt/ai-hedge-fund) | Prototype reference for AI hedge fund agent team structure |
+
+### Real-World Benchmarks & Industry Data
+
+| Source | Stat / Finding | Applied to |
+|--------|---------------|------------|
+| Alpha Arena Season 1 (Oct–Nov 2025) | Qwen beat GPT-5 in live trading — architecture matters more than model | Justification for OpenRouter Qwen3-32B as secondary agent model |
+| Mercer 2024 (150 asset managers) | 91% using or planning AI in portfolio construction | Context for LLM-native portfolio approach |
+| AIMA 2024 | 95% of hedge funds use generative AI | Context |
+| arXiv 2511.13614 | 30% alpha decay after 6 months, worst at regime transitions | Basis for strategy decay monitoring |

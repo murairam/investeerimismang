@@ -14,12 +14,18 @@ import os
 from datetime import date
 from typing import Optional
 
-from openai import OpenAI
+from openai import APIConnectionError, APITimeoutError, BadRequestError, OpenAI
 
 from agents.base_agent import BaseAgent
-from config import MOMENTUM_WINDOW
+from config import (
+    API_TIMEOUT_SECONDS,
+    MOMENTUM_WINDOW,
+    OPENROUTER_ANALYST_MODEL,
+    OPENROUTER_BASE_URL,
+    USE_OPENROUTER_FOR_SECONDARY_AGENTS,
+)
 from data.cost_tracker import log_usage
-from data.fetcher import MarketSnapshot
+from data.fetcher import MarketSnapshot, sanitize_ticker
 from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
@@ -88,7 +94,27 @@ class OpenAIFullAnalyst(BaseAgent):
     MODEL = "gpt-5.4-nano"
 
     def __init__(self) -> None:
+        self._openrouter_enabled = USE_OPENROUTER_FOR_SECONDARY_AGENTS and bool(os.environ.get("OPENROUTER_API_KEY"))
+        if self._openrouter_enabled:
+            self.client = OpenAI(
+                api_key=os.environ["OPENROUTER_API_KEY"],
+                base_url=OPENROUTER_BASE_URL,
+            )
+            self.model = OPENROUTER_ANALYST_MODEL
+        else:
+            self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+            self.model = self.MODEL
+
+    def _switch_to_openai_fallback(self) -> None:
+        if self.model == self.MODEL:
+            return
+        logger.warning(
+            "Switching FullAnalyst from OpenRouter model '%s' to OpenAI fallback '%s'",
+            self.model,
+            self.MODEL,
+        )
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+        self.model = self.MODEL
 
     def propose(
         self,
@@ -108,7 +134,7 @@ class OpenAIFullAnalyst(BaseAgent):
                     proposal.confidence * 100,
                 )
                 return proposal
-            except (json.JSONDecodeError, KeyError, ValueError) as exc:
+            except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError) as exc:
                 logger.warning("FullAnalyst attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
                 if attempt == self.MAX_RETRIES:
                     logger.warning("FullAnalyst exhausted retries — returning empty proposal")
@@ -139,34 +165,17 @@ class OpenAIFullAnalyst(BaseAgent):
         premarket_gap = snapshot.get("premarket_gap", {})
         iv_proxy = snapshot.get("iv_proxy", {})
 
-        # Sort by combined score (momentum + catalyst) for full analyst
-        def combined_score(c: dict) -> float:
-            t = c["ticker"]
-            score = 0.0
-            sharpe = c.get("sharpe_20d", float("nan"))
-            if not math.isnan(sharpe):
-                score += max(-0.5, min(1.5, sharpe))
-            mom_5d = c.get("mom_5d", float("nan"))
-            if not math.isnan(mom_5d):
-                score += max(-1.0, min(2.0, mom_5d * 15.0))
-            vs_index = c.get("vs_index", float("nan"))
-            if not math.isnan(vs_index):
-                score += max(-1.0, min(2.0, vs_index * 12.0))
-            vol_ratio = c.get("vol_ratio", float("nan"))
-            if not math.isnan(vol_ratio):
-                score += max(-1.0, min(2.5, (vol_ratio - 1.0) * 2.5))
-            rsi = c.get("rsi_14", float("nan"))
-            if not math.isnan(rsi):
-                score += 1.0 if rsi >= 75 else (0.5 if rsi >= 60 else 0.0)
-            si = short_interest.get(t)
-            if si is not None:
-                score += max(0.0, min(2.0, si * 8.0))
-            pm = premarket_gap.get(t)
-            if pm is not None:
-                score += max(-0.5, min(2.0, pm * 25.0))
-            return score
-
-        ranked = sorted(snapshot["candidates"], key=combined_score, reverse=True)
+        ranked_source = snapshot.get("ranked_candidates", snapshot.get("candidates", []))
+        candidate_map = {c["ticker"]: c for c in snapshot.get("candidates", [])}
+        ranked: list[dict] = []
+        for item in ranked_source:
+            if not isinstance(item, dict):
+                continue
+            ticker = item.get("ticker")
+            if isinstance(ticker, str) and ticker in candidate_map:
+                ranked.append(candidate_map[ticker])
+        if not ranked:
+            ranked = snapshot.get("candidates", [])
 
         header = (
             f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d Ret':>8} {'Sharpe':>7} "
@@ -212,6 +221,10 @@ class OpenAIFullAnalyst(BaseAgent):
                 sector_rotation_line = f"Sector rotation (20d, breadth): {' | '.join(_parts[:5])}"
                 if _lag:
                     sector_rotation_line += f"  |  Laggards: {', '.join(_lag[:4])}"
+                sector_rotation_line += (
+                    "\nSector action rule: if a sector's breadth is below 40%, it is losing internal momentum — "
+                    "reduce or exit your weakest performer in that sector and redeploy into the leading sector."
+                )
 
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
@@ -251,11 +264,12 @@ class OpenAIFullAnalyst(BaseAgent):
 
         for c in ranked:
             t = c["ticker"]
+            safe_ticker = sanitize_ticker(t)
             si = short_interest.get(t)
             pm = premarket_gap.get(t)
             iv = iv_proxy.get(t)
             lines.append(
-                f"{t:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
+                f"{safe_ticker:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
                 f"{fmt(c['momentum']):>8} "
                 f"{fmt(c['sharpe_20d'], '.2f'):>7} "
                 f"{fmt(c['mom_5d']):>7} "
@@ -279,7 +293,7 @@ class OpenAIFullAnalyst(BaseAgent):
         if prior_proposal and prior_proposal.positions:
             lines += ["", "Yesterday's holdings (for continuity reference):"]
             for pos in prior_proposal.positions:
-                lines.append(f"  {pos.ticker:<12} {pos.weight:.1%}")
+                lines.append(f"  {sanitize_ticker(pos.ticker):<12} {pos.weight:.1%}")
 
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]
@@ -310,20 +324,41 @@ class OpenAIFullAnalyst(BaseAgent):
         if learning_context:
             system_prompt += f"\n\n## Live learning — MANDATORY overrides from past runs\n{learning_context}"
 
-        response = self.client.chat.completions.create(
-            model=self.MODEL,
-            response_format={"type": "json_object"},
-            temperature=0.2,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message},
-            ],
-        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                response_format={"type": "json_object"},
+                temperature=0.2,
+                timeout=API_TIMEOUT_SECONDS,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message},
+                ],
+            )
+        except (BadRequestError, APIConnectionError, APITimeoutError) as exc:
+            if self._openrouter_enabled and self.model != self.MODEL:
+                logger.warning("OpenRouter FullAnalyst request failed (%s). Falling back to OpenAI.", exc)
+                self._switch_to_openai_fallback()
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    response_format={"type": "json_object"},
+                    temperature=0.2,
+                    timeout=API_TIMEOUT_SECONDS,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                )
+            else:
+                raise
+
+        if response is None:
+            raise ValueError("Empty response from model")
 
         usage = response.usage
         cost = log_usage(
             agent_name="OpenAIFullAnalyst",
-            model=self.MODEL,
+            model=self.model,
             input_tokens=usage.prompt_tokens,
             output_tokens=usage.completion_tokens,
         )
@@ -365,10 +400,12 @@ class OpenAIFullAnalyst(BaseAgent):
         peer_proposals: list[PortfolioProposal],
     ) -> dict:
         """Lightweight second-pass debate: identify agreements and disagreements with peer proposals."""
-        own_str = ", ".join(f"{p.ticker} {p.weight:.0%}" for p in own_proposal.positions)
+        own_str = ", ".join(f"{sanitize_ticker(p.ticker)} {p.weight:.0%}" for p in own_proposal.positions)
         peer_lines = []
         for i, peer in enumerate(peer_proposals, 1):
-            peer_lines.append(f"Peer {i}: " + ", ".join(f"{p.ticker} {p.weight:.0%}" for p in peer.positions))
+            peer_lines.append(
+                f"Peer {i}: " + ", ".join(f"{sanitize_ticker(p.ticker)} {p.weight:.0%}" for p in peer.positions)
+            )
         peer_str = "\n".join(peer_lines)
         prompt = (
             f"Your portfolio: {own_str}\n\n"
@@ -380,7 +417,7 @@ class OpenAIFullAnalyst(BaseAgent):
         )
         try:
             response = self.client.chat.completions.create(
-                model=self.MODEL,
+                model=self.model,
                 response_format={"type": "json_object"},
                 temperature=0.0,
                 messages=[
@@ -388,7 +425,7 @@ class OpenAIFullAnalyst(BaseAgent):
                     {"role": "user", "content": prompt},
                 ],
             )
-            log_usage("OpenAIFullAnalyst_crosscheck", self.MODEL,
+            log_usage("OpenAIFullAnalyst_crosscheck", self.model,
                       response.usage.prompt_tokens, response.usage.completion_tokens)
             return json.loads(response.choices[0].message.content)
         except Exception as exc:

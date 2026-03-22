@@ -4,6 +4,7 @@ Paper-trading account for pre-game training with one-day delayed target applicat
 import json
 import logging
 import os
+import tempfile
 from datetime import date
 from typing import Optional
 
@@ -71,8 +72,11 @@ def _load_raw() -> dict:
 
 def _save_raw(data: dict) -> None:
     path = os.path.abspath(_PAPER_STORE_PATH)
-    with open(path, "w") as f:
+    dir_ = os.path.dirname(path)
+    with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp") as f:
         json.dump(data, f, indent=2)
+        tmp = f.name
+    os.replace(tmp, path)
 
 
 def _mark_to_market(

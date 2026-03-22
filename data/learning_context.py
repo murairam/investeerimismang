@@ -4,10 +4,34 @@ with markdown summaries as a backward-compatible fallback.
 """
 import logging
 import os
+import re
 
 from data.learning_state import build_prompt_learning_context
 
 logger = logging.getLogger(__name__)
+
+_MAX_LINE_LEN = 400
+# Lines that could hijack LLM instruction-following when re-injected as system prompt
+_INJECTION_RE = re.compile(
+    r"^\s*(ignore|disregard|forget|override|system\s*:|<[^>]+>|\[inst\])",
+    re.IGNORECASE,
+)
+
+
+def _sanitize_learning_text(text: str) -> str:
+    """Sanitize LLM-generated text before re-injecting it into system prompts.
+
+    Prevents second-order prompt injection: if a past LLM run produced adversarial
+    content in rationale/reasoning fields, this stops it from being re-injected
+    as a trusted 'MANDATORY override' in future system prompts.
+    """
+    sanitized = []
+    for line in text.splitlines():
+        if _INJECTION_RE.match(line):
+            logger.warning("Stripped potential injection line from learning context: %.60s…", line)
+            continue
+        sanitized.append(line[:_MAX_LINE_LEN])
+    return "\n".join(sanitized)
 
 _LEARNING_PATH = os.path.join(os.path.dirname(__file__), "..", "PREGAME_LEARNING.md")
 _CRITIQUE_PATH = os.path.join(os.path.dirname(__file__), "..", "AI_SELF_CRITIQUE.md")
@@ -26,7 +50,8 @@ def get_learning_context() -> str:
     if critique:
         fallback_sections.append(critique)
 
-    return build_prompt_learning_context(strategy_text=strategy, fallback_sections=fallback_sections)
+    raw = build_prompt_learning_context(strategy_text=strategy, fallback_sections=fallback_sections)
+    return _sanitize_learning_text(raw)
 
 
 def _read_file(path: str) -> str:

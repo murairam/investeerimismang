@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from datetime import date
 from typing import Optional
 
@@ -89,8 +90,11 @@ def log_usage(
 
     data["total_cost"] = round(data.get("total_cost", 0.0) + cost, 6)
 
-    with open(_COST_LOG_PATH, "w") as f:
+    dir_ = os.path.dirname(_COST_LOG_PATH)
+    with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp") as f:
         json.dump(data, f, indent=2)
+        tmp = f.name
+    os.replace(tmp, _COST_LOG_PATH)
 
     return cost
 

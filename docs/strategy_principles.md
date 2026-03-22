@@ -1,6 +1,6 @@
 # AlphaShark — Permanent Strategy Principles
 
-**Last updated:** 2026-03-20
+**Last updated:** 2026-03-22
 **Status:** Active (overrides any conservative defaults in auto-generated files)
 
 This file is NOT auto-generated. It survives daily pipeline runs and is injected into every
@@ -51,7 +51,30 @@ higher-momentum candidate.
 - **Data:** Stored in `learning_state.json['devil_accuracy']` (requires ≥5 HIGH-flag observations)
 - **High accuracy (>60%):** Risk Manager applies 10% hard cap on HIGH-flagged positions
 - **Low accuracy (≤60%):** Risk Manager uses own judgment; Devil is advisory only
+- **Repeat offender pre-injection:** Tickers flagged HIGH in ≥2 of the last 5 days get a ≤12% sizing warning to all agents regardless of overall accuracy threshold
 - **Implementation:** `data/learning_state.py::_devil_accuracy()` + prompt injection in context builder
+
+### Cross-Agent Debate
+- **Mechanism:** After initial proposals, each agent (Strategist, GeminiChallenger, FullAnalyst) runs a lightweight second-pass LLM call surfacing agreements and disagreements with peer proposals
+- **Data:** Debate summary compiled by orchestrator and injected into Risk Manager's synthesis context
+- **Implementation:** `agents/base_agent.py::cross_check()` + orchestrator step 3d (3 workers, 45s timeout, non-fatal)
+
+### Dynamic Signal Importance
+- **Mechanism:** `compute_signal_importance()` in `learning_state.py` tracks directional accuracy of each signal vs next-day returns across all position observations
+- **Data:** Stored in `learning_state.json['signal_importance']`; top signals highlighted in learning context shown to all agents
+- **Implementation:** `data/learning_state.py::compute_signal_importance()`
+
+### Confidence Calibration Tracking
+- **Mechanism:** Compares 1d returns on high-confidence (≥75%) vs low-confidence days
+- **Action:** Flags overconfidence pattern when high-confidence days underperform expectations
+- **Data:** Stored in `learning_state.json`; calibration warning injected into learning context
+- **Implementation:** `data/learning_state.py::compute_confidence_calibration()`
+
+### Strategy Decay Monitoring
+- **Mechanism:** Compares recent 5-day alpha vs prior 10-day alpha
+- **Threshold:** `decay_detected=True` when gap exceeds 0.2% per day
+- **Action:** Risk Manager renders a STRATEGY DECAY ALERT section when decay is active
+- **Implementation:** `data/meta_learning.py::detect_strategy_decay()` + orchestrator step 1b
 
 ---
 

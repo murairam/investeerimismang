@@ -7,6 +7,7 @@ import json
 import logging
 import math
 import os
+import tempfile
 from copy import deepcopy
 from typing import Optional
 
@@ -25,8 +26,9 @@ RATIONALE_TAGS = (
     "diversifier",
     "earnings_risk",
     "non_us_differentiator",
-    "overbought",       # RSI > 80 at entry — tracks whether buying overbought names hurts returns
-    "at_52w_high",      # within 2% of 52-week high at entry — tracks exhaustion/pullback risk
+    "overbought",           # RSI > 80 at entry — tracks whether buying overbought names hurts returns
+    "at_52w_high",          # within 2% of 52-week high at entry — tracks exhaustion/pullback risk
+    "pre_earnings_setup",   # earnings 2–6 days out + strong momentum — tracks pre-earnings drift outcomes
 )
 
 
@@ -56,8 +58,11 @@ def _sanitize(obj):
 def _safe_write(data: dict) -> None:
     path = os.path.abspath(_STORE_PATH)
     try:
-        with open(path, "w") as f:
+        dir_ = os.path.dirname(path)
+        with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp") as f:
             json.dump(_sanitize(data), f, indent=2)
+            tmp = f.name
+        os.replace(tmp, path)
         logger.info("Saved portfolio to %s", path)
     except Exception as exc:
         logger.warning("Could not save portfolio history: %s", exc)
@@ -180,6 +185,11 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
         any(token in text for token in ("52-week high", "52w high", "52 week high", "all-time high"))
         or _at_52w,
     )
+    add(
+        "pre_earnings_setup",
+        any(token in text for token in ("pre_earnings", "pre-earnings", "pre earnings", "earnings setup"))
+        or bool(signal.get("has_pre_earnings_setup")),
+    )
 
     return tags
 
@@ -242,12 +252,51 @@ def save_verified(
     performance_history = existing.get("performance_history", [])
     history = _ensure_history(existing)
 
+    def _clean_tags(raw_tags) -> list[str]:
+        if not isinstance(raw_tags, list):
+            return []
+        cleaned: list[str] = []
+        for tag in raw_tags:
+            if isinstance(tag, str) and tag in RATIONALE_TAGS and tag not in cleaned:
+                cleaned.append(tag)
+        return cleaned
+
+    previous_tags: dict[str, list[str]] = {}
+    for entry in existing.get("positions", []):
+        ticker = entry.get("ticker")
+        if isinstance(ticker, str):
+            tags = _clean_tags(entry.get("tags", []))
+            if tags:
+                previous_tags[ticker] = tags
+
+    previous_signal_map: dict[str, dict] = {}
+    if history:
+        latest_history = history[-1]
+        latest_positions = latest_history.get("final_portfolio", {}).get("positions", [])
+        for entry in latest_positions:
+            ticker = entry.get("ticker")
+            if isinstance(ticker, str):
+                tags = _clean_tags(entry.get("tags", []))
+                if tags and ticker not in previous_tags:
+                    previous_tags[ticker] = tags
+        signal_snapshot = latest_history.get("signal_snapshot", {})
+        if isinstance(signal_snapshot, dict):
+            previous_signal_map = _build_signal_map(signal_snapshot)
+
     final_positions = [
         {
             "ticker": p["ticker"],
             "weight": round(float(p["weight"]), 6),
-            "rationale": f"verified from game portfolio {date}",
-            "tags": [],
+            "rationale": (p.get("rationale") or f"verified from game portfolio {date}"),
+            "tags": (
+                _clean_tags(p.get("tags", []))
+                or derive_rationale_tags(
+                    p["ticker"],
+                    p.get("rationale") or f"verified from game portfolio {date}",
+                    previous_signal_map.get(p["ticker"], {}),
+                )
+                or previous_tags.get(p["ticker"], [])
+            ),
         }
         for p in positions
     ]

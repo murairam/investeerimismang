@@ -4,6 +4,7 @@ WebhookDispatcher — formats a PortfolioProposal as a Discord embed and POSTs i
 import logging
 import math
 import os
+import re
 from datetime import datetime
 from typing import Optional
 
@@ -35,6 +36,56 @@ def _round_weights(positions: list) -> list[int]:
 
 _EMBED_COLOUR = 0x2ECC71
 _MAX_EMBED_DESCRIPTION = 4096
+_MAX_FIELD_VALUE = 1024
+
+
+def _ensure_complete_sentence(text: str) -> str:
+    """Return text ending in punctuation to avoid half-sentence output."""
+    cleaned = re.sub(r"\s+", " ", text.strip())
+    if not cleaned:
+        return "No rationale provided."
+    if cleaned[-1] not in ".!?":
+        cleaned += "."
+    return cleaned
+
+
+def _truncate_on_sentence_boundary(text: str, limit: int) -> str:
+    """Truncate without cutting mid-sentence where possible."""
+    if len(text) <= limit:
+        return _ensure_complete_sentence(text)
+
+    clipped = text[:limit].rstrip()
+    boundary = max(clipped.rfind("."), clipped.rfind("!"), clipped.rfind("?"))
+    if boundary >= max(0, int(limit * 0.6)):
+        return _ensure_complete_sentence(clipped[: boundary + 1])
+
+    fallback = clipped[: max(0, limit - 1)].rstrip()
+    if fallback and fallback[-1] not in ".!?":
+        fallback += "."
+    return fallback
+
+
+def _chunk_lines(lines: list[str], limit: int = _MAX_FIELD_VALUE) -> list[str]:
+    """Pack lines into Discord-sized chunks without splitting lines."""
+    chunks: list[str] = []
+    current: list[str] = []
+    current_len = 0
+
+    for line in lines:
+        safe_line = line if len(line) <= limit else _truncate_on_sentence_boundary(line, limit)
+        candidate_len = current_len + (1 if current else 0) + len(safe_line)
+        if current and candidate_len > limit:
+            chunks.append("\n".join(current))
+            current = [safe_line]
+            current_len = len(safe_line)
+        else:
+            current.append(safe_line)
+            current_len = candidate_len if current_len else len(safe_line)
+
+    if current:
+        chunks.append("\n".join(current))
+
+    return chunks or ["N/A"]
 
 # Display names as they appear in the Äripäev game UI
 GAME_NAMES: dict[str, str] = {
@@ -132,7 +183,12 @@ def format_security_label(ticker: str) -> str:
 class WebhookDispatcher:
     def __init__(self) -> None:
         self.webhook_url = os.environ["DISCORD_WEBHOOK_URL"]
-        self.user_id = os.environ.get("DISCORD_USER_ID")  # Optional Discord user ID for @mentions
+        raw_uid = os.environ.get("DISCORD_USER_ID", "").strip()
+        # Discord snowflake IDs are 17–20 digits; reject anything else to prevent injection
+        import re as _re
+        self.user_id: Optional[str] = raw_uid if _re.fullmatch(r"\d{17,20}", raw_uid) else None
+        if raw_uid and not self.user_id:
+            logger.warning("DISCORD_USER_ID '%s' is not a valid snowflake — ignoring", raw_uid)
 
     def format_embed(
         self,
@@ -198,11 +254,8 @@ class WebhookDispatcher:
 
         rationale_lines = []
         for i, pos in enumerate(proposal.positions, 1):
-            rationale = pos.rationale.strip()
-            if len(rationale) > 200:
-                rationale = rationale[:199] + "…"
-            rationale_lines.append(f"**{_display(pos.ticker)}** — {rationale}")
-        rationale_block = "\n".join(rationale_lines[:10])
+            rationale = _truncate_on_sentence_boundary(pos.rationale.strip(), 280)
+            rationale_lines.append(f"{i}. {_display(pos.ticker)} — {rationale}")
 
         # Build actionable changes summary
         change_lines: list[str] = []
@@ -248,7 +301,7 @@ class WebhookDispatcher:
         else:
             change_lines.append("📋 **First run** — no prior portfolio to compare")
 
-        changes_block = "\n".join(change_lines)
+        changes_chunks = _chunk_lines(change_lines)
 
         alpha_line = (
             f"🧠 Alpha (avg selected vs index, 20d): {avg_vs_index:+.1%}"
@@ -275,9 +328,7 @@ class WebhookDispatcher:
                     f"({daily_return:+.2%} today, {since_start:+.2%} since start)"
                 )
 
-        thesis = proposal.reasoning.strip()
-        if len(thesis) > 500:
-            thesis = thesis[:499] + "…"
+        thesis = _truncate_on_sentence_boundary(proposal.reasoning.strip(), 500)
 
         description = (
             f"**Thesis:** {thesis}\n\n"
@@ -294,41 +345,60 @@ class WebhookDispatcher:
             for i, pos in enumerate(proposal.positions, 1)
         ]
 
+        fields: list[dict] = []
+
+        for idx, chunk in enumerate(changes_chunks, 1):
+            fields.append(
+                {
+                    "name": "Changes from Yesterday" if idx == 1 else f"Changes from Yesterday (cont. {idx})",
+                    "value": chunk,
+                    "inline": False,
+                }
+            )
+
+        fields.append(
+            {
+                "name": "Game Search Terms (use on website)",
+                "value": "\n".join(game_search_lines[:20]),
+                "inline": False,
+            }
+        )
+
+        fields.append(
+            {
+                "name": "Current Holdings",
+                "value": holdings_table[:_MAX_FIELD_VALUE],
+                "inline": False,
+            }
+        )
+
+        key_chunks = _chunk_lines(rationale_lines)
+        for idx, chunk in enumerate(key_chunks, 1):
+            fields.append(
+                {
+                    "name": "Key Points (all selected stocks)" if idx == 1 else f"Key Points (cont. {idx})",
+                    "value": chunk,
+                    "inline": False,
+                }
+            )
+
+        fields.append(
+            {
+                "name": "Next Steps",
+                "value": (
+                    "1) Review changes above\n"
+                    "2) Update portfolio on game website\n"
+                    "3) Run python scripts/verify.py to confirm"
+                ),
+                "inline": False,
+            }
+        )
+
         return {
             "title": f"🦈 AlphaShark Portfolio — {today} {run_time_str}",
             "description": description,
             "color": _EMBED_COLOUR,
-            "fields": [
-                {
-                    "name": "📝 Changes from Yesterday",
-                    "value": changes_block[:1024],
-                    "inline": False,
-                },
-                {
-                    "name": "🔍 Game Search Terms (use these on website)",
-                    "value": "\n".join(game_search_lines[:20]),
-                    "inline": False,
-                },
-                {
-                    "name": "📊 Current Holdings",
-                    "value": holdings_table[:1024],
-                    "inline": False,
-                },
-                {
-                    "name": "💡 Key Points",
-                    "value": rationale_block[:1024],
-                    "inline": False,
-                },
-                {
-                    "name": "✅ Next Steps",
-                    "value": (
-                        "1. Review changes above\n"
-                        "2. Update portfolio on game website\n"
-                        "3. Run `python scripts/verify.py` to confirm"
-                    ),
-                    "inline": False,
-                },
-            ],
+            "fields": fields,
             "footer": {
                 "text": (
                     f"Confidence: {confidence_pct}% · "

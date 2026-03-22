@@ -18,6 +18,7 @@ Pipeline:
 import logging
 import math
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
@@ -300,30 +301,46 @@ class AlphaSharkOrchestrator:
         full_analyst_proposal = None
         n_agents = sum(1 for f in [self.strategist, self.gemini_challenger, self.full_analyst] if f is not None)
         with ThreadPoolExecutor(max_workers=n_agents) as executor:
+            future_start_times: dict = {}
             future_strategist = executor.submit(
                 self.strategist.propose, snapshot, prior_portfolio
             )
+            future_start_times[future_strategist] = ("Strategist", time.perf_counter())
             future_challenger = executor.submit(
                 self.gemini_challenger.propose, snapshot, prior_portfolio
             )
+            future_start_times[future_challenger] = ("GeminiChallenger", time.perf_counter())
             future_full = executor.submit(
                 self.full_analyst.propose, snapshot, prior_portfolio
             )
+            future_start_times[future_full] = ("FullAnalyst", time.perf_counter())
 
             try:
                 strategist_proposal = future_strategist.result()
+                label, started = future_start_times[future_strategist]
+                logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
             except Exception as exc:
                 logger.exception("Strategist failed: %s", exc)
+                label, started = future_start_times[future_strategist]
+                logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
 
             try:
                 challenger_proposal = future_challenger.result()
+                label, started = future_start_times[future_challenger]
+                logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
             except Exception as exc:
                 logger.exception("GeminiChallenger failed: %s", exc)
+                label, started = future_start_times[future_challenger]
+                logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
 
             try:
                 full_analyst_proposal = future_full.result()
+                label, started = future_start_times[future_full]
+                logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
             except Exception as exc:
                 logger.exception("FullAnalyst failed: %s", exc)
+                label, started = future_start_times[future_full]
+                logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
 
         # Fail-safe: need at least one proposal
         active_proposals = [p for p in [strategist_proposal, challenger_proposal, full_analyst_proposal] if p is not None]

@@ -19,14 +19,15 @@ from typing import Optional
 from openai import OpenAI
 
 from agents.base_agent import BaseAgent
+import config
 from data.cost_tracker import log_usage
-from data.fetcher import MarketSnapshot
+from data.fetcher import MarketSnapshot, sanitize_ticker
 from data.learning_state import load_learning_state
 from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """You are a meta-analyst for the Äripäev/SEB Investment Game (Estonia). You receive THREE independent portfolio proposals and synthesize the best final portfolio:
+_SYSTEM_PROMPT = f"""You are a meta-analyst for the Äripäev/SEB Investment Game (Estonia). You receive THREE independent portfolio proposals and synthesize the best final portfolio:
 - Proposal A: GPT-5.4 Momentum Strategist (sees only trend/Sharpe signals)
 - Proposal B: Gemini Catalyst Hunter (sees only catalyst signals: vol_ratio, RSI, short interest, IV)
 - Proposal C: GPT-5.4-nano Full Analyst (sees ALL signals — fresh independent view)
@@ -39,6 +40,12 @@ Game ends 19 June 2026. Goal: highest absolute return, beating other participant
 This is a competition with 844 participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required. 15% drawdown is acceptable if it gives 40% upside potential — price risk for competition, not wealth management. Follow the signals. Do not apply any sector or stock bias — the data tells you what is working today. Competition rewards right-tail outcomes: concentrate in 5-6 names with real momentum catalysts.
 
 ## Synthesis rules
+**RULE #1 — MANDATORY: DO NOT EQUAL-WEIGHT. SIZE BY CONVICTION. EQUAL-WEIGHTING IS A FAILURE.**
+- Consensus + strong signals: 20–25%
+- Good signals, one model only: 12–18%
+- Diversifiers: 5–10%
+If you find yourself giving everything the same weight, you are not doing your job.
+
 0. **Target position count by regime** — you decide the exact count based on signal quality:
    - BULL: 5–6 positions. TARGET 5 positions at 20% each for maximum conviction. Only add a 6th if genuinely high-conviction at 15–17% and rebalance others. Do NOT add filler for diversification — diversification loses competitions.
    - NEUTRAL: 5–10 positions. Use your judgement — 5 if signals are concentrated, more if many names have strong setups.
@@ -47,18 +54,14 @@ This is a competition with 844 participants. Only #1 wins — median returns = l
 1. **Consensus picks** (appear in 2+ of the 3 proposals): independently validated across different signal lenses. Give them higher conviction weights (18–25%) unless there is a specific risk reason not to. A pick found by BOTH the momentum strategist and the catalyst hunter is especially strong — it wins on two different signal dimensions.
 2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, vol_ratio, regime fit. Include the best ones.
 3. **Ignore weak unique picks**: if only one model picked something and its signals are mediocre, skip it. But do NOT skip picks just to keep the portfolio small — the game has no transaction costs.
-4. **DO NOT equal-weight**. Size by conviction:
-   - Consensus + strong signals: 20–25%
-   - Good signals, one model only: 12–18%
-   - Diversifiers: 5–10%
-5. **Equal-weighting is a failure**. If you find yourself giving everything the same weight, you are not doing your job.
-6. **Check market concentration**: if >65% ends up in one market, redistribute.
-7. **Check regime fit and portfolio beta**:
+4. **Size by conviction** (see RULE #1 above): consensus 20–25%, single-model 12–18%, diversifiers 5–10%.
+5. **Check market concentration**: if >65% ends up in one market, redistribute.
+6. **Check regime fit and portfolio beta**:
    - You will be given the portfolio-weighted beta computed from the proposals.
    - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
-   - BULL regime: portfolio beta up to 2.0 is acceptable. Concentrate on top names — high beta wins in bull markets.
+   - BULL regime: TARGET portfolio beta 1.6–2.0. Concentrate on high-beta names — sub-1.4 beta in BULL is underperforming the mandate.
    - NEUTRAL: target portfolio beta between 0.95 and 1.30.
-8. **Target regime-based position count**:
+7. **Target regime-based position count**:
     - BULL: 5–6 positions. Target 5 at ~20% each. No position < 5%. Cap strongest at 25%.
     - NEUTRAL: 5–10 positions. Size by conviction — top picks 20–25%, diversifiers 5–10%.
     - BEAR: 6–12 positions. Cap at 20% each.
@@ -67,12 +70,12 @@ This is a competition with 844 participants. Only #1 wins — median returns = l
 11. **Catalyst insight**: the challenger picks represent high-momentum catalysts. If the challenger's picks have strong signals (high short interest, premarket gap-up, IV spike + momentum), include at least 1–2 of them even if they're not consensus.
 12. **Do NOT penalize non-US stocks for missing Short Interest data.** Their IV column shows 20d annualized realized vol (not options IV) — treat it as a volatility level indicator. Evaluate European/Baltic stocks on volume breakouts, momentum, premarket gaps, and realized vol so we don't accidentally build a 100% US portfolio.
 13. **Earnings — opportunity AND risk**: Pre-earnings momentum in high-conviction stocks is an OPPORTUNITY (academic: 3–8% drift in 2–4 days before announcement). If the snapshot shows a PRE_EARNINGS_SETUP tag for a stock: allow up to 20% weight, max 40% total pre-earnings exposure, no more than 2 names with earnings in the same week. For earnings within 1 day (announcement tomorrow): cap at 10% regardless of conviction — binary gap risk is too close.
-14. **Dead-money exclusion rule**: in this competition, a stock is dead money if vol_ratio < 0.90 and mom_5d <= +1.0%. Do NOT call a stock dead money if vol_ratio is above 1.0. HIGH-risk dead-money names should normally be excluded, not merely downsized.
+14. **Dead-money exclusion rule**: in this competition, a stock is dead money if vol_ratio < {config.DEAD_MONEY_VOL_RATIO:.2f} and mom_5d <= +{config.DEAD_MONEY_MOM_5D:.1%}. Do NOT call a stock dead money if vol_ratio is above 1.0. HIGH-risk dead-money names should normally be excluded, not merely downsized.
 15. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
 16. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists. A 5-stock portfolio means each slot is scarce capital.
 17. **Regime-score selectivity inside NEUTRAL**: when regime_score is below 50 (CAUTIOUS), still hold exactly 5 names, but be more selective. Do NOT use caution as an excuse to add slow names; instead remove weak-acceleration names and keep only the sharpest 5.
-18. **Overbought-at-peak weight cap**: if a pick has RSI > 82 AND pct_from_52w_high ≥ −2% (at or within 2% of its 52-week high), cap its weight at 15% UNLESS vol_ratio > 1.8. High RSI at the 52-week high without exceptional volume confirms exhaustion not breakout — even for consensus picks. If vol_ratio > 1.8 the volume surge justifies the full 20–25% conviction weight.
-19. **Devil flag respect**: The Devil's advocate labels each pick HIGH / MEDIUM / LOW risk. If the learning context reports that the Devil's HIGH-risk flags have been accurate (>60% of HIGH-flagged picks underperformed), treat HIGH-risk flags as a hard weight cap of 10% for that pick. If Devil accuracy is unknown or below 50%, use your own judgement.
+18. **Overbought-at-peak weight cap**: if a pick has RSI > {config.OVERBOUGHT_RSI_THRESHOLD} AND pct_from_52w_high ≥ −{config.OVERBOUGHT_HIGH_PCT:.0%} (at or within {config.OVERBOUGHT_HIGH_PCT:.0%} of its 52-week high), cap its weight at {config.OVERBOUGHT_WEIGHT_CAP:.0%} UNLESS vol_ratio > {config.OVERBOUGHT_VOLUME_EXCEPTION:.1f}. High RSI at the 52-week high without exceptional volume confirms exhaustion not breakout — even for consensus picks. If vol_ratio > {config.OVERBOUGHT_VOLUME_EXCEPTION:.1f} the volume surge justifies the full 20–25% conviction weight.
+19. **Devil flag respect**: The Devil's advocate labels each pick HIGH / MEDIUM / LOW risk. If the learning context reports that the Devil's HIGH-risk flags have been accurate (>60% of HIGH-flagged picks underperformed), treat HIGH-risk flags as a hard weight cap of {config.DEVIL_ACCURACY_CAP_WEIGHT:.0%} for that pick. If Devil accuracy is unknown or below 50%, use your own judgement.
 20. **Learning-state constraints are mandatory**: Any ticker-level weight caps, hard rules, and bias-avoidance directives in the learning context are hard constraints for today's synthesis. Do not override them with consensus arguments.
 
 ## Hard constraints
@@ -86,22 +89,23 @@ CRITICAL: "weight" must be a DECIMAL between 0.05 and 0.25. NOT a percentage.
   Correct: 0.20 (means 20%)
   WRONG:   20   (do not write whole numbers)
 
-{
-  "positions": [
-    {
-      "ticker": "TICKER",
-      "weight": 0.22,
-      "rationale": "consensus/unique pick + one-sentence reason for this weight."
-    }
-  ],
-  "reasoning": "2–3 sentences: what consensus existed, what catalyst picks you included, and portfolio beta vs target.",
-  "confidence": 0.80,
-  "learning_reflection": "One sentence: how today's synthesis adapts based on recent learning context."
-}"""
+{{
+    "positions": [
+        {{
+            "ticker": "TICKER",
+            "weight": 0.22,
+            "rationale": "consensus/unique pick + one-sentence reason for this weight."
+        }}
+    ],
+    "reasoning": "2–3 sentences: what consensus existed, what catalyst picks you included, and portfolio beta vs target.",
+    "confidence": 0.80,
+    "learning_reflection": "One sentence: how today's synthesis adapts based on recent learning context."
+}}"""
 
 
 class OpenAIRiskManager(BaseAgent):
     MODEL = "gpt-5.4"
+    MAX_RETRIES = 3
 
     def __init__(self) -> None:
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
@@ -129,22 +133,31 @@ class OpenAIRiskManager(BaseAgent):
             "BEAR": (None, 0.90),
         }
 
-        try:
-            result = self._call_openai(user_message)
-            result = self._enforce_beta(result, snapshot, regime, beta_targets)
-            result = self._enforce_selection_quality(result, snapshot, bear_cases or {})
-            logger.info(
-                "Meta-analyst: synthesised %d positions from strategist(%d) + gemini(%d) + full(%d) (conf %.0f%%)",
-                len(result.positions),
-                len(prior_proposal.positions),
-                len(challenger_proposal.positions) if challenger_proposal else 0,
-                len(full_analyst_proposal.positions) if full_analyst_proposal else 0,
-                result.confidence * 100,
-            )
-            return result
-        except Exception as exc:
-            logger.warning("Meta-analyst failed (%s) — falling back to merge", exc)
-            return self._merge_proposals(prior_proposal, challenger_proposal, full_analyst_proposal)
+        last_error: Optional[Exception] = None
+        for attempt in range(1, self.MAX_RETRIES + 1):
+            try:
+                result = self._call_openai(user_message)
+                result = self._enforce_beta(result, snapshot, regime, beta_targets)
+                result = self._enforce_selection_quality(result, snapshot, bear_cases or {})
+                logger.info(
+                    "Meta-analyst: synthesised %d positions from strategist(%d) + gemini(%d) + full(%d) (conf %.0f%%)",
+                    len(result.positions),
+                    len(prior_proposal.positions),
+                    len(challenger_proposal.positions) if challenger_proposal else 0,
+                    len(full_analyst_proposal.positions) if full_analyst_proposal else 0,
+                    result.confidence * 100,
+                )
+                return result
+            except Exception as exc:
+                last_error = exc
+                logger.warning("Meta-analyst attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
+
+        logger.error(
+            "Risk Manager failed after %d retries — using deterministic ranked-candidates fallback (%s)",
+            self.MAX_RETRIES,
+            last_error,
+        )
+        return self._fallback_top_ranked(snapshot)
 
     @staticmethod
     def _portfolio_beta(proposal: PortfolioProposal, snapshot: MarketSnapshot) -> float:
@@ -161,9 +174,6 @@ class OpenAIRiskManager(BaseAgent):
         if covered_weight == 0:
             return float("nan")
         return sum(w * b for w, b in covered) / covered_weight
-
-    # Empirical average S&P 500 beta for Nordic/Baltic stocks (structurally low US-market correlation)
-    _NON_US_ASSUMED_BETA = 0.30
 
     def _enforce_beta(
         self,
@@ -187,7 +197,7 @@ class OpenAIRiskManager(BaseAgent):
         non_us_weight = 1.0 - us_weight
 
         # Skip check if almost no US exposure — beta vs S&P 500 is meaningless
-        if us_weight < 0.25:
+        if us_weight < config.BETA_CHECK_MIN_US_WEIGHT:
             logger.info(
                 "Portfolio beta check skipped: only %.0f%% US exposure "
                 "(non-US stocks have structurally low S&P 500 beta — actual beta %.2f)",
@@ -197,8 +207,8 @@ class OpenAIRiskManager(BaseAgent):
 
         # Adjust target range for non-US exposure
         lo, hi = beta_targets.get(regime, (None, None))
-        adj_lo = (lo * us_weight + self._NON_US_ASSUMED_BETA * non_us_weight) if lo else None
-        adj_hi = (hi * us_weight + self._NON_US_ASSUMED_BETA * non_us_weight) if hi else None
+        adj_lo = (lo * us_weight + config.NON_US_ASSUMED_BETA * non_us_weight) if lo else None
+        adj_hi = (hi * us_weight + config.NON_US_ASSUMED_BETA * non_us_weight) if hi else None
 
         in_range = (adj_lo is None or actual_beta >= adj_lo) and (adj_hi is None or actual_beta <= adj_hi)
         raw_str = f"{lo if lo is not None else '?'}–{hi if hi is not None else '?'}"
@@ -215,7 +225,7 @@ class OpenAIRiskManager(BaseAgent):
                 "Portfolio beta %.2f outside adjusted target %s "
                 "(raw %s, %.0f%% US + %.0f%% non-US at assumed beta %.2f)",
                 actual_beta, adj_str, raw_str,
-                us_weight * 100, non_us_weight * 100, self._NON_US_ASSUMED_BETA,
+                us_weight * 100, non_us_weight * 100, config.NON_US_ASSUMED_BETA,
             )
             if regime == "BEAR" and adj_hi is not None and actual_beta > adj_hi:
                 logger.warning(
@@ -223,7 +233,7 @@ class OpenAIRiskManager(BaseAgent):
                     actual_beta, adj_hi,
                 )
                 positions = [
-                    Position(ticker=p.ticker, weight=min(p.weight, 0.15), rationale=p.rationale)
+                    Position(ticker=p.ticker, weight=min(p.weight, config.OVERBOUGHT_WEIGHT_CAP), rationale=p.rationale)
                     for p in proposal.positions
                 ]
                 total = sum(p.weight for p in positions)
@@ -256,7 +266,7 @@ class OpenAIRiskManager(BaseAgent):
             mom_5d = c.get("mom_5d", float("nan"))
             if math.isnan(vol_ratio) or math.isnan(mom_5d):
                 return False
-            return vol_ratio < 0.90 and mom_5d <= 0.01
+            return vol_ratio < config.DEAD_MONEY_VOL_RATIO and mom_5d <= config.DEAD_MONEY_MOM_5D
 
         def candidate_score(ticker: str) -> float:
             c = candidate_map.get(ticker, {})
@@ -310,13 +320,13 @@ class OpenAIRiskManager(BaseAgent):
             for ticker in ranked_candidates:
                 if len(kept) >= minimum_positions:
                     break
-                if candidate_score(ticker) < 0.15:
+                if candidate_score(ticker) < config.MIN_CANDIDATE_SCORE_FOR_SLOT:
                     continue
                 c = candidate_map[ticker]
                 kept.append(
                     Position(
                         ticker=ticker,
-                        weight=0.05,
+                        weight=config.FALLBACK_REPLACEMENT_WEIGHT,
                         rationale=(
                             "Replacement selected by slot-cost filter: stronger short-term acceleration "
                             "or cleaner momentum than removed alternatives."
@@ -337,12 +347,12 @@ class OpenAIRiskManager(BaseAgent):
             pct_high = c.get("pct_from_52w_high", float("nan"))
             vol_ratio = c.get("vol_ratio", float("nan"))
             overbought = (
-                not math.isnan(rsi) and rsi > 82
-                and not math.isnan(pct_high) and pct_high >= -0.02
-                and (math.isnan(vol_ratio) or vol_ratio <= 1.8)
+                not math.isnan(rsi) and rsi > config.OVERBOUGHT_RSI_THRESHOLD
+                and not math.isnan(pct_high) and pct_high >= -config.OVERBOUGHT_HIGH_PCT
+                and (math.isnan(vol_ratio) or vol_ratio <= config.OVERBOUGHT_VOLUME_EXCEPTION)
             )
-            if overbought and pos.weight > 0.15:
-                kept[i] = Position(ticker=pos.ticker, weight=0.15, rationale=pos.rationale)
+            if overbought and pos.weight > config.OVERBOUGHT_WEIGHT_CAP:
+                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale)
                 logger.info(
                     "Overbought-peak cap: %s → 15%% (RSI %.0f, 52wH %+.1f%%)",
                     pos.ticker, rsi, pct_high * 100,
@@ -353,8 +363,8 @@ class OpenAIRiskManager(BaseAgent):
         if devil.get("devil_is_accurate"):
             for i, pos in enumerate(kept):
                 bear = bear_cases.get(pos.ticker, {})
-                if bear.get("risk") == "HIGH" and pos.weight > 0.10:
-                    kept[i] = Position(ticker=pos.ticker, weight=0.10, rationale=pos.rationale)
+                if bear.get("risk") == "HIGH" and pos.weight > config.DEVIL_ACCURACY_CAP_WEIGHT:
+                    kept[i] = Position(ticker=pos.ticker, weight=config.DEVIL_ACCURACY_CAP_WEIGHT, rationale=pos.rationale)
                     logger.info(
                         "Devil accuracy cap: %s → 10%% (Devil accuracy active, HIGH flag)",
                         pos.ticker,
@@ -458,6 +468,47 @@ class OpenAIRiskManager(BaseAgent):
             confidence=0.5,
         )
 
+    @staticmethod
+    def _fallback_top_ranked(snapshot: MarketSnapshot) -> PortfolioProposal:
+        ranked = snapshot.get("ranked_candidates", [])
+        fallback_tickers: list[str] = []
+
+        for item in ranked:
+            if not isinstance(item, dict):
+                continue
+            ticker = item.get("ticker")
+            if isinstance(ticker, str) and ticker not in fallback_tickers:
+                fallback_tickers.append(ticker)
+            if len(fallback_tickers) >= 5:
+                break
+
+        if len(fallback_tickers) < 5:
+            for candidate in snapshot.get("candidates", []):
+                ticker = candidate.get("ticker") if isinstance(candidate, dict) else None
+                if isinstance(ticker, str) and ticker not in fallback_tickers:
+                    fallback_tickers.append(ticker)
+                if len(fallback_tickers) >= 5:
+                    break
+
+        fallback_tickers = fallback_tickers[:5]
+        positions = [
+            Position(
+                ticker=ticker,
+                weight=0.20,
+                rationale="FALLBACK: Risk Manager API failure — equal-weight top-5 by competition score",
+            )
+            for ticker in fallback_tickers
+        ]
+        logger.error(
+            "Risk Manager fallback activated: %s",
+            ", ".join(sanitize_ticker(t) for t in fallback_tickers),
+        )
+        return PortfolioProposal(
+            positions=positions,
+            reasoning="FALLBACK: Risk Manager API failure — equal-weight top-5 by competition score",
+            confidence=0.2,
+        )
+
     def _build_message(
         self,
         strategist: PortfolioProposal,
@@ -474,7 +525,7 @@ class OpenAIRiskManager(BaseAgent):
         # Compute portfolio betas for context
         strat_beta = self._portfolio_beta(strategist, snapshot)
         strat_beta_str = f"{strat_beta:.2f}" if not math.isnan(strat_beta) else "N/A"
-        beta_targets = {"BULL": "target ≤2.0", "BEAR": "target ≤0.90", "NEUTRAL": "target 0.95–1.30"}
+        beta_targets = {"BULL": "target 1.6–2.0", "BEAR": "target ≤0.90", "NEUTRAL": "target 0.95–1.30"}
         beta_target_str = beta_targets.get(regime, "target 0.95–1.15")
 
         breadth = snapshot.get("breadth_pct", float("nan"))
@@ -527,6 +578,10 @@ class OpenAIRiskManager(BaseAgent):
                 sector_rotation_line = f"Sector rotation (20d, breadth): {' | '.join(_parts[:5])}"
                 if _lag:
                     sector_rotation_line += f"  |  Laggards: {', '.join(_lag[:4])}"
+                sector_rotation_line += (
+                    "\nSector action rule: if a sector's breadth is below 40%, it is losing internal momentum — "
+                    "reduce or exit your weakest performer in that sector and redeploy into the leading sector."
+                )
 
         game_equity = snapshot.get("game_equity", 10000.0)
         game_ret = snapshot.get("game_return_pct", 0.0)
@@ -577,10 +632,16 @@ class OpenAIRiskManager(BaseAgent):
         triple = {t for t in all_tickers if sum([t in strat_tickers, t in chall_tickers, t in full_tickers]) == 3}
 
         if triple:
-            lines.append(f"🌟 TRIPLE CONSENSUS (all 3 proposals — maximum conviction): {', '.join(sorted(triple))}")
+            lines.append(
+                "🌟 TRIPLE CONSENSUS (all 3 proposals — maximum conviction): "
+                + ", ".join(sanitize_ticker(t) for t in sorted(triple))
+            )
             lines.append("")
         if consensus - triple:
-            lines.append(f"⭐ DOUBLE CONSENSUS (2/3 proposals — high conviction): {', '.join(sorted(consensus - triple))}")
+            lines.append(
+                "⭐ DOUBLE CONSENSUS (2/3 proposals — high conviction): "
+                + ", ".join(sanitize_ticker(t) for t in sorted(consensus - triple))
+            )
             lines.append("")
 
         def _fmt_row(p, consensus_set: set, candidate_map: dict) -> str:
@@ -593,7 +654,7 @@ class OpenAIRiskManager(BaseAgent):
                 if not math.isnan(mom_5d) and not math.isnan(vol_ratio)
                 else ""
             )
-            return f"{p.ticker:<12} {p.weight:>7.1%}{tag}  {p.rationale[:40]}{accel}"
+            return f"{sanitize_ticker(p.ticker):<12} {p.weight:>7.1%}{tag}  {p.rationale[:40]}{accel}"
 
         # Strategist proposal
         strat_total = sum(p.weight for p in strategist.positions)
@@ -722,12 +783,12 @@ class OpenAIRiskManager(BaseAgent):
                 lines.append("")
                 lines.append("**HIGH RISK (reduce weight or exclude):**")
                 for ticker, v in high_risk:
-                    lines.append(f"  {ticker}: {v['bear_case']}")
+                    lines.append(f"  {sanitize_ticker(ticker)}: {v['bear_case']}")
             if other_risk:
                 lines.append("")
                 lines.append("**MEDIUM / LOW RISK (acknowledge but can hold):**")
                 for ticker, v in other_risk:
-                    lines.append(f"  {ticker} [{v['risk']}]: {v['bear_case']}")
+                    lines.append(f"  {sanitize_ticker(ticker)} [{v['risk']}]: {v['bear_case']}")
 
         lines += [
             "",
@@ -746,6 +807,7 @@ class OpenAIRiskManager(BaseAgent):
             model=self.MODEL,
             response_format={"type": "json_object"},
             temperature=0.15,
+            timeout=config.API_TIMEOUT_SECONDS,
             messages=[
                 {"role": "system", "content": _SYSTEM_PROMPT},
                 {"role": "user", "content": user_message},

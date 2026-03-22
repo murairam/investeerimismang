@@ -24,7 +24,7 @@ from openai import OpenAI
 
 from agents.base_agent import BaseAgent
 from data.cost_tracker import log_usage
-from data.fetcher import MarketSnapshot
+from data.fetcher import MarketSnapshot, sanitize_ticker
 from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
@@ -155,7 +155,17 @@ class GeminiChallenger(BaseAgent):
         premarket_gap = snapshot.get("premarket_gap", {})
         iv_proxy = snapshot.get("iv_proxy", {})
 
-        catalyst_ranked = self._rank_candidates(snapshot)
+        ranked_source = snapshot.get("ranked_candidates", snapshot.get("candidates", []))
+        candidate_map = {c["ticker"]: c for c in snapshot.get("candidates", [])}
+        catalyst_ranked: list[dict] = []
+        for item in ranked_source:
+            if not isinstance(item, dict):
+                continue
+            ticker = item.get("ticker")
+            if isinstance(ticker, str) and ticker in candidate_map:
+                catalyst_ranked.append(candidate_map[ticker])
+        if not catalyst_ranked:
+            catalyst_ranked = snapshot.get("candidates", [])
 
         header = (
             f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'5d Ret':>7} {'RSI':>6} "
@@ -182,6 +192,10 @@ class GeminiChallenger(BaseAgent):
                 sector_rotation_line = f"Sector rotation (20d, breadth): {' | '.join(_parts[:5])}"
                 if _lag:
                     sector_rotation_line += f"  |  Laggards: {', '.join(_lag[:4])}"
+                sector_rotation_line += (
+                    "\nSector action rule: if a sector's breadth is below 40%, it is losing internal momentum — "
+                    "reduce or exit your weakest performer in that sector and redeploy into the leading sector."
+                )
 
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
@@ -220,11 +234,12 @@ class GeminiChallenger(BaseAgent):
 
         for c in catalyst_ranked:
             t = c["ticker"]
+            safe_ticker = sanitize_ticker(t)
             si = short_interest.get(t)
             pm = premarket_gap.get(t)
             iv = iv_proxy.get(t)
             lines.append(
-                f"{t:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
+                f"{safe_ticker:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
                 f"{fmt(c['mom_5d']):>7} "
                 f"{fmt(c['rsi_14'], '.1f'):>6} "
                 f"{fmt(c['vs_index']):>8} "
@@ -242,7 +257,7 @@ class GeminiChallenger(BaseAgent):
         if prior_proposal and prior_proposal.positions:
             lines += ["", "Yesterday's holdings (for continuity reference):"]
             for pos in prior_proposal.positions:
-                lines.append(f"  {pos.ticker:<12} {pos.weight:.1%}")
+                lines.append(f"  {sanitize_ticker(pos.ticker):<12} {pos.weight:.1%}")
 
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]
@@ -252,26 +267,6 @@ class GeminiChallenger(BaseAgent):
 
         lines += ["", "Build your catalyst-driven portfolio. Return valid JSON only."]
         return "\n".join(lines)
-
-    def _rank_candidates(self, snapshot: MarketSnapshot) -> list[dict]:
-        short_interest = snapshot.get("short_interest", {})
-        premarket_gap = snapshot.get("premarket_gap", {})
-        iv_proxy = snapshot.get("iv_proxy", {})
-
-        def sort_key(candidate: dict) -> tuple:
-            ticker = candidate["ticker"]
-            return (
-                self._catalyst_score(
-                    candidate,
-                    short_interest.get(ticker),
-                    premarket_gap.get(ticker),
-                    iv_proxy.get(ticker),
-                ),
-                candidate.get("vol_ratio", float("-inf")),
-                candidate.get("mom_5d", float("-inf")),
-            )
-
-        return sorted(snapshot["candidates"], key=sort_key, reverse=True)
 
     @staticmethod
     def _catalyst_score(
@@ -437,10 +432,12 @@ class GeminiChallenger(BaseAgent):
         peer_proposals: list[PortfolioProposal],
     ) -> dict:
         """Lightweight second-pass debate using Gemini (or Groq fallback)."""
-        own_str = ", ".join(f"{p.ticker} {p.weight:.0%}" for p in own_proposal.positions)
+        own_str = ", ".join(f"{sanitize_ticker(p.ticker)} {p.weight:.0%}" for p in own_proposal.positions)
         peer_lines = []
         for i, peer in enumerate(peer_proposals, 1):
-            peer_lines.append(f"Peer {i}: " + ", ".join(f"{p.ticker} {p.weight:.0%}" for p in peer.positions))
+            peer_lines.append(
+                f"Peer {i}: " + ", ".join(f"{sanitize_ticker(p.ticker)} {p.weight:.0%}" for p in peer.positions)
+            )
         peer_str = "\n".join(peer_lines)
         prompt = (
             f"Your portfolio: {own_str}\n\n"

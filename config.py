@@ -30,6 +30,32 @@ CASH_POLICY = {
     "strong_alpha_threshold": 0.03,       # deploy cash when selected names show strong alpha
 }
 
+OPENAI_FALLBACK_MODEL = "gpt-4o-mini"  # used if primary model unavailable
+API_TIMEOUT_SECONDS = 45
+
+USE_OPENROUTER_FOR_SECONDARY_AGENTS = True  # set False to revert to OpenAI for all
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+OPENROUTER_DEVIL_MODEL = "qwen/qwen3-32b"
+OPENROUTER_ANALYST_MODEL = "qwen/qwen3-32b"
+
+# Risk control thresholds
+OVERBOUGHT_RSI_THRESHOLD = 82
+OVERBOUGHT_HIGH_PCT = 0.02      # within 2% of 52w high
+OVERBOUGHT_VOLUME_EXCEPTION = 1.8  # vol_ratio above this bypasses cap
+OVERBOUGHT_WEIGHT_CAP = 0.15
+DEAD_MONEY_VOL_RATIO = 0.90
+DEAD_MONEY_MOM_5D = 0.01
+DEVIL_ACCURACY_CAP_WEIGHT = 0.10
+BETA_CHECK_MIN_US_WEIGHT = 0.25
+NON_US_ASSUMED_BETA = 0.30
+FALLBACK_REPLACEMENT_WEIGHT = 0.05
+MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
+
+# Regime thresholds
+VIX_HIGH_THRESHOLD = 30
+VIX_NEUTRAL_THRESHOLD = 22
+VIX_LOW_THRESHOLD = 15
+
 # ── Signal parameters ────────────────────────────────────────────────────────
 MOMENTUM_WINDOW = 20        # trading days for momentum calculation
 BETA_WINDOW = 60            # trading days for beta calculation
@@ -41,7 +67,7 @@ MOM_LONG = 60               # long-term momentum window (days)
 SMA_REGIME_WINDOW = 200     # days for market regime SMA
 REGIME_THRESHOLD = 0.02     # 2% band for BULL/BEAR classification
 CORR_WINDOW = 60            # days for correlation filter
-CORR_THRESHOLD = 0.85       # correlation above this → keep higher Sharpe
+CORR_THRESHOLD = 0.93       # correlation above this → keep higher Sharpe; 0.93 catches near-identical series (dual-class shares, same-commodity pure plays) without filtering distinct large-caps that merely co-move in bull markets
 
 # ── Competition ranking weights ──────────────────────────────────────────────
 # Z-score normalized weights for competition-optimized candidate ranking.

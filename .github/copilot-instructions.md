@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**AlphaShark** is an autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data, uses a 4-model AI ensemble (GPT-5.4 Strategist + GPT-5.4 Challenger + GPT-5.4-nano Devil + GPT-5.4 Risk Manager) to build a momentum portfolio, validates it against game rules, and posts the daily recommendation to Discord.
+**AlphaShark** is an autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data, uses a 4-model AI ensemble (GPT-5.4 Strategist + Gemini 2.5 Flash Challenger + GPT-5.4-nano Devil + GPT-5.4 Risk Manager) to build a momentum portfolio, validates it against game rules, and posts the daily recommendation to Discord.
 
 **Game period:** 6 April – 19 June 2026  
 **Daily execution:** GitHub Actions fires at 06:30 UTC on weekdays (Mon–Fri)
@@ -12,7 +12,7 @@
 ## Technology Stack
 
 - **Language:** Python 3.12
-- **AI models:** OpenAI (GPT-5.4, GPT-5.4-nano)
+- **AI models:** OpenAI GPT-5.4 (Strategist, Risk Manager) + Gemini 2.5 Flash (Challenger, with Groq Llama 3.3 70B fallback) + OpenRouter Qwen3-32B (Devil, Full Analyst)
 - **Market data:** `yfinance` (free, no API key required)
 - **Libraries:** `pandas`, `numpy`, `openai`, `google-genai`, `anthropic`, `requests`, `python-dotenv`, `pytrends`
 - **Automation:** GitHub Actions (`.github/workflows/`)
@@ -28,11 +28,14 @@ Market data (yfinance)
 data/fetcher.py — 15 signals per stock + macro context (regime score, VIX, breadth)
     ↓
 GPT-5.4 Strategist ──────────────────────────────────────────┐  (run in parallel)
-GPT-5.4 Challenger ──────────────────────────────────────────┤
+Gemini 2.5 Flash Challenger ─────────────────────────────────┤
+GPT-5.4-nano FullAnalyst ────────────────────────────────────┘
+                                                              ↓
+              [Cross-agent debate — lightweight second pass per agent]
                                                               ↓
 GPT-5.4-nano Devil — bear-case stress test for top picks
                                                               ↓
-GPT-5.4 Risk Manager — synthesises both proposals, weights consensus picks higher
+GPT-5.4 Risk Manager — synthesises all proposals + debate summary + bear cases
     ↓
 portfolio/validator.py — enforces game constraints, cash floor (min 75% invested)
     ↓
@@ -52,9 +55,10 @@ PREGAME_LOG.md / DAILY_LOG.md — human-readable entry appended
 | `config.py` | Universe, signal params, game constraints, sector map |
 | `agents/base_agent.py` | Abstract base class all LLM agents must implement |
 | `agents/openai_strategist.py` | GPT-5.4 momentum-driven portfolio selection |
-| `agents/openai_challenger.py` | GPT-5.4 contrarian second opinion |
+| `agents/gemini_challenger.py` | Gemini 2.5 Flash catalyst-hunter second opinion |
+| `agents/openai_challenger.py` | GPT-5.4-nano full analyst third proposal (all signals) |
 | `agents/openai_devil.py` | GPT-5.4-nano bear-case stress tester |
-| `agents/openai_risk_manager.py` | GPT-5.4 that synthesises both proposals |
+| `agents/openai_risk_manager.py` | GPT-5.4 that synthesises all proposals + debate + bear cases |
 | `data/fetcher.py` | Market data + 15 signal computations + macro context |
 | `data/earnings_fetcher.py` | Upcoming earnings calendar (7-day risk warnings) |
 | `data/news_fetcher.py` | Recent headlines for top candidates |
@@ -97,7 +101,11 @@ python scripts/verify.py   # confirm portfolio (LIVE mode)
 ### Required environment variables (see `.env.example`)
 
 ```
-OPENAI_API_KEY=...          # GPT-5.4 + GPT-5.4-nano
+OPENAI_API_KEY=...          # GPT-5.4 Strategist + Risk Manager
+GEMINI_API_KEY=...          # Gemini 2.5 Flash Challenger
+GROQ_API_KEY=...            # Groq Llama 3.3 70B — Gemini fallback (free tier, optional)
+OPENROUTER_API_KEY=...      # Qwen3-32B for Devil + Full Analyst (optional, falls back to GPT-5.4-nano)
+EODHD_API_KEY=...           # Nordic/Baltic ticker fallback
 DISCORD_WEBHOOK_URL=...     # Discord channel webhook
 DISCORD_USER_ID=...         # Optional: enables @mentions in LIVE mode
 ```

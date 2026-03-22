@@ -79,8 +79,49 @@ from data.portfolio_store import save_verified
 from data.verification_tracker import mark_verified
 from data.paper_account import sync_verified_positions
 from data.diary import mark_verified_entry
+from data.learning_state import load_learning_state
 
 _STORE_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
+
+
+def _active_ticker_caps() -> dict[str, float]:
+    state = load_learning_state()
+    raw_caps = state.get("weight_caps", []) if isinstance(state, dict) else []
+    caps: dict[str, float] = {}
+    for cap in raw_caps:
+        if not isinstance(cap, dict):
+            continue
+        if cap.get("scope") != "ticker":
+            continue
+        ticker = cap.get("ticker")
+        max_weight = cap.get("max_weight")
+        if not isinstance(ticker, str):
+            continue
+        try:
+            max_weight_float = float(max_weight)
+        except (TypeError, ValueError):
+            continue
+        if max_weight_float <= 0:
+            continue
+        caps[ticker] = max_weight_float
+    return caps
+
+
+def _apply_learning_caps(positions: list[dict]) -> None:
+    caps = _active_ticker_caps()
+    if not caps:
+        return
+    for pos in positions:
+        ticker = pos.get("ticker")
+        if ticker not in caps:
+            continue
+        max_weight = caps[ticker]
+        if float(pos.get("weight", 0.0)) > max_weight:
+            old_weight = float(pos["weight"])
+            pos["weight"] = max_weight
+            print(
+                f"  ⚠️  Learning cap applied: {ticker} {old_weight:.0%} -> {max_weight:.0%}"
+            )
 
 
 def load() -> Optional[dict]:
@@ -149,6 +190,8 @@ def _input_from_string(raw: str, equity: Optional[float]) -> None:
         print(f"  ✓ {game_name} ({ticker}) {weight:.0%}")
         positions.append({"ticker": ticker, "weight": weight, "rationale": "manually entered"})
 
+    _apply_learning_caps(positions)
+
     total = sum(p["weight"] for p in positions)
     print(f"\n  {len(positions)} positions, total {total:.1%}")
 
@@ -195,6 +238,7 @@ def main() -> None:
     if answer == "y":
         today = date.today().isoformat()
         positions = data.get("positions", [])
+        _apply_learning_caps(positions)
         save_verified(positions, today, close_prices=data.get("close_prices"))
 
         equity = _ask_equity()
@@ -287,6 +331,8 @@ def _enter_manual(existing: dict) -> None:
     if not positions:
         print("  Nothing entered — keeping existing record.\n")
         return
+
+    _apply_learning_caps(positions)
 
     total = sum(p["weight"] for p in positions)
     print(f"\n  Entered {len(positions)} positions, total {total:.1%}")

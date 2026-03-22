@@ -11,12 +11,18 @@ import os
 from datetime import date
 from typing import Optional
 
-from openai import OpenAI
+from openai import APIConnectionError, APITimeoutError, OpenAI
 
 from agents.base_agent import BaseAgent
-from config import MOMENTUM_WINDOW
+from config import (
+    API_TIMEOUT_SECONDS,
+    MOMENTUM_WINDOW,
+    VIX_HIGH_THRESHOLD,
+    VIX_LOW_THRESHOLD,
+    VIX_NEUTRAL_THRESHOLD,
+)
 from data.cost_tracker import log_usage
-from data.fetcher import MarketSnapshot
+from data.fetcher import MarketSnapshot, sanitize_ticker
 from data.portfolio_store import load_performance_history
 from portfolio.models import PortfolioProposal, Position
 
@@ -45,19 +51,19 @@ _REGIME_GUIDANCE = {
 def _vix_guidance(vix: float) -> str:
     if math.isnan(vix):
         return "VIX data unavailable — use regime signals only."
-    if vix > 30:
+    if vix > VIX_HIGH_THRESHOLD:
         return (
             f"VIX is {vix:.1f} — extreme fear. Reduce overall beta. "
             "Cap your highest-conviction positions at 20% and prefer names with strong earnings visibility. "
             "This is not the time for speculative breakouts."
         )
-    if vix > 22:
+    if vix > VIX_NEUTRAL_THRESHOLD:
         return (
             f"VIX is {vix:.1f} — elevated uncertainty. "
             "Be selective: only add a position if its Sharpe_20d is clearly above the median. "
             "Slightly prefer quality over pure momentum."
         )
-    if vix < 15:
+    if vix < VIX_LOW_THRESHOLD:
         return (
             f"VIX is {vix:.1f} — market complacency. "
             "Momentum strategy works well here but ensure every position has a genuine Sharpe edge. "
@@ -180,6 +186,13 @@ class OpenAIStrategist(BaseAgent):
                 logger.warning("Attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
                 if attempt == self.MAX_RETRIES:
                     raise RuntimeError("OpenAIStrategist: exhausted retries") from exc
+            except (APIConnectionError, APITimeoutError) as exc:
+                logger.warning("Strategist API attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
+                if attempt == self.MAX_RETRIES:
+                    logger.error("Strategist failed after %d retries — no fallback", self.MAX_RETRIES)
+                    raise RuntimeError(
+                        f"Strategist failed after {self.MAX_RETRIES} retries — no fallback"
+                    ) from exc
 
         raise RuntimeError("OpenAIStrategist: unreachable")
 
@@ -261,6 +274,10 @@ class OpenAIStrategist(BaseAgent):
                 _lag = [s for s, d in _valid if d["avg_mom_20d"] < 0]
                 if _lag:
                     lines.append(f"  Losing momentum: {', '.join(_lag[:4])}")
+                lines.append(
+                    "Sector action rule: if a sector's breadth is below 40%, it is losing internal momentum — "
+                    "reduce or exit your weakest performer in that sector and redeploy into the leading sector."
+                )
 
         rotation_risk = snapshot.get("rotation_risk", {})
         if rotation_risk:
@@ -285,8 +302,9 @@ class OpenAIStrategist(BaseAgent):
             return "N/A" if math.isnan(v) else format(v, fmt_str)
 
         for c in snapshot["candidates"]:
+            safe_ticker = sanitize_ticker(c["ticker"])
             lines.append(
-                f"{c['ticker']:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
+                f"{safe_ticker:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
                 f"{fmt(c['momentum']):>8} "
                 f"{fmt(c['sharpe_20d'], '.2f'):>7} "
                 f"{fmt(c['mom_5d']):>7} "
@@ -306,7 +324,7 @@ class OpenAIStrategist(BaseAgent):
                 "-" * 22,
             ]
             for pos in prior_proposal.positions:
-                lines.append(f"{pos.ticker:<12} {pos.weight:>8.1%}")
+                lines.append(f"{sanitize_ticker(pos.ticker):<12} {pos.weight:>8.1%}")
             lines += [
                 "",
                 "Turnover rule: to EXIT a current holding, the replacement must have a Sharpe_20d "
@@ -338,10 +356,10 @@ class OpenAIStrategist(BaseAgent):
                     top_l = sorted(pos_rets.items(), key=lambda x: x[1])[:1]
                     for t, r in top_w:
                         if r > 0:
-                            movers.append(f"{t} {r:+.1%} ▲")
+                            movers.append(f"{sanitize_ticker(t)} {r:+.1%} ▲")
                     for t, r in top_l:
                         if r < 0:
-                            movers.append(f"{t} {r:+.1%} ▼")
+                            movers.append(f"{sanitize_ticker(t)} {r:+.1%} ▼")
                 movers_str = "  ".join(movers) if movers else ""
                 lines.append(
                     f"{entry['date']:<12} {p_str:>10} {b_str:>10} {a_str:>8}    {movers_str}"
@@ -376,9 +394,13 @@ class OpenAIStrategist(BaseAgent):
                 if len(rets) >= 2 and all(r < 0 for r in rets)
             ]
             if consistent_winners:
-                lines.append(f"Consistent winners this week: {', '.join(consistent_winners)}")
+                lines.append(
+                    f"Consistent winners this week: {', '.join(sanitize_ticker(t) for t in consistent_winners)}"
+                )
             if consistent_losers:
-                lines.append(f"Consistent underperformers: {', '.join(consistent_losers)}")
+                lines.append(
+                    f"Consistent underperformers: {', '.join(sanitize_ticker(t) for t in consistent_losers)}"
+                )
 
             # Strategy adaptation signal
             if len(daily_entries) >= 2:
@@ -458,6 +480,7 @@ class OpenAIStrategist(BaseAgent):
             model=self.MODEL,
             response_format={"type": "json_object"},
             temperature=0.1,
+            timeout=API_TIMEOUT_SECONDS,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message},
@@ -502,10 +525,12 @@ class OpenAIStrategist(BaseAgent):
         peer_proposals: list[PortfolioProposal],
     ) -> dict:
         """Lightweight second-pass debate: identify agreements and disagreements with peer proposals."""
-        own_str = ", ".join(f"{p.ticker} {p.weight:.0%}" for p in own_proposal.positions)
+        own_str = ", ".join(f"{sanitize_ticker(p.ticker)} {p.weight:.0%}" for p in own_proposal.positions)
         peer_lines = []
         for i, peer in enumerate(peer_proposals, 1):
-            peer_lines.append(f"Peer {i}: " + ", ".join(f"{p.ticker} {p.weight:.0%}" for p in peer.positions))
+            peer_lines.append(
+                f"Peer {i}: " + ", ".join(f"{sanitize_ticker(p.ticker)} {p.weight:.0%}" for p in peer.positions)
+            )
         peer_str = "\n".join(peer_lines)
         prompt = (
             f"Your portfolio: {own_str}\n\n"

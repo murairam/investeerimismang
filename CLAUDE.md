@@ -20,7 +20,8 @@ python scripts/verify.py   # confirm portfolio (LIVE mode after submission)
 python scripts/pregame_review.py  # refresh pre-game learning summary
 ```
 
-Required env vars: `OPENAI_API_KEY`, `DISCORD_WEBHOOK_URL`, optionally `DISCORD_USER_ID`.
+Required env vars: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
+Optional: `OPENROUTER_API_KEY` (secondary-agent routing), `DISCORD_USER_ID`.
 
 No formal test suite — validate changes with `python main.py` and `python scripts/status.py`.
 
@@ -33,9 +34,9 @@ data/fetcher.py — 15 signals per stock + macro context (regime score 0-100, VI
     ↓ (parallel)
 agents/openai_strategist.py (GPT-5.4)          ─┐ Proposal A: momentum strategist
 agents/gemini_challenger.py (Gemini 2.5 Flash)  ─┤ Proposal B: catalyst hunter
-agents/openai_challenger.py (GPT-5.4-nano)      ─┘ Proposal C: full analyst (all signals)
+agents/openai_challenger.py (Qwen3-32B via OpenRouter, fallback GPT-5.4-nano) ─┘ Proposal C: full analyst (all signals)
     ↓
-agents/openai_devil.py (GPT-5.4-nano)  — stress-tests top picks → bear cases
+agents/openai_devil.py (Qwen3-32B via OpenRouter, fallback GPT-5.4-nano) — stress-tests top picks → bear cases
     ↓
 agents/openai_risk_manager.py (GPT-5.4) — synthesises all 3 proposals + bear cases → PortfolioProposal
     ↓
@@ -160,17 +161,17 @@ competing in a short-term 10-week game. The objective is to **WIN**, not to pres
 - Prioritize: high-beta breakouts, sector momentum leaders, pre-earnings catalysts
 - Concentrate: 5–8 positions maximum. Diversification is for managing money, not winning competitions.
 - Current regime (as of March 2026): Energy rotation year. Brent ~$103, energy +25% YTD.
-  Tech in correction. Favour XOM, CVX, EQNR.OL, KONG.OL, LLY, DSV.CO.
+    Tech in correction. Favour XOM, CVX, EQNR.OL, KOG.OL, LLY, DSV.CO.
 - Avoid: low-beta telecom, Nordic banks as filler, shipping with SELL consensus (Mærsk)
 - Tech stack: yfinance for data, vectorized pandas for math (no TA-Lib or bloated libraries),
-  Python 3.10+ type hints throughout, `logging` (not `print`) for all output.
+    Python 3.12+ type hints throughout, `logging` (not `print`) for all output.
 
 ## Memory Loop — Mandatory Reading
 
 Before writing any new trading logic or modifying agent prompts, you MUST:
 1. Read `learning_state.json` or `data/learning_state.py` outputs first — this is the machine source of truth.
-2. Read `AI_SELF_CRITIQUE.md` — use it as a human-readable audit, not the primary state source.
-3. Read `PREGAME_LEARNING.md` — use it as a human-readable training summary.
+2. Read `AI_SELF_CRITIQUE.md` only as a human-readable audit (optional for prompt logic).
+3. Read `PREGAME_LEARNING.md` only as a human-readable training summary (optional for prompt logic).
 4. Read `docs/strategy_principles.md` — the persistent strategic pivot document that survives
    daily auto-generation of `AI_SELF_CRITIQUE.md`.
 
@@ -243,4 +244,5 @@ Auto-generated files (`PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`
 | `verification_reminder.yml` | Mon–Fri 07:00 UTC | Discord reminder if portfolio not verified (LIVE only) |
 | `evening_review.yml` | Post-market | Optional evening review |
 
-GitHub secrets required: `OPENAI_API_KEY`, `DISCORD_WEBHOOK_URL`, optionally `DISCORD_USER_ID`.
+GitHub secrets required: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
+Optional: `OPENROUTER_API_KEY`, `DISCORD_USER_ID`.
