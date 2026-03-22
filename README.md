@@ -15,7 +15,7 @@ An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game
 These are the non-obvious design decisions worth explaining in depth.
 
 **Adversarial multi-model ensemble**
-Three agents propose portfolios in parallel — GPT-5.4 (Strategist), Gemini 2.5 Flash (Challenger), and GPT-5.4-nano (Full Analyst). Using two independent model families (OpenAI + Google) reduces correlated reasoning errors that a single-provider ensemble would share. The Devil's Advocate then generates bear cases specifically for the top combined picks before the Risk Manager synthesises the final portfolio. This adversarial architecture is inspired by red-teaming practices in security.
+Three agents propose portfolios in parallel — GPT-5.4 (Strategist), Gemini 2.5 Flash (Challenger), and Qwen3-32B via OpenRouter (Full Analyst, with GPT-5.4-nano fallback). Using two independent model families (OpenAI + Google) plus optional OpenRouter routing reduces correlated reasoning errors and operating cost. The Devil's Advocate (also Qwen3-32B via OpenRouter, with GPT-5.4-nano fallback) then generates bear cases specifically for the top combined picks before the Risk Manager synthesises the final portfolio. This adversarial architecture is inspired by red-teaming practices in security.
 
 **Self-improving learning loop**
 Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record without any human labelling.
