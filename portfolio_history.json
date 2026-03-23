@@ -1,41 +1,47 @@
 {
-  "date": "2026-03-22",
+  "date": "2026-03-23",
   "source": "verified",
   "positions": [
     {
       "ticker": "APA",
       "weight": 0.25,
-      "rationale": "verified from game portfolio 2026-03-22",
+      "rationale": "manually entered",
       "tags": []
     },
     {
       "ticker": "VLO",
-      "weight": 0.2,
-      "rationale": "verified from game portfolio 2026-03-22",
-      "tags": []
-    },
-    {
-      "ticker": "DVN",
-      "weight": 0.2,
-      "rationale": "verified from game portfolio 2026-03-22",
+      "weight": 0.14,
+      "rationale": "manually entered",
       "tags": []
     },
     {
       "ticker": "LYB",
-      "weight": 0.15,
-      "rationale": "verified from game portfolio 2026-03-22",
+      "weight": 0.18,
+      "rationale": "manually entered",
       "tags": []
     },
     {
       "ticker": "AKAM",
-      "weight": 0.1,
-      "rationale": "verified from game portfolio 2026-03-22",
+      "weight": 0.15,
+      "rationale": "manually entered",
       "tags": []
     },
     {
-      "ticker": "EQNR.OL",
-      "weight": 0.1,
-      "rationale": "verified from game portfolio 2026-03-22",
+      "ticker": "XOM",
+      "weight": 0.13,
+      "rationale": "manually entered",
+      "tags": []
+    },
+    {
+      "ticker": "OXY",
+      "weight": 0.08,
+      "rationale": "manually entered",
+      "tags": []
+    },
+    {
+      "ticker": "DELL",
+      "weight": 0.07,
+      "rationale": "manually entered",
       "tags": []
     }
   ],
@@ -1491,6 +1497,64 @@
             "ticker": "EQNR.OL",
             "weight": 0.1,
             "rationale": "verified from game portfolio 2026-03-22",
+            "tags": []
+          }
+        ],
+        "reasoning": "The portfolio is built around the strongest independently validated consensus cluster: EQNR.OL, VLO, NESTE.HE, APA, and AKRBP.OL, with EQNR and VLO receiving the highest weights because they combine consensus with better risk-adjusted signal quality and no hard Devil cap. I included one catalyst-driven unique pick, DVN, to keep at least one non-consensus breakout from the catalyst hunter, while sharply reducing APA and AKRBP.OL due to explicit HIGH-risk flags; portfolio beta should land near the NEUTRAL target range and far above the strategist's too-low 0.11 baseline.",
+        "confidence": 0.82,
+        "learning_reflection": "I stayed concentrated in the energy leadership pocket to preserve right-tail upside, but adapted by cutting flagged overextended names harder and avoiding slow filler in this cautious-neutral regime."
+      },
+      "performance": {},
+      "signal_snapshot": {},
+      "validation": {
+        "verified_override": true
+      }
+    },
+    {
+      "date": "2026-03-23",
+      "provenance": "verified",
+      "final_portfolio": {
+        "positions": [
+          {
+            "ticker": "APA",
+            "weight": 0.25,
+            "rationale": "manually entered",
+            "tags": []
+          },
+          {
+            "ticker": "VLO",
+            "weight": 0.14,
+            "rationale": "manually entered",
+            "tags": []
+          },
+          {
+            "ticker": "LYB",
+            "weight": 0.18,
+            "rationale": "manually entered",
+            "tags": []
+          },
+          {
+            "ticker": "AKAM",
+            "weight": 0.15,
+            "rationale": "manually entered",
+            "tags": []
+          },
+          {
+            "ticker": "XOM",
+            "weight": 0.13,
+            "rationale": "manually entered",
+            "tags": []
+          },
+          {
+            "ticker": "OXY",
+            "weight": 0.08,
+            "rationale": "manually entered",
+            "tags": []
+          },
+          {
+            "ticker": "DELL",
+            "weight": 0.07,
+            "rationale": "manually entered",
             "tags": []
           }
         ],
