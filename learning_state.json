@@ -1,25 +1,28 @@
 {
   "generated_from_days": 7,
-  "position_observations": 15,
+  "position_observations": 19,
   "minimums": {
     "strong_daily_observations": 5,
     "strong_ticker_observations": 5,
     "strong_rationale_observations": 5
   },
-  "hard_rules": [],
-  "biases_to_avoid": [
-    "Avoid overusing momentum rationales until their hit rate recovers above 40%.",
-    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.",
-    "Avoid overusing consensus rationales until their hit rate recovers above 40%.",
-    "Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%.",
-    "Avoid overusing overbought rationales until their hit rate recovers above 40%.",
-    "Avoid overusing at_52w_high rationales until their hit rate recovers above 40%."
+  "hard_rules": [
+    "RATIONALE CAP: cap any position whose primary thesis is 'momentum' at 15% \u2014 hit rate 22% over 9 observations (threshold: 30%).",
+    "RATIONALE CAP: cap any position whose primary thesis is 'high_sharpe' at 15% \u2014 hit rate 22% over 9 observations (threshold: 30%).",
+    "RATIONALE CAP: cap any position whose primary thesis is 'consensus' at 15% \u2014 hit rate 25% over 8 observations (threshold: 30%)."
   ],
+  "biases_to_avoid": [],
   "validated_winners": [
     {
       "ticker": "APA",
-      "observations": 6,
-      "avg_return_1d": 0.026493,
+      "observations": 8,
+      "avg_return_1d": 0.017856,
+      "hit_rate": 0.75
+    },
+    {
+      "ticker": "XOM",
+      "observations": 5,
+      "avg_return_1d": 0.007205,
       "hit_rate": 1.0
     }
   ],
@@ -44,6 +47,24 @@
     }
   ],
   "weight_caps": [
+    {
+      "scope": "rationale_tag",
+      "tag": "momentum",
+      "max_weight": 0.15,
+      "reason": "momentum_hit_rate_22%_over_9_obs"
+    },
+    {
+      "scope": "rationale_tag",
+      "tag": "high_sharpe",
+      "max_weight": 0.15,
+      "reason": "high_sharpe_hit_rate_22%_over_9_obs"
+    },
+    {
+      "scope": "rationale_tag",
+      "tag": "consensus",
+      "max_weight": 0.15,
+      "reason": "consensus_hit_rate_25%_over_8_obs"
+    },
     {
       "scope": "ticker",
       "ticker": "AKRBP.OL",
@@ -72,7 +93,7 @@
     "avg_hold_vs_replace_1d": 0.023721,
     "positive_hold_vs_replace_rate": 1.0,
     "avg_slot_opportunity_cost_1d": -0.005737,
-    "avg_turnover_estimate": 0.343333,
+    "avg_turnover_estimate": 0.323333,
     "observations": 1,
     "status": "insufficient_data"
   },
@@ -87,6 +108,11 @@
       "instruction": "Prefer at_52w_high setups when other signals are comparable.",
       "observations": 7
     }
+  ],
+  "early_warning_notes": [
+    "EARLY WARNING: non_us_differentiator has weak hit quality (0% over 6 obs).",
+    "EARLY WARNING: overbought has weak hit quality (33% over 6 obs).",
+    "EARLY WARNING: at_52w_high has weak hit quality (29% over 7 obs)."
   ],
   "rationale_stats": {
     "momentum": {
@@ -126,12 +152,12 @@
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": -0.013618,
-    "tier2_avg_return_1d": -0.00319,
-    "tier3_avg_return_1d": -0.01721,
-    "tier1_observations": 6,
-    "tier2_observations": 7,
-    "tier3_observations": 2
+    "tier1_avg_return_1d": -0.012307,
+    "tier2_avg_return_1d": -0.004598,
+    "tier3_avg_return_1d": -0.000823,
+    "tier1_observations": 8,
+    "tier2_observations": 8,
+    "tier3_observations": 3
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
@@ -177,76 +203,50 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-03-21",
-    "portfolio_return_1d": -0.0111,
-    "benchmark_return_1d": -0.0151,
-    "alpha_1d": 0.004,
+    "date": "2026-03-22",
+    "portfolio_return_1d": 0.0014,
+    "benchmark_return_1d": 0.0145,
+    "alpha_1d": -0.0131,
     "winners": [
       {
-        "ticker": "APA",
-        "return_1d": 0.0276,
-        "vs_benchmark": 0.0427,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "breakout",
-          "consensus",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Triple-consensus leader with the strongest 5d acceleration (+13.5%) and strong volume confirmation (",
-        "rsi_at_entry": 84.868417,
-        "vol_ratio_at_entry": 2.73085
+        "ticker": "AKAM",
+        "return_1d": 0.032,
+        "vs_benchmark": 0.0174,
+        "tags": [],
+        "rationale_snippet": "verified from game portfolio 2026-03-22",
+        "rsi_at_entry": null,
+        "vol_ratio_at_entry": null
       }
     ],
     "losers": [
       {
-        "ticker": "AKRBP.OL",
-        "return_1d": -0.0414,
-        "vs_benchmark": -0.0263,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "non_us_differentiator"
-        ],
-        "rationale_snippet": "Triple-consensus energy leader with the best volume confirmation in the core group (vol_ratio 3.41) ",
-        "rsi_at_entry": 74.04514,
-        "vol_ratio_at_entry": 3.407257
+        "ticker": "LYB",
+        "return_1d": -0.0145,
+        "vs_benchmark": -0.029,
+        "tags": [],
+        "rationale_snippet": "verified from game portfolio 2026-03-22",
+        "rsi_at_entry": null,
+        "vol_ratio_at_entry": null
       },
       {
-        "ticker": "EQNR.OL",
-        "return_1d": -0.0093,
-        "vs_benchmark": 0.0059,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "non_us_differentiator",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Double-consensus pick with the strongest 5d move in the set (+16.5%) and low crowding, but sized sli",
-        "rsi_at_entry": 82.319262,
-        "vol_ratio_at_entry": 1.47759
+        "ticker": "VLO",
+        "return_1d": -0.0087,
+        "vs_benchmark": -0.0232,
+        "tags": [],
+        "rationale_snippet": "verified from game portfolio 2026-03-22",
+        "rsi_at_entry": null,
+        "vol_ratio_at_entry": null
       },
       {
-        "ticker": "NESTE.HE",
-        "return_1d": -0.0074,
-        "vs_benchmark": 0.0077,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "non_us_differentiator",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Double-consensus Nordic energy name with solid momentum (+8.4%), acceptable volume confirmation (1.2",
-        "rsi_at_entry": 83.268106,
-        "vol_ratio_at_entry": 1.286763
+        "ticker": "APA",
+        "return_1d": -0.0081,
+        "vs_benchmark": -0.0226,
+        "tags": [],
+        "rationale_snippet": "verified from game portfolio 2026-03-22",
+        "rsi_at_entry": null,
+        "vol_ratio_at_entry": null
       }
     ],
-    "lesson": "'momentum' entries underperformed \u2014 review sizing for this thesis today; 'high_sharpe' entries underperformed \u2014 review sizing for this thesis today"
+    "lesson": "no strong tag signal"
   }
 }

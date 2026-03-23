@@ -1,11 +1,9 @@
 """
-OpenAIFullAnalyst — Independent Full-Signal Analyst (gpt-5.4-nano).
+OpenAIFullAnalyst — Independent Full-Signal Analyst (Qwen3-32B via OpenRouter, fallback gpt-5.4-nano).
 
 Sees ALL signals (momentum + catalyst) and provides a completely independent
 second opinion on portfolio construction. Not constrained to momentum-only or
 catalyst-only — finds the best picks across every signal dimension.
-
-Cost estimate: ~$0.01 per run (gpt-5.4-nano).
 """
 import json
 import logging
@@ -263,6 +261,9 @@ class OpenAIFullAnalyst(BaseAgent):
             f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",
         ]
+        portfolio_state_context = snapshot.get("portfolio_state_context", "")
+        if portfolio_state_context:
+            lines += ["", portfolio_state_context]
         if comm_line:
             lines.append(comm_line)
         if sector_rotation_line:
@@ -367,7 +368,7 @@ class OpenAIFullAnalyst(BaseAgent):
             ],
         )
         if openrouter_call:
-            call_kwargs["max_tokens"] = 1500
+            call_kwargs["max_tokens"] = 3000
         else:
             call_kwargs["response_format"] = {"type": "json_object"}
 

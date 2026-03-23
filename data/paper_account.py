@@ -254,11 +254,17 @@ def rebalance_to_proposal(
 
     if state.get("last_rebalanced_date") == as_of_date:
         logger.info("Paper account already processed for %s — skipping duplicate run", as_of_date)
+        # Read the actual stored daily_return from the history entry for today rather than
+        # returning 0.0, which causes the orchestrator log to show "+0.00% today" incorrectly.
+        history = state.get("history", [])
+        stored_daily = 0.0
+        if history and history[-1].get("date") == as_of_date:
+            stored_daily = float(history[-1].get("daily_return", 0.0))
         return {
             "as_of_date": as_of_date,
             "equity": float(state.get("last_equity", state.get("initial_capital", start_capital))),
             "initial_capital": float(state.get("initial_capital", start_capital)),
-            "daily_return": 0.0,
+            "daily_return": stored_daily,
             "return_since_start": (
                 float(state.get("last_equity", start_capital)) / float(state.get("initial_capital", start_capital))
             ) - 1,

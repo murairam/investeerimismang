@@ -5,12 +5,12 @@ Target go-live date: 2026-04-06
 Days remaining: 14
 
 ## Scoreboard
-- Training days with measurable alpha: 6
+- Training days with measurable alpha: 7
 - Win days (alpha > 0): 4
-- Loss days (alpha < 0): 2
-- Average daily alpha: +0.14%
-- Paper account equity: €9,860.00 (from €10,000.00, return -1.40%)
-- Max drawdown (paper): 1.40%
+- Loss days (alpha < 0): 3
+- Average daily alpha: -0.07%
+- Paper account equity: €10,059.00 (from €10,000.00, return +0.59%)
+- Max drawdown (paper): 1.39%
 - Average turnover: 36.36%
 
 ## Confidence note
@@ -20,24 +20,25 @@ Days remaining: 14
 
 ## Best and worst day
 - Best alpha day: 2026-03-21 (+0.74%)
-- Worst alpha day: 2026-03-19 (-0.89%)
+- Worst alpha day: 2026-03-23 (-1.31%)
 
 ## Structured learning state
-- Active hard rules: 0
+- Active hard rules: 3
 - Changed hard rules since yesterday: 0
 - Confidence notes: 2
 
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| APA | winner | 6 | +2.65% | 100% |
+| APA | winner | 8 | +1.79% | 75% |
+| XOM | winner | 5 | +0.72% | 100% |
 | AKRBP.OL | loser | 6 | -4.14% | 0% |
 | EQNR.OL | loser | 6 | -0.93% | 0% |
 | NESTE.HE | loser | 6 | -0.74% | 0% |
 
 ## Action plan until April 6
-- Avoid overusing momentum rationales until their hit rate recovers above 40%.
-- Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.
+- RATIONALE CAP: cap any position whose primary thesis is 'momentum' at 15% — hit rate 22% over 9 observations (threshold: 30%).
+- RATIONALE CAP: cap any position whose primary thesis is 'high_sharpe' at 15% — hit rate 22% over 9 observations (threshold: 30%).
 
 ## Daily routine
 - Run: `python main.py`

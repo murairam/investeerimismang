@@ -1,6 +1,6 @@
 # AlphaShark — Permanent Strategy Principles
 
-**Last updated:** 2026-03-22
+**Last updated:** 2026-03-23
 **Status:** Active (overrides any conservative defaults in auto-generated files)
 
 This file is NOT auto-generated. It survives daily pipeline runs and is injected into every
@@ -46,6 +46,23 @@ higher-momentum candidate.
 - **Rationale:** Breakout moves often exhaust at peaks; strong volume confirmation trumps RSI
 - **Implementation:** `agents/openai_risk_manager.py` rules 18 & 19
 
+### Conditional Rotation-Risk Sector Cap
+- **Rule:** There is no permanent sector cap, but if `rotation_risk` marks a sector as **HIGH**, that sector is temporarily capped at **60%** of portfolio weight.
+- **Rationale:** Prevent concentration drift into sectors with clear momentum deceleration while preserving legal concentration in normal conditions.
+- **Implementation:** `agents/openai_risk_manager.py::_enforce_selection_quality()` + `config.ROTATION_RISK_HIGH_SECTOR_CAP`
+
+### NEUTRAL Beta Target — Rotation Override
+- **Rule:** In normal NEUTRAL conditions, portfolio beta target remains 0.95–1.30.
+- **Override:** If rotation risk is active (HIGH/MEDIUM) or sector leadership is clearly decoupled, beta target becomes a **soft diagnostic**. Do not add high-beta filler names solely to raise beta.
+- **Rationale:** Preserve rotation alpha when leaders decouple from S&P correlation.
+- **Implementation:** `agents/openai_risk_manager.py` system prompt + synthesis context in `_build_message()`
+
+### Low-Volume Concentration Guard
+- **Rule:** Positions with `vol_ratio < 0.80` are capped at **18%** (even outside BEAR).
+- **Portfolio check:** weighted-average `vol_ratio` warning fires below **0.85**.
+- **Rationale:** Prevent portfolios dominated by unconfirmed breakouts.
+- **Implementation:** `agents/openai_risk_manager.py::_enforce_selection_quality()` + config thresholds
+
 ### Devil's Advocate Accuracy Tracking
 - **Mechanism:** Devil tracks HIGH-flagged picks and compares their 1d returns vs all other picks
 - **Data:** Stored in `learning_state.json['devil_accuracy']` (requires ≥5 HIGH-flag observations)
@@ -53,6 +70,12 @@ higher-momentum candidate.
 - **Low accuracy (≤60%):** Risk Manager uses own judgment; Devil is advisory only
 - **Repeat offender pre-injection:** Tickers flagged HIGH in ≥2 of the last 5 days get a ≤12% sizing warning to all agents regardless of overall accuracy threshold
 - **Implementation:** `data/learning_state.py::_devil_accuracy()` + prompt injection in context builder
+
+### Learning Rule Promotion Ladder
+- **Rule:** weak rationale tags with 5–7 observations are treated as **early warnings**, not mandatory bans.
+- **Mandatory bias avoidance** now requires **8+ observations**.
+- **Rationale:** avoid overfitting hard rules from thin samples.
+- **Implementation:** `data/learning_state.py` thresholds and context rendering
 
 ### Cross-Agent Debate
 - **Mechanism:** After initial proposals, each agent (Strategist, GeminiChallenger, FullAnalyst) runs a lightweight second-pass LLM call surfacing agreements and disagreements with peer proposals
@@ -75,6 +98,16 @@ higher-momentum candidate.
 - **Threshold:** `decay_detected=True` when gap exceeds 0.2% per day
 - **Action:** Risk Manager renders a STRATEGY DECAY ALERT section when decay is active
 - **Implementation:** `data/meta_learning.py::detect_strategy_decay()` + orchestrator step 1b
+
+### Portfolio Continuity Context (State + History)
+- **Mechanism:** Orchestrator builds a shared `portfolio_state_context` from verified/current holdings + yesterday's realized portfolio vs benchmark performance + last 5 days of performance history
+- **Action:** Injected into all agent prompts (Strategist, Gemini Challenger, Full Analyst, Risk Manager) so turnover and resizing are explicitly grounded in prior state
+- **Intent:** Avoid stateless day-to-day churn; force explicit keep/cut/resize reasoning linked to actual portfolio history
+
+### Discord Change Explanations
+- **Mechanism:** Discord `Changes from Yesterday` now includes a short reason per ADD/REMOVE/RESIZE line
+- **Source:** Uses position rationale + live signal context (momentum, relative strength, volume confirmation, overbought flags)
+- **Intent:** Make execution instructions actionable (what changed and why), not just a diff list
 
 ---
 

@@ -25,6 +25,7 @@ _STATE_PATH = os.path.join(_ROOT, "learning_state.json")
 _MIN_STRONG_DAILY_OBSERVATIONS = 5
 _MIN_STRONG_TICKER_OBSERVATIONS = 5
 _MIN_STRONG_RATIONALE_OBSERVATIONS = 5
+_MIN_MANDATORY_RATIONALE_OBSERVATIONS = 8
 
 
 def _avg(values: list[float]) -> float:
@@ -228,10 +229,32 @@ def generate_learning_state() -> dict:
         hard_rules.append("Cap all positions at 15% until Tier 1 returns exceed Tier 3 returns over recent history.")
         weight_caps.append({"scope": "global", "max_weight": 0.15, "reason": "inverted_conviction"})
 
+    early_warning_notes: list[str] = []
+    _RATIONALE_CAP_HIT_RATE_THRESHOLD = 0.30
     for tag, stats in rationale_stats.items():
-        if stats["observations"] >= _MIN_STRONG_RATIONALE_OBSERVATIONS and (stats["avg_return_1d"] < -0.003 or stats["hit_rate"] < 0.4):
+        observations = stats["observations"]
+        hit_rate = stats["hit_rate"]
+        weak_signal = stats["avg_return_1d"] < -0.003 or hit_rate < 0.4
+        # Promote to hard weight cap when hit rate is genuinely poor with sufficient data.
+        # This is stronger than a bias-to-avoid (which is advisory) — the cap is code-enforced.
+        if observations >= _MIN_MANDATORY_RATIONALE_OBSERVATIONS and hit_rate < _RATIONALE_CAP_HIT_RATE_THRESHOLD:
+            hard_rules.append(
+                f"RATIONALE CAP: cap any position whose primary thesis is '{tag}' at 15% — "
+                f"hit rate {hit_rate:.0%} over {observations} observations (threshold: {_RATIONALE_CAP_HIT_RATE_THRESHOLD:.0%})."
+            )
+            weight_caps.append({
+                "scope": "rationale_tag",
+                "tag": tag,
+                "max_weight": 0.15,
+                "reason": f"{tag}_hit_rate_{hit_rate:.0%}_over_{observations}_obs",
+            })
+        elif observations >= _MIN_MANDATORY_RATIONALE_OBSERVATIONS and weak_signal:
             biases_to_avoid.append(
                 f"Avoid overusing {tag} rationales until their hit rate recovers above 40%."
+            )
+        elif observations >= _MIN_STRONG_RATIONALE_OBSERVATIONS and weak_signal:
+            early_warning_notes.append(
+                f"EARLY WARNING: {tag} has weak hit quality ({hit_rate:.0%} over {observations} obs)."
             )
 
     for loser in losers[:3]:
@@ -302,6 +325,7 @@ def generate_learning_state() -> dict:
             "status": "actionable" if len(hold_vs_replace) >= _MIN_STRONG_DAILY_OBSERVATIONS else "insufficient_data",
         },
         "confidence_notes": confidence_notes[:5],
+        "early_warning_notes": early_warning_notes[:5],
         "rationale_stats": rationale_stats,
         "conviction_tiers": {
             "tier1_avg_return_1d": round(tier1_avg, 6),
@@ -610,6 +634,14 @@ def build_prompt_learning_context(
                     for lo in pm["losers"][:3]
                 ]
                 pm_lines.append(f"  Losers: {' | '.join(loser_strs)}")
+                # Inject a soft advisory for each loser to prevent reflexive doubling-down
+                for lo in pm["losers"][:3]:
+                    ret = lo["return_1d"]
+                    if ret < -0.008:  # -0.8% threshold
+                        pm_lines.append(
+                            f"  SOFT ADVISORY: {lo['ticker']} returned {ret:+.1%} yesterday — "
+                            f"do not allocate above 15% without vol_ratio > 1.0 confirmation."
+                        )
             if pm.get("lesson"):
                 pm_lines.append(f"  Lesson: {pm['lesson']}")
             lines.append("\n".join(pm_lines))
@@ -659,10 +691,14 @@ def build_prompt_learning_context(
                 f"- MANDATORY: DO NOT use this as a primary thesis driver today — {rule}"
                 for rule in state["biases_to_avoid"][:4]
             )
+        if state.get("early_warning_notes"):
+            lines.append("Biases under watch (EARLY WARNING):")
+            lines.extend(f"- {note}" for note in state["early_warning_notes"][:4])
         weight_caps = state.get("weight_caps", [])
         ticker_caps = [cap for cap in weight_caps if isinstance(cap, dict) and cap.get("scope") == "ticker"]
+        rationale_tag_caps = [cap for cap in weight_caps if isinstance(cap, dict) and cap.get("scope") == "rationale_tag"]
         if ticker_caps:
-            lines.append("Ticker weight caps (MANDATORY):")
+            lines.append("Ticker weight caps (MANDATORY — code-enforced):")
             for cap in ticker_caps[:8]:
                 ticker = cap.get("ticker")
                 max_weight = cap.get("max_weight")
@@ -676,9 +712,27 @@ def build_prompt_learning_context(
                 lines.append(
                     f"- HARD CAP: {ticker} <= {max_weight_float:.0%} ({reason})"
                 )
+        if rationale_tag_caps:
+            lines.append("Rationale-tag weight caps (MANDATORY — code-enforced for positions using these as primary thesis):")
+            for cap in rationale_tag_caps[:6]:
+                tag = cap.get("tag")
+                max_weight = cap.get("max_weight")
+                reason = cap.get("reason", "learning_state_cap")
+                if not isinstance(tag, str):
+                    continue
+                try:
+                    max_weight_float = float(max_weight)
+                except (TypeError, ValueError):
+                    continue
+                lines.append(
+                    f"- HARD CAP: positions with '{tag}' as primary thesis <= {max_weight_float:.0%} ({reason})"
+                )
         winners = state.get("validated_winners", [])
         if winners:
-            lines.append("Validated winners:")
+            lines.append(
+                "Validated winners (historically strong, but require vol_ratio > 1.0 before max-sizing — "
+                "past performance does not override today's volume confirmation):"
+            )
             lines.extend(
                 f"- {item['ticker']}: avg {item['avg_return_1d']:+.2%} over {item['observations']} obs"
                 for item in winners[:3]
@@ -706,7 +760,7 @@ def build_prompt_learning_context(
                 )
         # Recent repeat flags shown regardless of accuracy status (Change 3)
         recent_flags = devil.get("high_flagged_tickers_recent", [])
-        if recent_flags:
+        if recent_flags and devil.get("status") in ("actionable", "early_data") and devil.get("observations", 0) > 0:
             flagged_str = ", ".join(f"{f['ticker']} (x{f['flag_count']})" for f in recent_flags[:5])
             lines.append(
                 f"Repeat HIGH-risk flags (last 5 days): {flagged_str}. "

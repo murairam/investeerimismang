@@ -44,6 +44,7 @@ from data.paper_account import rebalance_to_proposal, reset_for_live, load_verif
 from data.portfolio_store import (
     build_signal_snapshot,
     load_last,
+    load_performance_history,
     load_yesterday_prices,
     save as save_portfolio,
 )
@@ -292,10 +293,19 @@ class AlphaSharkOrchestrator:
             if losers:
                 logger.info("Losers: %s", ", ".join(f"{t} {r:+.1%}" for t, r in losers[:3]))
 
+        snapshot["portfolio_state_context"] = self._build_portfolio_state_context(
+            prior_portfolio=prior_portfolio,
+            portfolio_return_1d=portfolio_return_1d if daily_pnl else None,
+            benchmark_return_1d=benchmark_1d if daily_pnl else None,
+            alpha_1d=alpha_1d if daily_pnl else None,
+        )
+        if snapshot["portfolio_state_context"]:
+            logger.info("Portfolio state context prepared (%d chars) for all agents", len(snapshot["portfolio_state_context"]))
+
         # Steps 3a + 3b + 3c: run all 3 analysts IN PARALLEL — fully independent
         logger.info(
             "Calling OpenAIStrategist (GPT-5.4) + GeminiChallenger (Gemini 2.5 Flash) "
-            "+ OpenAIFullAnalyst (gpt-5.4-nano) in parallel …"
+            "+ OpenAIFullAnalyst (Qwen3-32B via OpenRouter, fallback gpt-5.4-nano) in parallel …"
         )
         strategist_proposal = None
         challenger_proposal = None
@@ -726,6 +736,55 @@ class AlphaSharkOrchestrator:
         )
 
         logger.info("── AlphaShark pipeline complete ──")
+
+    @staticmethod
+    def _build_portfolio_state_context(
+        prior_portfolio: Optional[PortfolioProposal],
+        portfolio_return_1d: Optional[float],
+        benchmark_return_1d: Optional[float],
+        alpha_1d: Optional[float],
+    ) -> str:
+        lines: list[str] = ["### Portfolio State & History (must use in reasoning)"]
+
+        if prior_portfolio and prior_portfolio.positions:
+            lines.append("Current holdings from verified/game state:")
+            for pos in prior_portfolio.positions:
+                lines.append(f"  - {pos.ticker}: {pos.weight:.1%}")
+        else:
+            lines.append("Current holdings: cold start (no prior portfolio found).")
+
+        if (
+            portfolio_return_1d is not None
+            and benchmark_return_1d is not None
+            and alpha_1d is not None
+        ):
+            lines += [
+                "Yesterday performance (from actual prior holdings):",
+                (
+                    f"  - Portfolio {portfolio_return_1d:+.2%} vs benchmark {benchmark_return_1d:+.2%} "
+                    f"(alpha {alpha_1d:+.2%})"
+                ),
+            ]
+
+        perf_history = load_performance_history(max_days=5)
+        daily_entries = [entry for entry in perf_history if "portfolio_return_1d" in entry]
+        if daily_entries:
+            lines.append("Recent performance history (last 5 days):")
+            for entry in daily_entries:
+                date_label = entry.get("date", "?")
+                p_ret = entry.get("portfolio_return_1d")
+                b_ret = entry.get("benchmark_return_1d")
+                a_ret = entry.get("alpha_1d")
+                if any(v is None for v in (p_ret, b_ret, a_ret)):
+                    continue
+                lines.append(
+                    f"  - {date_label}: portfolio {p_ret:+.2%}, benchmark {b_ret:+.2%}, alpha {a_ret:+.2%}"
+                )
+
+        lines += [
+            "Use this context explicitly: keep strong winners, cut persistent laggards, and justify turnover/size changes against this state.",
+        ]
+        return "\n".join(lines)
 
     def _cash_policy_decision(self, proposal, snapshot) -> tuple[bool, str]:
         total = sum(p.weight for p in proposal.positions)

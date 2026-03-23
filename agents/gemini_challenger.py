@@ -202,6 +202,9 @@ class GeminiChallenger(BaseAgent):
             f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",
         ]
+        portfolio_state_context = snapshot.get("portfolio_state_context", "")
+        if portfolio_state_context:
+            lines += ["", portfolio_state_context]
         if sector_rotation_line:
             lines.append(sector_rotation_line)
         rotation_risk = snapshot.get("rotation_risk", {})

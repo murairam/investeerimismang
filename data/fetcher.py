@@ -15,6 +15,7 @@ import yfinance as yf
 
 from config import (
     BETA_BENCHMARK,
+    BETA_MIN_OBSERVATIONS,
     BETA_WINDOW,
     COMPETITION_SORT_WEIGHTS,
     CORR_THRESHOLD,
@@ -477,16 +478,26 @@ class DataFetcher:
         if len(close) < window:
             return pd.Series(np.nan, index=close.columns, name="beta")
 
-        stock_returns = close.iloc[-window:].pct_change(fill_method=None).dropna()
+        # Do NOT call .dropna() on the full DataFrame here — that drops rows where ANY of
+        # the ~630 tickers has NaN (e.g. new Baltic listings with <60d history), which
+        # eliminates valid US trading days for all tickers including APA/OXY/XOM and
+        # can reduce the sample below BETA_MIN_OBSERVATIONS, producing NaN for everything.
+        # Per-ticker alignment is handled by paired.dropna() inside the loop.
+        stock_returns = close.iloc[-window:].pct_change(fill_method=None)
         bench_returns = benchmark_close.iloc[-window:].pct_change(fill_method=None).dropna()
-        bench_returns, stock_returns = bench_returns.align(stock_returns, join="inner", axis=0)
-        bench_var = bench_returns.var()
-        if bench_var == 0:
-            return pd.Series(np.nan, index=close.columns, name="beta")
-
         betas: dict[str, float] = {}
         for ticker in stock_returns.columns:
-            cov = stock_returns[ticker].cov(bench_returns)
+            paired = pd.concat([stock_returns[ticker], bench_returns], axis=1).dropna()
+            if len(paired) < BETA_MIN_OBSERVATIONS:
+                betas[ticker] = float("nan")
+                continue
+            stock_series = paired.iloc[:, 0]
+            bench_series = paired.iloc[:, 1]
+            bench_var = bench_series.var()
+            if bench_var == 0:
+                betas[ticker] = float("nan")
+                continue
+            cov = stock_series.cov(bench_series)
             betas[ticker] = cov / bench_var
         return pd.Series(betas, name="beta")
 

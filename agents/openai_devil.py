@@ -269,7 +269,7 @@ class OpenAIDevil:
             ],
         )
         if openrouter_call:
-            call_kwargs["max_tokens"] = 1000
+            call_kwargs["max_tokens"] = 2000  # was 1000 — too small for 12 tickers, caused truncation
         else:
             call_kwargs["response_format"] = {"type": "json_object"}
 
@@ -287,6 +287,14 @@ class OpenAIDevil:
 
         if (response.choices[0].finish_reason or "").lower() == "length":
             logger.warning("Devil response truncated (finish_reason=length) — attempting partial JSON parse")
+            # Truncation means max_tokens was too small or the model is still insufficient.
+            # Switch to the GPT fallback immediately so the retry loop uses a better model.
+            if self._openrouter_enabled and self.model != self.MODEL:
+                logger.warning(
+                    "Switching Devil from OpenRouter '%s' to OpenAI fallback '%s' due to truncation",
+                    self.model, self.MODEL,
+                )
+                self._switch_to_openai_fallback()
 
         usage = response.usage
         cost = log_usage(

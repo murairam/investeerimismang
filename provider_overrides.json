@@ -5,12 +5,7 @@
       "price_provider": "eodhd",
       "provider_symbol": "CGCBV.HE"
     },
-    "KSLAV.HE": {
-      "market": "OMXHLCPI",
-      "price_provider": "eodhd",
-      "provider_symbol": "KSLAV.HE"
-    },
-    "OKDAV.HE": {
+"OKDAV.HE": {
       "market": "OMXHLCPI",
       "price_provider": "eodhd",
       "provider_symbol": "OKDAV.HE"

@@ -5,7 +5,12 @@
       "ticker": "APA",
       "weight": 0.25,
       "rationale": "manually entered",
-      "tags": []
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "overbought",
+        "at_52w_high"
+      ]
     },
     {
       "ticker": "VLO",
@@ -23,25 +28,40 @@
       "ticker": "AKAM",
       "weight": 0.15,
       "rationale": "manually entered",
-      "tags": []
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "at_52w_high"
+      ]
     },
     {
       "ticker": "XOM",
       "weight": 0.13,
       "rationale": "manually entered",
-      "tags": []
+      "tags": [
+        "momentum",
+        "at_52w_high"
+      ]
     },
     {
       "ticker": "OXY",
       "weight": 0.08,
       "rationale": "manually entered",
-      "tags": []
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "at_52w_high"
+      ]
     },
     {
       "ticker": "DELL",
       "weight": 0.07,
       "rationale": "manually entered",
-      "tags": []
+      "tags": [
+        "momentum",
+        "high_sharpe",
+        "at_52w_high"
+      ]
     }
   ],
   "reasoning": "The portfolio is built around the strongest independently validated consensus cluster: EQNR.OL, VLO, NESTE.HE, APA, and AKRBP.OL, with EQNR and VLO receiving the highest weights because they combine consensus with better risk-adjusted signal quality and no hard Devil cap. I included one catalyst-driven unique pick, DVN, to keep at least one non-consensus breakout from the catalyst hunter, while sharply reducing APA and AKRBP.OL due to explicit HIGH-risk flags; portfolio beta should land near the NEUTRAL target range and far above the strategist's too-low 0.11 baseline.",
@@ -146,7 +166,19 @@
     },
     {
       "date": "2026-03-23",
-      "benchmark_return_20d": -0.0583
+      "benchmark_return_20d": -0.0346,
+      "portfolio_return_1d": 0.001444,
+      "benchmark_return_1d": 0.014538,
+      "alpha_1d": -0.013094,
+      "position_returns": {
+        "APA": -0.008054,
+        "VLO": -0.008693,
+        "LYB": -0.014457,
+        "AKAM": 0.031951,
+        "XOM": 0.006263,
+        "OXY": -0.00873,
+        "DELL": 0.033837
+      }
     }
   ],
   "history": [
@@ -1507,10 +1539,53 @@
         "confidence": 0.82,
         "learning_reflection": "I stayed concentrated in the energy leadership pocket to preserve right-tail upside, but adapted by cutting flagged overextended names harder and avoiding slow filler in this cautious-neutral regime."
       },
-      "performance": {},
+      "performance": {
+        "date": "2026-03-23",
+        "portfolio_return_1d": 0.001444,
+        "benchmark_return_1d": 0.014538,
+        "alpha_1d": -0.013094,
+        "position_returns": {
+          "APA": -0.008054,
+          "VLO": -0.008693,
+          "LYB": -0.014457,
+          "AKAM": 0.031951,
+          "XOM": 0.006263,
+          "OXY": -0.00873,
+          "DELL": 0.033837
+        }
+      },
       "signal_snapshot": {},
       "validation": {
         "verified_override": true
+      },
+      "outcomes": {
+        "1d": {
+          "portfolio_return": 0.001444,
+          "benchmark_return": 0.014538,
+          "alpha": -0.013094,
+          "position_returns": {
+            "APA": -0.008054,
+            "VLO": -0.008693,
+            "LYB": -0.014457,
+            "AKAM": 0.031951,
+            "XOM": 0.006263,
+            "OXY": -0.00873,
+            "DELL": 0.033837
+          }
+        }
+      },
+      "decision_evaluation": {
+        "new_avg_return_1d": null,
+        "dropped_avg_return_1d": null,
+        "hold_vs_replace_1d": null,
+        "selected_avg_return_1d": null,
+        "alternatives_avg_return_1d": null,
+        "slot_opportunity_cost_1d": null
+      },
+      "agent_returns_1d": {
+        "strategist": null,
+        "challenger": null,
+        "full_analyst": null
       }
     },
     {
@@ -1519,145 +1594,156 @@
       "final_portfolio": {
         "positions": [
           {
-            "ticker": "APA",
-            "weight": 0.17,
-            "rationale": "Double-consensus pick and validated recent winner; despite overbought risk, the breakout leadership in the strongest sector justifies a max-conviction weight.",
+            "ticker": "XOM",
+            "weight": 0.15,
+            "rationale": "Triple-consensus validated and a historical winner we already hold; keep as the highest-quality energy anchor, but cap at 15% because consensus-tag caps apply and beta is too low to justify a larger slot in a competition portfolio.",
             "tags": [
               "momentum",
-              "high_sharpe",
-              "breakout",
               "consensus",
-              "overbought",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "OXY",
-            "weight": 0.24,
-            "rationale": "Double-consensus energy name with strong catalyst alignment and 52-week-high momentum; sized just below APA due to slightly less upside asymmetry.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "breakout",
-              "consensus",
-              "catalyst",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "EOG",
-            "weight": 0.2,
-            "rationale": "Best unique catalyst pick from Proposal B with strong premarket strength and sector-tailwind support; earns a core slot over weaker low-beta alternatives.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "catalyst",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "DVN",
-            "weight": 0.17,
-            "rationale": "High-conviction unique catalyst in the leading energy complex; kept meaningful but below EOG given similar overbought risk and lack of cross-model confirmation.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "catalyst",
-              "overbought",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "AKAM",
-            "weight": 0.11,
-            "rationale": "Double-consensus non-energy inclusion that adds differentiated catalyst exposure, but low beta and limited upside potential in this tape cap it as the smallest position.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "consensus",
-              "catalyst",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "VLO",
-            "weight": 0.11,
-            "rationale": "Best remaining unique pick from Proposal A and useful downstream energy diversifier; low retail crowding and cleaner slot value than LYB, DELL, or capped Nordic names.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "diversifier",
-              "non_us_differentiator",
-              "overbought",
-              "at_52w_high"
-            ]
-          }
-        ],
-        "reasoning": "The synthesis leans into the only clear cross-agent consensus names\u2014APA, OXY, and AKAM\u2014while adding the strongest unique catalyst names EOG and DVN plus VLO as the best remaining energy slot. I excluded EQNR.OL and AKRBP.OL due to hard learning caps and weak volume, and skipped DELL/LYB because their slot value was inferior under the cautious-neutral regime. Portfolio beta should move materially above the strategist's too-low 0.30 and closer to the neutral target range, while staying concentrated in the only sector with real breadth leadership.",
-        "confidence": 0.79,
-        "learning_reflection": "I adapted by staying concentrated and aggressive in energy leadership, but avoided recurring underperformers and low-volume Nordic energy names that the learning state explicitly warned against."
-      },
-      "strategist_proposal": {
-        "positions": [
-          {
-            "ticker": "APA",
-            "weight": 0.25,
-            "rationale": "Best combination of 20d Sharpe, explosive 5d acceleration, strongest relative strength vs index, and fresh 52-week-high breakout makes APA the clear highest-conviction leader despite elevated energy rotation risk.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "breakout",
-              "overbought",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "VLO",
-            "weight": 0.18,
-            "rationale": "VLO remains a current holding with solid Sharpe, positive 5d momentum, near-52-week-high positioning, and no clearly superior replacement exceeding the turnover threshold, so it keeps a large but second-tier weight.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "breakout",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "OXY",
-            "weight": 0.16,
-            "rationale": "OXY earns an upgrade from a smaller prior weight because its 6.0% 5d return and 52-week-high breakout signal show better near-term thrust than slower integrated oil peers.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "breakout",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "LYB",
-            "weight": 0.12,
-            "rationale": "LYB has strong medium-term momentum and positive alpha versus index, but repeated HIGH-risk flags and only moderate recent acceleration justify keeping it as a capped supporting position.",
-            "tags": [
-              "momentum",
-              "high_sharpe"
-            ]
-          },
-          {
-            "ticker": "AKAM",
-            "weight": 0.11,
-            "rationale": "AKAM is one of the few non-energy names with positive Sharpe, strong 4.5% 5d momentum, positive MACD, and near-high price structure, giving useful cross-sector diversification without sacrificing trend quality.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "diversifier",
-              "overbought",
               "at_52w_high"
             ]
           },
           {
             "ticker": "DELL",
+            "weight": 0.16,
+            "rationale": "Triple-consensus pick with strong 5d acceleration and better relative upside than the lagging current holdings; retained as a core aggressor, but limited by the mandatory consensus rationale cap and low-volume confirmation.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "consensus",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "AKAM",
+            "weight": 0.16,
+            "rationale": "Double-consensus and yesterday's clear winner from the live book, so it earns a full capped core weight despite vol_ratio 0.72; this explicitly keeps a strong winner while cutting weaker sector exposures.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "consensus",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "PLTR",
             "weight": 0.1,
-            "rationale": "DELL stays in the portfolio because its 32.3% 20d return and strong vs-index reading remain intact, and no replacement clears the required 20% Sharpe improvement hurdle over its current signal quality.",
+            "rationale": "Double-consensus catalyst name with solid 5d momentum and low retail crowding, but Devil HIGH-risk status requires a meaningful reduction versus normal sizing, so it stays as a smaller upside sleeve.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "consensus",
+              "catalyst"
+            ]
+          },
+          {
+            "ticker": "APA",
+            "weight": 0.1,
+            "rationale": "Current holding and validated historical winner with strong volume-backed 5d momentum, but yesterday's lag, high Google crowding, RSI 82 near highs, and Devil HIGH-risk flag force a trimmed tactical hold rather than a core overweight.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "CTY1S.HE",
+            "weight": 0.16,
+            "rationale": "Best unique catalyst pick from Proposal B with standout vol_ratio 1.94, giving the portfolio a non-US high-volume breakout that is not dead money and earns a full single-name conviction weight.",
+            "tags": [
+              "momentum",
+              "breakout",
+              "catalyst",
+              "non_us_differentiator"
+            ]
+          },
+          {
+            "ticker": "OXY",
+            "weight": 0.1,
+            "rationale": "Included over weaker current laggards VLO and LYB because its 5d momentum is materially better and vol_ratio is near 1.0; sized as a secondary energy follow-through rather than a top conviction name.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "EQNR.OL",
+            "weight": 0.07,
+            "rationale": "Strong unique energy breakout with vol_ratio 1.37 and 5d +7.5%, but mandatory ticker cap of 7% for recurring underperformance overrides the otherwise attractive setup.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "non_us_differentiator"
+            ]
+          }
+        ],
+        "reasoning": "I cut persistent laggards VLO and LYB and do not keep filler names from weak sectors, while retaining the strongest live winners and consensus names: XOM and DELL (triple consensus), plus AKAM and PLTR (double consensus). I also include one high-volume catalyst outsider in CTY1S.HE and one capped Nordic energy breakout in EQNR.OL; portfolio beta should remain inside the neutral target band, likely around the strategist's 0.97 baseline with a modest lift from PLTR/DELL/OXY but still appropriate for a cautious-neutral regime.",
+        "confidence": 0.78,
+        "learning_reflection": "Today's synthesis adapts by staying concentrated but avoiding stateless churn: it keeps proven live winners, trims crowded or overbought names, respects mandatory caps, and removes weak decelerating-sector laggards instead of diversifying for its own sake."
+      },
+      "strategist_proposal": {
+        "positions": [
+          {
+            "ticker": "APA",
+            "weight": 0.15,
+            "rationale": "Keep but trim from 25% to 15% because it remains the strongest current holding by far with top-tier 20d return, Sharpe, 5d breakout and near-52w-high strength, but crowding and rationale-cap argue against max sizing.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "AKAM",
+            "weight": 0.14,
+            "rationale": "AKAM earned a larger slot after yesterday\u2019s +3.9% move because its 8.1% 5d surge, 0.52 Sharpe, positive MACD and fresh 52-week-high test show improving momentum without the crowding seen in hotter names.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "DELL",
+            "weight": 0.13,
+            "rationale": "DELL stays as a core position since it outperformed yesterday, has the best 20d return among current holdings, strong vs-index leadership and is breaking out near highs with enough beta to help win the game.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "PLTR",
+            "weight": 0.15,
+            "rationale": "Add PLTR as the best non-energy aggressor because its 5.1% 5d momentum, 1.56 beta, 0.53 Sharpe and strong relative strength offer a higher-upside breakout than weaker existing laggards.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout"
+            ]
+          },
+          {
+            "ticker": "INTU",
+            "weight": 0.12,
+            "rationale": "INTU replaces weaker holdings on superior smooth momentum, posting a 0.59 Sharpe and 30.7% vs-index alpha, while low retail interest makes it a cleaner quality-momentum diversifier in a cautious tape.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "diversifier",
+              "overbought"
+            ]
+          },
+          {
+            "ticker": "DDOG",
+            "weight": 0.11,
+            "rationale": "DDOG earns a smaller but meaningful slot because its 25.8% 20d return, 29.3% relative outperformance and 1.85 beta provide differentiated upside, though weaker 5d follow-through keeps it below top weight.",
             "tags": [
               "momentum",
               "high_sharpe"
@@ -1665,161 +1751,213 @@
           },
           {
             "ticker": "XOM",
-            "weight": 0.08,
-            "rationale": "XOM has been a consistent winner and still trends positively, but weaker Sharpe and slower 5d momentum than APA/OXY/VLO argue for a smaller hold-sized allocation rather than a top slot.",
+            "weight": 0.1,
+            "rationale": "Retain XOM as the most reliable energy continuity holding since it has been the week\u2019s consistent winner, but size below prior weight because energy breadth is still strong yet clearly decelerating.",
             "tags": [
               "momentum",
-              "high_sharpe",
               "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "EXPE",
+            "weight": 0.1,
+            "rationale": "EXPE is a rotation add over stale chemical/refining exposure because its 26.8% 20d return, 3.1% 5d gain, 30.3% vs-index and positive MACD clear the turnover hurdle versus VLO and LYB.",
+            "tags": [
+              "momentum",
+              "high_sharpe"
             ]
           }
         ],
-        "reasoning": "This remains an energy-led portfolio because the snapshot shows overwhelming sector leadership, and APA is the standout top pick with the strongest blend of smooth trend, breakout confirmation, and short-term acceleration. I keep the book concentrated in seven names, trimming weaker-conviction exposure rather than over-diversifying, while retaining AKAM and DELL as the best non-energy trend survivors under the turnover rule.",
-        "confidence": 0.79,
-        "learning_reflection": "I adapted by leaning into the proven winners already working this week, avoiding recurring underperformers with hard caps, and only keeping non-energy names that still show resilient relative strength."
+        "reasoning": "I am cutting the weakest current holdings\u2014VLO, LYB and OXY\u2014because sector action says reduce laggards in decelerating groups, and each is replaced only by names with Sharpe at least 20% better than the stock being displaced. The portfolio keeps the true winners already in hand (APA, AKAM, DELL, XOM) while adding higher-quality momentum leaders PLTR, INTU, DDOG and EXPE to reduce overdependence on slowing energy without abandoning the strongest trend still in the market.",
+        "confidence": 0.72,
+        "learning_reflection": "Today\u2019s portfolio adapts by preserving proven in-portfolio winners, trimming crowded or decelerating energy concentration, and avoiding previously recurring Nordic underperformers despite the broader energy theme."
       },
       "challenger_proposal": {
         "positions": [
           {
-            "ticker": "EOG",
+            "ticker": "CTY1S.HE",
             "weight": 0.25,
-            "rationale": "Highest conviction pick. Strong +1.9% premarket gap indicates immediate buying momentum. RSI 78.5 confirms strong parabolic breakout, and as an energy leader, it aligns with the current sector rotation. Not subject to the RSI > 82 cap, allowing for maximum sizing.",
+            "rationale": "Highest conviction non-US catalyst pick. Exhibits a parabolic breakout with a vol_ratio of 1.94, significantly above the 1.5 threshold, confirming strong buying interest. The 5.2% dividend yield provides additional value, aligning with the Baltic/Nordic dividend edge mandate.",
             "tags": [
               "momentum",
-              "high_sharpe",
               "breakout",
               "catalyst",
-              "overbought",
-              "at_52w_high"
+              "non_us_differentiator"
             ]
           },
           {
-            "ticker": "DVN",
+            "ticker": "XOM",
             "weight": 0.2,
-            "rationale": "Strong catalyst with a +0.9% premarket gap, indicating opening momentum. RSI 78.9 confirms strong momentum near its 52-week high, making it a high-beta energy leader in the current rotation. Not subject to the RSI > 82 cap.",
+            "rationale": "Core energy rotation play, a validated winner with a strong RSI of 70.6 and at its 52-week high, supported by a decent vol_ratio of 0.82. This aligns with the strategic mandate to favor energy leaders in the current regime.",
             "tags": [
               "momentum",
-              "high_sharpe",
               "breakout",
-              "catalyst",
               "overbought",
               "at_52w_high"
             ]
           },
           {
-            "ticker": "APA",
+            "ticker": "DELL",
+            "weight": 0.18,
+            "rationale": "Strong individual catalyst with a 4.1% 5-day return, high IV spike (0.86), and a positive premarket gap. Although its vol_ratio is below 0.8, capping it at 18%, its strong momentum and IV spike make it a high-conviction pick for its sector.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "catalyst",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "AKAM",
             "weight": 0.15,
-            "rationale": "Validated winner with strong performance. As an energy leader, it benefits from the sector rotation. However, its RSI of 84.6 and being at its 52-week high trigger the mandatory sizing cap of 15%.",
+            "rationale": "A winner from yesterday's portfolio (+3.9%), showing strong 5-day returns (8.1%) and at its 52-week high. While its vol_ratio is below 0.8, limiting its size to 18%, we allocate 15% to maintain distinct position weights and capitalize on its confirmed momentum.",
             "tags": [
               "momentum",
               "high_sharpe",
               "breakout",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "PLTR",
+            "weight": 0.12,
+            "rationale": "Strong 5-day return of 5.1% and a positive premarket gap of +0.4% indicate early momentum. With a solid catalyst score and decent vol_ratio of 0.93, it represents a growth-oriented catalyst play.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "catalyst"
+            ]
+          },
+          {
+            "ticker": "TKM1T.TL",
+            "weight": 0.1,
+            "rationale": "A strong Baltic non-US pick with a vol_ratio of 1.76, confirming significant volume and a breakout. It's at its 52-week high and offers an excellent 6.6% dividend yield, providing a compelling catalyst-driven return.",
+            "tags": [
+              "momentum",
+              "breakout",
+              "catalyst",
+              "non_us_differentiator",
+              "at_52w_high"
+            ]
+          }
+        ],
+        "reasoning": "This portfolio is aggressively concentrated on high-conviction catalyst plays, prioritizing confirmed volume breakouts and strong momentum in leading sectors like Energy, while also capturing non-US opportunities with high dividend yields. Positions from yesterday's portfolio that showed weak performance or had better catalyst alternatives were removed or reduced, and sizing rules for overbought conditions and low volume confirmation were strictly applied to manage risk while maximizing upside potential.",
+        "confidence": 0.85,
+        "learning_reflection": "Today's picks explicitly applied hard caps and sizing rules for overbought conditions and low volume, ensuring discipline while maintaining an aggressive, catalyst-driven approach to portfolio construction."
+      },
+      "full_analyst_proposal": {
+        "positions": [
+          {
+            "ticker": "EQNR.OL",
+            "weight": 0.2,
+            "rationale": "Strong OBX energy breakout with 35.0% 20d return, RSI 71.1, vs_index 38.4%, and vol_ratio 1.37. Confirmed by high volume and positive momentum despite sector rotation risk.",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "breakout",
+              "non_us_differentiator",
+              "overbought"
+            ]
+          },
+          {
+            "ticker": "DELL",
+            "weight": 0.18,
+            "rationale": "Top-performing US tech with 36.8% 20d return, RSI 72.8, vs_index 40.3%, and Sharpe 0.42. Maintains strong relative strength despite vol_ratio 0.77 (capped at 18% per low-volume rule).",
+            "tags": [
+              "momentum",
+              "high_sharpe",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "INF1T.TL",
+            "weight": 0.15,
+            "rationale": "Baltic breakout with RSI 77.8, 3.3% 20d return, and vs_index 6.8%. Low beta (0.07) and high RSI confirm unconfirmed move; diversification play.",
+            "tags": [
+              "momentum",
+              "breakout",
+              "diversifier",
+              "non_us_differentiator",
+              "overbought",
+              "at_52w_high"
+            ]
+          },
+          {
+            "ticker": "XOM",
+            "weight": 0.15,
+            "rationale": "Energy sector leader with 6.6% 20d return, RSI 70.6, vs_index 10.0%, and vol_ratio 0.82. Maintains positive momentum despite sector deceleration.",
+            "tags": [
+              "momentum",
               "overbought",
               "at_52w_high"
             ]
           },
           {
             "ticker": "OXY",
-            "weight": 0.14,
-            "rationale": "Strong energy play with high RSI (76.5) and at its 52-week high, further bolstered by Warren Buffett's continued investment, providing a strong fundamental catalyst. Not subject to the RSI > 82 cap.",
+            "weight": 0.12,
+            "rationale": "Energy follow-through with 15.3% 20d return, RSI 73.6, and vs_index 18.8%. Vol_ratio 0.99 meets minimum threshold for confirmation.",
             "tags": [
               "momentum",
               "high_sharpe",
-              "breakout",
-              "catalyst",
               "overbought",
               "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "AKAM",
-            "weight": 0.1,
-            "rationale": "Event-driven catalyst with the 'Global NVIDIA AI Grid Rollout' news, indicating significant growth potential. High short interest (13.4%) provides potential for a short squeeze if momentum accelerates, and it is not overbought.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "catalyst",
-              "overbought",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "EQNR.OL",
-            "weight": 0.07,
-            "rationale": "Non-US energy leader aligned with the 'Energy rotation year' mandate. Included to meet the non-US diversification requirement, but strictly capped at 7% due to its status as a recurring underperformer.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "diversifier",
-              "non_us_differentiator",
-              "overbought",
-              "at_52w_high"
-            ]
-          },
-          {
-            "ticker": "AKRBP.OL",
-            "weight": 0.06,
-            "rationale": "Non-US energy exposure with a high dividend yield (7.3%) and a positive premarket gap. Included to meet the non-US diversification requirement, but strictly capped at 7% (adjusted to 6% for unique weighting) due to its status as a recurring underperformer.",
-            "tags": [
-              "momentum",
-              "high_sharpe",
-              "catalyst",
-              "diversifier",
-              "non_us_differentiator",
-              "overbought"
             ]
           }
         ],
-        "reasoning": "The portfolio is aggressively concentrated in the leading Energy sector, aligning with the 'Energy rotation year' mandate and prioritizing explosive catalyst setups. High-conviction picks like EOG and DVN are chosen for their strong premarket gap-ups and confirmed momentum, while APA and OXY benefit from high RSI and being at 52-week highs with strong institutional backing. AKAM provides a high-beta AI catalyst with short squeeze potential. Non-US exposure is met with capped positions in EQNR.OL and AKRBP.OL, adhering to their underperformer status while still participating in the energy theme and meeting the non-US requirement.",
-        "confidence": 0.9,
-        "learning_reflection": "Today's picks strictly applied the RSI > 82 + 52wH% cap and the recurring underperformer hard caps, ensuring aggressive but disciplined sizing based on specific learning context."
+        "reasoning": "Energy rotation remains dominant but shows deceleration; focus on confirmed OBX energy (EQNR.OL) and US energy (XOM, OXY) while reducing APA/VLO. Diversify with Baltic breakout (INF1T.TL) and tech leader (DELL) to balance sector risk.",
+        "confidence": 0.82,
+        "learning_reflection": "Reduced energy concentration from 40% to 30% (XOM+OXY+EQNR.OL) to mitigate rotation risk while maintaining exposure to confirmed breakouts."
       },
-      "full_analyst_proposal": null,
       "regime": "NEUTRAL",
       "bear_cases": {
-        "APA": {
-          "bear_case": "RSI 84.6 (overbought) and at 52-week high (0.0%) \u2014 likely to face profit-taking or consolidation.",
-          "risk": "MEDIUM"
-        },
-        "OXY": {
-          "bear_case": "RSI 76.5 (overbought) and at 52-week high (0.0%) \u2014 momentum may stall near resistance.",
-          "risk": "MEDIUM"
-        },
-        "EOG": {
-          "bear_case": "RSI 78.5 (overbought) and -0.1% from 52-week high \u2014 near-term reversal risk.",
-          "risk": "MEDIUM"
-        },
-        "AKAM": {
-          "bear_case": "-1.4% from 52-week high with beta 0.16 \u2014 weak upside potential in sideways market.",
-          "risk": "MEDIUM"
-        },
-        "DVN": {
-          "bear_case": "RSI 78.9 (overbought) and -0.3% from 52-week high \u2014 near-term exhaustion possible.",
-          "risk": "MEDIUM"
-        },
-        "VLO": {
-          "bear_case": "-0.9% from 52-week high with beta 0.40 \u2014 limited upside in neutral market.",
-          "risk": "MEDIUM"
-        },
-        "LYB": {
-          "bear_case": "RSI 76.6 (overbought) and -2.5% from 52-week high \u2014 near-term correction risk.",
-          "risk": "MEDIUM"
-        },
         "DELL": {
-          "bear_case": "Beta 1.85 in NEUTRAL regime \u2014 high downside sensitivity. Mom_5d 0.7% shows fading momentum.",
+          "bear_case": "RSI 72.8 with mom_5d +4.1% looks strong, but the stock is still only ~0.7% below its 52-week high (pct_from_52w_high -0.7%) while beta is elevated at 1.85\u2014if momentum stalls, downside could be amplified.",
           "risk": "MEDIUM"
         },
         "XOM": {
-          "bear_case": "Volume data unavailable; assess downside via momentum, RSI, beta, and 52-week-high distance.",
+          "bear_case": "Very low beta (0.05) and weak distance from the high (pct_from_52w_high 0.0%) suggest limited upside follow-through; with RSI 70.6 and mom_5d +2.2% not accelerating, returns may underwhelm versus the index (vs Idx 10.0%).",
           "risk": "LOW"
         },
-        "EQNR.OL": {
-          "bear_case": "RSI 81.8 (overbought) with vol_ratio 0.17 \u2014 momentum may reverse without volume support.",
+        "AKAM": {
+          "bear_case": "RSI is overbought at 74.3, but the stock is flat versus its 52-week high (pct_from_52w_high 0.0%) and has only moderate volume confirmation (vol_ratio 0.72); if mom_5d +8.1% fades, the move may reverse quickly.",
           "risk": "MEDIUM"
         },
-        "AKRBP.OL": {
-          "bear_case": "-4.8% from 52-week high with vol_ratio 0.12 \u2014 no clear recovery catalyst.",
+        "PLTR": {
+          "bear_case": "Deeply below the 52-week high (pct_from_52w_high -22.6%) with high beta (1.56) creates downside leverage; despite RSI 64.4, the stock is still in a correction and may fail to reclaim highs.",
+          "risk": "HIGH"
+        },
+        "CTY1S.HE": {
+          "bear_case": "Negative beta (-0.27) and weak momentum (mom_5d +2.3% but Sharpe 0.04) plus only modest distance from the high (pct_from_52w_high -3.5%) point to unstable/low-quality performance\u2014likely to underperform on risk-adjusted basis.",
           "risk": "MEDIUM"
+        },
+        "EQNR.OL": {
+          "bear_case": "RSI 71.1 with mom_5d +7.5% is constructive, but the stock remains meaningfully off the highs (pct_from_52w_high -6.0%) while beta is still elevated (1.37); any market wobble could hit it harder than peers.",
+          "risk": "MEDIUM"
+        },
+        "APA": {
+          "bear_case": "RSI is extremely high at 82.2 and the stock is only slightly below its 52-week high (pct_from_52w_high -0.8%), which raises the odds of a momentum snapback; beta is 1.14, so a reversal could translate into sharp underperformance.",
+          "risk": "HIGH"
+        },
+        "INF1T.TL": {
+          "bear_case": "RSI 77.8 is stretched, but mom_5d is exactly 0.0% and the stock is still below the 52-week high (pct_from_52w_high -1.7%); with vol_ratio 0.58 and beta 0.07, it risks stalling without volume/momentum confirmation.",
+          "risk": "MEDIUM"
+        },
+        "INTU": {
+          "bear_case": "The stock is far below its 52-week high (pct_from_52w_high -43.1%) with high beta (0.87) and only moderate RSI (58.5); even with mom_5d +1.1%, the longer correction depth suggests rallies may fail to sustain.",
+          "risk": "HIGH"
+        },
+        "OXY": {
+          "bear_case": "RSI 73.6 is elevated while the stock is still slightly below the 52-week high (pct_from_52w_high -0.9%) and beta is near 1 (0.99); if mom_5d +5.1% cools, the setup is prone to a quick fade.",
+          "risk": "MEDIUM"
+        },
+        "DDOG": {
+          "bear_case": "Deeply off the highs (pct_from_52w_high -35.4%) with high beta (1.85) is a bearish combo\u2014despite RSI 68.6 and mom_5d +2.0%, the stock may struggle to regain prior levels and could amplify drawdowns.",
+          "risk": "HIGH"
+        },
+        "EXPE": {
+          "bear_case": "Still materially below the 52-week high (pct_from_52w_high -20.7%) with elevated beta (1.53); RSI 64.2 and mom_5d +3.1% may not be enough to reverse the correction, leaving room for underperformance if momentum weakens.",
+          "risk": "HIGH"
         }
       },
       "validation": {
@@ -1829,202 +1967,238 @@
         "post_round_total_weight": 1.0
       },
       "signal_snapshot": {
+        "DDOG": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.257955,
+          "mom_5d": 0.01987,
+          "mom_60d": -0.066732,
+          "sharpe_20d": 0.511762,
+          "rsi_14": 68.588314,
+          "vs_index": 0.292568,
+          "pct_from_52w_high": -0.35367,
+          "beta": 1.851806,
+          "vol_ratio": 0.348631,
+          "macd_hist": 0.007487,
+          "atr_pct": 0.047649,
+          "dividend_yield": 0.0,
+          "last_price": 129.085007,
+          "has_earnings_warning": false
+        },
+        "INTU": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.27234,
+          "mom_5d": 0.011408,
+          "mom_60d": -0.322574,
+          "sharpe_20d": 0.593158,
+          "rsi_14": 58.542285,
+          "vs_index": 0.306954,
+          "pct_from_52w_high": -0.431316,
+          "beta": 0.871968,
+          "vol_ratio": 0.332271,
+          "macd_hist": 0.010986,
+          "atr_pct": 0.043089,
+          "dividend_yield": 0.009793,
+          "last_price": 457.470001,
+          "has_earnings_warning": false
+        },
+        "PLTR": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.228637,
+          "mom_5d": 0.050681,
+          "mom_60d": -0.149701,
+          "sharpe_20d": 0.532309,
+          "rsi_14": 64.3788,
+          "vs_index": 0.263251,
+          "pct_from_52w_high": -0.225504,
+          "beta": 1.559287,
+          "vol_ratio": 0.933297,
+          "macd_hist": 0.00724,
+          "atr_pct": 0.038646,
+          "dividend_yield": 0.0,
+          "last_price": 160.460007,
+          "has_earnings_warning": false
+        },
         "APA": {
           "market": "SP500",
           "sector": "Energy",
-          "momentum": 0.361769,
-          "mom_5d": 0.13231,
-          "mom_60d": 0.632833,
-          "sharpe_20d": 0.934895,
-          "rsi_14": 84.637401,
-          "vs_index": 0.420099,
-          "pct_from_52w_high": 0.0,
-          "beta": 0.001142,
-          "vol_ratio": null,
-          "macd_hist": 0.014175,
-          "atr_pct": 0.035836,
-          "dividend_yield": 0.025569,
-          "last_price": 39.110001,
-          "has_earnings_warning": false
-        },
-        "EQNR.OL": {
-          "market": "OBX",
-          "sector": "Energy",
-          "momentum": 0.424504,
-          "mom_5d": 0.134941,
-          "mom_60d": 0.726614,
-          "sharpe_20d": 0.792225,
-          "rsi_14": 81.82488,
-          "vs_index": 0.482834,
-          "pct_from_52w_high": -0.008279,
-          "beta": -0.211266,
-          "vol_ratio": 0.165458,
-          "macd_hist": 0.017604,
-          "atr_pct": 0.037729,
-          "dividend_yield": 0.037573,
-          "last_price": 395.299988,
-          "has_earnings_warning": false
-        },
-        "LYB": {
-          "market": "SP500",
-          "sector": "Chem",
-          "momentum": 0.309746,
-          "mom_5d": 0.031514,
-          "mom_60d": 0.715843,
-          "sharpe_20d": 0.545539,
-          "rsi_14": 76.630249,
-          "vs_index": 0.368076,
-          "pct_from_52w_high": -0.025,
-          "beta": 0.266244,
-          "vol_ratio": null,
-          "macd_hist": 0.0053,
-          "atr_pct": 0.052945,
-          "dividend_yield": 0.065466,
-          "last_price": 73.32,
-          "has_earnings_warning": false
-        },
-        "AKRBP.OL": {
-          "market": "OBX",
-          "sector": "Energy",
-          "momentum": 0.230092,
-          "mom_5d": 0.041468,
-          "mom_60d": 0.427519,
-          "sharpe_20d": 0.540777,
-          "rsi_14": 69.433968,
-          "vs_index": 0.288421,
-          "pct_from_52w_high": -0.048255,
-          "beta": 0.263621,
-          "vol_ratio": 0.117858,
-          "macd_hist": 0.010583,
-          "atr_pct": 0.034026,
-          "dividend_yield": 0.07306,
-          "last_price": 349.100006,
+          "momentum": 0.350801,
+          "mom_5d": 0.12319,
+          "mom_60d": 0.619682,
+          "sharpe_20d": 0.892764,
+          "rsi_14": 82.167648,
+          "vs_index": 0.385415,
+          "pct_from_52w_high": -0.008054,
+          "beta": -0.071357,
+          "vol_ratio": 1.136234,
+          "macd_hist": 0.013772,
+          "atr_pct": 0.036971,
+          "dividend_yield": 0.025777,
+          "last_price": 38.794998,
           "has_earnings_warning": false
         },
         "DELL": {
           "market": "SP500",
           "sector": "US",
-          "momentum": 0.323401,
-          "mom_5d": 0.007219,
-          "mom_60d": 0.225315,
-          "sharpe_20d": 0.367905,
-          "rsi_14": 68.470884,
-          "vs_index": 0.381731,
-          "pct_from_52w_high": -0.039545,
-          "beta": 1.85341,
-          "vol_ratio": null,
-          "macd_hist": 0.002965,
-          "atr_pct": 0.04384,
-          "dividend_yield": 0.013319,
-          "last_price": 157.669998,
+          "momentum": 0.36818,
+          "mom_5d": 0.041299,
+          "mom_60d": 0.266776,
+          "sharpe_20d": 0.418809,
+          "rsi_14": 72.767936,
+          "vs_index": 0.402794,
+          "pct_from_52w_high": -0.007047,
+          "beta": 1.854671,
+          "vol_ratio": 0.765504,
+          "macd_hist": 0.004956,
+          "atr_pct": 0.042777,
+          "dividend_yield": 0.012883,
+          "last_price": 163.005005,
           "has_earnings_warning": false
         },
-        "VLO": {
-          "market": "SP500",
-          "sector": "Energy",
-          "momentum": 0.215158,
-          "mom_5d": 0.031345,
-          "mom_60d": 0.471416,
-          "sharpe_20d": 0.569534,
-          "rsi_14": 68.105271,
-          "vs_index": 0.273488,
-          "pct_from_52w_high": -0.00913,
-          "beta": 0.395032,
-          "vol_ratio": null,
-          "macd_hist": 0.003155,
-          "atr_pct": 0.035287,
-          "dividend_yield": 0.019136,
-          "last_price": 239.860001,
-          "has_earnings_warning": false
-        },
-        "OXY": {
+        "EXPE": {
           "market": "SP500",
           "sector": "US",
-          "momentum": 0.163423,
-          "mom_5d": 0.060437,
-          "mom_60d": 0.530696,
-          "sharpe_20d": 0.487447,
-          "rsi_14": 76.467769,
-          "vs_index": 0.221752,
-          "pct_from_52w_high": 0.0,
-          "beta": -0.038718,
-          "vol_ratio": null,
-          "macd_hist": 0.004884,
-          "atr_pct": 0.030989,
-          "dividend_yield": 0.016142,
-          "last_price": 60.709999,
+          "momentum": 0.268142,
+          "mom_5d": 0.030588,
+          "mom_60d": -0.168669,
+          "sharpe_20d": 0.421036,
+          "rsi_14": 64.242116,
+          "vs_index": 0.302756,
+          "pct_from_52w_high": -0.206606,
+          "beta": 1.525736,
+          "vol_ratio": 0.380673,
+          "macd_hist": 0.009538,
+          "atr_pct": 0.05162,
+          "dividend_yield": 0.007043,
+          "last_price": 238.539993,
           "has_earnings_warning": false
         },
-        "EOG": {
-          "market": "SP500",
-          "sector": "US",
-          "momentum": 0.134249,
-          "mom_5d": 0.031373,
-          "mom_60d": 0.353164,
-          "sharpe_20d": 0.525032,
-          "rsi_14": 78.450092,
-          "vs_index": 0.192579,
-          "pct_from_52w_high": -0.000648,
-          "beta": -0.061347,
-          "vol_ratio": null,
-          "macd_hist": 0.00205,
-          "atr_pct": 0.024159,
-          "dividend_yield": 0.028761,
-          "last_price": 138.729996,
-          "has_earnings_warning": false
-        },
-        "DVN": {
-          "market": "SP500",
+        "EQNR.OL": {
+          "market": "OBX",
           "sector": "Energy",
-          "momentum": 0.120086,
-          "mom_5d": 0.043087,
-          "mom_60d": 0.371297,
-          "sharpe_20d": 0.440819,
-          "rsi_14": 78.854114,
-          "vs_index": 0.178416,
-          "pct_from_52w_high": -0.002665,
-          "beta": 0.01803,
-          "vol_ratio": null,
-          "macd_hist": 0.005952,
-          "atr_pct": 0.02736,
-          "dividend_yield": 0.019729,
-          "last_price": 48.66,
+          "momentum": 0.34955,
+          "mom_5d": 0.075223,
+          "mom_60d": 0.635763,
+          "sharpe_20d": 0.590723,
+          "rsi_14": 71.071208,
+          "vs_index": 0.384163,
+          "pct_from_52w_high": -0.060462,
+          "beta": -0.460988,
+          "vol_ratio": 1.366161,
+          "macd_hist": 0.015037,
+          "atr_pct": 0.045432,
+          "dividend_yield": 0.03966,
+          "last_price": 374.5,
           "has_earnings_warning": false
         },
         "AKAM": {
           "market": "SP500",
           "sector": "US",
-          "momentum": 0.115786,
-          "mom_5d": 0.045097,
-          "mom_60d": 0.246268,
-          "sharpe_20d": 0.409808,
-          "rsi_14": 69.549504,
-          "vs_index": 0.174115,
-          "pct_from_52w_high": -0.014003,
-          "beta": 0.162653,
-          "vol_ratio": null,
-          "macd_hist": 0.004684,
-          "atr_pct": 0.03972,
+          "momentum": 0.154415,
+          "mom_5d": 0.081278,
+          "mom_60d": 0.289414,
+          "sharpe_20d": 0.519262,
+          "rsi_14": 74.277575,
+          "vs_index": 0.189028,
+          "pct_from_52w_high": 0.0,
+          "beta": 0.257766,
+          "vol_ratio": 0.718128,
+          "macd_hist": 0.006754,
+          "atr_pct": 0.039238,
           "dividend_yield": 0.0,
-          "last_price": 110.195,
+          "last_price": 114.010002,
+          "has_earnings_warning": false
+        },
+        "OXY": {
+          "market": "SP500",
+          "sector": "US",
+          "momentum": 0.153266,
+          "mom_5d": 0.051179,
+          "mom_60d": 0.517333,
+          "sharpe_20d": 0.450905,
+          "rsi_14": 73.631573,
+          "vs_index": 0.18788,
+          "pct_from_52w_high": -0.00873,
+          "beta": -0.105727,
+          "vol_ratio": 0.988636,
+          "macd_hist": 0.004365,
+          "atr_pct": 0.032168,
+          "dividend_yield": 0.016284,
+          "last_price": 60.18,
           "has_earnings_warning": false
         },
         "XOM": {
           "market": "SP500",
           "sector": "Energy",
-          "momentum": 0.059101,
-          "mom_5d": 0.015519,
-          "mom_60d": 0.349461,
-          "sharpe_20d": 0.307701,
-          "rsi_14": 69.159334,
-          "vs_index": 0.11743,
+          "momentum": 0.065734,
+          "mom_5d": 0.021879,
+          "mom_60d": 0.357912,
+          "sharpe_20d": 0.342771,
+          "rsi_14": 70.596458,
+          "vs_index": 0.100347,
           "pct_from_52w_high": 0.0,
-          "beta": 0.04531,
-          "vol_ratio": null,
-          "macd_hist": 0.001598,
-          "atr_pct": 0.022946,
-          "dividend_yield": 0.025302,
-          "last_price": 159.669998,
+          "beta": 0.046429,
+          "vol_ratio": 0.820122,
+          "macd_hist": 0.001985,
+          "atr_pct": 0.024002,
+          "dividend_yield": 0.025145,
+          "last_price": 160.669998,
+          "has_earnings_warning": false
+        },
+        "INF1T.TL": {
+          "market": "BALTIC",
+          "sector": "Baltic",
+          "momentum": 0.033333,
+          "mom_5d": 0.0,
+          "mom_60d": 0.019737,
+          "sharpe_20d": 0.342805,
+          "rsi_14": 77.777966,
+          "vs_index": 0.067947,
+          "pct_from_52w_high": -0.016736,
+          "beta": 0.071953,
+          "vol_ratio": 0.578284,
+          "macd_hist": 0.000283,
+          "atr_pct": 0.004762,
+          "dividend_yield": 0.064516,
+          "last_price": 46.5,
+          "has_earnings_warning": false
+        },
+        "TKM1T.TL": {
+          "market": "BALTIC",
+          "sector": "Cons",
+          "momentum": 0.007165,
+          "mom_5d": 0.0,
+          "mom_60d": 0.046809,
+          "sharpe_20d": 0.169661,
+          "rsi_14": 59.259312,
+          "vs_index": 0.041779,
+          "pct_from_52w_high": -0.004049,
+          "beta": 0.029671,
+          "vol_ratio": 1.761093,
+          "macd_hist": -0.000668,
+          "atr_pct": 0.004501,
+          "dividend_yield": 0.066057,
+          "last_price": 9.84,
+          "has_earnings_warning": false
+        },
+        "CTY1S.HE": {
+          "market": "OMXHLCPI",
+          "sector": "Fin",
+          "momentum": 0.009449,
+          "mom_5d": 0.022872,
+          "mom_60d": 0.017221,
+          "sharpe_20d": 0.040933,
+          "rsi_14": 55.115513,
+          "vs_index": 0.044063,
+          "pct_from_52w_high": -0.035123,
+          "beta": -0.267093,
+          "vol_ratio": 1.94473,
+          "macd_hist": 0.00353,
+          "atr_pct": 0.020912,
+          "dividend_yield": 0.052002,
+          "last_price": 3.846,
           "has_earnings_warning": false
         }
       },
@@ -2032,61 +2206,64 @@
         "selected_tickers": [
           "AKAM",
           "APA",
-          "DVN",
-          "EOG",
+          "CTY1S.HE",
+          "DELL",
+          "EQNR.OL",
           "OXY",
-          "VLO"
+          "PLTR",
+          "XOM"
         ],
         "held_tickers": [
           "AKAM",
           "APA",
-          "OXY",
-          "VLO"
-        ],
-        "new_tickers": [
-          "DVN",
-          "EOG"
-        ],
-        "dropped_tickers": [
           "DELL",
-          "LYB",
+          "OXY",
           "XOM"
         ],
-        "held_count": 4,
-        "new_count": 2,
-        "dropped_count": 3,
-        "overlap_weight": 0.47,
-        "turnover_estimate": 0.53,
+        "new_tickers": [
+          "CTY1S.HE",
+          "EQNR.OL",
+          "PLTR"
+        ],
+        "dropped_tickers": [
+          "LYB",
+          "VLO"
+        ],
+        "held_count": 5,
+        "new_count": 3,
+        "dropped_count": 2,
+        "overlap_weight": 0.53,
+        "turnover_estimate": 0.47,
         "candidate_alternatives": [
           {
+            "ticker": "DDOG",
+            "selection_score": 2.419431,
+            "mom_5d": 0.01987,
+            "vol_ratio": 0.348631
+          },
+          {
             "ticker": "INTU",
-            "selection_score": 3.25914,
-            "mom_5d": 0.007185,
-            "vol_ratio": null
-          },
-          {
-            "ticker": "EQNR.OL",
-            "selection_score": 4.814933,
-            "mom_5d": 0.134941,
-            "vol_ratio": 0.165458
-          },
-          {
-            "ticker": "NESTE.HE",
-            "selection_score": 2.983391,
-            "mom_5d": 0.047163,
-            "vol_ratio": 0.134505
+            "selection_score": 2.348504,
+            "mom_5d": 0.011408,
+            "vol_ratio": 0.332271
           },
           {
             "ticker": "COIN",
-            "selection_score": 1.714515,
-            "mom_5d": -0.028625,
-            "vol_ratio": null
+            "selection_score": 0.510938,
+            "mom_5d": -0.004058,
+            "vol_ratio": 0.731531
           },
           {
-            "ticker": "LYB",
-            "selection_score": 4.122787,
-            "mom_5d": 0.031514,
-            "vol_ratio": null
+            "ticker": "EXPE",
+            "selection_score": 2.521627,
+            "mom_5d": 0.030588,
+            "vol_ratio": 0.380673
+          },
+          {
+            "ticker": "MPC",
+            "selection_score": 3.254288,
+            "mom_5d": 0.021752,
+            "vol_ratio": 0.531628
           }
         ]
       },
@@ -2096,11 +2273,13 @@
   ],
   "source": "verified",
   "close_prices": {
-    "AKAM": 110.19499969482422,
-    "APA": 39.11000061035156,
-    "DVN": 48.65999984741211,
-    "EOG": 138.72999572753906,
-    "OXY": 60.709999084472656,
-    "VLO": 239.86000061035156
+    "AKAM": 114.01000213623047,
+    "APA": 38.79499816894531,
+    "CTY1S.HE": 3.8459999561309814,
+    "DELL": 163.0050048828125,
+    "EQNR.OL": 374.5,
+    "OXY": 60.18000030517578,
+    "PLTR": 160.4600067138672,
+    "XOM": 160.6699981689453
   }
 }

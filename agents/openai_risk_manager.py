@@ -60,7 +60,8 @@ If you find yourself giving everything the same weight, you are not doing your j
    - You will be given the portfolio-weighted beta computed from the proposals.
    - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
    - BULL regime: TARGET portfolio beta 1.6–2.0. Concentrate on high-beta names — sub-1.4 beta in BULL is underperforming the mandate.
-   - NEUTRAL: target portfolio beta between 0.95 and 1.30.
+    - NEUTRAL: target portfolio beta between 0.95 and 1.30 in normal conditions.
+    - If the user context includes a ROTATION RISK ALERT (HIGH/MEDIUM) or clear sector-rotation leadership, treat NEUTRAL beta as a SOFT diagnostic, not a hard objective. Do NOT add high-beta filler names solely to raise beta if that dilutes the strongest rotation leaders.
 7. **Target regime-based position count**:
     - BULL: 5–6 positions. Target 5 at ~20% each. No position < 5%. Cap strongest at 25%.
     - NEUTRAL: 5–10 positions. Size by conviction — top picks 20–25%, diversifiers 5–10%.
@@ -80,7 +81,7 @@ If you find yourself giving everything the same weight, you are not doing your j
 
 ## Hard constraints
 - 5 to 20 stocks.
-- Each position: 5% to 25%.
+- Each position: 5% to 25%. NEVER output a weight above 0.25. If you output 0.30 for one position, the validator renormalizes ALL positions — not just that one — distorting your intended relative sizing across the entire portfolio.
 - Total weight: ≤ 100%.
 - No duplicate tickers.
 
@@ -88,6 +89,7 @@ If you find yourself giving everything the same weight, you are not doing your j
 CRITICAL: "weight" must be a DECIMAL between 0.05 and 0.25. NOT a percentage.
   Correct: 0.20 (means 20%)
   WRONG:   20   (do not write whole numbers)
+  WRONG:   0.30 (exceeds 0.25 maximum — renormalizes every other position too)
 
 {{
     "positions": [
@@ -161,19 +163,31 @@ class OpenAIRiskManager(BaseAgent):
 
     @staticmethod
     def _portfolio_beta(proposal: PortfolioProposal, snapshot: MarketSnapshot) -> float:
-        """Compute weighted-average beta of a proposal using the candidate beta values."""
+        """Compute weighted-average beta of a proposal using the candidate beta values.
+
+        Non-US tickers (those with '.' in the symbol) that have NaN beta fall back to
+        config.NON_US_ASSUMED_BETA (0.30) rather than being silently excluded.  Silently
+        excluding them treats them as beta=0, which understates portfolio risk.
+        """
         beta_map = {
             c["ticker"]: c["beta"]
             for c in snapshot["candidates"]
             if not math.isnan(c.get("beta", float("nan")))
         }
-        covered = [(p.weight, beta_map[p.ticker]) for p in proposal.positions if p.ticker in beta_map]
-        if not covered:
+        total_weight = sum(p.weight for p in proposal.positions)
+        if total_weight == 0:
             return float("nan")
-        covered_weight = sum(w for w, _ in covered)
-        if covered_weight == 0:
+        weighted_sum = 0.0
+        for p in proposal.positions:
+            if p.ticker in beta_map:
+                weighted_sum += p.weight * beta_map[p.ticker]
+            elif "." in p.ticker:
+                # Non-US ticker with missing beta: assume structurally low S&P 500 beta
+                weighted_sum += p.weight * config.NON_US_ASSUMED_BETA
+            # US ticker with NaN beta: exclude (data gap — do not assume)
+        if weighted_sum == 0.0 and not any(p.ticker in beta_map or "." in p.ticker for p in proposal.positions):
             return float("nan")
-        return sum(w * b for w, b in covered) / covered_weight
+        return weighted_sum / total_weight
 
     def _enforce_beta(
         self,
@@ -191,9 +205,22 @@ class OpenAIRiskManager(BaseAgent):
         """
         actual_beta = self._portfolio_beta(proposal, snapshot)
         if math.isnan(actual_beta):
+            logger.warning(
+                "Portfolio beta could not be computed (all candidate betas are NaN) — "
+                "beta enforcement skipped. Check fetcher beta calculation."
+            )
             return proposal
 
         us_weight = sum(p.weight for p in proposal.positions if "." not in p.ticker)
+
+        # Sanity check: a US-heavy portfolio with near-zero beta can indicate data issues
+        # (e.g. insufficient observations), but can also happen in genuine decoupling.
+        if actual_beta < 0.3 and us_weight > 0.50:
+            logger.warning(
+                "Portfolio beta %.2f is very low while portfolio is %.0f%% US stocks. "
+                "Could be beta-data artifact OR real market decoupling — verify compute_beta() sample sizes and rotation context.",
+                actual_beta, us_weight * 100,
+            )
         non_us_weight = 1.0 - us_weight
 
         # Skip check if almost no US exposure — beta vs S&P 500 is meaningless
@@ -373,15 +400,13 @@ class OpenAIRiskManager(BaseAgent):
         learning_state = load_learning_state()
         raw_caps = learning_state.get("weight_caps", [])
         ticker_caps: dict[str, tuple[float, str]] = {}
+        # rationale_tag_caps: tag keyword → (max_weight, reason)
+        rationale_tag_caps: dict[str, tuple[float, str]] = {}
         for cap in raw_caps:
             if not isinstance(cap, dict):
                 continue
-            if cap.get("scope") != "ticker":
-                continue
-            ticker = cap.get("ticker")
+            scope = cap.get("scope")
             max_weight = cap.get("max_weight")
-            if not isinstance(ticker, str):
-                continue
             try:
                 cap_value = float(max_weight)
             except (TypeError, ValueError):
@@ -389,7 +414,14 @@ class OpenAIRiskManager(BaseAgent):
             if cap_value <= 0:
                 continue
             cap_reason = str(cap.get("reason", "learning_state_cap"))
-            ticker_caps[ticker] = (cap_value, cap_reason)
+            if scope == "ticker":
+                ticker = cap.get("ticker")
+                if isinstance(ticker, str):
+                    ticker_caps[ticker] = (cap_value, cap_reason)
+            elif scope == "rationale_tag":
+                tag = cap.get("tag")
+                if isinstance(tag, str):
+                    rationale_tag_caps[tag] = (cap_value, cap_reason)
 
         for i, pos in enumerate(kept):
             cap_info = ticker_caps.get(pos.ticker)
@@ -407,6 +439,25 @@ class OpenAIRiskManager(BaseAgent):
                     cap_reason,
                 )
 
+        # Pass C2 — Rationale-tag caps: positions whose rationale text contains a
+        # low-hit-rate tag keyword are capped. Promoted from bias-to-avoid after
+        # hit_rate < 30% with ≥8 observations.
+        for i, pos in enumerate(kept):
+            rationale_lower = (pos.rationale or "").lower()
+            for tag, (max_weight, cap_reason) in rationale_tag_caps.items():
+                if tag.lower() in rationale_lower and pos.weight > max_weight:
+                    old_weight = pos.weight
+                    kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale)
+                    logger.info(
+                        "Rationale-tag cap: %s %.0f%% → %.0f%% (tag '%s' %s)",
+                        pos.ticker,
+                        old_weight * 100,
+                        max_weight * 100,
+                        tag,
+                        cap_reason,
+                    )
+                    break  # apply the most restrictive matching tag only
+
         total_weight = sum(p.weight for p in kept)
         if total_weight <= 0:
             return proposal
@@ -416,6 +467,147 @@ class OpenAIRiskManager(BaseAgent):
             Position(ticker=p.ticker, weight=w, rationale=p.rationale)
             for p, w in zip(kept, weights)
         ]
+
+        def _redistribute_excess(
+            positions: list[Position],
+            excess: float,
+            blocked_indices: set[int],
+        ) -> list[Position]:
+            if excess <= 1e-9:
+                return positions
+            max_weight = config.GAME_CONSTRAINTS["max_weight"]
+            eligible = [i for i, p in enumerate(positions) if i not in blocked_indices and p.weight < max_weight]
+            if not eligible:
+                return positions
+            headrooms = {i: max_weight - positions[i].weight for i in eligible}
+            total_headroom = sum(headrooms.values())
+            if total_headroom <= 1e-9:
+                return positions
+            updated = positions[:]
+            for i in eligible:
+                delta = excess * (headrooms[i] / total_headroom)
+                updated[i] = Position(
+                    ticker=updated[i].ticker,
+                    weight=updated[i].weight + delta,
+                    rationale=updated[i].rationale,
+                )
+            return updated
+
+        # Re-enforce ticker caps after normalization to avoid cap drift.
+        capped_excess = 0.0
+        capped_indices: set[int] = set()
+        for i, pos in enumerate(kept):
+            cap_info = ticker_caps.get(pos.ticker)
+            if not cap_info:
+                continue
+            max_weight, _ = cap_info
+            if pos.weight > max_weight:
+                capped_excess += pos.weight - max_weight
+                kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale)
+                capped_indices.add(i)
+        kept = _redistribute_excess(kept, capped_excess, capped_indices)
+
+        # Pass D — Low-volume concentration cap (applied POST-normalization so it survives
+        # renormalization).  Positions with vol_ratio below the threshold are oversized relative
+        # to their confirmation level; cap them and redistribute the freed weight.
+        low_vol_excess = 0.0
+        low_vol_indices: set[int] = set()
+        for i, pos in enumerate(kept):
+            vol_ratio = candidate_map.get(pos.ticker, {}).get("vol_ratio", float("nan"))
+            if (
+                not math.isnan(vol_ratio)
+                and vol_ratio < config.LOW_VOLUME_VOL_RATIO_THRESHOLD
+                and pos.weight > config.LOW_VOLUME_MAX_WEIGHT
+            ):
+                low_vol_excess += pos.weight - config.LOW_VOLUME_MAX_WEIGHT
+                kept[i] = Position(ticker=pos.ticker, weight=config.LOW_VOLUME_MAX_WEIGHT, rationale=pos.rationale)
+                low_vol_indices.add(i)
+                logger.info(
+                    "Low-volume cap: %s → %.0f%% (vol_ratio %.2f < %.2f)",
+                    pos.ticker,
+                    config.LOW_VOLUME_MAX_WEIGHT * 100,
+                    vol_ratio,
+                    config.LOW_VOLUME_VOL_RATIO_THRESHOLD,
+                )
+        if low_vol_indices:
+            kept = _redistribute_excess(kept, low_vol_excess, low_vol_indices)
+
+        # Conditional sector cap when rotation risk is HIGH or MEDIUM.
+        rotation_risk = snapshot.get("rotation_risk", {})
+        high_risk_sectors = {
+            sector for sector, info in rotation_risk.items()
+            if isinstance(info, dict) and info.get("level") == "HIGH"
+        }
+        medium_risk_sectors = {
+            sector for sector, info in rotation_risk.items()
+            if isinstance(info, dict) and info.get("level") == "MEDIUM"
+        } - high_risk_sectors  # don't double-process sectors already caught by HIGH
+
+        def _apply_sector_cap(
+            positions: list[Position],
+            sectors: set[str],
+            sector_cap: float,
+            level: str,
+        ) -> list[Position]:
+            sector_indices = [
+                i
+                for i, pos in enumerate(positions)
+                if candidate_map.get(pos.ticker, {}).get("sector") in sectors
+            ]
+            sector_weight = sum(positions[i].weight for i in sector_indices)
+            if sector_weight > sector_cap + 1e-9 and sector_indices and len(sector_indices) < len(positions):
+                scale = sector_cap / sector_weight
+                excess = 0.0
+                for i in sector_indices:
+                    old_w = positions[i].weight
+                    new_w = old_w * scale
+                    excess += old_w - new_w
+                    positions[i] = Position(ticker=positions[i].ticker, weight=new_w, rationale=positions[i].rationale)
+                positions = _redistribute_excess(positions, excess, set(sector_indices))
+                logger.info(
+                    "Rotation %s-risk sector cap applied: %.0f%% → %.0f%% (sectors: %s)",
+                    level, sector_weight * 100, sector_cap * 100, ", ".join(sorted(sectors)),
+                )
+            elif sector_weight > sector_cap + 1e-9:
+                logger.warning(
+                    "Rotation %s-risk sector concentration %.0f%% exceeds %.0f%% but no alternate positions to redistribute to",
+                    level, sector_weight * 100, sector_cap * 100,
+                )
+            return positions
+
+        if high_risk_sectors:
+            kept = _apply_sector_cap(kept, high_risk_sectors, config.ROTATION_RISK_HIGH_SECTOR_CAP, "HIGH")
+        if medium_risk_sectors:
+            kept = _apply_sector_cap(kept, medium_risk_sectors, config.ROTATION_RISK_MEDIUM_SECTOR_CAP, "MEDIUM")
+
+        weighted_vol_sum = 0.0
+        vol_weight_covered = 0.0
+        for pos in kept:
+            vol_ratio = candidate_map.get(pos.ticker, {}).get("vol_ratio", float("nan"))
+            if math.isnan(vol_ratio):
+                continue
+            weighted_vol_sum += pos.weight * vol_ratio
+            vol_weight_covered += pos.weight
+        if vol_weight_covered > 0:
+            portfolio_avg_vol = weighted_vol_sum / vol_weight_covered
+            if portfolio_avg_vol < config.PORTFOLIO_MIN_AVG_VOL_RATIO:
+                logger.warning(
+                    "Portfolio avg vol_ratio %.2f below floor %.2f",
+                    portfolio_avg_vol,
+                    config.PORTFOLIO_MIN_AVG_VOL_RATIO,
+                )
+
+        for pos in kept:
+            c = candidate_map.get(pos.ticker, {})
+            mom_5d = c.get("mom_5d", float("nan"))
+            rationale = (pos.rationale or "").lower()
+            mentions_breakout = "breakout" in rationale or "volume" in rationale
+            if mentions_breakout and not math.isnan(mom_5d) and mom_5d <= 0.002:
+                logger.warning(
+                    "Rationale/data mismatch: %s described as breakout but mom_5d is %.2f%%",
+                    pos.ticker,
+                    mom_5d * 100,
+                )
 
         return PortfolioProposal(
             positions=kept,
@@ -525,7 +717,20 @@ class OpenAIRiskManager(BaseAgent):
         # Compute portfolio betas for context
         strat_beta = self._portfolio_beta(strategist, snapshot)
         strat_beta_str = f"{strat_beta:.2f}" if not math.isnan(strat_beta) else "N/A"
-        beta_targets = {"BULL": "target 1.6–2.0", "BEAR": "target ≤0.90", "NEUTRAL": "target 0.95–1.30"}
+        rotation_risk = snapshot.get("rotation_risk", {})
+        rotation_alert_active = any(
+            isinstance(info, dict) and info.get("level") in {"HIGH", "MEDIUM"}
+            for info in rotation_risk.values()
+        )
+        beta_targets = {
+            "BULL": "target 1.6–2.0",
+            "BEAR": "target ≤0.90",
+            "NEUTRAL": (
+                "soft target 0.95–1.30 (rotation-active: do not add beta filler)"
+                if rotation_alert_active
+                else "target 0.95–1.30"
+            ),
+        }
         beta_target_str = beta_targets.get(regime, "target 0.95–1.15")
 
         breadth = snapshot.get("breadth_pct", float("nan"))
@@ -593,11 +798,13 @@ class OpenAIRiskManager(BaseAgent):
             f"Composite regime score: {rscore}/100 — {score_label}",
             f"Strategist proposal portfolio beta: {strat_beta_str} ({beta_target_str} for {regime} regime)",
         ]
+        portfolio_state_context = snapshot.get("portfolio_state_context", "")
+        if portfolio_state_context:
+            lines += ["", portfolio_state_context]
         if comm_line:
             lines.append(comm_line)
         if sector_rotation_line:
             lines.append(sector_rotation_line)
-        rotation_risk = snapshot.get("rotation_risk", {})
         if rotation_risk:
             high = [(s, i) for s, i in rotation_risk.items() if i["level"] == "HIGH"]
             med = [(s, i) for s, i in rotation_risk.items() if i["level"] == "MEDIUM"]
@@ -606,6 +813,11 @@ class OpenAIRiskManager(BaseAgent):
                 alert_lines.append(f"  {i['level']}: {s} — {i['reason']}")
             if high:
                 alert_lines.append(f"  Action: Reduce or exit {', '.join(s for s, _ in high)} before rotation completes.")
+            if regime == "NEUTRAL":
+                alert_lines.append(
+                    "  Beta guidance override: treat NEUTRAL beta as secondary under active rotation risk; "
+                    "do not add high-beta names only to push beta upward."
+                )
             lines += [""] + alert_lines
         lines += [
             "Analyst consensus note: AnaRtg 1=StrongBuy→5=StrongSell; AnaUp% = (target−price)/price. Use as cross-check on weight decisions — high momentum + analyst upside = conviction; high momentum + negative analyst upside = stretched/crowded, consider capping.",
@@ -774,21 +986,40 @@ class OpenAIRiskManager(BaseAgent):
         if bear_cases:
             high_risk = [(t, v) for t, v in bear_cases.items() if v["risk"] == "HIGH"]
             other_risk = [(t, v) for t, v in bear_cases.items() if v["risk"] != "HIGH"]
+            # Build signal lookup for fact-checking devil's narrative claims
+            _signal_lookup = {c["ticker"]: c for c in snapshot.get("candidates", [])}
             lines += ["", "### ⚠️ Devil's Advocate — Bear Cases"]
             lines.append(
                 "These are the strongest arguments AGAINST each pick. "
-                "Factor them into your weight decisions — HIGH risk picks should be sized down or cut."
+                "Factor them into your weight decisions — HIGH risk picks should be sized down or cut. "
+                "ACTUAL SIGNALS are appended for fact-checking — if the devil's narrative contradicts the signals, trust the signals."
             )
             if high_risk:
                 lines.append("")
                 lines.append("**HIGH RISK (reduce weight or exclude):**")
                 for ticker, v in high_risk:
+                    sigs = _signal_lookup.get(ticker, {})
+                    vr = sigs.get("vol_ratio", float("nan"))
+                    m5 = sigs.get("mom_5d", float("nan"))
+                    rsi = sigs.get("rsi_14", float("nan"))
+                    vr_str = f"{vr:.2f}" if not math.isnan(vr) else "n/a"
+                    m5_str = f"{m5 * 100:+.1f}%" if not math.isnan(m5) else "n/a"
+                    rsi_str = f"{rsi:.0f}" if not math.isnan(rsi) else "n/a"
                     lines.append(f"  {sanitize_ticker(ticker)}: {v['bear_case']}")
+                    lines.append(f"    [ACTUAL SIGNALS: vol_ratio={vr_str}, mom_5d={m5_str}, rsi={rsi_str}]")
             if other_risk:
                 lines.append("")
                 lines.append("**MEDIUM / LOW RISK (acknowledge but can hold):**")
                 for ticker, v in other_risk:
+                    sigs = _signal_lookup.get(ticker, {})
+                    vr = sigs.get("vol_ratio", float("nan"))
+                    m5 = sigs.get("mom_5d", float("nan"))
+                    rsi = sigs.get("rsi_14", float("nan"))
+                    vr_str = f"{vr:.2f}" if not math.isnan(vr) else "n/a"
+                    m5_str = f"{m5 * 100:+.1f}%" if not math.isnan(m5) else "n/a"
+                    rsi_str = f"{rsi:.0f}" if not math.isnan(rsi) else "n/a"
                     lines.append(f"  {sanitize_ticker(ticker)} [{v['risk']}]: {v['bear_case']}")
+                    lines.append(f"    [ACTUAL SIGNALS: vol_ratio={vr_str}, mom_5d={m5_str}, rsi={rsi_str}]")
 
         lines += [
             "",
@@ -829,7 +1060,15 @@ class OpenAIRiskManager(BaseAgent):
         )
 
         data = json.loads(response.choices[0].message.content)
-        raw_positions = data["positions"]
+        raw_positions = data.get("positions", [])
+        if not isinstance(raw_positions, list):
+            raise ValueError("Meta-analyst returned invalid positions format")
+        min_stocks = config.GAME_CONSTRAINTS["min_stocks"]
+        max_stocks = config.GAME_CONSTRAINTS["max_stocks"]
+        if not (min_stocks <= len(raw_positions) <= max_stocks):
+            raise ValueError(
+                f"Meta-analyst returned {len(raw_positions)} positions; expected {min_stocks}-{max_stocks}"
+            )
 
         # Auto-fix: if any weight > 1.0 the model output percentages (e.g. 25 instead of 0.25)
         if any(float(p["weight"]) > 1.0 for p in raw_positions):
@@ -837,14 +1076,26 @@ class OpenAIRiskManager(BaseAgent):
             for p in raw_positions:
                 p["weight"] = float(p["weight"]) / 100.0
 
-        positions = [
-            Position(
-                ticker=p["ticker"],
-                weight=float(p["weight"]),
-                rationale=p.get("rationale", ""),
+        seen_tickers: set[str] = set()
+        min_weight = config.GAME_CONSTRAINTS["min_weight"]
+        max_weight = config.GAME_CONSTRAINTS["max_weight"]
+        positions: list[Position] = []
+        for raw in raw_positions:
+            ticker = sanitize_ticker(str(raw.get("ticker", "")))
+            if not ticker:
+                raise ValueError("Meta-analyst returned empty ticker")
+            if ticker in seen_tickers:
+                raise ValueError(f"Meta-analyst returned duplicate ticker: {ticker}")
+            seen_tickers.add(ticker)
+            weight = float(raw.get("weight", 0.0))
+            bounded_weight = max(min_weight, min(max_weight, weight))
+            positions.append(
+                Position(
+                    ticker=ticker,
+                    weight=bounded_weight,
+                    rationale=str(raw.get("rationale", "")),
+                )
             )
-            for p in raw_positions
-        ]
         return PortfolioProposal(
             positions=positions,
             reasoning=data.get("reasoning", ""),

@@ -960,37 +960,41 @@ Winners: APA +2.8% | Losers: MU -4.8%, AKRBP.OL -4.1%, EQNR.OL -0.9%
 
 ---
 
-## 2026-03-23 10:16:18
+## 2026-03-23 20:28:28
 
-**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 29.7 · S&P 500 20d: -5.8%
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.4% · VIX: 25.4 · S&P 500 20d: -3.5%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Paper account:** Equity €9,860.00 (start €10,000) · Today +0.00% · Since start -1.40% · Turnover 0.0% · Cash €0.00
+**Yesterday's P&L:** Portfolio +0.1% · Benchmark +1.5% · Alpha -1.3%
+Winners: DELL +3.4%, AKAM +3.2%, XOM +0.6% | Losers: LYB -1.4%, OXY -0.9%, VLO -0.9%
 
-**Confidence:** 79% · **Positions:** 6 · **Total weight:** 100.0%
+**Paper account:** Equity €10,059.00 (start €10,000) · Today +0.00% · Since start +0.59% · Turnover 0.0% · Cash €0.00
 
-**Thesis:** The synthesis leans into the only clear cross-agent consensus names—APA, OXY, and AKAM—while adding the strongest unique catalyst names EOG and DVN plus VLO as the best remaining energy slot. I excluded EQNR.OL and AKRBP.OL due to hard learning caps and weak volume, and skipped DELL/LYB because their slot value was inferior under the cautious-neutral regime. Portfolio beta should move materially above the strategist's too-low 0.30 and closer to the neutral target range, while staying concentrated in the only sector with real breadth leadership.
+**Confidence:** 78% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** I cut persistent laggards VLO and LYB and do not keep filler names from weak sectors, while retaining the strongest live winners and consensus names: XOM and DELL (triple consensus), plus AKAM and PLTR (double consensus). I also include one high-volume catalyst outsider in CTY1S.HE and one capped Nordic energy breakout in EQNR.OL; portfolio beta should remain inside the neutral target band, likely around the strategist's 0.97 baseline with a modest lift from PLTR/DELL/OXY but still appropriate for a cautious-neutral regime.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **APA** | 17.0% | Double-consensus pick and validated recent winner; despite overbought risk, the breakout leadership in the strongest sector justifies a max-conviction weight. |
-| 2 | **OXY** | 24.0% | Double-consensus energy name with strong catalyst alignment and 52-week-high momentum; sized just below APA due to slightly less upside asymmetry. |
-| 3 | **EOG** | 20.0% | Best unique catalyst pick from Proposal B with strong premarket strength and sector-tailwind support; earns a core slot over weaker low-beta alternatives. |
-| 4 | **DVN** | 17.0% | High-conviction unique catalyst in the leading energy complex; kept meaningful but below EOG given similar overbought risk and lack of cross-model confirmation. |
-| 5 | **AKAM** | 11.0% | Double-consensus non-energy inclusion that adds differentiated catalyst exposure, but low beta and limited upside potential in this tape cap it as the smallest position. |
-| 6 | **VLO** | 11.0% | Best remaining unique pick from Proposal A and useful downstream energy diversifier; low retail crowding and cleaner slot value than LYB, DELL, or capped Nordic names. |
+| 1 | **XOM** | 15.0% | Triple-consensus validated and a historical winner we already hold; keep as the highest-quality energy anchor, but cap at 15% because consensus-tag caps apply and beta is too low to justify a larger slot in a competition portfolio. |
+| 2 | **DELL** | 16.0% | Triple-consensus pick with strong 5d acceleration and better relative upside than the lagging current holdings; retained as a core aggressor, but limited by the mandatory consensus rationale cap and low-volume confirmation. |
+| 3 | **AKAM** | 16.0% | Double-consensus and yesterday's clear winner from the live book, so it earns a full capped core weight despite vol_ratio 0.72; this explicitly keeps a strong winner while cutting weaker sector exposures. |
+| 4 | **PLTR** | 10.0% | Double-consensus catalyst name with solid 5d momentum and low retail crowding, but Devil HIGH-risk status requires a meaningful reduction versus normal sizing, so it stays as a smaller upside sleeve. |
+| 5 | **APA** | 10.0% | Current holding and validated historical winner with strong volume-backed 5d momentum, but yesterday's lag, high Google crowding, RSI 82 near highs, and Devil HIGH-risk flag force a trimmed tactical hold rather than a core overweight. |
+| 6 | **CTY1S.HE** | 16.0% | Best unique catalyst pick from Proposal B with standout vol_ratio 1.94, giving the portfolio a non-US high-volume breakout that is not dead money and earns a full single-name conviction weight. |
+| 7 | **OXY** | 10.0% | Included over weaker current laggards VLO and LYB because its 5d momentum is materially better and vol_ratio is near 1.0; sized as a secondary energy follow-through rather than a top conviction name. |
+| 8 | **EQNR.OL** | 7.0% | Strong unique energy breakout with vol_ratio 1.37 and 5d +7.5%, but mandatory ticker cap of 7% for recurring underperformance overrides the otherwise attractive setup. |
 
 **Changes from yesterday:**
-- ➕ Added **EOG** at 20.0%
-- ➕ Added **DVN** at 17.0%
+- ➕ Added **PLTR** at 10.0%
+- ➕ Added **CTY1S.HE** at 16.0%
+- ➕ Added **EQNR.OL** at 7.0%
+- ➖ Removed **VLO** (was 14.0%)
 - ➖ Removed **LYB** (was 18.0%)
-- ➖ Removed **XOM** (was 13.0%)
-- ➖ Removed **DELL** (was 7.0%)
-- ▼ **APA**: 25.0% → 17.0% (-8.0%)
-- ▲ **OXY**: 8.0% → 24.0% (+16.0%)
-- ▼ **AKAM**: 15.0% → 11.0% (-4.0%)
-- ▼ **VLO**: 14.0% → 11.0% (-3.0%)
+- ▲ **DELL**: 7.0% → 16.0% (+9.0%)
+- ▼ **APA**: 25.0% → 10.0% (-15.0%)
+- ▲ **OXY**: 8.0% → 10.0% (+2.0%)
 
 ---
 

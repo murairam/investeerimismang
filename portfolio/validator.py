@@ -86,6 +86,13 @@ class PortfolioValidator:
         mn, mx = self.c["min_weight"], self.c["max_weight"]
 
         # 1. Clip individual weights to [min_weight, max_weight]
+        for p in proposal.positions:
+            if p.weight > mx:
+                logger.warning(
+                    "Validator clipping %s from %.1f%% to %.0f%% — model ignored weight constraint. "
+                    "Renormalization will redistribute the excess across ALL positions.",
+                    p.ticker, p.weight * 100, mx * 100,
+                )
         positions = [
             Position(
                 ticker=p.ticker,

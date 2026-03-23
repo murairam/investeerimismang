@@ -41,7 +41,7 @@ _FALLBACK_UNIVERSE: dict[str, list[str]] = {
         "ORNBV.HE", "UPM.HE", "METSO.HE", "KCR.HE", "VALMT.HE",
         "TIETO.HE", "KESKOB.HE", "KOJAMO.HE", "HUH1V.HE", "CGCBV.HE",
         "METSB.HE", "TYRES.HE", "YIT.HE", "DIGIA.HE", "CTY1S.HE",
-        "MANTA.HE", "KALMAR.HE", "RAUT.HE", "OKDAV.HE", "KSLAV.HE",
+        "MANTA.HE", "KALMAR.HE", "RAUT.HE", "OKDAV.HE",
     ],
     "OMXS30": [
         "ABB.ST", "ALFA.ST", "ASSA-B.ST", "ATCO-A.ST", "ATCO-B.ST",

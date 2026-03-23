@@ -39,7 +39,7 @@ OPENROUTER_DEVIL_MODEL = "qwen/qwen3-32b"
 OPENROUTER_ANALYST_MODEL = "qwen/qwen3-32b"
 
 # Risk control thresholds
-OVERBOUGHT_RSI_THRESHOLD = 82
+OVERBOUGHT_RSI_THRESHOLD = 79   # was 82; lowered to catch RSI 79-82 exhaustion before full overbought
 OVERBOUGHT_HIGH_PCT = 0.02      # within 2% of 52w high
 OVERBOUGHT_VOLUME_EXCEPTION = 1.8  # vol_ratio above this bypasses cap
 OVERBOUGHT_WEIGHT_CAP = 0.15
@@ -50,6 +50,11 @@ BETA_CHECK_MIN_US_WEIGHT = 0.25
 NON_US_ASSUMED_BETA = 0.30
 FALLBACK_REPLACEMENT_WEIGHT = 0.05
 MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
+ROTATION_RISK_HIGH_SECTOR_CAP = 0.60    # max sector weight when rotation risk = HIGH
+ROTATION_RISK_MEDIUM_SECTOR_CAP = 0.75  # max sector weight when rotation risk = MEDIUM
+LOW_VOLUME_VOL_RATIO_THRESHOLD = 0.80   # low-volume confirmation floor for concentration caps
+LOW_VOLUME_MAX_WEIGHT = 0.18
+PORTFOLIO_MIN_AVG_VOL_RATIO = 0.85
 
 # Regime thresholds
 VIX_HIGH_THRESHOLD = 30
@@ -59,6 +64,7 @@ VIX_LOW_THRESHOLD = 15
 # ── Signal parameters ────────────────────────────────────────────────────────
 MOMENTUM_WINDOW = 20        # trading days for momentum calculation
 BETA_WINDOW = 60            # trading days for beta calculation
+BETA_MIN_OBSERVATIONS = 30  # minimum aligned return observations required for beta estimation
 BETA_BENCHMARK = "^GSPC"    # S&P 500 as benchmark
 TOP_N_CANDIDATES = 200      # max candidates passed to agents — pure signal meritocracy, no per-market caps
 RSI_WINDOW = 14             # RSI lookback period

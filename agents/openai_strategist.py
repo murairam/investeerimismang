@@ -254,6 +254,9 @@ class OpenAIStrategist(BaseAgent):
             f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} (>1=calm, <0.9=fear) | Credit spreads 20d: {credit_str} (positive=risk-on)",
             f"Composite regime score: {rscore}/100 — {score_label} (0–30=defensive, 31–49=cautious, 50–69=neutral, 70+=bullish)",
         ]
+        portfolio_state_context = snapshot.get("portfolio_state_context", "")
+        if portfolio_state_context:
+            lines += ["", portfolio_state_context]
         if comm_line:
             lines.append(comm_line)
         # Sector rotation context

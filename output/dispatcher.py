@@ -264,6 +264,91 @@ class WebhookDispatcher:
         if prior_proposal and prior_proposal.positions:
             prior_map = {p.ticker: p.weight for p in prior_proposal.positions}
             current_map = {p.ticker: p.weight for p in proposal.positions}
+            current_pos_map = {p.ticker: p for p in proposal.positions}
+
+            def _signal_commentary(ticker: str) -> list[str]:
+                candidate = candidate_map.get(ticker)
+                if not candidate:
+                    return []
+
+                notes: list[str] = []
+                mom_5d = candidate.get("mom_5d", float("nan"))
+                vs_index = candidate.get("vs_index", float("nan"))
+                vol_ratio = candidate.get("vol_ratio", float("nan"))
+                rsi_14 = candidate.get("rsi_14", float("nan"))
+                pct_high = candidate.get("pct_from_52w_high", float("nan"))
+
+                if not math.isnan(mom_5d):
+                    if mom_5d >= 0.03:
+                        notes.append(f"strong 5d momentum ({mom_5d:+.1%})")
+                    elif mom_5d <= 0.0:
+                        notes.append(f"weak 5d momentum ({mom_5d:+.1%})")
+
+                if not math.isnan(vs_index):
+                    if vs_index > 0.0:
+                        notes.append(f"outperforming index ({vs_index:+.1%})")
+                    elif vs_index < 0.0:
+                        notes.append(f"lagging index ({vs_index:+.1%})")
+
+                if not math.isnan(vol_ratio):
+                    if vol_ratio >= 1.2:
+                        notes.append(f"volume confirmation ({vol_ratio:.2f}x)")
+                    elif vol_ratio < 0.8:
+                        notes.append(f"low volume confirmation ({vol_ratio:.2f}x)")
+
+                overbought = (
+                    not math.isnan(rsi_14)
+                    and not math.isnan(pct_high)
+                    and rsi_14 > 82
+                    and pct_high >= -0.02
+                    and (math.isnan(vol_ratio) or vol_ratio <= 1.8)
+                )
+                if overbought:
+                    notes.append("overbought near 52w high")
+
+                return notes
+
+            def _reason_for_add(ticker: str) -> str:
+                pos = current_pos_map.get(ticker)
+                rationale = _truncate_on_sentence_boundary(pos.rationale.strip(), 120) if pos else ""
+                signal_notes = _signal_commentary(ticker)
+                if signal_notes:
+                    return "; ".join(signal_notes[:2]) + "."
+                if rationale and rationale != "No rationale provided.":
+                    return rationale
+                return "New high-conviction entry versus alternatives."
+
+            def _reason_for_remove(ticker: str) -> str:
+                signal_notes = _signal_commentary(ticker)
+                negative = [
+                    note
+                    for note in signal_notes
+                    if any(token in note for token in ("weak", "lagging", "low volume", "overbought"))
+                ]
+                if negative:
+                    return "; ".join(negative[:2]) + "."
+                return "Capital reallocated to stronger opportunities (slot-cost upgrade)."
+
+            def _reason_for_resize(ticker: str, diff: float) -> str:
+                signal_notes = _signal_commentary(ticker)
+                rationale = _truncate_on_sentence_boundary(
+                    current_pos_map[ticker].rationale.strip(),
+                    120,
+                ) if ticker in current_pos_map else ""
+                if diff > 0:
+                    if signal_notes:
+                        return "Conviction increased: " + "; ".join(signal_notes[:2]) + "."
+                    if rationale and rationale != "No rationale provided.":
+                        return f"Conviction increased: {rationale}"
+                    return "Conviction increased after proposal synthesis."
+                risk_notes = [
+                    note
+                    for note in signal_notes
+                    if any(token in note for token in ("weak", "lagging", "low volume", "overbought"))
+                ]
+                if risk_notes:
+                    return "Risk trim: " + "; ".join(risk_notes[:2]) + "."
+                return "Risk-rebalanced to fund higher-conviction names."
 
             added = [ticker for ticker in current_map if ticker not in prior_map]
             removed = [ticker for ticker in prior_map if ticker not in current_map]
@@ -287,14 +372,21 @@ class WebhookDispatcher:
 
                 # Detailed changes
                 for ticker in added:
-                    change_lines.append(f"➕ **{_display(ticker)}** → {int(current_map[ticker] * 100)}%")
+                    reason = _reason_for_add(ticker)
+                    change_lines.append(
+                        f"➕ **{_display(ticker)}** → {int(current_map[ticker] * 100)}% — {reason}"
+                    )
                 for ticker in removed:
-                    change_lines.append(f"➖ **{_display(ticker)}** (was {int(prior_map[ticker] * 100)}%)")
+                    reason = _reason_for_remove(ticker)
+                    change_lines.append(
+                        f"➖ **{_display(ticker)}** (was {int(prior_map[ticker] * 100)}%) — {reason}"
+                    )
                 for ticker in resized:
                     diff = current_map[ticker] - prior_map[ticker]
                     arrow = "▲" if diff > 0 else "▼"
+                    reason = _reason_for_resize(ticker, diff)
                     change_lines.append(
-                        f"{arrow} **{_display(ticker)}** {int(prior_map[ticker] * 100)}%→{int(current_map[ticker] * 100)}%"
+                        f"{arrow} **{_display(ticker)}** {int(prior_map[ticker] * 100)}%→{int(current_map[ticker] * 100)}% — {reason}"
                     )
             else:
                 change_lines.append("✅ **No changes** — portfolio unchanged from yesterday")
