@@ -24,8 +24,8 @@ not to preserve capital.
 
 ## The Conservative Mistake — Do Not Repeat
 
-**Mistake made:** The system was tuned for conservative wealth preservation — low beta targets
-(0.95–1.15), strict sector caps, RSI overbought filters, and wide diversification (8-10 positions).
+**Mistake made:** The system was tuned for conservative wealth preservation — rigid beta targets
+in NEUTRAL regimes, strict sector caps, RSI overbought filters, and wide diversification (8-10 positions).
 This guarantees underperformance in a short-term competition. With 844 participants, a median
 portfolio finishes 422nd. Conservative = losing by design.
 
@@ -41,13 +41,13 @@ higher-momentum candidate.
 ## Risk Management Guardrails (March 2026)
 
 ### Overbought Position Sizing
-- **Rule:** RSI > 82 + within 2% of 52-week high → max 15% position weight
+- **Rule:** RSI > 79 + within 2% of 52-week high → max 15% position weight
 - **Exception:** volume_ratio > 1.8 allows full 25% (genuine breakout volume overrides overbought signal)
 - **Rationale:** Breakout moves often exhaust at peaks; strong volume confirmation trumps RSI
 - **Implementation:** `agents/openai_risk_manager.py` rules 18 & 19
 
 ### Conditional Rotation-Risk Sector Cap
-- **Rule:** There is no permanent sector cap, but if `rotation_risk` marks a sector as **HIGH**, that sector is temporarily capped at **60%** of portfolio weight.
+- **Rule:** There is no permanent sector cap, but if `rotation_risk` marks a sector as **HIGH**, that sector is temporarily capped at **60%** of portfolio weight (and **MEDIUM** risk sectors at **75%**).
 - **Rationale:** Prevent concentration drift into sectors with clear momentum deceleration while preserving legal concentration in normal conditions.
 - **Implementation:** `agents/openai_risk_manager.py::_enforce_selection_quality()` + `config.ROTATION_RISK_HIGH_SECTOR_CAP`
 

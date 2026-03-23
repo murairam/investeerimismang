@@ -38,6 +38,14 @@ PRICING = {
     "o3-mini":           {"input": 1.10  / 1_000_000, "output":  4.40 / 1_000_000},
     # Gemini (free tier)
     "gemini-2.0-flash-exp": {"input": 0.0, "output": 0.0},
+    "gemini-2.5-flash": {"input": 0.0, "output": 0.0},
+    # OpenRouter models
+    "qwen/qwen3-235b-a22b": {"input": 0.455 / 1_000_000, "output": 1.82 / 1_000_000},
+    "deepseek/deepseek-v3.2": {"input": 0.26 / 1_000_000, "output": 0.38 / 1_000_000},
+    "nvidia/nemotron-3-super-120b-a12b": {"input": 0.30 / 1_000_000, "output": 0.30 / 1_000_000},  # paid variant (~$0.01/call)
+    "nvidia/nemotron-3-super-120b-a12": {"input": 0.0, "output": 0.0},  # deprecated free model
+    # Historical model kept for accurate legacy cost logs
+    "qwen/qwen3-32b": {"input": 0.08 / 1_000_000, "output": 0.24 / 1_000_000},
 }
 
 

@@ -2,17 +2,17 @@
 
 ## Project Overview
 
-**AlphaShark** is an autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data, uses a 4-model AI ensemble (GPT-5.4 Strategist + Gemini 2.5 Flash Challenger + GPT-5.4-nano Devil + GPT-5.4 Risk Manager) to build a momentum portfolio, validates it against game rules, and posts the daily recommendation to Discord.
+**AlphaShark** is an autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data, uses a multi-model AI ensemble (GPT-5.4 Strategist + Gemini 2.5 Flash Challenger + DeepSeek V3.2 Full Analyst + Qwen3-235B Devil + GPT-5.4 Risk Manager) to build a momentum portfolio, validates it against game rules, and posts the daily recommendation to Discord.
 
 **Game period:** 6 April – 19 June 2026  
-**Daily execution:** GitHub Actions fires at 06:30 UTC on weekdays (Mon–Fri)
+**Daily execution:** GitHub Actions fires at 06:00 UTC on weekdays (Mon–Fri)
 
 ---
 
 ## Technology Stack
 
 - **Language:** Python 3.12
-- **AI models:** OpenAI GPT-5.4 (Strategist, Risk Manager) + Gemini 2.5 Flash (Challenger, with Groq Llama 3.3 70B fallback) + OpenRouter Qwen3-32B (Devil, Full Analyst)
+- **AI models:** OpenAI GPT-5.4 (Strategist, Risk Manager) + Gemini 2.5 Flash (Challenger, with OpenRouter Llama 4 Maverick fallback then OpenAI GPT-5.4-nano) + OpenRouter DeepSeek V3.2 (Full Analyst) + OpenRouter Qwen3-235B-A22B (Devil)
 - **Market data:** `yfinance` (free, no API key required)
 - **Libraries:** `pandas`, `numpy`, `openai`, `google-genai`, `anthropic`, `requests`, `python-dotenv`, `pytrends`
 - **Automation:** GitHub Actions (`.github/workflows/`)
@@ -29,11 +29,11 @@ data/fetcher.py — 15 signals per stock + macro context (regime score, VIX, bre
     ↓
 GPT-5.4 Strategist ──────────────────────────────────────────┐  (run in parallel)
 Gemini 2.5 Flash Challenger ─────────────────────────────────┤
-GPT-5.4-nano FullAnalyst ────────────────────────────────────┘
+DeepSeek V3.2 FullAnalyst ────────────────────────────────────┘
                                                               ↓
               [Cross-agent debate — lightweight second pass per agent]
                                                               ↓
-GPT-5.4-nano Devil — bear-case stress test for top picks
+Qwen3-235B-A22B Devil — bear-case stress test for top picks
                                                               ↓
 GPT-5.4 Risk Manager — synthesises all proposals + debate summary + bear cases
     ↓
@@ -56,8 +56,8 @@ PREGAME_LOG.md / DAILY_LOG.md — human-readable entry appended
 | `agents/base_agent.py` | Abstract base class all LLM agents must implement |
 | `agents/openai_strategist.py` | GPT-5.4 momentum-driven portfolio selection |
 | `agents/gemini_challenger.py` | Gemini 2.5 Flash catalyst-hunter second opinion |
-| `agents/openai_challenger.py` | GPT-5.4-nano full analyst third proposal (all signals) |
-| `agents/openai_devil.py` | GPT-5.4-nano bear-case stress tester |
+| `agents/openai_challenger.py` | DeepSeek V3.2 full analyst third proposal (OpenRouter; fallback GPT-5.4-nano) |
+| `agents/openai_devil.py` | Qwen3-235B bear-case stress tester (OpenRouter; fallback GPT-5.4-nano) |
 | `agents/openai_risk_manager.py` | GPT-5.4 that synthesises all proposals + debate + bear cases |
 | `data/fetcher.py` | Market data + 15 signal computations + macro context |
 | `data/earnings_fetcher.py` | Upcoming earnings calendar (7-day risk warnings) |
@@ -103,8 +103,8 @@ python scripts/verify.py   # confirm portfolio (LIVE mode)
 ```
 OPENAI_API_KEY=...          # GPT-5.4 Strategist + Risk Manager
 GEMINI_API_KEY=...          # Gemini 2.5 Flash Challenger
-GROQ_API_KEY=...            # Groq Llama 3.3 70B — Gemini fallback (free tier, optional)
-OPENROUTER_API_KEY=...      # Qwen3-32B for Devil + Full Analyst (optional, falls back to GPT-5.4-nano)
+OPENROUTER_API_KEY=...      # DeepSeek V3.2 (Full Analyst), Qwen3-235B (Devil), and Llama 4 Maverick (Gemini fallback)
+GROQ_API_KEY=...            # Optional legacy key (current fallback chain no longer depends on Groq)
 EODHD_API_KEY=...           # Nordic/Baltic ticker fallback
 DISCORD_WEBHOOK_URL=...     # Discord channel webhook
 DISCORD_USER_ID=...         # Optional: enables @mentions in LIVE mode
@@ -166,7 +166,7 @@ Run → measure P&L → update PREGAME_LEARNING.md → AI self-critique → AI_S
 
 | Workflow | Schedule | Purpose |
 |----------|----------|---------|
-| `alphashark.yml` | Mon–Fri 06:30 UTC | Run full pipeline, commit portfolio + learning files back to repo |
+| `alphashark.yml` | Mon–Fri 06:00 UTC | Run full pipeline, commit portfolio + learning files back to repo |
 | `verification_reminder.yml` | Mon–Fri 07:00 UTC | Send Discord reminder if portfolio hasn't been verified (LIVE mode only) |
 
 Required GitHub repository secrets: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`. Optional: `DISCORD_USER_ID`.

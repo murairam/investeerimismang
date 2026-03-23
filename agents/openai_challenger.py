@@ -359,16 +359,20 @@ class OpenAIFullAnalyst(BaseAgent):
         # OpenRouter does not reliably enforce response_format or handle long outputs —
         # use max_tokens to prevent truncation and omit response_format for OR calls.
         openrouter_call = self._openrouter_enabled and self.model != self.MODEL
+        # Qwen3 runs in "thinking" mode by default — disable it to avoid 3+ minute hangs
+        effective_user_message = ("/no_think\n\n" + user_message) if openrouter_call and "qwen3" in self.model.lower() else user_message
         call_kwargs: dict = dict(
             temperature=0.2,
             timeout=API_TIMEOUT_SECONDS,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message},
+                {"role": "user", "content": effective_user_message},
             ],
         )
         if openrouter_call:
             call_kwargs["max_tokens"] = 3000
+            if "deepseek" in self.model.lower():
+                call_kwargs["extra_body"] = {"reasoning": {"enabled": True}}
         else:
             call_kwargs["response_format"] = {"type": "json_object"}
 
@@ -453,20 +457,46 @@ class OpenAIFullAnalyst(BaseAgent):
             'Return JSON only: {"agrees": ["TICKER1", ...], "disagrees": [{"ticker": "X", "reason": "..."}]}'
         )
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                response_format={"type": "json_object"},
-                temperature=0.0,
-                messages=[
+            call_kwargs: dict = {
+                "temperature": 0.0,
+                "messages": [
                     {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
                     {"role": "user", "content": prompt},
                 ],
-            )
+            }
+            if self._openrouter_enabled and self.model != self.MODEL:
+                call_kwargs["max_tokens"] = 1200
+            else:
+                call_kwargs["response_format"] = {"type": "json_object"}
+
+            response = self.client.chat.completions.create(model=self.model, **call_kwargs)
             log_usage("OpenAIFullAnalyst_crosscheck", self.model,
                       response.usage.prompt_tokens, response.usage.completion_tokens)
-            return json.loads(response.choices[0].message.content)
+            raw_text = response.choices[0].message.content or ""
+            return _extract_json(raw_text)
         except Exception as exc:
             logger.warning("FullAnalyst cross_check failed (non-fatal): %s", exc)
+            if self.model != self.MODEL:
+                try:
+                    fallback_client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+                    response = fallback_client.chat.completions.create(
+                        model=self.MODEL,
+                        response_format={"type": "json_object"},
+                        temperature=0.0,
+                        messages=[
+                            {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
+                            {"role": "user", "content": prompt},
+                        ],
+                    )
+                    log_usage(
+                        "OpenAIFullAnalyst_crosscheck_fallback",
+                        self.MODEL,
+                        response.usage.prompt_tokens,
+                        response.usage.completion_tokens,
+                    )
+                    return json.loads(response.choices[0].message.content)
+                except Exception as exc2:
+                    logger.warning("FullAnalyst cross_check OpenAI fallback failed (non-fatal): %s", exc2)
             return {}
 
 

@@ -892,3 +892,150 @@ Winners: DELL +3.4%, AKAM +3.2%, XOM +0.6% | Losers: LYB -1.4%, OXY -0.9%, VLO -
 - ▲ **OXY**: 8.0% → 10.0% (+2.0%)
 
 ---
+## 2026-03-23 21:01:13
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.6% · VIX: 25.5 · S&P 500 20d: -3.7%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.3% · Benchmark +1.2% · Alpha -1.0%
+Winners: DELL +4.3%, AKAM +3.1%, XOM +1.0% | Losers: LYB -2.3%, VLO -0.9%, OXY -0.6%
+
+**Paper account:** Equity €10,059.00 (start €10,000) · Today +2.02% · Since start +0.59% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 81% · **Positions:** 7 · **Total weight:** 100.0%
+
+**Thesis:** I am explicitly cutting persistent laggards LYB and VLO and exiting the weaker residual energy/tech mix in favor of the strongest consensus names: APA, OXY, DELL, PLTR, AKAM, XOM, plus capped EQNR.OL. I kept current winners APA/AKAM/XOM where signals still justify a slot, but resized APA down from 25% and avoided adding low-volume names like INTU, DVN, and COP; COIN is the only non-consensus catalyst inclusion and is deliberately small due to the HIGH-risk flag. Portfolio remains concentrated and rotation-aware with about 47% Energy exposure, below the 75% medium-risk sector cap, and beta should sit around the soft neutral range without adding filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **APA** | 16.0% | Triple-consensus validated winner and current holding to keep, but trim hard from 25% because Energy rotation is decelerating, RSI is 84, Google interest is crowded, and rationale-cap rules prevent larger sizing. |
+| 2 | **OXY** | 16.0% | Triple-consensus keep/add: still one of the cleaner Energy leaders with positive 5d momentum and vol_ratio above 1.0, so it earns a core slot while staying within the 15% rationale cap. |
+| 3 | **DELL** | 16.0% | Double-consensus upgrade from the current 7% because it is a stronger replacement for lagging LYB/VLO exposure, but low-volume confirmation at 0.88 and rationale-cap rules keep it at 15%. |
+| 4 | **PLTR** | 17.0% | Double-consensus catalyst add with better volume confirmation than most non-energy alternatives and low retail crowding, making it the best new upside slot despite only medium devil risk. |
+| 5 | **AKAM** | 17.0% | Double-consensus current winner and yesterday’s best performer, so it stays despite weak sector breadth in Tech; kept at the hard 15% cap because the thesis is still largely momentum-driven and vol_ratio is only 0.89. |
+| 6 | **XOM** | 11.0% | Double-consensus Energy core retained as a steadier major while weaker current names are cut, but lower 5d acceleration and sub-1.0 volume confirmation argue for a smaller support weight. |
+| 7 | **EQNR.OL** | 7.0% | Double-consensus satellite included for differentiated Energy/geopolitical exposure and strong 1.37 volume confirmation, but mandatory ticker cap limits size to 7%. |
+
+**Changes from yesterday:**
+- ➕ Added **PLTR** at 17.0%
+- ➕ Added **EQNR.OL** at 7.0%
+- ➖ Removed **VLO** (was 14.0%)
+- ➖ Removed **LYB** (was 18.0%)
+- ▼ **APA**: 25.0% → 16.0% (-9.0%)
+- ▲ **OXY**: 8.0% → 16.0% (+8.0%)
+- ▲ **DELL**: 7.0% → 16.0% (+9.0%)
+- ▲ **AKAM**: 15.0% → 17.0% (+2.0%)
+- ▼ **XOM**: 13.0% → 11.0% (-2.0%)
+
+---
+## 2026-03-23 21:25:19
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.7% · VIX: 26.5 · S&P 500 20d: -3.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.3% · Benchmark +1.1% · Alpha -0.9%
+Winners: DELL +4.4%, AKAM +3.6%, XOM +0.9% | Losers: LYB -2.5%, VLO -1.0%, OXY -0.7%
+
+**Paper account:** Equity €10,059.00 (start €10,000) · Today +2.02% · Since start +0.59% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 81% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I cut the persistent laggards and dead-money names from the current book—LYB, VLO, and the residual low-conviction sleeve—because chemicals and weak-volume energy were dragging recent alpha while sector rules explicitly call for reducing weak performers in losing sectors. The final portfolio keeps the strongest independently validated names (AKAM, APA, DELL, PLTR, XOM, OXY), includes the key catalyst add PLTR, and stays concentrated in exactly 6 names; beta remains a soft secondary consideration in this rotation-risk regime, with concentration focused on active movers rather than filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **AKAM** | 17.0% | Triple-consensus keep and yesterday’s clear winner; strong 5d momentum (+8.5%) with solid volume confirmation (1.26), but capped at 15% by mandatory consensus/momentum rationale limits. |
+| 2 | **DELL** | 17.0% | Triple-consensus offensive tech hold with good continuation (+5.1% 5d, vol_ratio 1.04); kept despite recent underperformance because it is one of the few active non-energy movers, but capped at 15% due to HIGH-risk flag and rationale-cap rules. |
+| 3 | **PLTR** | 18.0% | Triple-consensus aggressive add for right-tail upside; better slot than INTU/DDOG thanks to stronger acceleration and acceptable volume confirmation (5.3% 5d, vol_ratio 1.13), but reduced to 15% under mandatory rationale cap and HIGH-risk caution. |
+| 4 | **XOM** | 18.0% | Double-consensus energy core and validated historical winner in the rotation year; volume is acceptable (1.06) and it is a cleaner hold than VLO/LYB, but capped at 15% by consensus/momentum learning constraints. |
+| 5 | **APA** | 18.0% | Triple-consensus and one of the strongest validated winners with elite short-term momentum (+13.0% 5d, vol_ratio 1.43); trimmed hard from current 25% because APA is crowded, overbought (RSI 84), and HIGH-risk flagged. |
+| 6 | **OXY** | 12.0% | Double-consensus energy continuation name with good 5d acceleration (+5.3%) and volume confirmation (1.10); included as the best sixth slot after cutting weaker current holdings, but sized below core names due to HIGH-risk flag and energy deceleration alert. |
+
+**Changes from yesterday:**
+- ➕ Added **PLTR** at 18.0%
+- ➖ Removed **VLO** (was 14.0%)
+- ➖ Removed **LYB** (was 18.0%)
+- ▲ **AKAM**: 15.0% → 17.0% (+2.0%)
+- ▲ **DELL**: 7.0% → 17.0% (+10.0%)
+- ▲ **XOM**: 13.0% → 18.0% (+5.0%)
+- ▼ **APA**: 25.0% → 18.0% (-7.0%)
+- ▲ **OXY**: 8.0% → 12.0% (+4.0%)
+
+---
+## 2026-03-23 21:40:14
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.7% · VIX: 26.1 · S&P 500 20d: -3.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.3% · Benchmark +1.1% · Alpha -0.9%
+Winners: DELL +4.4%, AKAM +3.6%, XOM +0.9% | Losers: LYB -2.5%, VLO -1.0%, OXY -0.7%
+
+**Paper account:** Equity €10,059.00 (start €10,000) · Today +2.02% · Since start +0.59% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 78% · **Positions:** 8 · **Total weight:** 100.0%
+
+**Thesis:** I cut the weakest current laggards and sector-rule violators first—LYB and VLO exit because Chem is decelerating and both were recent losers, while APA is trimmed hard from 25% and DELL is increased from 7% with risk control. Consensus was strongest in APA, DELL, PLTR, and XOM, but learning-state caps prevented oversized consensus/momentum allocations, so I balanced those with catalyst adds in DDOG and a cleaner energy replacement in CVX. Portfolio stays concentrated at 8 names with 50% Energy exposure—well below the temporary 75% medium-risk sector cap—and beta remains acceptable for cautious NEUTRAL without adding filler solely to force it higher.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **XOM** | 15.0% | Triple-consensus current winner kept as core continuity energy exposure; breadth still strongly favors Energy, volume is confirmed (1.08), and the 15% cap also respects the learning constraint against max-sizing a consensus-led thesis. |
+| 2 | **PLTR** | 15.0% | Triple-consensus offensive add with solid 5d acceleration (+5.3%) and acceptable volume (1.13); chosen as the best non-energy catalyst name without the low-volume problems seen in some alternatives. |
+| 3 | **AKAM** | 15.0% | Double-consensus and yesterday’s strongest actual portfolio winner (+3.6%); strong 5d momentum (+8.5%) and good volume confirmation (1.26) justify keeping it at the learning-rule maximum. |
+| 4 | **OXY** | 15.0% | Double-consensus energy continuation play with better short-term acceleration than XOM (+5.3% 5d) and confirmed volume (1.10); retained while rotating out weaker current laggards. |
+| 5 | **DELL** | 11.0% | Triple-consensus upgrade from the current 7% holding, but sized below the usual level because Devil flagged HIGH risk and volume confirmation is only borderline at 0.95 despite strong price momentum. |
+| 6 | **APA** | 10.0% | Triple-consensus and historically validated winner in this book, but cut sharply from the current 25% because it is crowded, RSI 84 is a HIGH-risk exhaustion flag, and Energy has medium rotation-risk deceleration. |
+| 7 | **DDOG** | 9.0% | Double-consensus catalyst inclusion for right-tail upside, but kept small because vol_ratio 0.57 is weak and the Devil HIGH-risk warning requires a meaningful haircut versus normal sizing. |
+| 8 | **CVX** | 10.0% | Best unique replacement for LYB/VLO exposure: still in the leading Energy complex, cleaner volume confirmation (1.10) than MPC, and helps avoid overcommitting to the most overextended single-name energy winners. |
+
+**Changes from yesterday:**
+- ➕ Added **PLTR** at 15.0%
+- ➕ Added **DDOG** at 9.0%
+- ➕ Added **CVX** at 10.0%
+- ➖ Removed **VLO** (was 14.0%)
+- ➖ Removed **LYB** (was 18.0%)
+- ▲ **OXY**: 8.0% → 15.0% (+7.0%)
+- ▲ **DELL**: 7.0% → 11.0% (+4.0%)
+- ▼ **APA**: 25.0% → 10.0% (-15.0%)
+
+---
+## 2026-03-23 22:42:25
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.7% · VIX: 26.1 · S&P 500 20d: -3.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.3% · Benchmark +1.1% · Alpha -0.9%
+Winners: DELL +4.4%, AKAM +3.6%, XOM +0.9% | Losers: LYB -2.5%, VLO -1.0%, OXY -0.7%
+
+**Paper account:** Equity €10,059.00 (start €10,000) · Today +2.02% · Since start +0.59% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 79% · **Positions:** 7 · **Total weight:** 100.0%
+
+**Thesis:** I kept the independently validated core—APA, DELL, PLTR, XOM, and AKAM—while explicitly cutting persistent laggards from the current book (LYB, VLO, OXY) and reducing concentration in decelerating energy sub-groups. I included one cleaner energy replacement (COP) and one small catalyst flyer (DDOG), but respected learning-state caps and Devil warnings by limiting consensus-driven names to 15% unless supported by a stronger non-consensus thesis; portfolio remains concentrated and rotation-led rather than padded for beta.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **PLTR** | 16.0% | Triple-consensus breakout and the cleanest non-energy accelerator (5d +5.3%, vol_ratio 1.13); with current portfolio alpha lagging, this is the best aggressive redeployment slot. |
+| 2 | **APA** | 17.0% | Triple-consensus and a validated historical winner with the strongest current energy momentum (5d +13.0%, vol_ratio 1.43), but capped down from max due to HIGH-risk overbought flag, RSI 84, and crowded search interest. |
+| 3 | **DELL** | 17.0% | Triple-consensus keep from current holdings with solid acceleration (5d +5.1%, vol_ratio 1.05); maintained but capped by the learning-rule limit on consensus sizing and HIGH-risk extension concerns near highs. |
+| 4 | **XOM** | 17.0% | Triple-consensus continuity holding and validated winner; lower-beta but still justified as a liquid core energy leader while rotating out of weaker current energy/chem names. |
+| 5 | **AKAM** | 17.0% | Double-consensus and yesterday's strongest actual winner (+3.6%) with strong 5d momentum (+8.5%) and volume confirmation (1.26); kept as a proven current holding despite sector weakness. |
+| 6 | **COP** | 11.0% | Best unique energy replacement for VLO/LYB/OXY exposure: upstream tilt fits the energy rotation better than refining/chemicals, though low volume confirmation (0.82) keeps it at diversifier size. |
+| 7 | **DDOG** | 5.0% | Included only as a small catalyst challenger pick to preserve right-tail upside, but heavily reduced because vol_ratio 0.57 is weak and the Devil flagged it HIGH risk. |
+
+**Changes from yesterday:**
+- ➕ Added **PLTR** at 16.0%
+- ➕ Added **COP** at 11.0%
+- ➕ Added **DDOG** at 5.0%
+- ➖ Removed **VLO** (was 14.0%)
+- ➖ Removed **LYB** (was 18.0%)
+- ➖ Removed **OXY** (was 8.0%)
+- ▼ **APA**: 25.0% → 17.0% (-8.0%)
+- ▲ **DELL**: 7.0% → 17.0% (+10.0%)
+- ▲ **XOM**: 13.0% → 17.0% (+4.0%)
+- ▲ **AKAM**: 15.0% → 17.0% (+2.0%)
+
+---

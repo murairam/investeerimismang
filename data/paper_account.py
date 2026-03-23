@@ -159,9 +159,24 @@ def sync_verified_positions(
             target_positions[ticker] = round((equity * pos["weight"]) / (px * fx), 8)
 
     history = state.get("history", [])
+
+    # Daily return should always be measured versus the most recent DISTINCT
+    # prior trading date, not versus an earlier verification of the same day.
+    prev_equity_for_day: Optional[float] = None
+    for entry in reversed(history):
+        if entry.get("date") == as_of_date:
+            continue
+        try:
+            prev_equity_for_day = float(entry.get("equity"))
+        except (TypeError, ValueError):
+            prev_equity_for_day = None
+        if prev_equity_for_day is not None and prev_equity_for_day > 0:
+            break
+
     return_since_start = (equity / initial_capital - 1) if initial_capital > 0 else 0.0
-    prev_equity = float(state.get("last_equity", state.get("initial_capital", equity)))
-    daily_return = (equity / prev_equity - 1) if prev_equity > 0 else 0.0
+    if prev_equity_for_day is None or prev_equity_for_day <= 0:
+        prev_equity_for_day = float(state.get("last_equity", state.get("initial_capital", equity)))
+    daily_return = (equity / prev_equity_for_day - 1) if prev_equity_for_day > 0 else 0.0
 
     history_entry = {
         "date": as_of_date,

@@ -15,7 +15,7 @@ An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game
 These are the non-obvious design decisions worth explaining in depth.
 
 **Adversarial multi-model ensemble**
-Three agents propose portfolios in parallel — GPT-5.4 (Strategist), Gemini 2.5 Flash (Challenger), and Qwen3-32B via OpenRouter (Full Analyst, with GPT-5.4-nano fallback). Using two independent model families (OpenAI + Google) plus optional OpenRouter routing reduces correlated reasoning errors and operating cost. The Devil's Advocate (also Qwen3-32B via OpenRouter, with GPT-5.4-nano fallback) then generates bear cases specifically for the top combined picks before the Risk Manager synthesises the final portfolio. This adversarial architecture is inspired by red-teaming practices in security.
+Three agents propose portfolios in parallel — GPT-5.4 (Strategist), NVIDIA Nemotron-Super-120B via OpenRouter (Challenger primary, free tier), and DeepSeek V3.2 via OpenRouter (Full Analyst, with GPT-5.4-nano fallback). Using multiple model families (OpenAI + NVIDIA + DeepSeek + Qwen) reduces correlated reasoning errors. The Devil's Advocate runs on Qwen3-235B-A22B via OpenRouter (with GPT-5.4-nano fallback). The Challenger fallback chain is: NVIDIA Nemotron → Gemini 2.5 Flash → GPT-5.4-nano.
 
 **Self-improving learning loop**
 Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record without any human labelling.
@@ -40,9 +40,11 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 |-------|-----------|-----|
 | Language | Python 3.11+ | Type hints, dataclasses, async-compatible |
 | AI — Strategist + Risk Manager | OpenAI GPT-5.4 | Strongest instruction-following for structured JSON portfolio output |
-| AI — Challenger | Google Gemini 2.5 Flash | Independent model family reduces correlated reasoning errors vs pure OpenAI stack |
-| AI — Challenger fallback | Groq Llama 3.3 70B | Free-tier fallback when Gemini is unavailable; accessed via OpenAI-compatible API |
-| AI — Devil + Full Analyst | OpenRouter Qwen3-32B | ~85% cost saving vs GPT-5.4-nano for secondary agents; configurable via `USE_OPENROUTER_FOR_SECONDARY_AGENTS` |
+| AI — Challenger (primary) | OpenRouter NVIDIA Nemotron-Super-120B (free) | Free high-quality model; independent model family reduces correlated errors |
+| AI — Challenger fallback 1 | Google Gemini 2.5 Flash | Kicks in when OpenRouter/Nemotron is unavailable |
+| AI — Challenger fallback 2 | OpenAI GPT-5.4-nano | Final safety net when both OpenRouter and Gemini fail |
+| AI — Full Analyst | OpenRouter DeepSeek V3.2 | Strong all-signal reasoning at low token cost; GPT-5.4-nano fallback if needed |
+| AI — Devil | OpenRouter Qwen3-235B-A22B | Strongest adversarial critique model; GPT-5.4-nano fallback if needed |
 | Market data | yfinance (primary), EODHD (fallback) | Free + reliable for S&P 500; EODHD fills Nordic/Baltic tickers where yfinance coverage is unreliable |
 | Enrichment | pytrends, SEC EDGAR Form 4 API, yfinance news | Catalyst signals not in price data |
 | Automation | GitHub Actions | Zero-infra scheduled runs; secrets management; auto-commit results |
@@ -53,7 +55,7 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 
 ## Key Features
 
-- **Mixed AI decision stack**: GPT-5.4 Strategist + Gemini 2.5 Flash Challenger + OpenRouter Qwen3-32B Full Analyst run in parallel (two independent model families), Qwen3-32B Devil's Advocate pressure-tests the picks, and GPT-5.4 Risk Manager synthesizes the final portfolio. Groq Llama 3.3 70B is the automatic fallback when Gemini is unavailable.
+- **Mixed AI decision stack**: GPT-5.4 Strategist + NVIDIA Nemotron-Super-120B (OpenRouter free) Challenger + DeepSeek V3.2 (OpenRouter) Full Analyst run in parallel, Qwen3-235B-A22B (OpenRouter) Devil's Advocate pressure-tests the picks, and GPT-5.4 Risk Manager synthesizes the final portfolio. Challenger fallback chain: Nemotron → Gemini 2.5 Flash → GPT-5.4-nano.
 - **Full-universe candidate set**: agents see the current filtered universe instead of a tiny shortlist capped per market
 - **Rich signal snapshot**: momentum, Sharpe, RSI, beta, volume confirmation, MACD, ATR, dividend yield, regime data, and catalyst overlays
 - **Parallel enrichment layer**: news, earnings, insider buying, and Google Trends are fetched concurrently and injected into prompts
@@ -125,7 +127,7 @@ The bot runs daily in **PREGAME** mode — all decisions are recorded but don't 
 
 ```mermaid
 flowchart TD
-    GHA["⏰ GitHub Actions\n06:30 UTC Mon–Fri"]
+    GHA["⏰ GitHub Actions\n06:00 UTC Mon–Fri"]
 
     subgraph DATA["Data Layer"]
         FETCH["data/fetcher.py\n15 signals per stock\n~630 universe tickers"]
@@ -139,13 +141,13 @@ flowchart TD
 
     subgraph AGENTS["Agent Layer — run in parallel"]
         S["GPT-5.4\nStrategist\nmomentum + breakouts"]
-        G["Gemini 2.5 Flash\nChallenger\ncatalyst hunter\n(Groq fallback)"]
-        F["Qwen3-32B via OpenRouter\nFull Analyst\nall-signals view"]
+      G["NVIDIA Nemotron via OpenRouter\nChallenger\ncatalyst hunter\n(Gemini → GPT-5.4-nano fallback)"]
+      F["DeepSeek V3.2 via OpenRouter\nFull Analyst\nall-signals view\n(GPT-5.4-nano fallback)"]
     end
 
     subgraph SYNTHESIS["Synthesis Layer"]
         DEBATE["Cross-Agent Debate\nlightweight second pass\nagreements / disagreements"]
-        DEVIL["Qwen3-32B via OpenRouter\nDevil's Advocate\nbear cases for top picks"]
+        DEVIL["Qwen3-235B-A22B via OpenRouter\nDevil's Advocate\nbear cases for top picks"]
         RM["GPT-5.4 Risk Manager\nconviction sizing\nfinal portfolio"]
     end
 
@@ -194,7 +196,7 @@ flowchart LR
 - **Devil's-advocate check**: top combined picks are pressure-tested before final sizing so obvious dead-money or asymmetric-risk names can be cut or downweighted
   - **Devil accuracy feedback loop**: when Devil's accuracy at flagging true underperformers exceeds 60%, the Risk Manager applies a 10% hard cap on HIGH-flagged positions (tracked in `learning_state.json`)
   - **Devil repeat-offender pre-injection**: tickers flagged HIGH in ≥2 of the last 5 days get a ≤12% sizing warning shown to all agents regardless of overall accuracy threshold
-- **Overbought weight cap**: positions with RSI > 82 AND within 2% of 52w high are capped at 15% unless volume_ratio > 1.8 (exception for strong volume breakouts)
+- **Overbought weight cap**: positions with RSI > 79 AND within 2% of 52w high are capped at 15% unless vol_ratio > 1.8 (exception for confirmed volume breakouts). Threshold was lowered from 82 → 79 to catch RSI 79–82 exhaustion earlier.
 - **No sector cap**: sector concentration is intentionally allowed if one theme has the strongest momentum
 - **Cross-market awareness**: the agents are steered away from cloning a pure US mega-cap portfolio and are encouraged to use Nordic/Baltic names when signal quality justifies it
 - **High RSI is not an auto-reject**: strong RSI plus volume confirmation is treated as a breakout clue, not a blanket overbought filter (but see overbought weight cap rule above)
@@ -291,10 +293,9 @@ python main.py
 1. Push the repo to GitHub
 2. Go to **Settings → Secrets and variables → Actions**
 3. Add these repository secrets:
-   - `OPENAI_API_KEY` (required — Strategist + Risk Manager)
-   - `GEMINI_API_KEY` (required — Gemini Challenger)
-   - `GROQ_API_KEY` (optional — free-tier Gemini fallback)
-   - `OPENROUTER_API_KEY` (optional — Qwen3-32B for Devil + Full Analyst; falls back to GPT-5.4-nano if absent)
+   - `OPENAI_API_KEY` (required — Strategist + Risk Manager + all nano fallbacks)
+   - `GEMINI_API_KEY` (required — Gemini 2.5 Flash, challenger second fallback)
+   - `OPENROUTER_API_KEY` (required — NVIDIA Nemotron challenger, DeepSeek Full Analyst, Qwen3 Devil)
    - `EODHD_API_KEY` (required — Nordic/Baltic ticker fallback)
    - `DISCORD_WEBHOOK_URL` (required)
    - `DISCORD_USER_ID` (optional — enables @mentions in LIVE mode)
@@ -307,10 +308,9 @@ python main.py
 ### Required environment variables
 
 ```
-OPENAI_API_KEY=...         # GPT-5.4 Strategist + Risk Manager
-GEMINI_API_KEY=...         # Gemini 2.5 Flash Challenger (primary)
-GROQ_API_KEY=...           # Groq Llama 3.3 70B — automatic Gemini fallback (free tier)
-OPENROUTER_API_KEY=...     # Qwen3-32B via OpenRouter for Devil + Full Analyst (~85% cheaper than GPT-5.4-nano)
+OPENAI_API_KEY=...         # GPT-5.4 Strategist + Risk Manager + GPT-5.4-nano fallbacks
+GEMINI_API_KEY=...         # Gemini 2.5 Flash — Challenger second fallback
+OPENROUTER_API_KEY=...     # NVIDIA Nemotron (Challenger primary) + DeepSeek V3.2 (Full Analyst) + Qwen3-235B-A22B (Devil)
 EODHD_API_KEY=...          # EODHD fallback for Nordic/Baltic tickers yfinance can't fetch
 DISCORD_WEBHOOK_URL=...    # Discord channel webhook for daily posts
 DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mode
@@ -354,9 +354,9 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 ├── agents/
 │   ├── base_agent.py            # abstract base class (includes cross_check() debate hook)
 │   ├── openai_strategist.py     # GPT-5.4 — momentum-driven portfolio selection
-│   ├── gemini_challenger.py     # Gemini 2.5 Flash — catalyst-hunter; Groq Llama 3.3 70B fallback
-│   ├── openai_challenger.py     # Qwen3-32B via OpenRouter (or GPT-5.4-nano) — full analyst third proposal
-│   ├── openai_devil.py          # Qwen3-32B via OpenRouter (or GPT-5.4-nano) — bear-case stress test
+│   ├── gemini_challenger.py     # Catalyst-hunter; primary: NVIDIA Nemotron (OpenRouter free), fallback: Gemini 2.5 Flash → GPT-5.4-nano
+│   ├── openai_challenger.py     # DeepSeek V3.2 via OpenRouter (or GPT-5.4-nano) — full analyst third proposal
+│   ├── openai_devil.py          # Qwen3-235B-A22B via OpenRouter (or GPT-5.4-nano) — bear-case stress test
 │   └── openai_risk_manager.py   # GPT-5.4 — synthesises all proposals + debate + bear cases
 ├── portfolio/
 │   ├── models.py                # Position, PortfolioProposal dataclasses
@@ -410,7 +410,7 @@ Design decisions in this project are grounded in the following papers and open-s
 
 | Source | Stat / Finding | Applied to |
 |--------|---------------|------------|
-| Alpha Arena Season 1 (Oct–Nov 2025) | Qwen beat GPT-5 in live trading — architecture matters more than model | Justification for OpenRouter Qwen3-32B as secondary agent model |
+| Alpha Arena Season 1 (Oct–Nov 2025) | Qwen beat GPT-5 in live trading — architecture matters more than model | Justification for using a strong Qwen-family model as Devil's adversarial specialist |
 | Mercer 2024 (150 asset managers) | 91% using or planning AI in portfolio construction | Context for LLM-native portfolio approach |
 | AIMA 2024 | 95% of hedge funds use generative AI | Context |
 | arXiv 2511.13614 | 30% alpha decay after 6 months, worst at regime transitions | Basis for strategy decay monitoring |

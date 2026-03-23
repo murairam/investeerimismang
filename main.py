@@ -9,6 +9,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+if sys.version_info < (3, 10):
+    sys.exit(
+        "ERROR: AlphaShark requires Python 3.10+ (project venv is recommended). "
+        "Run with: '/Users/mari/Documents/my projects/investeerimismang/.venv/bin/python' main.py"
+    )
+
 # Fail fast with a clear error if required secrets are missing,
 # before any agent is initialised or API calls are made.
 _REQUIRED_ENV = ["OPENAI_API_KEY", "GEMINI_API_KEY", "DISCORD_WEBHOOK_URL"]

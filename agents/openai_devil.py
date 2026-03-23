@@ -260,12 +260,14 @@ class OpenAIDevil:
 
     def _call_openai(self, user_message: str) -> dict[str, dict]:
         openrouter_call = self._openrouter_enabled and self.model != self.MODEL
+        # Qwen3 runs in "thinking" mode by default — disable it to avoid long hangs
+        effective_user_message = ("/no_think\n\n" + user_message) if openrouter_call and "qwen3" in self.model.lower() else user_message
         call_kwargs: dict = dict(
             temperature=0.1,
             timeout=config.API_TIMEOUT_SECONDS,
             messages=[
                 {"role": "system", "content": _SYSTEM_PROMPT},
-                {"role": "user", "content": user_message},
+                {"role": "user", "content": effective_user_message},
             ],
         )
         if openrouter_call:

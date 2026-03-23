@@ -30,13 +30,14 @@ CASH_POLICY = {
     "strong_alpha_threshold": 0.03,       # deploy cash when selected names show strong alpha
 }
 
-OPENAI_FALLBACK_MODEL = "gpt-4o-mini"  # used if primary model unavailable
+OPENAI_FALLBACK_MODEL = "gpt-5.4-nano"  # used if primary model unavailable
 API_TIMEOUT_SECONDS = 45
 
 USE_OPENROUTER_FOR_SECONDARY_AGENTS = True  # set False to revert to OpenAI for all
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-OPENROUTER_DEVIL_MODEL = "qwen/qwen3-32b"
-OPENROUTER_ANALYST_MODEL = "qwen/qwen3-32b"
+OPENROUTER_DEVIL_MODEL = "qwen/qwen3-235b-a22b"
+OPENROUTER_ANALYST_MODEL = "deepseek/deepseek-v3.2"
+OPENROUTER_CHALLENGER_MODEL = "nvidia/nemotron-3-super-120b-a12b"  # paid model (was free nemotron-3-super-120b-a12)
 
 # Risk control thresholds
 OVERBOUGHT_RSI_THRESHOLD = 79   # was 82; lowered to catch RSI 79-82 exhaustion before full overbought

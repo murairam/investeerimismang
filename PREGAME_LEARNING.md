@@ -8,7 +8,7 @@ Days remaining: 14
 - Training days with measurable alpha: 7
 - Win days (alpha > 0): 4
 - Loss days (alpha < 0): 3
-- Average daily alpha: -0.07%
+- Average daily alpha: -0.01%
 - Paper account equity: €10,059.00 (from €10,000.00, return +0.59%)
 - Max drawdown (paper): 1.39%
 - Average turnover: 36.36%
@@ -20,7 +20,7 @@ Days remaining: 14
 
 ## Best and worst day
 - Best alpha day: 2026-03-21 (+0.74%)
-- Worst alpha day: 2026-03-23 (-1.31%)
+- Worst alpha day: 2026-03-19 (-0.89%)
 
 ## Structured learning state
 - Active hard rules: 3
@@ -30,8 +30,8 @@ Days remaining: 14
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| APA | winner | 8 | +1.79% | 75% |
-| XOM | winner | 5 | +0.72% | 100% |
+| APA | winner | 8 | +1.94% | 75% |
+| XOM | winner | 5 | +0.78% | 100% |
 | AKRBP.OL | loser | 6 | -4.14% | 0% |
 | EQNR.OL | loser | 6 | -0.93% | 0% |
 | NESTE.HE | loser | 6 | -0.74% | 0% |

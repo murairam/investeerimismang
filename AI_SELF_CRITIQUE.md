@@ -41,9 +41,9 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 8 | -1.23% |
-| Tier 2 (medium conviction) | 12-18% | 8 | -0.46% |
-| Tier 3 (low conviction) | 5-10% | 3 | -0.08% |
+| Tier 1 (high conviction) | 20-25% | 8 | -1.18% |
+| Tier 2 (medium conviction) | 12-18% | 8 | -0.59% |
+| Tier 3 (low conviction) | 5-10% | 3 | +0.04% |
 
 ## Structured Learning State
 - Active hard rules: 3

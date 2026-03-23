@@ -16,13 +16,13 @@
     {
       "ticker": "APA",
       "observations": 8,
-      "avg_return_1d": 0.017856,
+      "avg_return_1d": 0.019359,
       "hit_rate": 0.75
     },
     {
       "ticker": "XOM",
       "observations": 5,
-      "avg_return_1d": 0.007205,
+      "avg_return_1d": 0.007781,
       "hit_rate": 1.0
     }
   ],
@@ -93,7 +93,7 @@
     "avg_hold_vs_replace_1d": 0.023721,
     "positive_hold_vs_replace_rate": 1.0,
     "avg_slot_opportunity_cost_1d": -0.005737,
-    "avg_turnover_estimate": 0.323333,
+    "avg_turnover_estimate": 0.326667,
     "observations": 1,
     "status": "insufficient_data"
   },
@@ -152,9 +152,9 @@
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": -0.012307,
-    "tier2_avg_return_1d": -0.004598,
-    "tier3_avg_return_1d": -0.000823,
+    "tier1_avg_return_1d": -0.011757,
+    "tier2_avg_return_1d": -0.005945,
+    "tier3_avg_return_1d": 0.000444,
     "tier1_observations": 8,
     "tier2_observations": 8,
     "tier3_observations": 3
@@ -164,6 +164,10 @@
     "status": "insufficient_data",
     "observations": 0,
     "high_flagged_tickers_recent": [
+      {
+        "ticker": "DELL",
+        "flag_count": 2
+      },
       {
         "ticker": "LYB",
         "flag_count": 2
@@ -204,14 +208,14 @@
   },
   "yesterday_postmortem": {
     "date": "2026-03-22",
-    "portfolio_return_1d": 0.0014,
-    "benchmark_return_1d": 0.0145,
-    "alpha_1d": -0.0131,
+    "portfolio_return_1d": 0.0026,
+    "benchmark_return_1d": 0.0115,
+    "alpha_1d": -0.0089,
     "winners": [
       {
         "ticker": "AKAM",
-        "return_1d": 0.032,
-        "vs_benchmark": 0.0174,
+        "return_1d": 0.0358,
+        "vs_benchmark": 0.0243,
         "tags": [],
         "rationale_snippet": "verified from game portfolio 2026-03-22",
         "rsi_at_entry": null,
@@ -221,8 +225,8 @@
     "losers": [
       {
         "ticker": "LYB",
-        "return_1d": -0.0145,
-        "vs_benchmark": -0.029,
+        "return_1d": -0.0252,
+        "vs_benchmark": -0.0367,
         "tags": [],
         "rationale_snippet": "verified from game portfolio 2026-03-22",
         "rsi_at_entry": null,
@@ -230,8 +234,8 @@
       },
       {
         "ticker": "VLO",
-        "return_1d": -0.0087,
-        "vs_benchmark": -0.0232,
+        "return_1d": -0.0103,
+        "vs_benchmark": -0.0218,
         "tags": [],
         "rationale_snippet": "verified from game portfolio 2026-03-22",
         "rsi_at_entry": null,
@@ -239,8 +243,8 @@
       },
       {
         "ticker": "APA",
-        "return_1d": -0.0081,
-        "vs_benchmark": -0.0226,
+        "return_1d": -0.002,
+        "vs_benchmark": -0.0135,
         "tags": [],
         "rationale_snippet": "verified from game portfolio 2026-03-22",
         "rsi_at_entry": null,

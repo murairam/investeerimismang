@@ -6,7 +6,7 @@ Pipeline:
   2. Load previous portfolio from portfolio_history.json (if exists)
   3a. OpenAIStrategist (GPT-5.4)        ─┐ run IN PARALLEL (ThreadPoolExecutor 3 workers)
   3b. GeminiChallenger (Gemini 2.5 Flash)─┤ (Catalyst Hunter — FREE, independent)
-  3c. OpenAIFullAnalyst (gpt-5.4-nano)   ─┘ (All-signal analyst — independent)
+    3c. OpenAIFullAnalyst (DeepSeek V3.2 via OpenRouter, fallback gpt-5.4-nano) ─┘ (All-signal analyst — independent)
   3d. OpenAIDevil (gpt-5.4-nano): stress-tests top picks from all 3 proposals
   4. OpenAIRiskManager (GPT-5.4): synthesises all 3 proposals + bear cases
   5. PortfolioValidator.validate() → normalize if needed
@@ -305,7 +305,7 @@ class AlphaSharkOrchestrator:
         # Steps 3a + 3b + 3c: run all 3 analysts IN PARALLEL — fully independent
         logger.info(
             "Calling OpenAIStrategist (GPT-5.4) + GeminiChallenger (Gemini 2.5 Flash) "
-            "+ OpenAIFullAnalyst (Qwen3-32B via OpenRouter, fallback gpt-5.4-nano) in parallel …"
+            "+ OpenAIFullAnalyst (DeepSeek V3.2 via OpenRouter, fallback gpt-5.4-nano) in parallel …"
         )
         strategist_proposal = None
         challenger_proposal = None
@@ -663,11 +663,13 @@ class AlphaSharkOrchestrator:
             price_map=snapshot.get("price_map", {}),
         )
         if paper_metrics:
+            skip_label = " [already processed today]" if paper_metrics.get("skipped_duplicate") else ""
             logger.info(
-                "Paper account: equity €%.2f (%+.2f%% since start, %+.2f%% today)",
+                "Paper account: equity €%.2f (%+.2f%% since start, %+.2f%% today)%s",
                 paper_metrics["equity"],
                 paper_metrics["return_since_start"] * 100,
                 paper_metrics["daily_return"] * 100,
+                skip_label,
             )
 
         # Step 7: Append to daily log

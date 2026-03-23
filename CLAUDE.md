@@ -23,6 +23,8 @@ python scripts/pregame_review.py  # refresh pre-game learning summary
 Required env vars: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
 Optional: `OPENROUTER_API_KEY` (secondary-agent routing), `DISCORD_USER_ID`.
 
+Gemini fallback chain: OpenRouter `meta-llama/llama-4-maverick:free` first, then OpenAI `gpt-5.4-nano` as final fallback.
+
 No formal test suite — validate changes with `python main.py` and `python scripts/status.py`.
 
 ## Architecture
@@ -34,9 +36,9 @@ data/fetcher.py — 15 signals per stock + macro context (regime score 0-100, VI
     ↓ (parallel)
 agents/openai_strategist.py (GPT-5.4)          ─┐ Proposal A: momentum strategist
 agents/gemini_challenger.py (Gemini 2.5 Flash)  ─┤ Proposal B: catalyst hunter
-agents/openai_challenger.py (Qwen3-32B via OpenRouter, fallback GPT-5.4-nano) ─┘ Proposal C: full analyst (all signals)
+agents/openai_challenger.py (DeepSeek V3.2 via OpenRouter, fallback GPT-5.4-nano) ─┘ Proposal C: full analyst (all signals)
     ↓
-agents/openai_devil.py (Qwen3-32B via OpenRouter, fallback GPT-5.4-nano) — stress-tests top picks → bear cases
+agents/openai_devil.py (Qwen3-235B-A22B via OpenRouter, fallback GPT-5.4-nano) — stress-tests top picks → bear cases
     ↓
 agents/openai_risk_manager.py (GPT-5.4) — synthesises all 3 proposals + bear cases → PortfolioProposal
     ↓
@@ -97,7 +99,7 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 ## Risk Control Features (Added March 2026)
 
 ### Overbought Weight Cap
-- **When triggered:** RSI > 82 AND position within 2% of 52-week high
+- **When triggered:** RSI > 79 AND position within 2% of 52-week high
 - **Action:** Cap position weight at 15% — **code-enforced in `_enforce_selection_quality()` (Pass A)**
 - **Exception:** If volume_ratio > 1.8 (strong breakout volume), full 25% is allowed
 - **Rationale:** Prevents max-sizing obvious exhaustion patterns while allowing genuine volume breakouts
@@ -240,7 +242,7 @@ Auto-generated files (`PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`
 
 | Workflow | Schedule | Purpose |
 |----------|----------|---------|
-| `alphashark.yml` | Mon–Fri 06:30 UTC | Full pipeline, auto-commits portfolio + learning files |
+| `alphashark.yml` | Mon–Fri 06:00 UTC | Full pipeline, auto-commits portfolio + learning files |
 | `verification_reminder.yml` | Mon–Fri 07:00 UTC | Discord reminder if portfolio not verified (LIVE only) |
 | `evening_review.yml` | Post-market | Optional evening review |
 

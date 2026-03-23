@@ -1,5 +1,5 @@
 """
-GeminiChallenger — Catalyst Hunter (Gemini 2.5 Flash, free tier).
+GeminiChallenger — Catalyst Hunter (OpenRouter primary).
 
 Independent second opinion focused on explosive near-term catalysts:
 short squeeze setups, premarket gap-ups, IV spikes, vol_ratio breakouts.
@@ -7,8 +7,8 @@ Signal table shows CATALYST signals only (vol_ratio, RSI, short interest,
 premarket gap, IV, ATR%, dividend yield) — complementing the momentum-only
 Strategist for genuine signal divergence.
 
-Free tier: 250 req/day — zero cost to the project.
-Model: gemini-2.5-flash (best free model as of March 2026).
+Fallback chain: OpenRouter (NVIDIA Nemotron) -> Gemini -> OpenAI gpt-5.4-nano.
+Model: nvidia/nemotron-3-super-120b-a12 primary.
 SDK: google-genai (replaces deprecated google.generativeai).
 """
 import json
@@ -22,6 +22,7 @@ from google import genai
 from google.genai import types
 from openai import OpenAI
 
+import config
 from agents.base_agent import BaseAgent
 from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot, sanitize_ticker
@@ -29,7 +30,58 @@ from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
 
-_GROQ_MODEL = "llama-3.3-70b-versatile"
+
+_CHALLENGER_JSON_SCHEMA = {
+    "name": "challenger_portfolio",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "positions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "ticker": {"type": "string"},
+                        "weight": {"type": "number"},
+                        "rationale": {"type": "string"},
+                    },
+                    "required": ["ticker", "weight", "rationale"],
+                },
+            },
+            "reasoning": {"type": "string"},
+            "confidence": {"type": "number"},
+            "learning_reflection": {"type": "string"},
+        },
+        "required": ["positions", "reasoning", "confidence", "learning_reflection"],
+    },
+}
+
+
+def _extract_json(text: str) -> dict:
+    """Parse JSON from model output, tolerating prose prefix/suffix and truncation."""
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object found in model response")
+    candidate = text[start:]
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+    for end in range(len(candidate) - 1, 0, -1):
+        if candidate[end] == "}":
+            try:
+                return json.loads(candidate[: end + 1])
+            except json.JSONDecodeError:
+                continue
+    raise ValueError("Could not extract valid JSON from model response")
 
 _REGIME_GUIDANCE = {
     "BULL": "BULL regime — TARGET 5 catalyst plays for maximum conviction. Only add a 6th if genuinely high-conviction. Vol_ratio > 1.5 + RSI > 75 = ideal breakout. Size top picks at 20-25%. No filler — diversification loses competitions.",
@@ -92,8 +144,13 @@ class GeminiChallenger(BaseAgent):
 
     def __init__(self) -> None:
         self.client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-        groq_key = os.environ.get("GROQ_API_KEY", "")
-        self._groq = OpenAI(api_key=groq_key, base_url="https://api.groq.com/openai/v1") if groq_key else None
+        or_key = os.environ.get("OPENROUTER_API_KEY", "")
+        self._openrouter_fallback = OpenAI(
+            api_key=or_key,
+            base_url=config.OPENROUTER_BASE_URL,
+        ) if or_key else None
+        self._openrouter_fallback_available = self._openrouter_fallback is not None
+        self._openai = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     def propose(
         self,
@@ -104,6 +161,24 @@ class GeminiChallenger(BaseAgent):
         learning_context = snapshot.get("learning_context", "")
         user_message = self._build_user_message(snapshot, prior_proposal)
 
+        # Primary: OpenRouter challenger model
+        try:
+            proposal = self._call_openrouter_primary(user_message, regime, learning_context)
+            if proposal.positions:
+                logger.info(
+                    "GeminiChallenger produced %d positions (confidence %.0f%%)",
+                    len(proposal.positions),
+                    proposal.confidence * 100,
+                )
+                return proposal
+            logger.warning("OpenRouter challenger returned empty proposal — falling back to Gemini")
+        except (json.JSONDecodeError, KeyError, ValueError) as exc:
+            logger.warning("GeminiChallenger OpenRouter failed: %s", exc)
+        except Exception as exc:
+            logger.warning("GeminiChallenger OpenRouter API error: %s", exc)
+
+        # First fallback: Gemini
+        logger.info("OpenRouter challenger unavailable — falling back to Gemini (%s)", self.MODEL)
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
                 proposal = self._call_gemini(user_message, regime, learning_context)
@@ -114,21 +189,13 @@ class GeminiChallenger(BaseAgent):
                 )
                 return proposal
             except (json.JSONDecodeError, KeyError, ValueError) as exc:
-                logger.warning("GeminiChallenger attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
-                if attempt == self.MAX_RETRIES:
-                    if self._groq:
-                        logger.info("Gemini bad output — falling back to Groq (%s)", _GROQ_MODEL)
-                        return self._call_groq_fallback(user_message, regime, learning_context)
-                    logger.warning("GeminiChallenger exhausted retries — returning empty proposal")
-                    return PortfolioProposal()
+                logger.warning("GeminiChallenger Gemini fallback attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
             except Exception as exc:
-                logger.warning("GeminiChallenger attempt %d/%d API error: %s", attempt, self.MAX_RETRIES, exc)
-                if attempt == self.MAX_RETRIES:
-                    if self._groq:
-                        logger.info("Gemini unavailable — falling back to Groq (%s)", _GROQ_MODEL)
-                        return self._call_groq_fallback(user_message, regime, learning_context)
-                    logger.warning("GeminiChallenger exhausted retries — returning empty proposal")
-                    return PortfolioProposal()
+                logger.warning("GeminiChallenger Gemini fallback attempt %d/%d API error: %s", attempt, self.MAX_RETRIES, exc)
+
+        # Final fallback: OpenAI nano
+        logger.info("Gemini fallback unavailable — final fallback to OpenAI (%s)", config.OPENAI_FALLBACK_MODEL)
+        return self._call_openai_fallback(user_message, regime, learning_context)
 
         return PortfolioProposal()
 
@@ -311,13 +378,13 @@ class GeminiChallenger(BaseAgent):
 
         return score
 
-    def _call_groq_fallback(
+    def _call_openai_fallback(
         self,
         user_message: str,
         regime: str = "NEUTRAL",
         learning_context: str = "",
     ) -> PortfolioProposal:
-        """Groq (Llama 3.3 70B) fallback when Gemini is unavailable. Free tier, OpenAI-compatible API."""
+        """OpenAI fallback when Gemini is unavailable."""
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = (
             _SYSTEM_PROMPT_BASE
@@ -329,8 +396,8 @@ class GeminiChallenger(BaseAgent):
 
         for attempt in range(1, 3):
             try:
-                response = self._groq.chat.completions.create(
-                    model=_GROQ_MODEL,
+                response = self._openai.chat.completions.create(
+                    model=config.OPENAI_FALLBACK_MODEL,
                     response_format={"type": "json_object"},
                     temperature=0.4,
                     messages=[
@@ -340,13 +407,13 @@ class GeminiChallenger(BaseAgent):
                 )
                 usage = response.usage
                 cost = log_usage(
-                    agent_name="GroqChallenger",
-                    model=_GROQ_MODEL,
+                    agent_name="GeminiChallenger-OAIFallback",
+                    model=config.OPENAI_FALLBACK_MODEL,
                     input_tokens=usage.prompt_tokens,
                     output_tokens=usage.completion_tokens,
                 )
                 logger.info(
-                    "Groq fallback tokens — in: %d, out: %d (cost: $%.5f)",
+                    "OpenAI fallback tokens — in: %d, out: %d (cost: $%.5f)",
                     usage.prompt_tokens, usage.completion_tokens, cost,
                 )
                 data = json.loads(response.choices[0].message.content)
@@ -358,7 +425,7 @@ class GeminiChallenger(BaseAgent):
                     Position(ticker=p["ticker"], weight=float(p["weight"]), rationale=p.get("rationale", ""))
                     for p in raw_positions
                 ]
-                logger.info("Groq fallback produced %d positions", len(positions))
+                logger.info("OpenAI fallback produced %d positions", len(positions))
                 return PortfolioProposal(
                     positions=positions,
                     reasoning=data.get("reasoning", ""),
@@ -366,10 +433,139 @@ class GeminiChallenger(BaseAgent):
                     learning_reflection=data.get("learning_reflection", ""),
                 )
             except Exception as exc:
-                logger.warning("Groq fallback attempt %d/2 failed: %s", attempt, exc)
+                logger.warning("OpenAI fallback attempt %d/2 failed: %s", attempt, exc)
 
-        logger.warning("Groq fallback also failed — returning empty proposal")
+        logger.warning("OpenAI fallback also failed — returning empty proposal")
         return PortfolioProposal()
+
+    def _call_openrouter_primary(
+        self,
+        user_message: str,
+        regime: str = "NEUTRAL",
+        learning_context: str = "",
+    ) -> PortfolioProposal:
+        """OpenRouter primary challenger model (NVIDIA Nemotron)."""
+        if self._openrouter_fallback is None or not self._openrouter_fallback_available:
+            logger.warning("OpenRouter challenger unavailable (missing OPENROUTER_API_KEY)")
+            return PortfolioProposal()
+
+        regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
+        system_prompt = (
+            _SYSTEM_PROMPT_BASE
+            .replace("TODAY_DATE", date.today().isoformat())
+            .replace("REGIME_GUIDANCE", regime_guidance)
+        )
+        if learning_context:
+            system_prompt += f"\n\nLive learning — MANDATORY overrides from past runs:\n{learning_context}"
+
+        effective_user_message = (
+            "/no_think\n\n"
+            "Return valid JSON only. No markdown, no commentary, no code fences.\n\n"
+            + user_message
+        )
+
+        for attempt in range(1, 3):
+            try:
+                response = self._openrouter_fallback.chat.completions.create(
+                    model=config.OPENROUTER_CHALLENGER_MODEL,
+                    temperature=0.4,
+                    timeout=config.API_TIMEOUT_SECONDS,
+                    max_tokens=900,
+                    provider={"require_parameters": True},
+                    response_format={
+                        "type": "json_schema",
+                        "json_schema": _CHALLENGER_JSON_SCHEMA,
+                    },
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": effective_user_message},
+                    ],
+                )
+                usage = response.usage
+                prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
+                completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
+                cost = log_usage(
+                    agent_name="GeminiChallenger-ORPrimary",
+                    model=config.OPENROUTER_CHALLENGER_MODEL,
+                    input_tokens=prompt_tokens,
+                    output_tokens=completion_tokens,
+                )
+                logger.info(
+                    "OpenRouter challenger tokens — in: %d, out: %d (cost: $%.5f)",
+                    prompt_tokens,
+                    completion_tokens,
+                    cost,
+                )
+
+                raw_text = response.choices[0].message.content or ""
+                try:
+                    data = _extract_json(raw_text)
+                except ValueError:
+                    logger.warning("OpenRouter challenger returned non-JSON output — attempting JSON repair pass")
+                    data = self._repair_openrouter_json(raw_text)
+                    if data is None:
+                        raise
+                raw_positions = data.get("positions", [])
+                if any(float(p["weight"]) > 1.0 for p in raw_positions):
+                    for p in raw_positions:
+                        p["weight"] = float(p["weight"]) / 100.0
+                positions = [
+                    Position(ticker=p["ticker"], weight=float(p["weight"]), rationale=p.get("rationale", ""))
+                    for p in raw_positions
+                ]
+                logger.info("OpenRouter challenger produced %d positions", len(positions))
+                return PortfolioProposal(
+                    positions=positions,
+                    reasoning=data.get("reasoning", ""),
+                    confidence=float(data.get("confidence", 0.5)),
+                    learning_reflection=data.get("learning_reflection", ""),
+                )
+            except Exception as exc:
+                logger.warning("OpenRouter challenger attempt %d/2 failed: %s", attempt, exc)
+                msg = str(exc)
+                if "No endpoints found" in msg or "404" in msg:
+                    logger.warning(
+                        "OpenRouter model '%s' unavailable for this account/run — disabling OpenRouter fallback until restart",
+                        config.OPENROUTER_CHALLENGER_MODEL,
+                    )
+                    self._openrouter_fallback_available = False
+                    break
+
+        logger.warning("OpenRouter challenger failed — returning empty proposal")
+        return PortfolioProposal()
+
+    def _repair_openrouter_json(self, raw_text: str) -> Optional[dict]:
+        """Best-effort conversion of non-JSON OpenRouter output into required schema."""
+        if not raw_text.strip():
+            return None
+        try:
+            repair_response = self._openrouter_fallback.chat.completions.create(
+                model=config.OPENROUTER_CHALLENGER_MODEL,
+                temperature=0.0,
+                timeout=config.API_TIMEOUT_SECONDS,
+                max_tokens=700,
+                provider={"require_parameters": True},
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": _CHALLENGER_JSON_SCHEMA,
+                },
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "Convert the provided text to valid JSON with this exact schema keys: "
+                            "positions (array of {ticker, weight, rationale}), reasoning, confidence, learning_reflection. "
+                            "Return JSON only."
+                        ),
+                    },
+                    {"role": "user", "content": raw_text[:12000]},
+                ],
+            )
+            repaired = repair_response.choices[0].message.content or ""
+            return _extract_json(repaired)
+        except Exception as exc:
+            logger.warning("OpenRouter challenger JSON repair failed: %s", exc)
+            return None
 
     def _call_gemini(
         self,
@@ -434,7 +630,7 @@ class GeminiChallenger(BaseAgent):
         own_proposal: PortfolioProposal,
         peer_proposals: list[PortfolioProposal],
     ) -> dict:
-        """Lightweight second-pass debate using Gemini (or Groq fallback)."""
+        """Lightweight second-pass debate using OpenRouter, then Gemini, then OpenAI fallback."""
         own_str = ", ".join(f"{sanitize_ticker(p.ticker)} {p.weight:.0%}" for p in own_proposal.positions)
         peer_lines = []
         for i, peer in enumerate(peer_proposals, 1):
@@ -451,6 +647,29 @@ class GeminiChallenger(BaseAgent):
             'Return JSON only: {"agrees": ["TICKER1", ...], "disagrees": [{"ticker": "X", "reason": "..."}]}'
         )
         try:
+            if self._openrouter_fallback is not None and self._openrouter_fallback_available:
+                resp = self._openrouter_fallback.chat.completions.create(
+                    model=config.OPENROUTER_CHALLENGER_MODEL,
+                    temperature=0.0,
+                    max_tokens=1200,
+                    messages=[
+                        {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
+                        {"role": "user", "content": prompt},
+                    ],
+                )
+                raw_text = resp.choices[0].message.content or ""
+                return _extract_json(raw_text)
+        except Exception as exc:
+            logger.warning("OpenRouter Challenger cross_check failed (non-fatal): %s", exc)
+            msg = str(exc)
+            if "No endpoints found" in msg or "404" in msg:
+                logger.warning(
+                    "OpenRouter cross_check model '%s' unavailable — disabling OpenRouter challenger until restart",
+                    config.OPENROUTER_CHALLENGER_MODEL,
+                )
+                self._openrouter_fallback_available = False
+
+        try:
             response = self.client.models.generate_content(
                 model=self.MODEL,
                 contents=prompt,
@@ -466,21 +685,20 @@ class GeminiChallenger(BaseAgent):
                 if raw.startswith("json"):
                     raw = raw[4:]
             return json.loads(raw)
-        except Exception as exc:
-            logger.warning("GeminiChallenger cross_check failed (non-fatal): %s", exc)
-            # Try Groq fallback if available
-            if self._groq:
-                try:
-                    resp = self._groq.chat.completions.create(
-                        model=_GROQ_MODEL,
-                        response_format={"type": "json_object"},
-                        temperature=0.0,
-                        messages=[
-                            {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
-                            {"role": "user", "content": prompt},
-                        ],
-                    )
-                    return json.loads(resp.choices[0].message.content)
-                except Exception as exc2:
-                    logger.warning("Groq cross_check fallback also failed: %s", exc2)
-            return {}
+        except Exception as exc2:
+            logger.warning("GeminiChallenger cross_check fallback failed (non-fatal): %s", exc2)
+
+        try:
+            resp = self._openai.chat.completions.create(
+                model=config.OPENAI_FALLBACK_MODEL,
+                response_format={"type": "json_object"},
+                temperature=0.0,
+                messages=[
+                    {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            return json.loads(resp.choices[0].message.content)
+        except Exception as exc3:
+            logger.warning("OpenAI cross_check fallback also failed: %s", exc3)
+        return {}
