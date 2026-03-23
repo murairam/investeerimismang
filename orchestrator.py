@@ -111,7 +111,7 @@ class AlphaSharkOrchestrator:
             snapshot["game_return_pct"] = 0.0
 
         # Step 1b: inject learning context (what worked / didn't in past runs)
-        learning_context = get_learning_context()
+        learning_context = get_learning_context(current_regime=snapshot.get("regime", "NEUTRAL"))
         snapshot["learning_context"] = learning_context
         learning_state = load_learning_state()
         if learning_context:
@@ -127,7 +127,8 @@ class AlphaSharkOrchestrator:
             logger.info("No learning context yet (first run or files missing)")
 
         # Signal importance: log which signals are most predictive this run (Change 1)
-        _sig_imp = learning_state.get("signal_importance", {})
+        _sig_imp_raw = learning_state.get("signal_importance", {})
+        _sig_imp = _sig_imp_raw.get("global", _sig_imp_raw) if isinstance(_sig_imp_raw, dict) else {}
         if _sig_imp:
             top_signals = sorted(_sig_imp.items(), key=lambda x: -x[1])
             logger.info(
@@ -614,6 +615,7 @@ class AlphaSharkOrchestrator:
             "strategist_proposal": strategist_proposal,
             "challenger_proposal": challenger_proposal if (challenger_proposal and challenger_proposal.positions) else None,
             "full_analyst_proposal": full_analyst_proposal if (full_analyst_proposal and full_analyst_proposal.positions) else None,
+            "regime": snapshot.get("regime", "NEUTRAL"),
             "prior_portfolio": prior_portfolio,
             "bear_cases": bear_cases,
             "validation": {

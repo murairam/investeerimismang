@@ -1,5 +1,5 @@
 {
-  "generated_from_days": 6,
+  "generated_from_days": 7,
   "position_observations": 15,
   "minimums": {
     "strong_daily_observations": 5,
@@ -72,7 +72,7 @@
     "avg_hold_vs_replace_1d": 0.023721,
     "positive_hold_vs_replace_rate": 1.0,
     "avg_slot_opportunity_cost_1d": -0.005737,
-    "avg_turnover_estimate": 0.25,
+    "avg_turnover_estimate": 0.343333,
     "observations": 1,
     "status": "insufficient_data"
   },
@@ -145,15 +145,108 @@
     ]
   },
   "signal_importance": {
-    "momentum": 0.2222,
-    "mom_5d": 0.2222,
-    "sharpe_20d": 0.2222,
-    "rsi_14": 0.2222,
-    "vs_index": 0.2222,
-    "vol_ratio": 0.2222,
-    "beta": 0.4444
+    "global": {
+      "momentum": 0.2222,
+      "mom_5d": 0.2222,
+      "sharpe_20d": 0.2222,
+      "rsi_14": 0.2222,
+      "vs_index": 0.2222,
+      "vol_ratio": 0.2222,
+      "beta": 0.4444
+    },
+    "per_regime": {}
   },
   "confidence_calibration": {
     "status": "insufficient_data"
+  },
+  "competition_standing": {
+    "status": "no_data"
+  },
+  "agent_accuracy": {
+    "strategist": {
+      "status": "insufficient_data",
+      "observations": 0
+    },
+    "challenger": {
+      "status": "insufficient_data",
+      "observations": 0
+    },
+    "full_analyst": {
+      "status": "insufficient_data",
+      "observations": 0
+    }
+  },
+  "yesterday_postmortem": {
+    "date": "2026-03-21",
+    "portfolio_return_1d": -0.0111,
+    "benchmark_return_1d": -0.0151,
+    "alpha_1d": 0.004,
+    "winners": [
+      {
+        "ticker": "APA",
+        "return_1d": 0.0276,
+        "vs_benchmark": 0.0427,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "breakout",
+          "consensus",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Triple-consensus leader with the strongest 5d acceleration (+13.5%) and strong volume confirmation (",
+        "rsi_at_entry": 84.868417,
+        "vol_ratio_at_entry": 2.73085
+      }
+    ],
+    "losers": [
+      {
+        "ticker": "AKRBP.OL",
+        "return_1d": -0.0414,
+        "vs_benchmark": -0.0263,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "non_us_differentiator"
+        ],
+        "rationale_snippet": "Triple-consensus energy leader with the best volume confirmation in the core group (vol_ratio 3.41) ",
+        "rsi_at_entry": 74.04514,
+        "vol_ratio_at_entry": 3.407257
+      },
+      {
+        "ticker": "EQNR.OL",
+        "return_1d": -0.0093,
+        "vs_benchmark": 0.0059,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "non_us_differentiator",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Double-consensus pick with the strongest 5d move in the set (+16.5%) and low crowding, but sized sli",
+        "rsi_at_entry": 82.319262,
+        "vol_ratio_at_entry": 1.47759
+      },
+      {
+        "ticker": "NESTE.HE",
+        "return_1d": -0.0074,
+        "vs_benchmark": 0.0077,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "non_us_differentiator",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Double-consensus Nordic energy name with solid momentum (+8.4%), acceptable volume confirmation (1.2",
+        "rsi_at_entry": 83.268106,
+        "vol_ratio_at_entry": 1.286763
+      }
+    ],
+    "lesson": "'momentum' entries underperformed \u2014 review sizing for this thesis today; 'high_sharpe' entries underperformed \u2014 review sizing for this thesis today"
   }
 }

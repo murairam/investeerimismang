@@ -9,6 +9,7 @@ import json
 import logging
 import math
 import os
+import re
 from typing import Optional
 
 from openai import APIConnectionError, APITimeoutError, BadRequestError, OpenAI
@@ -19,6 +20,31 @@ from data.fetcher import MarketSnapshot, sanitize_ticker
 from portfolio.models import PortfolioProposal
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_json(text: str) -> dict:
+    """Parse JSON from model output, tolerating prose prefix/suffix and truncation."""
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object found in model response")
+    candidate = text[start:]
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+    for end in range(len(candidate) - 1, 0, -1):
+        if candidate[end] == "}":
+            try:
+                return json.loads(candidate[: end + 1])
+            except json.JSONDecodeError:
+                continue
+    raise ValueError("Could not extract valid JSON from model response")
+
 
 _SYSTEM_PROMPT = """You are a BEAR-CASE analyst and dead-money detector. Your ONLY job is to find reasons why each stock pick might FAIL or UNDERPERFORM.
 
@@ -41,6 +67,7 @@ Never write contradictory text like "vol_ratio 2.1 is low". If a metric is not b
   A stock CANNOT be "above its 52-week high" by this metric. Do NOT write that.
 - RSI > 75 alone is not a HIGH risk — it signals momentum. Only flag RSI if combined with vol_ratio < 0.8 (move not confirmed) or mom_5d turning negative.
 - mom_5d: positive = accelerating, negative = losing steam. Use it.
+- If vol_ratio is N/A or unavailable, do NOT claim low/weak volume and do NOT use volume-confirmation arguments. In that case, base risk on RSI, momentum, beta, and distance from 52-week high.
 
 Examples of good bear cases:
 - "RSI 78 but vol_ratio 0.6 — breakout not confirmed by volume; likely fading."
@@ -111,6 +138,7 @@ class OpenAIDevil:
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
                 result = self._call_openai(user_message)
+                result = self._postprocess_bear_cases(result, snapshot)
                 logger.info(
                     "Devil's advocate challenged %d picks: %d HIGH, %d MEDIUM, %d LOW risk",
                     len(result),
@@ -124,6 +152,81 @@ class OpenAIDevil:
 
         logger.info("Devil's advocate unavailable — Risk Manager will proceed without bear cases")
         return {}
+
+    @staticmethod
+    def _ensure_sentence(text: str) -> str:
+        cleaned = re.sub(r"\s+", " ", (text or "").strip())
+        cleaned = re.sub(r"\s+([.,;:!?])", r"\1", cleaned)
+        cleaned = re.sub(r"([.,;:!?]){2,}", r"\1", cleaned)
+        if not cleaned:
+            return "Risk based on momentum and beta; volume data unavailable."
+        if cleaned[-1] not in ".!?":
+            cleaned += "."
+        return cleaned
+
+    def _postprocess_bear_cases(self, bears: dict[str, dict], snapshot: MarketSnapshot) -> dict[str, dict]:
+        """Normalize awkward volume wording when vol_ratio is missing (N/A)."""
+        signal_map = {c["ticker"]: c for c in snapshot.get("candidates", [])}
+        out: dict[str, dict] = {}
+
+        for ticker, item in bears.items():
+            bear_case = item.get("bear_case", "")
+            risk = item.get("risk", "MEDIUM").upper()
+
+            signal = signal_map.get(ticker, {})
+            vol_ratio = signal.get("vol_ratio", float("nan"))
+            vol_missing = vol_ratio is None or (isinstance(vol_ratio, float) and math.isnan(vol_ratio))
+
+            if vol_missing and bear_case:
+                text = bear_case
+                text = re.sub(r"vol[_ ]?ratio\s*(?:is|=)?\s*n/?a", "volume data unavailable", text, flags=re.IGNORECASE)
+                text = re.sub(r"\(\s*volume data unavailable\s*\)", "", text, flags=re.IGNORECASE)
+                text = re.sub(
+                    r"\b(?:with|and|but)\s+(?:no|weak|low|strong)\s+volume(?:\s+(?:confirmation|support|signal))?\b",
+                    "",
+                    text,
+                    flags=re.IGNORECASE,
+                )
+                text = re.sub(r"\b(?:no|without)\s+volume\s+(?:confirmation|support|signal)\b", "", text, flags=re.IGNORECASE)
+                text = re.sub(r"\blacks?\s+volume\s+(?:confirmation|support|signal)\b", "", text, flags=re.IGNORECASE)
+                text = re.sub(r"\bvolume data unavailable\b", "", text, flags=re.IGNORECASE)
+                text = re.sub(r"\s*[,;:]\s*", ", ", text)
+                text = re.sub(r"\s{2,}", " ", text).strip(" ,")
+
+                sentences = re.split(r"(?<=[.!?])\s+", text)
+                filtered = []
+                for sentence in sentences:
+                    s = sentence.strip()
+                    if not s:
+                        continue
+                    lowered = s.lower()
+                    if any(
+                        phrase in lowered
+                        for phrase in (
+                            "no volume confirmation",
+                            "weak volume",
+                            "low volume",
+                            "volume data unavailable",
+                            "volume confirmation",
+                            "volume support",
+                            "volume signal",
+                            "without volume support",
+                        )
+                    ):
+                        continue
+                    filtered.append(s)
+
+                text = " ".join(filtered)
+                if not text:
+                    text = "Volume data unavailable; assess downside via momentum, RSI, beta, and 52-week-high distance."
+                bear_case = text
+
+            out[ticker] = {
+                "bear_case": self._ensure_sentence(bear_case),
+                "risk": risk,
+            }
+
+        return out
 
     def _build_message(self, tickers: list[str], snapshot: MarketSnapshot) -> str:
         signal_map = {c["ticker"]: c for c in snapshot["candidates"]}
@@ -156,33 +259,34 @@ class OpenAIDevil:
         return "\n".join(lines)
 
     def _call_openai(self, user_message: str) -> dict[str, dict]:
+        openrouter_call = self._openrouter_enabled and self.model != self.MODEL
+        call_kwargs: dict = dict(
+            temperature=0.1,
+            timeout=config.API_TIMEOUT_SECONDS,
+            messages=[
+                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "user", "content": user_message},
+            ],
+        )
+        if openrouter_call:
+            call_kwargs["max_tokens"] = 1000
+        else:
+            call_kwargs["response_format"] = {"type": "json_object"}
+
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                response_format={"type": "json_object"},
-                temperature=0.1,
-                timeout=config.API_TIMEOUT_SECONDS,
-                messages=[
-                    {"role": "system", "content": _SYSTEM_PROMPT},
-                    {"role": "user", "content": user_message},
-                ],
-            )
+            response = self.client.chat.completions.create(model=self.model, **call_kwargs)
         except (BadRequestError, APIConnectionError, APITimeoutError) as exc:
             if self._openrouter_enabled and self.model != self.MODEL:
                 logger.warning("OpenRouter Devil request failed (%s). Falling back to OpenAI.", exc)
                 self._switch_to_openai_fallback()
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    response_format={"type": "json_object"},
-                    temperature=0.1,
-                    timeout=config.API_TIMEOUT_SECONDS,
-                    messages=[
-                        {"role": "system", "content": _SYSTEM_PROMPT},
-                        {"role": "user", "content": user_message},
-                    ],
-                )
+                call_kwargs.pop("max_tokens", None)
+                call_kwargs["response_format"] = {"type": "json_object"}
+                response = self.client.chat.completions.create(model=self.model, **call_kwargs)
             else:
                 raise
+
+        if (response.choices[0].finish_reason or "").lower() == "length":
+            logger.warning("Devil response truncated (finish_reason=length) — attempting partial JSON parse")
 
         usage = response.usage
         cost = log_usage(
@@ -198,7 +302,8 @@ class OpenAIDevil:
             cost,
         )
 
-        data = json.loads(response.choices[0].message.content)
+        raw_content = response.choices[0].message.content or ""
+        data = _extract_json(raw_content)
         bears = data.get("bears", data) if isinstance(data, dict) else data
         return {
             item["ticker"]: {

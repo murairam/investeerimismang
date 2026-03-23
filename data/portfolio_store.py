@@ -138,22 +138,34 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
     signal = signal or {}
     tags: list[str] = []
 
+    def as_number(value: object) -> Optional[float]:
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            numeric = float(value)
+            return None if math.isnan(numeric) else numeric
+        return None
+
     def add(tag: str, cond: bool) -> None:
         if cond and tag not in tags:
             tags.append(tag)
 
-    add("momentum", "momentum" in text or signal.get("momentum", 0.0) > 0)
-    add("high_sharpe", "sharpe" in text or signal.get("sharpe_20d", 0.0) >= 0.35)
-    _pct_high_breakout = signal.get("pct_from_52w_high")
+    _momentum = as_number(signal.get("momentum"))
+    _sharpe = as_number(signal.get("sharpe_20d"))
+    _vol_ratio = as_number(signal.get("vol_ratio"))
+    _rsi = as_number(signal.get("rsi_14"))
+    _pct_high_breakout = as_number(signal.get("pct_from_52w_high"))
+
+    add("momentum", "momentum" in text or (_momentum is not None and _momentum > 0))
+    add("high_sharpe", "sharpe" in text or (_sharpe is not None and _sharpe >= 0.35))
     _at_breakout = (
         _pct_high_breakout is not None
-        and not math.isnan(_pct_high_breakout)
         and _pct_high_breakout >= -0.03
     )
     add(
         "breakout",
         any(token in text for token in ("breakout", "52-week", "52 week", "parabolic"))
-        or (signal.get("vol_ratio", 0.0) >= 1.5 and _at_breakout),
+        or (_vol_ratio is not None and _vol_ratio >= 1.5 and _at_breakout),
     )
     add("consensus", "consensus" in text)
     _si = signal.get("short_interest")
@@ -172,12 +184,11 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
     add(
         "overbought",
         any(token in text for token in ("overbought", "rsi", "extended"))
-        or signal.get("rsi_14", 0.0) > 80,
+        or (_rsi is not None and _rsi > 80),
     )
-    _pct_high_at = signal.get("pct_from_52w_high")
+    _pct_high_at = as_number(signal.get("pct_from_52w_high"))
     _at_52w = (
         _pct_high_at is not None
-        and not math.isnan(_pct_high_at)
         and _pct_high_at >= -0.02
     )
     add(
@@ -240,6 +251,49 @@ def load_yesterday_prices() -> dict:
     """Return saved close_prices from the last portfolio save, or empty dict."""
     data = _safe_read()
     return data.get("close_prices", {})
+
+
+def save_competition_standing(rank: int, total: int, date: str) -> None:
+    """Patch today's history record with competition rank and total participants."""
+    existing = _safe_read()
+    history = _ensure_history(existing)
+
+    standing = {
+        "rank": rank,
+        "total": total,
+        "percentile_from_top": round((rank - 1) / total * 100, 1) if total > 0 else None,
+        "date": date,
+    }
+
+    if history and history[-1].get("date") == date:
+        history[-1]["competition_standing"] = standing
+    elif history:
+        history[-1]["competition_standing"] = standing
+
+    existing["competition_standing"] = standing
+    existing["history"] = history
+    _safe_write(existing)
+    logger.info("Competition standing saved: rank %d/%d for %s", rank, total, date)
+
+
+def load_competition_standing_history(max_days: int = 10) -> list[dict]:
+    """Return the last N days of competition standings recorded in history."""
+    data = _safe_read()
+    history = _ensure_history(data)
+    standings = []
+    for record in history[-max_days:]:
+        cs = record.get("competition_standing")
+        if cs and cs.get("rank") and cs.get("total"):
+            standings.append(cs)
+    return standings
+
+
+def load_last_known_participant_count() -> Optional[int]:
+    """Return the most recently recorded total participant count, or None."""
+    standings = load_competition_standing_history(max_days=30)
+    if standings:
+        return standings[-1].get("total")
+    return None
 
 
 def save_verified(
@@ -474,6 +528,29 @@ def _attach_outcomes_to_prior_record(
     }
     prior_record["decision_evaluation"] = evaluation
 
+    # Per-agent virtual returns: what would each proposal have returned?
+    agent_returns: dict[str, Optional[float]] = {}
+    for agent_key, label in [
+        ("strategist_proposal", "strategist"),
+        ("challenger_proposal", "challenger"),
+        ("full_analyst_proposal", "full_analyst"),
+    ]:
+        proposal = prior_record.get(agent_key) or {}
+        positions = proposal.get("positions", [])
+        if not positions:
+            agent_returns[label] = None
+            continue
+        covered = [
+            (float(p.get("weight", 0.0)), float(returns_lookup[p["ticker"]]))
+            for p in positions
+            if p.get("ticker") in returns_lookup
+        ]
+        if len(covered) < 2:
+            agent_returns[label] = None
+            continue
+        agent_returns[label] = round(sum(w * r for w, r in covered), 6)
+    prior_record["agent_returns_1d"] = agent_returns
+
 
 def save(
     proposal: PortfolioProposal,
@@ -541,6 +618,9 @@ def save(
         if (decision_context or {}).get("strategist_proposal") else None,
         "challenger_proposal": _portfolio_to_dict((decision_context or {}).get("challenger_proposal"), signal_snapshot)
         if (decision_context or {}).get("challenger_proposal") else None,
+        "full_analyst_proposal": _portfolio_to_dict((decision_context or {}).get("full_analyst_proposal"), signal_snapshot)
+        if (decision_context or {}).get("full_analyst_proposal") else None,
+        "regime": (decision_context or {}).get("regime"),
         "bear_cases": deepcopy((decision_context or {}).get("bear_cases", {})),
         "validation": deepcopy((decision_context or {}).get("validation", {})),
         "signal_snapshot": signal_snapshot,

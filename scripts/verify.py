@@ -5,9 +5,10 @@ Run this after updating your game portfolio to confirm the system's
 record matches what you actually hold in the Äripäev/SEB game.
 
 Usage:
-    python verify.py                                      — show + confirm interactively
-    python verify.py --show                               — print only, no prompts
-    python verify.py --input "EQNR.OL 25, APA 20" --equity 9978   — one-liner confirm
+    python verify.py                                                         — show + confirm interactively
+    python verify.py --show                                                  — print only, no prompts
+    python verify.py --input "EQNR.OL 25, APA 20" --equity 9978            — one-liner confirm
+    python verify.py --input "EQNR.OL 25, APA 20" --equity 9978 --rank 42 --total 920  — with competition standing
 """
 import json
 import os
@@ -75,7 +76,7 @@ def _resolve_ticker(raw: str) -> Optional[str]:
 
     return None
 
-from data.portfolio_store import save_verified
+from data.portfolio_store import save_verified, save_competition_standing, load_last_known_participant_count
 from data.verification_tracker import mark_verified
 from data.paper_account import sync_verified_positions
 from data.diary import mark_verified_entry
@@ -165,7 +166,12 @@ def _parse_equity_arg() -> Optional[float]:
     return None
 
 
-def _input_from_string(raw: str, equity: Optional[float]) -> None:
+def _input_from_string(
+    raw: str,
+    equity: Optional[float],
+    rank: Optional[int] = None,
+    total: Optional[int] = None,
+) -> None:
     """Parse 'TICKER WEIGHT, TICKER WEIGHT, …' and save directly."""
     positions = []
     for entry in raw.split(","):
@@ -192,8 +198,8 @@ def _input_from_string(raw: str, equity: Optional[float]) -> None:
 
     _apply_learning_caps(positions)
 
-    total = sum(p["weight"] for p in positions)
-    print(f"\n  {len(positions)} positions, total {total:.1%}")
+    total_weight = sum(p["weight"] for p in positions)
+    print(f"\n  {len(positions)} positions, total {total_weight:.1%}")
 
     if equity is None:
         equity = _ask_equity()
@@ -210,6 +216,13 @@ def _input_from_string(raw: str, equity: Optional[float]) -> None:
 
     mark_verified(today)
     mark_verified_entry(today, mode=_mode_for_date(today))
+
+    if rank is None or total is None:
+        rank, total = _ask_competition_standing()
+    if rank is not None and total is not None:
+        save_competition_standing(rank, total, today)
+        print(f"  Competition standing saved: rank {rank}/{total}.")
+
     print("  ✅ Saved.\n")
 
 
@@ -219,7 +232,9 @@ def main() -> None:
 
     if input_str is not None:
         equity = _parse_equity_arg()
-        _input_from_string(input_str, equity)
+        rank = _parse_rank_arg()
+        total = _parse_total_arg()
+        _input_from_string(input_str, equity, rank=rank, total=total)
         return
 
     data = load()
@@ -251,6 +266,12 @@ def main() -> None:
 
         mark_verified(today)
         mark_verified_entry(today, mode=_mode_for_date(today))
+
+        rank, total = _ask_competition_standing()
+        if rank is not None and total is not None:
+            save_competition_standing(rank, total, today)
+            print(f"  Competition standing saved: rank {rank}/{total}.")
+
         print("\n  ✅ Portfolio confirmed. Record is up to date.\n")
 
     elif answer == "n":
@@ -275,6 +296,55 @@ def _ask_equity() -> float:
     except ValueError:
         print("  Could not parse — using 10000 as fallback.")
         return 10000.0
+
+
+def _ask_competition_standing() -> tuple[Optional[int], Optional[int]]:
+    """Ask for current rank and total participants. Returns (rank, total) or (None, None)."""
+    last_total = load_last_known_participant_count()
+    total_hint = f" (last known: {last_total})" if last_total else ""
+    print(f"  What is your current competition rank? (press Enter to skip)")
+    rank_raw = input("  > ").strip()
+    if not rank_raw:
+        return None, None
+    try:
+        rank = int(rank_raw)
+    except ValueError:
+        print("  Could not parse rank — skipping competition standing.")
+        return None, None
+    print(f"  Total participants today?{total_hint} (press Enter to use last known)")
+    total_raw = input("  > ").strip()
+    if not total_raw and last_total:
+        total = last_total
+    elif total_raw:
+        try:
+            total = int(total_raw)
+        except ValueError:
+            print("  Could not parse total — skipping competition standing.")
+            return None, None
+    else:
+        print("  No total participants known — skipping competition standing.")
+        return None, None
+    return rank, total
+
+
+def _parse_rank_arg() -> Optional[int]:
+    for i, arg in enumerate(sys.argv):
+        if arg == "--rank" and i + 1 < len(sys.argv):
+            try:
+                return int(sys.argv[i + 1])
+            except ValueError:
+                pass
+    return None
+
+
+def _parse_total_arg() -> Optional[int]:
+    for i, arg in enumerate(sys.argv):
+        if arg == "--total" and i + 1 < len(sys.argv):
+            try:
+                return int(sys.argv[i + 1])
+            except ValueError:
+                pass
+    return None
 
 
 def _fetch_prices(tickers: list[str]) -> dict[str, float]:
@@ -352,6 +422,12 @@ def _enter_manual(existing: dict) -> None:
 
     mark_verified(today)
     mark_verified_entry(today, mode=_mode_for_date(today))
+
+    rank, total = _ask_competition_standing()
+    if rank is not None and total is not None:
+        save_competition_standing(rank, total, today)
+        print(f"  Competition standing saved: rank {rank}/{total}.")
+
     print("  ✅ Saved. The system will use this as the baseline for tomorrow.\n")
 
 

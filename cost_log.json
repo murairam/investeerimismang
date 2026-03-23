@@ -2031,7 +2031,255 @@
       "input_tokens": 5858,
       "output_tokens": 593,
       "cost_usd": 0.02354
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 20686,
+      "output_tokens": 770,
+      "cost_usd": 0.063265
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31649,
+      "output_tokens": 9311,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31649,
+      "output_tokens": 9311,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31649,
+      "output_tokens": 1309,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist_crosscheck",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 226,
+      "output_tokens": 184,
+      "cost_usd": 0.000275
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst_crosscheck",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 246,
+      "output_tokens": 192,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIDevil",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 1338,
+      "output_tokens": 861,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 6600,
+      "output_tokens": 540,
+      "cost_usd": 0.0246
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 20953,
+      "output_tokens": 618,
+      "cost_usd": 0.061653
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31987,
+      "output_tokens": 8973,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31987,
+      "output_tokens": 880,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist_crosscheck",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 223,
+      "output_tokens": 290,
+      "cost_usd": 0.000407
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst_crosscheck",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 243,
+      "output_tokens": 208,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIDevil",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 1341,
+      "output_tokens": 772,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 6845,
+      "output_tokens": 563,
+      "cost_usd": 0.025558
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 20592,
+      "output_tokens": 677,
+      "cost_usd": 0.061635
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31623,
+      "output_tokens": 8893,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 20604,
+      "output_tokens": 627,
+      "cost_usd": 0.060915
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 20604,
+      "output_tokens": 639,
+      "cost_usd": 0.061095
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 29921,
+      "output_tokens": 1500,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 29924,
+      "output_tokens": 574,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst_crosscheck",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 225,
+      "output_tokens": 122,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist_crosscheck",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 204,
+      "output_tokens": 242,
+      "cost_usd": 0.000343
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31202,
+      "output_tokens": 1500,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIDevil",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 1346,
+      "output_tokens": 4767,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 6259,
+      "output_tokens": 547,
+      "cost_usd": 0.023853
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31202,
+      "output_tokens": 1500,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIFullAnalyst",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 31202,
+      "output_tokens": 1500,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIStrategist_crosscheck",
+      "model": "gpt-5.4-nano",
+      "input_tokens": 176,
+      "output_tokens": 185,
+      "cost_usd": 0.000266
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIDevil",
+      "model": "qwen/qwen3-32b",
+      "input_tokens": 1346,
+      "output_tokens": 3355,
+      "cost_usd": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 5836,
+      "output_tokens": 529,
+      "cost_usd": 0.022525
     }
   ],
-  "total_cost": 5.72757
+  "total_cost": 6.133959
 }

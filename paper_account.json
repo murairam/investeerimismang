@@ -3,13 +3,13 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "APA": 72.68651981,
-    "VLO": 6.63700118,
-    "LYB": 27.91590683,
-    "AKAM": 15.47857802,
-    "XOM": 9.25809689,
-    "OXY": 14.98412717,
-    "DELL": 5.04836407
+    "APA": 72.71268776,
+    "VLO": 6.63939057,
+    "LYB": 27.92595687,
+    "AKAM": 15.48415048,
+    "XOM": 9.26142991,
+    "OXY": 14.98952162,
+    "DELL": 5.05018154
   },
   "verified_weights": {
     "APA": 0.25,
@@ -263,24 +263,24 @@
     },
     {
       "date": "2026-03-23",
-      "equity": 9861.0,
+      "equity": 9860.0,
       "cash": 0.0,
-      "daily_return": 0.0,
-      "return_since_start": -0.0139,
+      "daily_return": -0.000101,
+      "return_since_start": -0.014,
       "turnover": 0.0,
       "positions": {
-        "APA": 72.68651981,
-        "VLO": 6.63700118,
-        "LYB": 27.91590683,
-        "AKAM": 15.47857802,
-        "XOM": 9.25809689,
-        "OXY": 14.98412717,
-        "DELL": 5.04836407
+        "APA": 72.71268776,
+        "VLO": 6.63939057,
+        "LYB": 27.92595687,
+        "AKAM": 15.48415048,
+        "XOM": 9.26142991,
+        "OXY": 14.98952162,
+        "DELL": 5.05018154
       },
       "pending_order": null,
       "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-03-23",
-  "last_equity": 9861.0
+  "last_equity": 9860.0
 }

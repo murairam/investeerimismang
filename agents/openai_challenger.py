@@ -30,6 +30,37 @@ from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
 
+
+def _extract_json(text: str) -> dict:
+    """
+    Parse JSON from model output, handling prose prefix/suffix and truncation.
+    Tries json.loads first; on failure, locates the first '{' and attempts
+    progressively shorter substrings until a valid object is found.
+    """
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    # Find first '{' — model may have output prose before the JSON
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object found in model response")
+    candidate = text[start:]
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+    # Truncated JSON: walk backwards from the end to find last '}' that closes the root object
+    for end in range(len(candidate) - 1, 0, -1):
+        if candidate[end] == "}":
+            try:
+                return json.loads(candidate[: end + 1])
+            except json.JSONDecodeError:
+                continue
+    raise ValueError("Could not extract valid JSON from model response")
+
+
 _REGIME_GUIDANCE = {
     "BULL": "BULL regime — TARGET 5 positions for maximum conviction. Only add a 6th if genuinely high-conviction. Push top picks to 20–25%. 5 names at 20% each is ideal. Do NOT add filler for diversification — diversification loses competitions.",
     "BEAR": "BEAR regime — 6–12 positions. Spread risk broadly. Cap individual positions at 15%. Prefer names with earnings visibility.",
@@ -324,36 +355,40 @@ class OpenAIFullAnalyst(BaseAgent):
         if learning_context:
             system_prompt += f"\n\n## Live learning — MANDATORY overrides from past runs\n{learning_context}"
 
+        # OpenRouter does not reliably enforce response_format or handle long outputs —
+        # use max_tokens to prevent truncation and omit response_format for OR calls.
+        openrouter_call = self._openrouter_enabled and self.model != self.MODEL
+        call_kwargs: dict = dict(
+            temperature=0.2,
+            timeout=API_TIMEOUT_SECONDS,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+        )
+        if openrouter_call:
+            call_kwargs["max_tokens"] = 1500
+        else:
+            call_kwargs["response_format"] = {"type": "json_object"}
+
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                response_format={"type": "json_object"},
-                temperature=0.2,
-                timeout=API_TIMEOUT_SECONDS,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
-            )
+            response = self.client.chat.completions.create(model=self.model, **call_kwargs)
         except (BadRequestError, APIConnectionError, APITimeoutError) as exc:
             if self._openrouter_enabled and self.model != self.MODEL:
                 logger.warning("OpenRouter FullAnalyst request failed (%s). Falling back to OpenAI.", exc)
                 self._switch_to_openai_fallback()
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    response_format={"type": "json_object"},
-                    temperature=0.2,
-                    timeout=API_TIMEOUT_SECONDS,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_message},
-                    ],
-                )
+                call_kwargs.pop("max_tokens", None)
+                call_kwargs["response_format"] = {"type": "json_object"}
+                response = self.client.chat.completions.create(model=self.model, **call_kwargs)
             else:
                 raise
 
         if response is None:
             raise ValueError("Empty response from model")
+
+        finish_reason = (response.choices[0].finish_reason or "").lower()
+        if finish_reason == "length":
+            logger.warning("FullAnalyst response truncated (finish_reason=length) — attempting partial JSON parse")
 
         usage = response.usage
         cost = log_usage(
@@ -369,7 +404,8 @@ class OpenAIFullAnalyst(BaseAgent):
             cost,
         )
 
-        data = json.loads(response.choices[0].message.content)
+        raw_content = response.choices[0].message.content or ""
+        data = _extract_json(raw_content)
         raw_positions = data.get("positions", [])
 
         # Auto-fix: if any weight > 1.0 the model output percentages

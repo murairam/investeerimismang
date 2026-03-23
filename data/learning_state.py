@@ -11,7 +11,12 @@ import tempfile
 from collections import defaultdict
 from typing import Optional
 
-from data.portfolio_store import RATIONALE_TAGS, load_decision_history, load_performance_history
+from data.portfolio_store import (
+    RATIONALE_TAGS,
+    load_decision_history,
+    load_performance_history,
+    load_competition_standing_history,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,22 +31,34 @@ def _avg(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
-def compute_signal_importance(rows: list[dict]) -> dict[str, float]:
+def compute_signal_importance(rows: list[dict]) -> dict:
     """
-    For each signal name, compute the fraction of positions where the signal
-    direction agreed with the next-day return direction (directional accuracy).
-    Returns signal_name -> importance_score (0.5 = random, 1.0 = perfect).
+    For each signal, compute directional accuracy vs next-day return (0.5 = random, 1.0 = perfect).
+    Returns {"global": {signal: score}, "per_regime": {"BULL": {signal: score}, ...}}.
     """
     SIGNALS = ["momentum", "mom_5d", "sharpe_20d", "rsi_14", "vs_index", "vol_ratio", "beta"]
-    hits: dict[str, list[float]] = {s: [] for s in SIGNALS}
+    hits_global: dict[str, list[float]] = {s: [] for s in SIGNALS}
+    hits_regime: dict[str, dict[str, list[float]]] = {
+        r: {s: [] for s in SIGNALS} for r in ("BULL", "NEUTRAL", "BEAR")
+    }
     for row in rows:
         ret = row["return_1d"]
         sig = row.get("signal", {})
+        regime = row.get("regime") or "UNKNOWN"
         for s in SIGNALS:
             val = sig.get(s)
             if val is not None:
-                hits[s].append(1.0 if (val > 0 and ret > 0) or (val < 0 and ret < 0) else 0.0)
-    return {s: round(sum(v) / len(v), 4) for s, v in hits.items() if len(v) >= 5}
+                hit = 1.0 if (val > 0 and ret > 0) or (val < 0 and ret < 0) else 0.0
+                hits_global[s].append(hit)
+                if regime in hits_regime:
+                    hits_regime[regime][s].append(hit)
+    global_imp = {s: round(sum(v) / len(v), 4) for s, v in hits_global.items() if len(v) >= 5}
+    per_regime = {
+        regime: {s: round(sum(v) / len(v), 4) for s, v in sig_hits.items() if len(v) >= 5}
+        for regime, sig_hits in hits_regime.items()
+    }
+    per_regime = {r: imp for r, imp in per_regime.items() if imp}
+    return {"global": global_imp, "per_regime": per_regime}
 
 
 def compute_confidence_calibration(history: list[dict]) -> dict:
@@ -88,6 +105,7 @@ def _position_records(history: list[dict]) -> list[dict]:
         outcomes = (day.get("outcomes", {}) or {}).get("1d", {})
         pos_returns = outcomes.get("position_returns", {}) or day.get("performance", {}).get("position_returns", {})
         signal_snapshot = day.get("signal_snapshot", {})
+        regime = day.get("regime")
         for pos in positions:
             ticker = pos.get("ticker")
             ret = pos_returns.get(ticker)
@@ -101,6 +119,7 @@ def _position_records(history: list[dict]) -> list[dict]:
                     "return_1d": float(ret),
                     "tags": pos.get("tags", []),
                     "signal": signal_snapshot.get(ticker, {}),
+                    "regime": regime,
                 }
             )
     return rows
@@ -296,6 +315,9 @@ def generate_learning_state() -> dict:
         "devil_accuracy": devil_accuracy,
         "signal_importance": compute_signal_importance(rows),
         "confidence_calibration": compute_confidence_calibration(history),
+        "competition_standing": derive_competition_posture(load_competition_standing_history(max_days=5)),
+        "agent_accuracy": _agent_accuracy(history),
+        "yesterday_postmortem": _build_postmortem(history),
     }
     save_learning_state(state)
     return state
@@ -360,14 +382,197 @@ def _devil_accuracy(history: list[dict]) -> dict:
     }
 
 
+def _agent_accuracy(history: list[dict]) -> dict:
+    """
+    Compute virtual 1d returns for each agent's proposal vs the final portfolio.
+    Uses pre-computed agent_returns_1d stored during _attach_outcomes_to_prior_record.
+    """
+    agent_buckets: dict[str, list[float]] = {"strategist": [], "challenger": [], "full_analyst": []}
+    final_returns: list[float] = []
+
+    for day in history:
+        ar = day.get("agent_returns_1d", {})
+        outcomes = (day.get("outcomes", {}) or {}).get("1d", {})
+        final_ret = outcomes.get("portfolio_return")
+        if final_ret is not None:
+            final_returns.append(float(final_ret))
+        for key in agent_buckets:
+            val = ar.get(key)
+            if val is not None:
+                agent_buckets[key].append(float(val))
+
+    final_avg = _avg(final_returns)
+    result: dict[str, dict] = {}
+    for key, returns in agent_buckets.items():
+        if len(returns) < 3:
+            result[key] = {"status": "insufficient_data", "observations": len(returns)}
+            continue
+        avg_ret = _avg(returns)
+        result[key] = {
+            "status": "actionable",
+            "observations": len(returns),
+            "avg_return_1d": round(avg_ret, 6),
+            "vs_final_portfolio": round(avg_ret - final_avg, 6) if final_returns else None,
+        }
+    return result
+
+
+def _build_postmortem(history: list[dict]) -> dict:
+    """
+    Specific post-mortem from the most recent day with position-level outcomes.
+    Identifies which positions won/lost, their entry signals and rationale tags,
+    and derives a one-line actionable lesson.
+    """
+    for day in reversed(history):
+        outcomes = (day.get("outcomes", {}) or {}).get("1d", {})
+        pos_returns = outcomes.get("position_returns", {})
+        if not pos_returns:
+            continue
+
+        portfolio = day.get("final_portfolio", {})
+        positions = portfolio.get("positions", [])
+        signal_snap = day.get("signal_snapshot", {})
+        benchmark = float(outcomes.get("benchmark_return", 0.0) or 0.0)
+
+        winners: list[dict] = []
+        losers: list[dict] = []
+        for pos in positions:
+            ticker = pos.get("ticker")
+            ret = pos_returns.get(ticker)
+            if ret is None:
+                continue
+            ret = float(ret)
+            sig = signal_snap.get(ticker, {})
+            entry = {
+                "ticker": ticker,
+                "return_1d": round(ret, 4),
+                "vs_benchmark": round(ret - benchmark, 4),
+                "tags": pos.get("tags", []),
+                "rationale_snippet": (pos.get("rationale") or "")[:100],
+                "rsi_at_entry": sig.get("rsi_14"),
+                "vol_ratio_at_entry": sig.get("vol_ratio"),
+            }
+            (winners if ret >= 0 else losers).append(entry)
+
+        winners.sort(key=lambda x: -x["return_1d"])
+        losers.sort(key=lambda x: x["return_1d"])
+
+        # Derive lesson: compare tag hit rates on winners vs losers
+        winning_tags: dict[str, int] = {}
+        losing_tags: dict[str, int] = {}
+        for w in winners:
+            for tag in w["tags"]:
+                winning_tags[tag] = winning_tags.get(tag, 0) + 1
+        for lo in losers:
+            for tag in lo["tags"]:
+                losing_tags[tag] = losing_tags.get(tag, 0) + 1
+
+        # Build lesson string
+        lesson_parts = []
+        for tag, count in losing_tags.items():
+            if count >= 2 and losing_tags.get(tag, 0) > winning_tags.get(tag, 0):
+                lesson_parts.append(f"'{tag}' entries underperformed — review sizing for this thesis today")
+        for tag, count in winning_tags.items():
+            if count >= 2 and winning_tags.get(tag, 0) > losing_tags.get(tag, 0):
+                lesson_parts.append(f"'{tag}' entries outperformed — continue favouring this setup")
+        lesson = "; ".join(lesson_parts[:2]) if lesson_parts else "no strong tag signal"
+
+        portfolio_return = float(outcomes.get("portfolio_return", 0.0) or 0.0)
+        return {
+            "date": day.get("date"),
+            "portfolio_return_1d": round(portfolio_return, 4),
+            "benchmark_return_1d": round(benchmark, 4),
+            "alpha_1d": round(portfolio_return - benchmark, 4),
+            "winners": winners,
+            "losers": losers,
+            "lesson": lesson,
+        }
+
+    return {}
+
+
 def _changed_rules(previous: list[str], current: list[str]) -> list[str]:
     previous_set = set(previous)
     return [rule for rule in current if rule not in previous_set]
 
 
+def derive_competition_posture(standings: list[dict]) -> dict:
+    """
+    Convert a history of competition standings into an actionable posture for today.
+
+    Postures:
+      DEFEND  — top 10%: protect the lead, avoid unnecessary tail risk
+      CLIMB   — 11–35%: differentiated picks, high conviction, no filler
+      CHASE   — 36–100%: concentrated high-beta; median rank = losing
+    """
+    if not standings:
+        return {"status": "no_data"}
+
+    latest = standings[-1]
+    rank = latest.get("rank")
+    total = latest.get("total")
+    if not rank or not total or total == 0:
+        return {"status": "no_data"}
+
+    percentile = (rank - 1) / total * 100  # 0 = rank 1, 100 = last place
+
+    if percentile <= 10:
+        posture = "DEFEND"
+        instruction = (
+            f"You are in the TOP {percentile:.1f}% (rank {rank}/{total}). "
+            "PROTECT this lead — a flat day when others lose is a win. "
+            "Favour high-momentum names with strong risk/reward. "
+            "Avoid extreme high-beta tail bets unless all signals are exceptional."
+        )
+    elif percentile <= 35:
+        posture = "CLIMB"
+        instruction = (
+            f"You are in the top {percentile:.1f}% (rank {rank}/{total}). "
+            "Well-positioned but you need to keep climbing to win. "
+            "Favour differentiated picks over the consensus portfolio. "
+            "No filler positions — every slot must earn its place."
+        )
+    else:
+        posture = "CHASE"
+        instruction = (
+            f"You are at rank {rank}/{total} (bottom {100 - percentile:.1f}%). "
+            "Median rank = losing by design with 844 participants. "
+            "You MUST take concentrated, differentiated, high-beta picks. "
+            "A well-diversified portfolio at this rank will finish near rank {rank}. "
+            "Be aggressive — safe picks guarantee you lose."
+        )
+
+    # Rank trend: compare latest vs up to 5 days ago
+    trend_text = "no prior data"
+    if len(standings) >= 2:
+        compare = standings[max(-5, -len(standings))]
+        prev_rank = compare.get("rank")
+        if prev_rank:
+            delta = prev_rank - rank  # positive = climbing, negative = falling
+            days = min(5, len(standings) - 1)
+            if delta > 0:
+                trend_text = f"improving (+{delta} positions over {days} day{'s' if days > 1 else ''})"
+            elif delta < 0:
+                trend_text = f"falling ({delta} positions over {days} day{'s' if days > 1 else ''})"
+            else:
+                trend_text = f"stagnant (no change over {days} day{'s' if days > 1 else ''})"
+
+    return {
+        "status": "actionable",
+        "rank": rank,
+        "total": total,
+        "percentile_from_top": round(percentile, 1),
+        "posture": posture,
+        "instruction": instruction,
+        "trend_text": trend_text,
+        "date": latest.get("date"),
+    }
+
+
 def build_prompt_learning_context(
     strategy_text: str = "",
     fallback_sections: Optional[list[str]] = None,
+    current_regime: str = "NEUTRAL",
 ) -> str:
     state = load_learning_state()
     fallback_sections = fallback_sections or []
@@ -378,6 +583,73 @@ def build_prompt_learning_context(
 
     if state:
         lines = ["=== STRUCTURED LEARNING STATE (apply in priority order) ==="]
+        standing = state.get("competition_standing", {})
+        if standing.get("status") == "actionable":
+            lines.append(
+                f"COMPETITION STANDING ({standing['date']}, rank {standing['rank']}/{standing['total']}, "
+                f"top {standing['percentile_from_top']}%, trend: {standing['trend_text']}):\n"
+                f"  POSTURE: {standing['posture']} — {standing['instruction']}"
+            )
+
+        # Yesterday's post-mortem — specific wins/losses with entry signals
+        pm = state.get("yesterday_postmortem", {})
+        if pm.get("date") and (pm.get("winners") or pm.get("losers")):
+            pm_lines = [
+                f"YESTERDAY'S POST-MORTEM ({pm['date']}, portfolio {pm['portfolio_return_1d']:+.2%} "
+                f"vs benchmark {pm['benchmark_return_1d']:+.2%}, alpha {pm['alpha_1d']:+.2%}):"
+            ]
+            if pm.get("winners"):
+                winner_strs = [
+                    f"{w['ticker']} {w['return_1d']:+.1%} [{','.join(w['tags'][:3])}]"
+                    for w in pm["winners"][:3]
+                ]
+                pm_lines.append(f"  Winners: {' | '.join(winner_strs)}")
+            if pm.get("losers"):
+                loser_strs = [
+                    f"{lo['ticker']} {lo['return_1d']:+.1%} [{','.join(lo['tags'][:3])}]"
+                    for lo in pm["losers"][:3]
+                ]
+                pm_lines.append(f"  Losers: {' | '.join(loser_strs)}")
+            if pm.get("lesson"):
+                pm_lines.append(f"  Lesson: {pm['lesson']}")
+            lines.append("\n".join(pm_lines))
+
+        # Per-agent accuracy — tell Risk Manager which agent to trust more
+        aa = state.get("agent_accuracy", {})
+        actionable_agents = {k: v for k, v in aa.items() if v.get("status") == "actionable"}
+        if actionable_agents:
+            agent_line_parts = []
+            for agent, stats in sorted(actionable_agents.items(), key=lambda x: -x[1].get("avg_return_1d", 0)):
+                vs = stats.get("vs_final_portfolio")
+                vs_str = f", {vs:+.2%} vs final" if vs is not None else ""
+                agent_line_parts.append(
+                    f"{agent}: avg {stats['avg_return_1d']:+.2%}/day ({stats['observations']} obs{vs_str})"
+                )
+            best = max(actionable_agents, key=lambda k: actionable_agents[k].get("avg_return_1d", 0))
+            lines.append(
+                "Agent accuracy (virtual returns on own proposals, last N days):\n"
+                + "\n".join(f"  {p}" for p in agent_line_parts)
+                + f"\n  → {best.title()} has been most accurate recently — Risk Manager should weight its picks higher."
+            )
+
+        # Regime-specific signal importance
+        sig_imp = state.get("signal_importance", {})
+        regime_imp = (sig_imp.get("per_regime") or {}).get(current_regime, {})
+        global_imp = sig_imp.get("global", {})
+        if regime_imp:
+            top_regime = sorted(regime_imp.items(), key=lambda x: -x[1])[:5]
+            lines.append(
+                f"Signal importance in {current_regime} regime (current) — directional accuracy vs next-day return:\n"
+                + "  " + " | ".join(f"{s}: {v:.0%}" for s, v in top_regime)
+                + "\n  Focus on high-accuracy signals above. Signals near 50% are no better than random."
+            )
+        elif global_imp:
+            top_global = sorted(global_imp.items(), key=lambda x: -x[1])[:5]
+            lines.append(
+                "Signal importance (global, no regime breakdown yet):\n"
+                + "  " + " | ".join(f"{s}: {v:.0%}" for s, v in top_global)
+            )
+
         if state.get("hard_rules"):
             lines.append("Hard constraints:")
             lines.extend(f"- {rule}" for rule in state["hard_rules"][:4])

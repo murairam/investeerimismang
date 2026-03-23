@@ -38,7 +38,7 @@ _CRITIQUE_PATH = os.path.join(os.path.dirname(__file__), "..", "AI_SELF_CRITIQUE
 _STRATEGY_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "strategy_principles.md")
 
 
-def get_learning_context() -> str:
+def get_learning_context(current_regime: str = "NEUTRAL") -> str:
     strategy = _read_file(_STRATEGY_PATH)
     fallback_sections = []
 
@@ -50,7 +50,11 @@ def get_learning_context() -> str:
     if critique:
         fallback_sections.append(critique)
 
-    raw = build_prompt_learning_context(strategy_text=strategy, fallback_sections=fallback_sections)
+    raw = build_prompt_learning_context(
+        strategy_text=strategy,
+        fallback_sections=fallback_sections,
+        current_regime=current_regime,
+    )
     return _sanitize_learning_text(raw)
 
 
