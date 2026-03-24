@@ -31,38 +31,15 @@ from portfolio.models import PortfolioProposal, Position
 logger = logging.getLogger(__name__)
 
 
-_CHALLENGER_JSON_SCHEMA = {
-    "name": "challenger_portfolio",
-    "strict": True,
-    "schema": {
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "positions": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "additionalProperties": False,
-                    "properties": {
-                        "ticker": {"type": "string"},
-                        "weight": {"type": "number"},
-                        "rationale": {"type": "string"},
-                    },
-                    "required": ["ticker", "weight", "rationale"],
-                },
-            },
-            "reasoning": {"type": "string"},
-            "confidence": {"type": "number"},
-            "learning_reflection": {"type": "string"},
-        },
-        "required": ["positions", "reasoning", "confidence", "learning_reflection"],
-    },
-}
-
-
 def _extract_json(text: str) -> dict:
     """Parse JSON from model output, tolerating prose prefix/suffix and truncation."""
     text = text.strip()
+    # Strip markdown code fences (```json ... ```)
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
     try:
         return json.loads(text)
     except json.JSONDecodeError:
@@ -166,9 +143,10 @@ class GeminiChallenger(BaseAgent):
             proposal = self._call_openrouter_primary(user_message, regime, learning_context)
             if proposal.positions:
                 logger.info(
-                    "GeminiChallenger produced %d positions (confidence %.0f%%)",
-                    len(proposal.positions),
-                    proposal.confidence * 100,
+                        "Challenger[OpenRouter:%s] produced %d positions (confidence %.0f%%)",
+                        config.OPENROUTER_CHALLENGER_MODEL,
+                        len(proposal.positions),
+                        proposal.confidence * 100,
                 )
                 return proposal
             logger.warning("OpenRouter challenger returned empty proposal — falling back to Gemini")
@@ -183,7 +161,8 @@ class GeminiChallenger(BaseAgent):
             try:
                 proposal = self._call_gemini(user_message, regime, learning_context)
                 logger.info(
-                    "GeminiChallenger produced %d positions (confidence %.0f%%)",
+                    "Challenger[Gemini:%s] produced %d positions (confidence %.0f%%)",
+                    self.MODEL,
                     len(proposal.positions),
                     proposal.confidence * 100,
                 )
@@ -457,30 +436,31 @@ class GeminiChallenger(BaseAgent):
         )
         if learning_context:
             system_prompt += f"\n\nLive learning — MANDATORY overrides from past runs:\n{learning_context}"
+        system_prompt += (
+            "\n\nCRITICAL OUTPUT FORMAT: Return exactly one valid JSON object and nothing else. "
+            "No markdown, no code fences, no prose before or after JSON. "
+            "Required top-level keys: positions, reasoning, confidence, learning_reflection."
+        )
 
         effective_user_message = (
-            "/no_think\n\n"
             "Return valid JSON only. No markdown, no commentary, no code fences.\n\n"
             + user_message
         )
 
         for attempt in range(1, 3):
             try:
-                response = self._openrouter_fallback.chat.completions.create(
-                    model=config.OPENROUTER_CHALLENGER_MODEL,
-                    temperature=0.4,
-                    timeout=config.API_TIMEOUT_SECONDS,
-                    max_tokens=900,
-                    provider={"require_parameters": True},
-                    response_format={
-                        "type": "json_schema",
-                        "json_schema": _CHALLENGER_JSON_SCHEMA,
-                    },
-                    messages=[
+                request_kwargs = {
+                    "model": config.OPENROUTER_CHALLENGER_MODEL,
+                    "temperature": 0.4,
+                    "timeout": config.API_TIMEOUT_SECONDS,
+                    "max_tokens": 2500,
+                    "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": effective_user_message},
                     ],
-                )
+                }
+
+                response = self._openrouter_fallback.chat.completions.create(**request_kwargs)
                 usage = response.usage
                 prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
                 completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
@@ -525,7 +505,7 @@ class GeminiChallenger(BaseAgent):
                 msg = str(exc)
                 if "No endpoints found" in msg or "404" in msg:
                     logger.warning(
-                        "OpenRouter model '%s' unavailable for this account/run — disabling OpenRouter fallback until restart",
+                        "OpenRouter model '%s' unavailable for this account/run with current request shape — disabling OpenRouter fallback until restart",
                         config.OPENROUTER_CHALLENGER_MODEL,
                     )
                     self._openrouter_fallback_available = False
@@ -538,33 +518,29 @@ class GeminiChallenger(BaseAgent):
         """Best-effort conversion of non-JSON OpenRouter output into required schema."""
         if not raw_text.strip():
             return None
+        prompt_messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Convert the provided text to valid JSON with this exact schema keys: "
+                    "positions (array of {ticker, weight, rationale}), reasoning, confidence, learning_reflection. "
+                    "Return JSON only."
+                ),
+            },
+            {"role": "user", "content": raw_text[:12000]},
+        ]
         try:
-            repair_response = self._openrouter_fallback.chat.completions.create(
-                model=config.OPENROUTER_CHALLENGER_MODEL,
+            repair_response = self._openai.chat.completions.create(
+                model=config.OPENAI_FALLBACK_MODEL,
+                response_format={"type": "json_object"},
                 temperature=0.0,
                 timeout=config.API_TIMEOUT_SECONDS,
-                max_tokens=700,
-                provider={"require_parameters": True},
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": _CHALLENGER_JSON_SCHEMA,
-                },
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "Convert the provided text to valid JSON with this exact schema keys: "
-                            "positions (array of {ticker, weight, rationale}), reasoning, confidence, learning_reflection. "
-                            "Return JSON only."
-                        ),
-                    },
-                    {"role": "user", "content": raw_text[:12000]},
-                ],
+                messages=prompt_messages,
             )
             repaired = repair_response.choices[0].message.content or ""
             return _extract_json(repaired)
         except Exception as exc:
-            logger.warning("OpenRouter challenger JSON repair failed: %s", exc)
+            logger.warning("OpenAI JSON repair failed: %s", exc)
             return None
 
     def _call_gemini(

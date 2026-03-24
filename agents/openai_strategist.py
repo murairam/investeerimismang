@@ -177,7 +177,8 @@ class OpenAIStrategist(BaseAgent):
             try:
                 proposal = self._call_openai(user_message, regime, vix, learning_context)
                 logger.info(
-                    "Strategist produced %d positions (confidence %.0f%%)",
+                    "Strategist[%s] produced %d positions (confidence %.0f%%)",
+                    self.MODEL,
                     len(proposal.positions),
                     proposal.confidence * 100,
                 )

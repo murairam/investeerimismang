@@ -76,6 +76,7 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 python main.py                   # Run full pipeline
 python scripts/status.py         # View project dashboard (costs, learning, next steps)
 python scripts/verify.py         # Confirm portfolio sync (LIVE mode)
+python scripts/check_models.py   # Smoke-test model routes/keys without full pipeline run
 python scripts/pregame_review.py # View learning summary (PREGAME mode)
 python scripts/historical_shadow_trader.py --start 2024-04-01 --end 2024-06-21
 ```

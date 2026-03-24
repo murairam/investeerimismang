@@ -158,7 +158,8 @@ class OpenAIFullAnalyst(BaseAgent):
             try:
                 proposal = self._call_openai(user_message, regime, learning_context)
                 logger.info(
-                    "FullAnalyst produced %d positions (confidence %.0f%%)",
+                    "FullAnalyst[%s] produced %d positions (confidence %.0f%%)",
+                    self.model,
                     len(proposal.positions),
                     proposal.confidence * 100,
                 )

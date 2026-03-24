@@ -1,28 +1,27 @@
 {
-  "generated_from_days": 7,
-  "position_observations": 19,
+  "generated_from_days": 8,
+  "position_observations": 23,
   "minimums": {
     "strong_daily_observations": 5,
     "strong_ticker_observations": 5,
     "strong_rationale_observations": 5
   },
-  "hard_rules": [
-    "RATIONALE CAP: cap any position whose primary thesis is 'momentum' at 15% \u2014 hit rate 22% over 9 observations (threshold: 30%).",
-    "RATIONALE CAP: cap any position whose primary thesis is 'high_sharpe' at 15% \u2014 hit rate 22% over 9 observations (threshold: 30%).",
-    "RATIONALE CAP: cap any position whose primary thesis is 'consensus' at 15% \u2014 hit rate 25% over 8 observations (threshold: 30%)."
+  "hard_rules": [],
+  "biases_to_avoid": [
+    "Avoid overusing momentum rationales until their hit rate recovers above 40%.",
+    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%."
   ],
-  "biases_to_avoid": [],
   "validated_winners": [
     {
       "ticker": "APA",
-      "observations": 8,
-      "avg_return_1d": 0.019359,
-      "hit_rate": 0.75
+      "observations": 10,
+      "avg_return_1d": 0.015078,
+      "hit_rate": 0.6
     },
     {
       "ticker": "XOM",
-      "observations": 5,
-      "avg_return_1d": 0.007781,
+      "observations": 7,
+      "avg_return_1d": 0.008171,
       "hit_rate": 1.0
     }
   ],
@@ -31,6 +30,12 @@
       "ticker": "AKRBP.OL",
       "observations": 6,
       "avg_return_1d": -0.041439,
+      "hit_rate": 0.0
+    },
+    {
+      "ticker": "VLO",
+      "observations": 5,
+      "avg_return_1d": -0.009831,
       "hit_rate": 0.0
     },
     {
@@ -48,24 +53,6 @@
   ],
   "weight_caps": [
     {
-      "scope": "rationale_tag",
-      "tag": "momentum",
-      "max_weight": 0.15,
-      "reason": "momentum_hit_rate_22%_over_9_obs"
-    },
-    {
-      "scope": "rationale_tag",
-      "tag": "high_sharpe",
-      "max_weight": 0.15,
-      "reason": "high_sharpe_hit_rate_22%_over_9_obs"
-    },
-    {
-      "scope": "rationale_tag",
-      "tag": "consensus",
-      "max_weight": 0.15,
-      "reason": "consensus_hit_rate_25%_over_8_obs"
-    },
-    {
       "scope": "ticker",
       "ticker": "AKRBP.OL",
       "max_weight": 0.07,
@@ -73,13 +60,13 @@
     },
     {
       "scope": "ticker",
-      "ticker": "EQNR.OL",
+      "ticker": "VLO",
       "max_weight": 0.07,
       "reason": "recurring_underperformer"
     },
     {
       "scope": "ticker",
-      "ticker": "NESTE.HE",
+      "ticker": "EQNR.OL",
       "max_weight": 0.07,
       "reason": "recurring_underperformer"
     }
@@ -90,40 +77,54 @@
     "replacement_sharpe_delta": 0.2
   },
   "decision_quality": {
-    "avg_hold_vs_replace_1d": 0.023721,
+    "avg_hold_vs_replace_1d": 0.036002,
     "positive_hold_vs_replace_rate": 1.0,
-    "avg_slot_opportunity_cost_1d": -0.005737,
-    "avg_turnover_estimate": 0.326667,
-    "observations": 1,
+    "avg_slot_opportunity_cost_1d": -0.014608,
+    "avg_turnover_estimate": 0.35,
+    "observations": 2,
     "status": "insufficient_data"
   },
   "confidence_notes": [
     {
+      "tag": "momentum",
+      "instruction": "Prefer momentum setups when other signals are comparable.",
+      "observations": 13
+    },
+    {
+      "tag": "high_sharpe",
+      "instruction": "Prefer high_sharpe setups when other signals are comparable.",
+      "observations": 13
+    },
+    {
+      "tag": "consensus",
+      "instruction": "Prefer consensus setups when other signals are comparable.",
+      "observations": 12
+    },
+    {
       "tag": "overbought",
       "instruction": "Prefer overbought setups when other signals are comparable.",
-      "observations": 6
+      "observations": 7
     },
     {
       "tag": "at_52w_high",
       "instruction": "Prefer at_52w_high setups when other signals are comparable.",
-      "observations": 7
+      "observations": 11
     }
   ],
   "early_warning_notes": [
     "EARLY WARNING: non_us_differentiator has weak hit quality (0% over 6 obs).",
-    "EARLY WARNING: overbought has weak hit quality (33% over 6 obs).",
-    "EARLY WARNING: at_52w_high has weak hit quality (29% over 7 obs)."
+    "EARLY WARNING: overbought has weak hit quality (29% over 7 obs)."
   ],
   "rationale_stats": {
     "momentum": {
-      "observations": 9,
-      "avg_return_1d": -0.007801,
-      "hit_rate": 0.2222
+      "observations": 13,
+      "avg_return_1d": 0.001271,
+      "hit_rate": 0.3846
     },
     "high_sharpe": {
-      "observations": 9,
-      "avg_return_1d": -0.007801,
-      "hit_rate": 0.2222
+      "observations": 13,
+      "avg_return_1d": 0.001271,
+      "hit_rate": 0.3846
     },
     "breakout": {
       "observations": 2,
@@ -131,9 +132,9 @@
       "hit_rate": 0.5
     },
     "consensus": {
-      "observations": 8,
-      "avg_return_1d": -0.007851,
-      "hit_rate": 0.25
+      "observations": 12,
+      "avg_return_1d": 0.001995,
+      "hit_rate": 0.4167
     },
     "non_us_differentiator": {
       "observations": 6,
@@ -141,48 +142,61 @@
       "hit_rate": 0.0
     },
     "overbought": {
-      "observations": 6,
-      "avg_return_1d": 0.003633,
-      "hit_rate": 0.3333
+      "observations": 7,
+      "avg_return_1d": 0.002821,
+      "hit_rate": 0.2857
     },
     "at_52w_high": {
-      "observations": 7,
-      "avg_return_1d": 0.001809,
-      "hit_rate": 0.2857
+      "observations": 11,
+      "avg_return_1d": 0.009037,
+      "hit_rate": 0.4545
     }
   },
   "conviction_tiers": {
     "tier1_avg_return_1d": -0.011757,
-    "tier2_avg_return_1d": -0.005945,
+    "tier2_avg_return_1d": 0.003265,
     "tier3_avg_return_1d": 0.000444,
     "tier1_observations": 8,
-    "tier2_observations": 8,
+    "tier2_observations": 12,
     "tier3_observations": 3
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
-    "status": "insufficient_data",
-    "observations": 0,
+    "status": "early_data",
+    "observations": 2,
+    "high_risk_avg_return_1d": 0.020921,
+    "low_risk_avg_return_1d": -0.004409,
+    "high_risk_negative_rate": 0.5,
+    "accuracy": 0.5,
+    "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
+      {
+        "ticker": "LYB",
+        "flag_count": 3
+      },
       {
         "ticker": "DELL",
         "flag_count": 2
       },
       {
-        "ticker": "LYB",
+        "ticker": "APA",
+        "flag_count": 2
+      },
+      {
+        "ticker": "EVO.ST",
         "flag_count": 2
       }
     ]
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.2222,
-      "mom_5d": 0.2222,
-      "sharpe_20d": 0.2222,
-      "rsi_14": 0.2222,
-      "vs_index": 0.2222,
-      "vol_ratio": 0.2222,
-      "beta": 0.4444
+      "momentum": 0.3846,
+      "mom_5d": 0.3846,
+      "sharpe_20d": 0.3846,
+      "rsi_14": 0.3846,
+      "vs_index": 0.3846,
+      "vol_ratio": 0.3846,
+      "beta": 0.6154
     },
     "per_regime": {}
   },
@@ -195,62 +209,83 @@
   "agent_accuracy": {
     "strategist": {
       "status": "insufficient_data",
-      "observations": 0
+      "observations": 1
     },
     "challenger": {
       "status": "insufficient_data",
-      "observations": 0
+      "observations": 1
     },
     "full_analyst": {
       "status": "insufficient_data",
-      "observations": 0
+      "observations": 1
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-03-22",
+    "date": "2026-03-23",
     "portfolio_return_1d": 0.0026,
     "benchmark_return_1d": 0.0115,
     "alpha_1d": -0.0089,
     "winners": [
       {
+        "ticker": "DELL",
+        "return_1d": 0.0439,
+        "vs_benchmark": 0.0324,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Triple-consensus keep from current holdings with solid acceleration (5d +5.1%, vol_ratio 1.05); main",
+        "rsi_at_entry": 73.827661,
+        "vol_ratio_at_entry": 1.052006
+      },
+      {
         "ticker": "AKAM",
         "return_1d": 0.0358,
         "vs_benchmark": 0.0243,
-        "tags": [],
-        "rationale_snippet": "verified from game portfolio 2026-03-22",
-        "rsi_at_entry": null,
-        "vol_ratio_at_entry": null
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Double-consensus and yesterday's strongest actual winner (+3.6%) with strong 5d momentum (+8.5%) and",
+        "rsi_at_entry": 74.709883,
+        "vol_ratio_at_entry": 1.261485
+      },
+      {
+        "ticker": "XOM",
+        "return_1d": 0.0091,
+        "vs_benchmark": -0.0023,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Triple-consensus continuity holding and validated winner; lower-beta but still justified as a liquid",
+        "rsi_at_entry": 71.213512,
+        "vol_ratio_at_entry": 1.080991
       }
     ],
     "losers": [
       {
-        "ticker": "LYB",
-        "return_1d": -0.0252,
-        "vs_benchmark": -0.0367,
-        "tags": [],
-        "rationale_snippet": "verified from game portfolio 2026-03-22",
-        "rsi_at_entry": null,
-        "vol_ratio_at_entry": null
-      },
-      {
-        "ticker": "VLO",
-        "return_1d": -0.0103,
-        "vs_benchmark": -0.0218,
-        "tags": [],
-        "rationale_snippet": "verified from game portfolio 2026-03-22",
-        "rsi_at_entry": null,
-        "vol_ratio_at_entry": null
-      },
-      {
         "ticker": "APA",
         "return_1d": -0.002,
         "vs_benchmark": -0.0135,
-        "tags": [],
-        "rationale_snippet": "verified from game portfolio 2026-03-22",
-        "rsi_at_entry": null,
-        "vol_ratio_at_entry": null
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Triple-consensus and a validated historical winner with the strongest current energy momentum (5d +1",
+        "rsi_at_entry": 83.996194,
+        "vol_ratio_at_entry": 1.430529
       }
     ],
-    "lesson": "no strong tag signal"
+    "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'high_sharpe' entries outperformed \u2014 continue favouring this setup"
   }
 }
