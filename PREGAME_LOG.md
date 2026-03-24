@@ -1003,7 +1003,7 @@ Winners: DELL +4.4%, AKAM +3.6%, XOM +0.9% | Losers: LYB -2.5%, VLO -1.0%, OXY -
 
 **Market:** NEUTRAL regime · SPX vs 200d SMA: -0.7% · VIX: 26.1 · S&P 500 20d: -3.8%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 08:56:56.
 
 **Yesterday's P&L:** Portfolio +0.3% · Benchmark +1.1% · Alpha -0.9%
 Winners: DELL +4.4%, AKAM +3.6%, XOM +0.9% | Losers: LYB -2.5%, VLO -1.0%, OXY -0.7%

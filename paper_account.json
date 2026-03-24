@@ -3,39 +3,22 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "APA": 75.46233094,
-    "VLO": 6.89267825,
-    "LYB": 29.21150683,
-    "AKAM": 15.39375898,
-    "XOM": 9.46433523,
-    "OXY": 15.54965966,
-    "DELL": 5.02091754
+    "XOM": 18.09862341,
+    "APA": 44.83061291,
+    "AKAM": 20.3878792,
+    "PLTR": 13.0545049,
+    "DELL": 7.08726251,
+    "CVX": 6.82126099
   },
-  "pending_order": {
-    "submitted_date": "2026-03-24",
-    "positions": [
-      {
-        "ticker": "AKAM",
-        "weight": 0.2
-      },
-      {
-        "ticker": "APA",
-        "weight": 0.2
-      },
-      {
-        "ticker": "DELL",
-        "weight": 0.2
-      },
-      {
-        "ticker": "PLTR",
-        "weight": 0.2
-      },
-      {
-        "ticker": "XOM",
-        "weight": 0.2
-      }
-    ]
+  "verified_weights": {
+    "XOM": 0.25,
+    "APA": 0.15,
+    "AKAM": 0.2,
+    "PLTR": 0.18,
+    "DELL": 0.1,
+    "CVX": 0.12
   },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-03-17",
@@ -297,57 +280,23 @@
     },
     {
       "date": "2026-03-24",
-      "equity": 10096.77,
+      "equity": 10047.0,
       "cash": 0.0,
-      "daily_return": 0.003754,
-      "return_since_start": 0.009677,
+      "daily_return": -0.001193,
+      "return_since_start": 0.0047,
       "turnover": 0.0,
       "positions": {
-        "APA": 75.46233094,
-        "VLO": 6.89267825,
-        "LYB": 29.21150683,
-        "AKAM": 15.39375898,
-        "XOM": 9.46433523,
-        "OXY": 15.54965966,
-        "DELL": 5.02091754
+        "XOM": 18.09862341,
+        "APA": 44.83061291,
+        "AKAM": 20.3878792,
+        "PLTR": 13.0545049,
+        "DELL": 7.08726251,
+        "CVX": 6.82126099
       },
-      "pending_order": {
-        "submitted_date": "2026-03-24",
-        "positions": [
-          {
-            "ticker": "AKAM",
-            "weight": 0.2
-          },
-          {
-            "ticker": "APA",
-            "weight": 0.2
-          },
-          {
-            "ticker": "DELL",
-            "weight": 0.2
-          },
-          {
-            "ticker": "PLTR",
-            "weight": 0.2
-          },
-          {
-            "ticker": "XOM",
-            "weight": 0.2
-          }
-        ]
-      },
-      "executed_pending": false
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-03-24",
-  "last_equity": 10096.76537208,
-  "verified_weights": {
-    "APA": 0.25,
-    "VLO": 0.14,
-    "LYB": 0.18,
-    "AKAM": 0.15,
-    "XOM": 0.13,
-    "OXY": 0.08,
-    "DELL": 0.07
-  }
+  "last_equity": 10047.0
 }
