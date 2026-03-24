@@ -677,6 +677,43 @@ class DataFetcher:
             logger.warning("Commodity context fetch failed: %s", exc)
         return result
 
+    def fetch_fx_context(self) -> dict:
+        """Fetch EUR/USD spot and momentum for FX-adjusting US equity returns.
+
+        The game is EUR-denominated. US stock returns are in USD. If EUR/USD
+        appreciates, US equity gains are partially offset for the EUR investor.
+        Returns a dict with price and return fields; NaN for any failure.
+        """
+        result: dict = {
+            "eurusd_price": float("nan"),
+            "eurusd_1d": float("nan"),
+            "eurusd_5d": float("nan"),
+            "eurusd_20d": float("nan"),
+        }
+        try:
+            data, *_ = self.fetch_ohlcv(["EURUSD=X"], period="3mo")
+            if "EURUSD=X" not in data.columns:
+                return result
+            col = data["EURUSD=X"].dropna()
+            if len(col) < 2:
+                return result
+            result["eurusd_price"] = float(col.iloc[-1])
+            result["eurusd_1d"] = float(col.iloc[-1] / col.iloc[-2] - 1)
+            if len(col) > 5:
+                result["eurusd_5d"] = float(col.iloc[-1] / col.iloc[-6] - 1)
+            if len(col) > 21:
+                result["eurusd_20d"] = float(col.iloc[-1] / col.iloc[-22] - 1)
+            logger.info(
+                "FX: EUR/USD %.4f (1d %+.2f%%, 5d %+.2f%%, 20d %+.2f%%)",
+                result["eurusd_price"],
+                result["eurusd_1d"] * 100,
+                result["eurusd_5d"] * 100 if not math.isnan(result["eurusd_5d"]) else 0.0,
+                result["eurusd_20d"] * 100 if not math.isnan(result["eurusd_20d"]) else 0.0,
+            )
+        except Exception as exc:
+            logger.warning("FX context fetch failed (non-fatal): %s", exc)
+        return result
+
     def fetch_credit_spread(self) -> float:
         """20-day change in HYG/LQD ratio as a credit spread proxy.
         Positive = spreads tightening (risk-on). Negative = widening (risk-off).

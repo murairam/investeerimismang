@@ -1,6 +1,6 @@
 # AlphaShark — Permanent Strategy Principles
 
-**Last updated:** 2026-03-23
+**Last updated:** 2026-03-24
 **Status:** Active (overrides any conservative defaults in auto-generated files)
 
 This file is NOT auto-generated. It survives daily pipeline runs and is injected into every
@@ -51,11 +51,11 @@ higher-momentum candidate.
 - **Rationale:** Prevent concentration drift into sectors with clear momentum deceleration while preserving legal concentration in normal conditions.
 - **Implementation:** `agents/openai_risk_manager.py::_enforce_selection_quality()` + `config.ROTATION_RISK_HIGH_SECTOR_CAP`
 
-### NEUTRAL Beta Target — Rotation Override
-- **Rule:** In normal NEUTRAL conditions, portfolio beta target remains 0.95–1.30.
-- **Override:** If rotation risk is active (HIGH/MEDIUM) or sector leadership is clearly decoupled, beta target becomes a **soft diagnostic**. Do not add high-beta filler names solely to raise beta.
-- **Rationale:** Preserve rotation alpha when leaders decouple from S&P correlation.
-- **Implementation:** `agents/openai_risk_manager.py` system prompt + synthesis context in `_build_message()`
+### Beta — Informational Only in BEAR
+- **Rule:** In BULL/NEUTRAL, beta target is 1.6–2.0 (BULL) or 0.95–1.30 (NEUTRAL) as a soft guide.
+- **BEAR:** Beta is logged for information only. No position caps, no forced beta reduction. The goal is to find stocks going UP, not stocks that fall less.
+- **Override in NEUTRAL:** If rotation risk is active (HIGH/MEDIUM), beta target is a soft diagnostic. Do not add high-beta filler to hit a number.
+- **Implementation:** `agents/openai_risk_manager.py::_enforce_beta()` (BEAR enforcement removed 2026-03-24)
 
 ### Low-Volume Concentration Guard
 - **Rule:** Positions with `vol_ratio < 0.80` are capped at **18%** (even outside BEAR).
@@ -140,7 +140,10 @@ by preventing energy concentration during the 2026 Energy rotation year.
 |--------|--------|
 | Consensus (both models agree) + strong signals | 20–25% |
 | Single model, strong signals | 12–18% |
-| Diversifier / speculative | 5–10% |
+| Smaller position / lower conviction | 5–10% |
+
+### Earnings — Opportunity, Not Risk
+Pre-earnings momentum is an OPPORTUNITY. Binary gaps can deliver 10–20% in a single session — exactly the kind of right-tail outcome that wins competitions. Size pre-earnings plays by conviction (up to 25%), not by fear. Rule 13 earnings caps have been removed (2026-03-24).
 
 Never equal-weight. If everything gets the same weight, you are not thinking.
 

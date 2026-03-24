@@ -12,6 +12,7 @@ import os
 from datetime import date
 from typing import Optional
 
+import openai
 from openai import APIConnectionError, APITimeoutError, BadRequestError, OpenAI
 
 from agents.base_agent import BaseAgent
@@ -61,7 +62,7 @@ def _extract_json(text: str) -> dict:
 
 _REGIME_GUIDANCE = {
     "BULL": "BULL regime — TARGET 5 positions for maximum conviction. Only add a 6th if genuinely high-conviction. Push top picks to 20–25%. 5 names at 20% each is ideal. Do NOT add filler for diversification — diversification loses competitions.",
-    "BEAR": "BEAR regime — 6–12 positions. Spread risk broadly. Cap individual positions at 15%. Prefer names with earnings visibility.",
+    "BEAR": "BEAR regime — 5–8 positions. Find what is going up and concentrate there. No position caps — size by conviction. Earnings catalysts are opportunities, not risks.",
     "NEUTRAL": "NEUTRAL regime — 5–10 positions. Quality over quantity — only add a position if signals are genuinely compelling.",
 }
 
@@ -164,7 +165,7 @@ class OpenAIFullAnalyst(BaseAgent):
                     proposal.confidence * 100,
                 )
                 return proposal
-            except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError) as exc:
+            except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError, openai.RateLimitError, openai.InternalServerError) as exc:
                 logger.warning("FullAnalyst attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
                 if attempt == self.MAX_RETRIES:
                     logger.warning("FullAnalyst exhausted retries — returning empty proposal")
@@ -379,7 +380,7 @@ class OpenAIFullAnalyst(BaseAgent):
 
         try:
             response = self.client.chat.completions.create(model=self.model, **call_kwargs)
-        except (BadRequestError, APIConnectionError, APITimeoutError) as exc:
+        except (BadRequestError, APIConnectionError, APITimeoutError, openai.RateLimitError, openai.InternalServerError) as exc:
             if self._openrouter_enabled and self.model != self.MODEL:
                 logger.warning("OpenRouter FullAnalyst request failed (%s). Falling back to OpenAI.", exc)
                 self._switch_to_openai_fallback()

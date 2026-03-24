@@ -19,7 +19,7 @@ GAME_CONSTRAINTS = {
 POSITION_TARGETS_BY_REGIME = {
     "BULL":    {"min_stocks": 5, "max_stocks": 6},   # tight concentration — 5 is the target, 6 only if genuinely high-conviction
     "NEUTRAL": {"min_stocks": 5, "max_stocks": 10},  # AI decides — more candidates = more range
-    "BEAR":    {"min_stocks": 6, "max_stocks": 12},  # spread risk in downturns
+    "BEAR":    {"min_stocks": 5, "max_stocks": 8},   # find what works and concentrate, even in downturns
 }
 
 # Cash policy (used when proposed allocation is below 100%)
@@ -48,7 +48,7 @@ DEAD_MONEY_VOL_RATIO = 0.90
 DEAD_MONEY_MOM_5D = 0.01
 DEVIL_ACCURACY_CAP_WEIGHT = 0.10
 BETA_CHECK_MIN_US_WEIGHT = 0.25
-NON_US_ASSUMED_BETA = 0.30
+NON_US_ASSUMED_BETA = 0.70
 FALLBACK_REPLACEMENT_WEIGHT = 0.05
 MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
 ROTATION_RISK_HIGH_SECTOR_CAP = 0.60    # max sector weight when rotation risk = HIGH

@@ -49,28 +49,28 @@ If you find yourself giving everything the same weight, you are not doing your j
 0. **Target position count by regime** — you decide the exact count based on signal quality:
    - BULL: 5–6 positions. TARGET 5 positions at 20% each for maximum conviction. Only add a 6th if genuinely high-conviction at 15–17% and rebalance others. Do NOT add filler for diversification — diversification loses competitions.
    - NEUTRAL: 5–10 positions. Use your judgement — 5 if signals are concentrated, more if many names have strong setups.
-   - BEAR: 6–12 positions. Spread risk more broadly.
+   - BEAR: 5–8 positions. Concentrate on the highest-conviction names — in a 75-day competition even a bear market has winners. Find what IS working and max-size it.
    Build in order: (1) consensus picks, (2) best unique picks. Do NOT pad with weak picks to reach a higher count.
 1. **Consensus picks** (appear in 2+ of the 3 proposals): independently validated across different signal lenses. Give them higher conviction weights (18–25%) unless there is a specific risk reason not to. A pick found by BOTH the momentum strategist and the catalyst hunter is especially strong — it wins on two different signal dimensions.
 2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, vol_ratio, regime fit. Include the best ones.
 3. **Ignore weak unique picks**: if only one model picked something and its signals are mediocre, skip it. But do NOT skip picks just to keep the portfolio small — the game has no transaction costs.
-4. **Size by conviction** (see RULE #1 above): consensus 20–25%, single-model 12–18%, diversifiers 5–10%.
-5. **Check market concentration**: if >65% ends up in one market, redistribute.
+4. **Size by conviction** (see RULE #1 above): consensus 20–25%, single-model 12–18%, smaller positions 5–10%.
+5. **No market concentration constraint**: 100% in one market is legal and correct if that market has the best signals.
 6. **Check regime fit and portfolio beta**:
    - You will be given the portfolio-weighted beta computed from the proposals.
-   - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
+   - BEAR regime: concentrate on what IS working. Even in a falling market, winning requires finding the stocks/sectors that are going up, not hiding in low-beta names that merely fall less. Beta is informational only in BEAR — do NOT cap positions because of it.
    - BULL regime: TARGET portfolio beta 1.6–2.0. Concentrate on high-beta names — sub-1.4 beta in BULL is underperforming the mandate.
     - NEUTRAL: target portfolio beta between 0.95 and 1.30 in normal conditions.
     - If the user context includes a ROTATION RISK ALERT (HIGH/MEDIUM) or clear sector-rotation leadership, treat NEUTRAL beta as a SOFT diagnostic, not a hard objective. Do NOT add high-beta filler names solely to raise beta if that dilutes the strongest rotation leaders.
 7. **Target regime-based position count**:
     - BULL: 5–6 positions. Target 5 at ~20% each. No position < 5%. Cap strongest at 25%.
-    - NEUTRAL: 5–10 positions. Size by conviction — top picks 20–25%, diversifiers 5–10%.
-    - BEAR: 6–12 positions. Cap at 20% each.
+    - NEUTRAL: 5–10 positions. Size by conviction — top picks 20–25%, smaller positions 5–10%.
+    - BEAR: 5–8 positions. Find what is working and size it aggressively — finishing 400th by hiding in low-beta names is not the goal.
 9. **No sector cap**: The game enforces zero sector concentration limits. 100% in one sector is fully legal (e.g. 4 Energy stocks at 25% each). Concentrate wherever the alpha is.
 10. **Vol_ratio signal**: prefer positions where vol_ratio > 1.2 (high-volume confirmation). Be cautious about positions where vol_ratio < 0.7 (low-volume, potentially weak move).
 11. **Catalyst insight**: the challenger picks represent high-momentum catalysts. If the challenger's picks have strong signals (high short interest, premarket gap-up, IV spike + momentum), include at least 1–2 of them even if they're not consensus.
 12. **Do NOT penalize non-US stocks for missing Short Interest data.** Their IV column shows 20d annualized realized vol (not options IV) — treat it as a volatility level indicator. Evaluate European/Baltic stocks on volume breakouts, momentum, premarket gaps, and realized vol so we don't accidentally build a 100% US portfolio.
-13. **Earnings — opportunity AND risk**: Pre-earnings momentum in high-conviction stocks is an OPPORTUNITY (academic: 3–8% drift in 2–4 days before announcement). If the snapshot shows a PRE_EARNINGS_SETUP tag for a stock: allow up to 20% weight, max 40% total pre-earnings exposure, no more than 2 names with earnings in the same week. For earnings within 1 day (announcement tomorrow): cap at 10% regardless of conviction — binary gap risk is too close.
+13. **Earnings — pure opportunity**: Pre-earnings momentum is an OPPORTUNITY (academic: 3–8% drift in 2–4 days before announcement). PRE_EARNINGS_SETUP stocks with strong momentum should be sized by conviction like any other pick — up to 20–25%. Do NOT cap positions just because of upcoming earnings — in a 75-day competition, binary gaps can generate 10–20% gains that decide first place.
 14. **Dead-money exclusion rule**: in this competition, a stock is dead money if vol_ratio < {config.DEAD_MONEY_VOL_RATIO:.2f} and mom_5d <= +{config.DEAD_MONEY_MOM_5D:.1%}. Do NOT call a stock dead money if vol_ratio is above 1.0. HIGH-risk dead-money names should normally be excluded, not merely downsized.
 15. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
 16. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists. A 5-stock portfolio means each slot is scarce capital.
@@ -132,7 +132,7 @@ class OpenAIRiskManager(BaseAgent):
         beta_targets = {
             "BULL": (None, 2.0),
             "NEUTRAL": (0.95, 1.30),
-            "BEAR": (None, 0.90),
+            "BEAR": (None, None),  # no beta cap in BEAR — competition requires going up, not falling less
         }
 
         last_error: Optional[Exception] = None
@@ -174,9 +174,6 @@ class OpenAIRiskManager(BaseAgent):
             for c in snapshot["candidates"]
             if not math.isnan(c.get("beta", float("nan")))
         }
-        total_weight = sum(p.weight for p in proposal.positions)
-        if total_weight == 0:
-            return float("nan")
         weighted_sum = 0.0
         for p in proposal.positions:
             if p.ticker in beta_map:
@@ -184,10 +181,14 @@ class OpenAIRiskManager(BaseAgent):
             elif "." in p.ticker:
                 # Non-US ticker with missing beta: assume structurally low S&P 500 beta
                 weighted_sum += p.weight * config.NON_US_ASSUMED_BETA
-            # US ticker with NaN beta: exclude (data gap — do not assume)
-        if weighted_sum == 0.0 and not any(p.ticker in beta_map or "." in p.ticker for p in proposal.positions):
+            # US ticker with NaN beta: excluded from both numerator and denominator
+        valid_weight = sum(
+            p.weight for p in proposal.positions
+            if p.ticker in beta_map or "." in p.ticker
+        )
+        if valid_weight == 0:
             return float("nan")
-        return weighted_sum / total_weight
+        return weighted_sum / valid_weight
 
     def _enforce_beta(
         self,
@@ -255,25 +256,13 @@ class OpenAIRiskManager(BaseAgent):
                 us_weight * 100, non_us_weight * 100, config.NON_US_ASSUMED_BETA,
             )
             if regime == "BEAR" and adj_hi is not None and actual_beta > adj_hi:
-                logger.warning(
-                    "BEAR regime beta too high (%.2f > %.2f) — capping positions at 15%%",
+                # Beta is logged as informational only — do NOT force position caps in BEAR.
+                # In a 75-day competition, winning requires finding stocks that go up, not
+                # hiding in low-beta names that merely fall less. Let the LLM's conviction stand.
+                logger.info(
+                    "BEAR regime beta %.2f above target %.2f — logged only, no code enforcement "
+                    "(competition mandate: find what works, not what falls least)",
                     actual_beta, adj_hi,
-                )
-                positions = [
-                    Position(ticker=p.ticker, weight=min(p.weight, config.OVERBOUGHT_WEIGHT_CAP), rationale=p.rationale)
-                    for p in proposal.positions
-                ]
-                total = sum(p.weight for p in positions)
-                if total > 0:
-                    positions = [
-                        Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale)
-                        for p in positions
-                    ]
-                proposal = PortfolioProposal(
-                    positions=positions,
-                    reasoning=proposal.reasoning,
-                    confidence=proposal.confidence,
-                    learning_reflection=proposal.learning_reflection,
                 )
         return proposal
 

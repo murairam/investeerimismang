@@ -147,7 +147,7 @@ class PortfolioValidator:
                     "All positions were reduced to zero — this indicates a configuration error."
                 )
             positions = [
-                Position(ticker=p.ticker, weight=p.weight / final_total, rationale=p.rationale)
+                Position(ticker=p.ticker, weight=min(self.c["max_weight"], p.weight / final_total), rationale=p.rationale)
                 for p in positions
             ]
 
@@ -160,13 +160,14 @@ class PortfolioValidator:
 
     def round_to_whole_pct(self, proposal: PortfolioProposal) -> PortfolioProposal:
         """
-        Round all weights to whole percentages that sum to exactly 100%.
+        Round all weights to whole percentages preserving the intended total.
         Uses largest-remainder method to distribute rounding errors.
         """
         weights = [p.weight for p in proposal.positions]
         floored = [int(w * 100) for w in weights]
         remainders = [(w * 100 - floored[i], i) for i, w in enumerate(weights)]
-        deficit = 100 - sum(floored)
+        target_total = round(sum(weights) * 100)  # respect the LLM's intended total, not always 100
+        deficit = target_total - sum(floored)
         # Distribute remaining percentage points to positions with largest remainders
         for _, i in sorted(remainders, reverse=True)[:deficit]:
             floored[i] += 1

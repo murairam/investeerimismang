@@ -107,6 +107,35 @@ class AlphaSharkOrchestrator:
                 comm.get("natgas_price", float("nan")) if not math.isnan(comm.get("natgas_price", float("nan"))) else 0,
             )
 
+        # Step 1a-ii: EUR/USD FX context — adjust US equity signals for EUR base currency
+        # The game is EUR-denominated; US equity returns in USD overstate gains if EUR strengthens.
+        fx_ctx = self.fetcher.fetch_fx_context()
+        snapshot["fx_context"] = fx_ctx
+        eurusd_20d = fx_ctx.get("eurusd_20d", float("nan"))
+        eurusd_5d = fx_ctx.get("eurusd_5d", float("nan"))
+        eurusd_1d = fx_ctx.get("eurusd_1d", float("nan"))
+        if not math.isnan(eurusd_20d):
+            n_adjusted = 0
+            for c in snapshot["candidates"]:
+                if "." not in c["ticker"]:  # US equity (no dot = not European/Baltic)
+                    c["momentum"] -= eurusd_20d
+                    if not math.isnan(c.get("mom_5d", float("nan"))) and not math.isnan(eurusd_5d):
+                        c["mom_5d"] -= eurusd_5d
+                    vol = c.get("vol_20d", float("nan"))
+                    c["sharpe_20d"] = c["momentum"] / vol if (not math.isnan(vol) and vol > 0) else 0.0
+                    c["vs_index"] = c["momentum"] - snapshot["benchmark_return"]
+                    n_adjusted += 1
+            if not math.isnan(eurusd_1d):
+                for ticker in list(snapshot["returns_1d"].keys()):
+                    if "." not in ticker:
+                        snapshot["returns_1d"][ticker] -= eurusd_1d
+            logger.info(
+                "FX: EUR/USD 20d %+.2f%% — applied drag to %d US equity signals and returns_1d",
+                eurusd_20d * 100, n_adjusted,
+            )
+        else:
+            logger.warning("FX context unavailable — US returns not EUR-adjusted")
+
         # Step 1b: inject verified game equity into snapshot so agents see real performance
         _pa = _load_raw_paper_account()
         if _pa:
@@ -374,9 +403,13 @@ class AlphaSharkOrchestrator:
             logger.error("All 3 analysts failed — aborting run")
             sys.exit(1)
 
-        if strategist_proposal is None:
-            logger.warning("Strategist unavailable — using first available proposal as base")
-            strategist_proposal = active_proposals[0]
+        # base_proposal is passed to Devil and Risk Manager as the "Proposal A" anchor.
+        # Do NOT reassign strategist_proposal — that causes phantom debate duplicates where
+        # strategist_proposal and challenger_proposal point to the same object, inflating consensus.
+        strategist_failed = strategist_proposal is None
+        base_proposal = strategist_proposal if not strategist_failed else active_proposals[0]
+        if strategist_failed:
+            logger.warning("Strategist unavailable — using first available proposal as base for Risk Manager")
 
         if not challenger_proposal or not challenger_proposal.positions:
             logger.warning("GeminiChallenger unavailable — meta-analyst will use 2 proposals only")
@@ -384,7 +417,8 @@ class AlphaSharkOrchestrator:
         if not full_analyst_proposal or not full_analyst_proposal.positions:
             logger.warning("FullAnalyst unavailable — meta-analyst will use 2 proposals only")
 
-        logger.info("Strategist[gpt-5.4] produced %d positions", len(strategist_proposal.positions))
+        if strategist_proposal and strategist_proposal.positions:
+            logger.info("Strategist[gpt-5.4] produced %d positions", len(strategist_proposal.positions))
         if challenger_proposal and challenger_proposal.positions:
             logger.info(
                 "Challenger[%s→gemini-2.5-flash→%s] produced %d positions",
@@ -401,13 +435,15 @@ class AlphaSharkOrchestrator:
             )
 
         # Log 3-way overlap — high cross-proposal overlap = strong conviction signal
-        all_tickers = {p.ticker for p in strategist_proposal.positions}
+        all_tickers: set[str] = set()
+        if strategist_proposal and strategist_proposal.positions:
+            all_tickers |= {p.ticker for p in strategist_proposal.positions}
         if challenger_proposal and challenger_proposal.positions:
             all_tickers |= {p.ticker for p in challenger_proposal.positions}
         if full_analyst_proposal and full_analyst_proposal.positions:
             all_tickers |= {p.ticker for p in full_analyst_proposal.positions}
 
-        strat_set = {p.ticker for p in strategist_proposal.positions}
+        strat_set = {p.ticker for p in strategist_proposal.positions} if strategist_proposal and strategist_proposal.positions else set()
         chall_set = {p.ticker for p in challenger_proposal.positions} if challenger_proposal and challenger_proposal.positions else set()
         full_set = {p.ticker for p in full_analyst_proposal.positions} if full_analyst_proposal and full_analyst_proposal.positions else set()
         consensus = {t for t in all_tickers if sum([t in strat_set, t in chall_set, t in full_set]) >= 2}
@@ -423,13 +459,15 @@ class AlphaSharkOrchestrator:
             logger.info("Double consensus (2/3 agents): %s", ", ".join(sorted(consensus - triple)))
 
         # Step 3d: Cross-agent debate — lightweight second pass to surface disagreements
+        # Only include proposals that genuinely exist — no duplicates from fallback copies.
         debate_flags: dict[str, dict] = {}
-        live_proposals = [
-            ("strategist", self.strategist, strategist_proposal),
-            ("challenger", self.gemini_challenger, challenger_proposal),
-            ("full_analyst", self.full_analyst, full_analyst_proposal),
-        ]
-        live_proposals = [(name, agent, prop) for name, agent, prop in live_proposals if prop and prop.positions]
+        live_proposals = []
+        if strategist_proposal and strategist_proposal.positions:
+            live_proposals.append(("strategist", self.strategist, strategist_proposal))
+        if challenger_proposal and challenger_proposal.positions:
+            live_proposals.append(("challenger", self.gemini_challenger, challenger_proposal))
+        if full_analyst_proposal and full_analyst_proposal.positions:
+            live_proposals.append(("full_analyst", self.full_analyst, full_analyst_proposal))
         if len(live_proposals) >= 2:
             with ThreadPoolExecutor(max_workers=3) as dex:
                 debate_futures = {
@@ -491,7 +529,7 @@ class AlphaSharkOrchestrator:
         )
         try:
             bear_cases = self.devil.challenge(
-                strategist_proposal,
+                base_proposal,
                 devil_challenger,
                 snapshot,
             )
@@ -502,7 +540,7 @@ class AlphaSharkOrchestrator:
         logger.info("Calling OpenAIRiskManager (GPT-5.4) — synthesising 3 proposals …")
         final_proposal = self.risk_manager.propose(
             snapshot,
-            prior_proposal=strategist_proposal,
+            prior_proposal=base_proposal,
             challenger_proposal=challenger_proposal if (challenger_proposal and challenger_proposal.positions) else None,
             bear_cases=bear_cases if bear_cases else None,
             full_analyst_proposal=full_analyst_proposal if (full_analyst_proposal and full_analyst_proposal.positions) else None,

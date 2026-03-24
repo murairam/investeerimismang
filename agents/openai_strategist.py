@@ -11,6 +11,7 @@ import os
 from datetime import date
 from typing import Optional
 
+import openai
 from openai import APIConnectionError, APITimeoutError, OpenAI
 
 from agents.base_agent import BaseAgent
@@ -38,8 +39,8 @@ _REGIME_GUIDANCE = {
     ),
     "BEAR": (
         "Market regime: BEAR (SPX below 200d SMA by ≥2%). "
-        "Spread risk across 6–12 positions. Cap individual at 15%. "
-        "Favour lower-beta quality names. Diversification here is real risk management."
+        "Concentrate on 5–8 positions in whatever IS working — sectors/stocks with positive momentum regardless of regime. "
+        "In a 75-day competition, the goal is to find the winners in any environment, not to fall less than others."
     ),
     "NEUTRAL": (
         "Market regime: NEUTRAL (SPX near 200d SMA). "
@@ -93,8 +94,8 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - Favour stocks with the strongest risk-adjusted momentum (Sharpe_20d = 20d return / annualised vol).
 - High Sharpe means a smooth, persistent uptrend — much better than a volatile spike.
 - Prefer high-beta names in bull-market conditions — they amplify gains.
-- Regime-based position count: BULL target 5 (max 6), NEUTRAL 5–10, BEAR 6–12. You decide the exact count based on signal quality — more positions only if multiple names genuinely earn their slot. Daily rebalancing replaces diversification — rotate out losers tomorrow. No token 5% picks unless a name has a clear catalyst reason.
-- Diversify across at least 2 markets to reduce single-market risk.
+- Regime-based position count: BULL target 5 (max 6), NEUTRAL 5–10, BEAR 5–8. You decide the exact count based on signal quality — more positions only if multiple names genuinely earn their slot. Daily rebalancing replaces diversification — rotate out losers tomorrow. No token 5% picks unless a name has a clear catalyst reason.
+- Single-market concentration is fine if signals are concentrated there. Do NOT add positions in other markets just for geographic diversification.
 - Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them IF 5d momentum is strong (> 5%). If a stock is at its 52w high but 5d momentum is weak (< 3%) and MACD is flat or negative, the move is likely exhausted — treat it as a hold candidate, not a fresh entry at full size.
 - vs_index > 0 means the stock beat its own market — pure alpha signal.
 - MACD histogram: positive = accelerating momentum, negative = decelerating. Use it to distinguish fresh breakouts from fading moves.
@@ -187,7 +188,7 @@ class OpenAIStrategist(BaseAgent):
                 logger.warning("Attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
                 if attempt == self.MAX_RETRIES:
                     raise RuntimeError("OpenAIStrategist: exhausted retries") from exc
-            except (APIConnectionError, APITimeoutError) as exc:
+            except (APIConnectionError, APITimeoutError, openai.RateLimitError, openai.InternalServerError) as exc:
                 logger.warning("Strategist API attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
                 if attempt == self.MAX_RETRIES:
                     logger.error("Strategist failed after %d retries — no fallback", self.MAX_RETRIES)
@@ -228,6 +229,18 @@ class OpenAIStrategist(BaseAgent):
             f"{'5d Ret':>7} {'60d Ret':>8} {'vs Idx':>8} "
             f"{'52wH%':>7} {'Beta':>6} {'MACD':>7} {'Price':>10}"
         )
+        fx = snapshot.get("fx_context", {})
+        fx_line = ""
+        eurusd = fx.get("eurusd_price", float("nan"))
+        if not math.isnan(eurusd):
+            eurusd_20d = fx.get("eurusd_20d", float("nan"))
+            eurusd_1d = fx.get("eurusd_1d", float("nan"))
+            fx_line = (
+                f"EUR/USD: {eurusd:.4f} ({eurusd_20d:+.2%} 20d, {eurusd_1d:+.2%} 1d) — "
+                "US equity signals shown above are already EUR-adjusted (USD returns minus FX drag)"
+                if not math.isnan(eurusd_20d) else f"EUR/USD: {eurusd:.4f}"
+            )
+
         comm = snapshot.get("commodity_context", {})
         comm_line = ""
         brent = comm.get("brent_price", float("nan"))
@@ -258,6 +271,8 @@ class OpenAIStrategist(BaseAgent):
         portfolio_state_context = snapshot.get("portfolio_state_context", "")
         if portfolio_state_context:
             lines += ["", portfolio_state_context]
+        if fx_line:
+            lines.append(fx_line)
         if comm_line:
             lines.append(comm_line)
         # Sector rotation context

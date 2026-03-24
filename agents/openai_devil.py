@@ -12,6 +12,7 @@ import os
 import re
 from typing import Optional
 
+import openai
 from openai import APIConnectionError, APITimeoutError, BadRequestError, OpenAI
 
 import config
@@ -277,7 +278,7 @@ class OpenAIDevil:
 
         try:
             response = self.client.chat.completions.create(model=self.model, **call_kwargs)
-        except (BadRequestError, APIConnectionError, APITimeoutError) as exc:
+        except (BadRequestError, APIConnectionError, APITimeoutError, openai.RateLimitError, openai.InternalServerError) as exc:
             if self._openrouter_enabled and self.model != self.MODEL:
                 logger.warning("OpenRouter Devil request failed (%s). Falling back to OpenAI.", exc)
                 self._switch_to_openai_fallback()

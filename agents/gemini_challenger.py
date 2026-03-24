@@ -62,7 +62,7 @@ def _extract_json(text: str) -> dict:
 
 _REGIME_GUIDANCE = {
     "BULL": "BULL regime — TARGET 5 catalyst plays for maximum conviction. Only add a 6th if genuinely high-conviction. Vol_ratio > 1.5 + RSI > 75 = ideal breakout. Size top picks at 20-25%. No filler — diversification loses competitions.",
-    "BEAR": "BEAR regime — 6-12 positions. Hunt catalysts with low correlation to broad market. Cap each at 15%.",
+    "BEAR": "BEAR regime — 5-8 positions. Find stocks with positive momentum regardless of regime. Max-size the winners — going up in a bear market beats falling less.",
     "NEUTRAL": "NEUTRAL regime — 5-10 catalyst picks. Include a pick only if you have genuine conviction in its setup.",
 }
 
