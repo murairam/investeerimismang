@@ -357,6 +357,8 @@ class OpenAIFullAnalyst(BaseAgent):
             call_kwargs["max_tokens"] = 3000
             if "deepseek" in self.model.lower():
                 call_kwargs["extra_body"] = {"reasoning": {"enabled": True}}
+                call_kwargs["max_tokens"] = 10000  # reasoning mode needs ~8k tokens; 3k causes truncation + retries
+                call_kwargs["timeout"] = 400  # reasoning mode observed up to 357s; give headroom
         else:
             call_kwargs["response_format"] = {"type": "json_object"}
 
@@ -420,7 +422,7 @@ class OpenAIFullAnalyst(BaseAgent):
 
     def cross_check(
         self,
-        snapshot: MarketSnapshot,
+        _snapshot: MarketSnapshot,
         own_proposal: PortfolioProposal,
         peer_proposals: list[PortfolioProposal],
     ) -> dict:

@@ -999,37 +999,36 @@ Winners: DELL +4.4%, AKAM +3.6%, XOM +0.9% | Losers: LYB -2.5%, VLO -1.0%, OXY -
 
 ---
 
-## 2026-03-24 18:05:22
+## 2026-03-24 22:10:16
 
-**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.8% · VIX: 26.5 · S&P 500 20d: -4.6%
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 27.0 · S&P 500 20d: -4.8%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio +1.3% · Benchmark -0.1% · Alpha +1.4%
-Winners: DELL +5.1%, APA +5.0%, XOM +2.5% | Losers: PLTR -4.5%
+**Yesterday's P&L:** Portfolio +1.1% · Benchmark -0.4% · Alpha +1.4%
+Winners: DELL +7.0%, APA +4.1%, XOM +2.2% | Losers: PLTR -4.2%, AKAM -0.4%
 
 **Paper account:** Equity €10,202.00 (start €10,000) · Today +1.42% · Since start +2.02% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 81% · **Positions:** 6 · **Total weight:** 100.0%
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
 
-**Thesis:** I kept the strongest current winners and triple-consensus names (XOM, APA, CVX, DELL, AKAM), explicitly cutting PLTR and exiting the weakest lagging/low-breadth tech exposure while avoiding dead-money Baltic fillers like TKM1T.TL and weak-momentum EEG1T.TL. I added MPC as the best non-consensus catalyst to keep the portfolio concentrated in the still-dominant Energy rotation without breaching the learning constraint on medium rotation risk; portfolio beta likely remains moderate and below the soft NEUTRAL target, which is acceptable because rotation risk makes beta secondary today.
+**Thesis:** The synthesis keeps the five independently validated consensus names—DELL, APA, XOM, CVX, and AKAM—because recent portfolio history says to keep strong winners and cut the persistent laggard, which is PLTR with negative 5d momentum. I included one unique catalyst-style add, HPE, because it has cleaner acceleration and volume than PLTR and beats lower-volume energy alternatives like MPC/PSX on slot cost; portfolio remains rotation-led toward Energy but avoids adding beta filler given the cautious NEUTRAL regime and active rotation-risk override.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **XOM** | 18.0% | Triple-consensus validated winner and current holding that has been contributing to recent alpha; kept as a core energy leader, but capped below max because RSI is >79 near highs and vol_ratio 0.59 is weak. |
-| 2 | **APA** | 16.0% | Triple-consensus and strongest recent winner in the book, but repeat HIGH-risk flag plus retail crowding and very weak vol_ratio 0.47 require a sharp size cut versus prior 15% despite strong 5d momentum. |
-| 3 | **CVX** | 18.0% | Triple-consensus integrated energy exposure keeps us aligned with the dominant sector while reducing single-name risk versus APA; weight capped by overbought/low-volume profile and medium rotation-risk in Energy. |
-| 4 | **DELL** | 16.0% | Triple-consensus catalyst name and recent winner with strong 5d momentum, but repeat HIGH-risk flag and vol_ratio 0.75 trigger cautious sizing rather than a larger tech allocation in a weak-breadth sector. |
-| 5 | **AKAM** | 14.0% | Triple-consensus hold from current portfolio with positive 5d momentum; reduced from 20% because Tech breadth is only 11% and vol_ratio 0.46 does not justify prior size, but it still earns a slot over weaker Baltic fillers. |
-| 6 | **MPC** | 18.0% | Best unique addition from the full analyst: energy/refining exposure with strong Sharpe and positive momentum, low retail crowding, and better slot value than dead-money Baltic names; sized aggressively but below core consensus names due to medium risk and vol_ratio 0.59. |
+| 1 | **DELL** | 15.0% | Consensus pick and one of yesterday’s strongest actual winners with the best 5d acceleration (+14.6%) and strongest volume confirmation (vol_ratio 1.52); conviction is capped below top tier because Devil flagged HIGH risk and repeat-high-risk sizing caution applies. |
+| 2 | **APA** | 15.0% | Consensus pick and validated historical winner with very strong 5d momentum (+12.8%) in the leading Energy rotation, but conviction is reduced for extreme RSI 92, high retail crowding, medium sector rotation risk, and recent repeat HIGH-risk flag. |
+| 3 | **XOM** | 15.0% | Consensus pick and core holding to keep after recent outperformance; Energy remains the only sector with dominant breadth, and XOM still has positive 5d momentum with acceptable volume confirmation despite overbought conditions. |
+| 4 | **CVX** | 15.0% | Consensus pick and strong Energy leader with breadth support, positive 5d momentum, and better volume confirmation than many alternatives; overbought status prevents a 9-10 but it still earns a core slot. |
+| 5 | **AKAM** | 21.0% | Consensus pick and current holding worth keeping as a differentiated non-Energy winner while Tech breadth is weak; its 5d momentum is still solid (+7.2%), though sub-1.0 volume keeps conviction in the mid-high range. |
+| 6 | **HPE** | 19.0% | Best unique replacement for PLTR under the slot-cost rule: stronger acceleration (+9.3% 5d) and much better volume confirmation (1.34) than PLTR, giving the portfolio one catalyst-style non-consensus mover without relying on weak Tech laggards. |
 
 **Changes from yesterday:**
-- ➕ Added **MPC** at 18.0%
+- ➕ Added **HPE** at 19.0%
 - ➖ Removed **PLTR** (was 18.0%)
-- ▼ **XOM**: 25.0% → 18.0% (-7.0%)
-- ▲ **CVX**: 12.0% → 18.0% (+6.0%)
-- ▲ **DELL**: 10.0% → 16.0% (+6.0%)
-- ▼ **AKAM**: 20.0% → 14.0% (-6.0%)
+- ▲ **DELL**: 10.0% → 15.0% (+5.0%)
+- ▼ **XOM**: 25.0% → 15.0% (-10.0%)
+- ▲ **CVX**: 12.0% → 15.0% (+3.0%)
 
 ---
 

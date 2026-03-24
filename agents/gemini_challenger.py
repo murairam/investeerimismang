@@ -33,7 +33,10 @@ logger = logging.getLogger(__name__)
 
 def _extract_json(text: str) -> dict:
     """Parse JSON from model output, tolerating prose prefix/suffix and truncation."""
+    import re as _re
     text = text.strip()
+    # Strip thinking blocks emitted by reasoning models (Qwen3, Nemotron, etc.)
+    text = _re.sub(r"<think>.*?</think>", "", text, flags=_re.DOTALL).strip()
     # Strip markdown code fences (```json ... ```)
     if text.startswith("```"):
         text = text.split("```")[1]
@@ -453,7 +456,7 @@ class GeminiChallenger(BaseAgent):
                     "model": config.OPENROUTER_CHALLENGER_MODEL,
                     "temperature": 0.4,
                     "timeout": config.API_TIMEOUT_SECONDS,
-                    "max_tokens": 2500,
+                    "max_tokens": 6000,  # Nemotron outputs ~3k tokens of prose reasoning before JSON
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": effective_user_message},

@@ -19,24 +19,26 @@ Days remaining: 13
 - Latest day is still experimental / unverified.
 
 ## Best and worst day
-- Best alpha day: 2026-03-23 (+1.46%)
+- Best alpha day: 2026-03-23 (+1.44%)
 - Worst alpha day: 2026-03-22 (-0.89%)
 
 ## Structured learning state
-- Active hard rules: 0
+- Active hard rules: 1
 - Changed hard rules since yesterday: 0
-- Confidence notes: 2
+- Confidence notes: 3
 
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| APA | winner | 10 | +2.69% | 80% |
+| APA | winner | 10 | +2.37% | 80% |
 | AKRBP.OL | loser | 6 | -4.14% | 0% |
 | EQNR.OL | loser | 6 | -0.93% | 0% |
 | NESTE.HE | loser | 6 | -0.74% | 0% |
 
 ## Action plan until April 6
-- Collect at least 3-5 daily observations before changing the strategy rules.
+- Cap all positions at 15% until Tier 1 returns exceed Tier 3 returns over recent history.
+- Avoid overusing momentum rationales until their hit rate recovers above 40%.
+- Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.
 
 ## Daily routine
 - Run: `python main.py`

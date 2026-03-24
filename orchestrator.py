@@ -19,7 +19,11 @@ import logging
 import math
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    TimeoutError as FuturesTimeoutError,
+    as_completed,
+)
 from typing import Optional
 
 from agents.gemini_challenger import GeminiChallenger
@@ -29,6 +33,7 @@ from agents.openai_risk_manager import OpenAIRiskManager
 from agents.openai_strategist import OpenAIStrategist
 from config import (
     CASH_POLICY,
+    API_TIMEOUT_SECONDS,
     OPENAI_FALLBACK_MODEL,
     OPENROUTER_ANALYST_MODEL,
     OPENROUTER_CHALLENGER_MODEL,
@@ -65,6 +70,8 @@ from portfolio.models import PortfolioProposal
 from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
+_FULL_ANALYST_RESULT_TIMEOUT = 420  # DeepSeek reasoning mode: observed 324–357s, give 420s headroom
+_ENRICHMENT_TOTAL_TIMEOUT = API_TIMEOUT_SECONDS * 3
 
 
 def _display_name(ticker: str) -> str:
@@ -205,12 +212,12 @@ class AlphaSharkOrchestrator:
 
         # Steps 1c–1f: fetch news, earnings, insider trades, and trends IN PARALLEL
         top_tickers_50 = [c["ticker"] for c in snapshot["candidates"][:50]]
-        us_candidates = [c["ticker"] for c in snapshot["candidates"] if "." not in c["ticker"]]
+        us_top_candidates = [c["ticker"] for c in snapshot["candidates"][:120] if "." not in c["ticker"]]
         all_candidate_tickers = [c["ticker"] for c in snapshot["candidates"]]
 
         def _fetch_news():
             try:
-                items = fetch_candidate_news(all_candidate_tickers)
+                items = fetch_candidate_news(top_tickers_50)
                 logger.info("Fetched %d news headlines for %d tickers", len(items), len(all_candidate_tickers))
                 return "news_headlines", format_news_for_prompt(items)
             except Exception as exc:
@@ -253,7 +260,7 @@ class AlphaSharkOrchestrator:
 
         def _fetch_insider():
             try:
-                trades = fetch_insider_trades(us_candidates)
+                trades = fetch_insider_trades(us_top_candidates)
                 if trades:
                     from collections import Counter
                     _tc = Counter(t["ticker"] for t in trades)
@@ -283,16 +290,45 @@ class AlphaSharkOrchestrator:
                 logger.warning("Trends fetch failed (non-fatal): %s", exc)
                 return "trends_context", ""
 
-        with ThreadPoolExecutor(max_workers=4) as pool:
-            enrichment_futures = [
-                pool.submit(_fetch_news),
-                pool.submit(_fetch_earnings),
-                pool.submit(_fetch_insider),
-                pool.submit(_fetch_trends),
-            ]
-            for future in enrichment_futures:
+        enrichment_defaults = {
+            "news_headlines": "",
+            "earnings_warning": "",
+            "insider_context": "",
+            "trends_context": "",
+        }
+        enrichment_executor = ThreadPoolExecutor(max_workers=4)
+        future_to_name: dict = {}
+        try:
+            future_to_name = {
+                enrichment_executor.submit(_fetch_news): "news",
+                enrichment_executor.submit(_fetch_earnings): "earnings",
+                enrichment_executor.submit(_fetch_insider): "insider",
+                enrichment_executor.submit(_fetch_trends): "trends",
+            }
+            start_times = {future: time.perf_counter() for future in future_to_name}
+
+            for future in as_completed(future_to_name, timeout=_ENRICHMENT_TOTAL_TIMEOUT):
+                name = future_to_name[future]
                 key, value = future.result()
-                snapshot[key] = value
+                enrichment_defaults[key] = value
+                logger.info(
+                    "Enrichment '%s' completed in %.1fs",
+                    name,
+                    time.perf_counter() - start_times[future],
+                )
+        except FuturesTimeoutError:
+            logger.error(
+                "Enrichment stage exceeded %.1fs; continuing with available context only",
+                _ENRICHMENT_TOTAL_TIMEOUT,
+            )
+        finally:
+            for future, name in future_to_name.items():
+                if not future.done():
+                    future.cancel()
+                    logger.error("Enrichment '%s' did not finish and was cancelled", name)
+            enrichment_executor.shutdown(wait=False, cancel_futures=True)
+
+        snapshot.update(enrichment_defaults)
 
         # Enforce pre-game/live mode behavior and post-start parameter freeze
         mode_info = enforce_mode_and_freeze(snapshot["as_of_date"], game_start_date="2026-04-06")
@@ -371,7 +407,8 @@ class AlphaSharkOrchestrator:
         challenger_proposal = None
         full_analyst_proposal = None
         n_agents = sum(1 for f in [self.strategist, self.gemini_challenger, self.full_analyst] if f is not None)
-        with ThreadPoolExecutor(max_workers=n_agents) as executor:
+        executor = ThreadPoolExecutor(max_workers=n_agents)
+        try:
             future_start_times: dict = {}
             future_strategist = executor.submit(
                 self.strategist.propose, snapshot, prior_portfolio
@@ -392,32 +429,54 @@ class AlphaSharkOrchestrator:
                 time.perf_counter(),
             )
 
+            _agent_timeout = API_TIMEOUT_SECONDS * 3
+
             try:
-                strategist_proposal = future_strategist.result()
+                strategist_proposal = future_strategist.result(timeout=_agent_timeout)
                 label, started = future_start_times[future_strategist]
                 logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
+            except FuturesTimeoutError:
+                future_strategist.cancel()
+                label, started = future_start_times[future_strategist]
+                logger.error("[%s] timed out after %.1fs — continuing without Strategist", label, time.perf_counter() - started)
             except Exception as exc:
                 logger.exception("Strategist failed: %s", exc)
                 label, started = future_start_times[future_strategist]
                 logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
 
             try:
-                challenger_proposal = future_challenger.result()
+                challenger_proposal = future_challenger.result(timeout=_agent_timeout)
                 label, started = future_start_times[future_challenger]
                 logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
+            except FuturesTimeoutError:
+                future_challenger.cancel()
+                label, started = future_start_times[future_challenger]
+                logger.error("[%s] timed out after %.1fs — continuing without GeminiChallenger", label, time.perf_counter() - started)
             except Exception as exc:
                 logger.exception("GeminiChallenger failed: %s", exc)
                 label, started = future_start_times[future_challenger]
                 logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
 
             try:
-                full_analyst_proposal = future_full.result()
+                full_analyst_proposal = future_full.result(timeout=_FULL_ANALYST_RESULT_TIMEOUT)
                 label, started = future_start_times[future_full]
                 logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
+            except FuturesTimeoutError:
+                future_full.cancel()
+                label, started = future_start_times[future_full]
+                logger.error(
+                    "[%s] timed out after %.1fs (timeout %.1fs) — continuing without FullAnalyst",
+                    label,
+                    time.perf_counter() - started,
+                    _FULL_ANALYST_RESULT_TIMEOUT,
+                )
             except Exception as exc:
                 logger.exception("FullAnalyst failed: %s", exc)
+                future_full.cancel()
                 label, started = future_start_times[future_full]
                 logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
+        finally:
+            executor.shutdown(wait=False, cancel_futures=True)
 
         # Fail-safe: need at least one proposal
         active_proposals = [p for p in [strategist_proposal, challenger_proposal, full_analyst_proposal] if p is not None]
@@ -471,9 +530,10 @@ class AlphaSharkOrchestrator:
         consensus = {t for t in all_tickers if sum([t in strat_set, t in chall_set, t in full_set]) >= 2}
         triple = {t for t in all_tickers if sum([t in strat_set, t in chall_set, t in full_set]) == 3}
 
+        _n_active = sum(1 for s in [strat_set, chall_set, full_set] if s)
         logger.info(
-            "3-way consensus: %d triple picks, %d double picks across %d unique tickers",
-            len(triple), len(consensus) - len(triple), len(all_tickers),
+            "%d-way consensus: %d triple picks, %d double picks across %d unique tickers",
+            _n_active, len(triple), len(consensus) - len(triple), len(all_tickers),
         )
         if triple:
             logger.info("Triple consensus (all 3 agents): %s", ", ".join(sorted(triple)))
@@ -558,8 +618,9 @@ class AlphaSharkOrchestrator:
         except Exception as exc:
             logger.warning("Devil's advocate failed (non-fatal): %s", exc)
 
-        # Step 4: Meta-analyst synthesises all 3 proposals + bear cases
-        logger.info("Calling OpenAIRiskManager (GPT-5.4) — synthesising 3 proposals …")
+        # Step 4: Meta-analyst synthesises all available proposals + bear cases
+        _available = sum(1 for p in [strategist_proposal, challenger_proposal, full_analyst_proposal] if p and p.positions)
+        logger.info("Calling OpenAIRiskManager (GPT-5.4) — synthesising %d proposal(s) …", _available)
         final_proposal = self.risk_manager.propose(
             snapshot,
             prior_proposal=base_proposal,

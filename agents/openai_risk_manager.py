@@ -366,6 +366,7 @@ class OpenAIRiskManager(BaseAgent):
             return proposal
 
         # Pass A — Overbought-at-peak cap (Rule 18): code-enforced hard cap
+        overbought_capped_indices: set[int] = set()
         for i, pos in enumerate(kept):
             c = candidate_map.get(pos.ticker, {})
             rsi = c.get("rsi_14", float("nan"))
@@ -378,6 +379,7 @@ class OpenAIRiskManager(BaseAgent):
             )
             if overbought and pos.weight > config.OVERBOUGHT_WEIGHT_CAP:
                 kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale)
+                overbought_capped_indices.add(i)
                 logger.info(
                     "Overbought-peak cap: %s → 15%% (RSI %.0f, 52wH %+.1f%%)",
                     pos.ticker, rsi, pct_high * 100,
@@ -491,6 +493,15 @@ class OpenAIRiskManager(BaseAgent):
                 )
             return updated
 
+        # Re-enforce overbought cap after normalization — normalization inflates capped weights.
+        ob_excess = 0.0
+        for i, pos in enumerate(kept):
+            if i in overbought_capped_indices and pos.weight > config.OVERBOUGHT_WEIGHT_CAP:
+                ob_excess += pos.weight - config.OVERBOUGHT_WEIGHT_CAP
+                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale)
+        if ob_excess > 1e-9:
+            kept = _redistribute_excess(kept, ob_excess, overbought_capped_indices)
+
         # Re-enforce ticker caps after normalization to avoid cap drift.
         capped_excess = 0.0
         capped_indices: set[int] = set()
@@ -528,7 +539,8 @@ class OpenAIRiskManager(BaseAgent):
                     config.LOW_VOLUME_VOL_RATIO_THRESHOLD,
                 )
         if low_vol_indices:
-            kept = _redistribute_excess(kept, low_vol_excess, low_vol_indices)
+            # Overbought-capped positions must not receive excess — their cap would be violated again
+            kept = _redistribute_excess(kept, low_vol_excess, low_vol_indices | overbought_capped_indices)
 
         # Conditional sector cap when rotation risk is HIGH or MEDIUM.
         rotation_risk = snapshot.get("rotation_risk", {})
@@ -1126,12 +1138,22 @@ class OpenAIRiskManager(BaseAgent):
         avg_win = sum(avg_pos) / len(avg_pos) if avg_pos else 0.01
         avg_loss = sum(avg_neg) / len(avg_neg) if avg_neg else 0.01
         win_loss_ratio = avg_win / max(avg_loss, 1e-6)
+        clamped_ratio = max(0.5, min(5.0, win_loss_ratio))
+        # If the learning-derived ratio would make Kelly negative (f* = W - (1-W)/R ≤ 0),
+        # the data is too noisy to trust — fall back to a neutral 2.0 ratio.
+        _DEFAULT_WIN_LOSS = 2.0
+        if 0.55 - (0.45 / clamped_ratio) <= 0:
+            logger.warning(
+                "Learning-state win/loss ratio %.2f produces negative Kelly — using default %.1f",
+                clamped_ratio, _DEFAULT_WIN_LOSS,
+            )
+            clamped_ratio = _DEFAULT_WIN_LOSS
 
         validator = PortfolioValidator()
         proposal = validator.apply_kelly_sizing(
             proposal,
             win_rate=0.55,
-            win_loss_ratio=max(0.5, min(5.0, win_loss_ratio)),
+            win_loss_ratio=clamped_ratio,
             win_rate_by_ticker=win_rate_by_ticker,
         )
         logger.info("Applied Kelly sizing from conviction scores")

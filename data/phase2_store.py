@@ -88,8 +88,15 @@ def _backfill_paper_history_fingerprints() -> None:
             )
 
 
+_phase2_tables_ensured = False
+
+
 def ensure_phase2_tables() -> None:
-    """Create Phase 2 tables if they do not already exist."""
+    """Create Phase 2 tables if they do not already exist. Runs at most once per process."""
+    global _phase2_tables_ensured
+    if _phase2_tables_ensured:
+        return
+    _phase2_tables_ensured = True
     with get_db_cursor(commit=True) as cur:
         cur.execute(
             """

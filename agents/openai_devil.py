@@ -24,8 +24,13 @@ logger = logging.getLogger(__name__)
 
 
 def _extract_json(text: str) -> dict:
-    """Parse JSON from model output, tolerating prose prefix/suffix and truncation."""
+    """Parse JSON from model output, tolerating prose prefix/suffix and truncation.
+
+    Also strips Qwen3 <think>...</think> blocks which appear before the JSON answer.
+    """
     text = text.strip()
+    # Strip thinking blocks emitted by Qwen3 even when /no_think is sent
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
     try:
         return json.loads(text)
     except json.JSONDecodeError:
