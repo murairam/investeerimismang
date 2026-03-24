@@ -172,20 +172,20 @@ class OpenAIRiskManager(BaseAgent):
             for c in snapshot["candidates"]
             if not math.isnan(c.get("beta", float("nan")))
         }
-        total_weight = sum(p.weight for p in proposal.positions)
-        if total_weight == 0:
-            return float("nan")
         weighted_sum = 0.0
+        covered_weight = 0.0
         for p in proposal.positions:
             if p.ticker in beta_map:
                 weighted_sum += p.weight * beta_map[p.ticker]
+                covered_weight += p.weight
             elif "." in p.ticker:
                 # Non-US ticker with missing beta: assume structurally low S&P 500 beta
                 weighted_sum += p.weight * config.NON_US_ASSUMED_BETA
-            # US ticker with NaN beta: exclude (data gap — do not assume)
-        if weighted_sum == 0.0 and not any(p.ticker in beta_map or "." in p.ticker for p in proposal.positions):
+                covered_weight += p.weight
+            # US ticker with NaN beta: exclude from both numerator and denominator
+        if covered_weight == 0.0:
             return float("nan")
-        return weighted_sum / total_weight
+        return weighted_sum / covered_weight
 
     def _enforce_beta(
         self,
