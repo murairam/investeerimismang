@@ -456,7 +456,7 @@ class GeminiChallenger(BaseAgent):
                     "model": config.OPENROUTER_CHALLENGER_MODEL,
                     "temperature": 0.4,
                     "timeout": config.API_TIMEOUT_SECONDS,
-                    "max_tokens": 6000,  # Nemotron outputs ~3k tokens of prose reasoning before JSON
+                    "max_tokens": 8192,  # Nemotron observed up to 6k tokens; give headroom
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": effective_user_message},

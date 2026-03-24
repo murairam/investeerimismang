@@ -70,7 +70,7 @@ from portfolio.models import PortfolioProposal
 from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
-_FULL_ANALYST_RESULT_TIMEOUT = 420  # DeepSeek reasoning mode: observed 324–357s, give 420s headroom
+_FULL_ANALYST_RESULT_TIMEOUT = 540  # DeepSeek reasoning mode: observed up to 473s, give 540s headroom
 _ENRICHMENT_TOTAL_TIMEOUT = API_TIMEOUT_SECONDS * 3
 
 
