@@ -8,6 +8,7 @@ import tempfile
 from datetime import date
 from typing import Optional
 
+from data.phase2_store import upsert_paper_account_entry
 from portfolio.models import PortfolioProposal
 
 logger = logging.getLogger(__name__)
@@ -210,6 +211,10 @@ def sync_verified_positions(
             "last_equity": round(equity, 8),
         }
     )
+    try:
+        upsert_paper_account_entry(history_entry, initial_capital=initial_capital)
+    except Exception as exc:
+        logger.warning("Failed to mirror verified paper-account entry to DB (JSON backup still saved): %s", exc)
 
 
 def load_verified_as_proposal() -> "Optional[PortfolioProposal]":
@@ -341,6 +346,11 @@ def rebalance_to_proposal(
     if state.get("verified_weights"):
         save_data["verified_weights"] = state["verified_weights"]
     _save_raw(save_data)
+
+    try:
+        upsert_paper_account_entry(history_entry, initial_capital=initial_capital)
+    except Exception as exc:
+        logger.warning("Failed to mirror paper-account entry to DB (JSON backup still saved): %s", exc)
 
     return {
         "as_of_date": as_of_date,

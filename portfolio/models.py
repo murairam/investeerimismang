@@ -9,6 +9,7 @@ class Position:
     ticker: str
     weight: float       # fraction, e.g. 0.15 = 15%
     rationale: str
+    conviction: int = 5 # 1-10 score (added for Kelly criterion sizing)
 
 
 @dataclass

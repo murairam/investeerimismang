@@ -19,6 +19,7 @@ from data.game_availability import load_unavailable_tickers
 from data.learning_state import load_learning_state
 from data.symbol_master import summarize_symbol_master
 from data.universe_loader import load_game_universe
+from data.portfolio_store import load_performance_history, load_decision_history
 from data.verification_tracker import get_last_verification
 from data.yahoo_symbols import get_eodhd_budget_status
 
@@ -76,28 +77,30 @@ def main():
         print(f"   Average per run: ${total_cost/max(run_count,1):.4f}")
 
     # Learning Progress
-    portfolio_history = load_json("portfolio_history.json")
-    performance = portfolio_history.get("performance_history", [])
+    performance = load_performance_history(max_days=60)
+    valid_perf = [p for p in performance if p.get("alpha_1d") is not None]
 
-    if performance:
-        wins = len([p for p in performance if p.get("alpha_1d", 0) > 0])
-        losses = len([p for p in performance if p.get("alpha_1d", 0) < 0])
-        avg_alpha = sum(p.get("alpha_1d", 0) for p in performance) / len(performance)
+    if valid_perf:
+        wins = len([p for p in valid_perf if p.get("alpha_1d", 0) > 0])
+        losses = len([p for p in valid_perf if p.get("alpha_1d", 0) < 0])
+        avg_alpha = sum(p.get("alpha_1d", 0) for p in valid_perf) / len(valid_perf)
 
         print(f"\n📊 Performance Learning")
-        print(f"   Training days: {len(performance)}")
+        print(f"   Training days: {len(valid_perf)}")
         print(f"   Win days: {wins} | Loss days: {losses}")
-        print(f"   Win rate: {wins/max(len(performance),1)*100:.1f}%")
+        print(f"   Win rate: {wins/max(len(valid_perf),1)*100:.1f}%")
         print(f"   Average daily alpha: {avg_alpha:+.2%}")
     else:
         print(f"\n📊 Performance Learning")
         print(f"   No performance data yet (run python main.py)")
 
-    latest_record = (portfolio_history.get("history") or [])[-1] if portfolio_history.get("history") else None
+    history = load_decision_history(max_days=1)
+    latest_record = history[0] if history else None
     verification = get_last_verification()
     print(f"\n🗂️  Daily State")
-    print(f"   Latest AI proposal date: {portfolio_history.get('date') or 'N/A'}")
-    print(f"   Latest canonical provenance: {latest_record.get('provenance', 'N/A') if latest_record else 'N/A'}")
+    print(f"   Database backend: Supabase PostgreSQL ✅")
+    print(f"   Latest AI proposal date: {latest_record.get('date') if latest_record else 'N/A'}")
+    print(f"   Latest canonical provenance: {latest_record.get('provenance') if latest_record else 'N/A'}")
     print(f"   Latest verified date: {verification.get('last_date') or 'N/A'}")
 
     universe = load_game_universe()
@@ -167,7 +170,6 @@ def main():
     # Files Status
     print(f"\n📁 Data Files Status")
     files = [
-        ("portfolio_history.json", "Portfolio decisions & P&L"),
         ("paper_account.json", "Virtual trading ledger"),
         ("PREGAME_LOG.md", "Canonical pregame daily log"),
         ("PREGAME_RUNS.md", "Pregame debug run log"),

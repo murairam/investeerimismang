@@ -85,6 +85,8 @@ class MarketSnapshot(TypedDict):
     short_interest: dict  # {ticker: float | None} short % of float; None for Baltic/Nordic
     premarket_gap: dict   # {ticker: float | None} gap vs prior close; US=after-hours, EU=morning gap
     iv_proxy: dict        # {ticker: float | None} implied volatility; None if no options chain
+    earnings: list[dict]  # List of upcoming earnings events
+    pead_signals: list[dict] # Post-Earnings Announcement Drift signals
     sector_momentum: dict # {sector: {avg_mom_20d, avg_mom_5d, avg_rsi, breadth, count}}
     rotation_risk: dict  # {sector: {"level": "HIGH"|"MEDIUM", "reason": str}} for exhausted leading sectors
 
@@ -1344,4 +1346,7 @@ class DataFetcher:
             iv_proxy=iv_proxy,
             sector_momentum=sector_momentum,
             rotation_risk=rotation_risk,
+            earnings=[],
+            pead_signals=[],
+            commodity_context="",
         )

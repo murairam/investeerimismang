@@ -6,10 +6,15 @@ Tracks token usage and costs for each agent run.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import tempfile
 from datetime import date
 from typing import Optional
+
+from data.phase2_store import insert_api_cost
+
+logger = logging.getLogger(__name__)
 
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _COST_LOG_PATH = os.path.join(_ROOT, "cost_log.json")
@@ -103,6 +108,18 @@ def log_usage(
         json.dump(data, f, indent=2)
         tmp = f.name
     os.replace(tmp, _COST_LOG_PATH)
+
+    try:
+        insert_api_cost(
+            run_date=run_date,
+            agent=agent_name,
+            model=model,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            cost_usd=round(cost, 6),
+        )
+    except Exception as exc:
+        logger.warning("Failed to mirror cost row to database (JSON backup still saved): %s", exc)
 
     return cost
 

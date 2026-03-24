@@ -359,15 +359,24 @@ class OpenAIStrategist(BaseAgent):
             col_header = f"{'Date':<12} {'Portfolio':>10} {'Benchmark':>10} {'Alpha':>8}    Key movers"
             lines.append(col_header)
             lines.append("-" * len(col_header))
+
+            def _as_float_or_none(value: object) -> Optional[float]:
+                if value is None:
+                    return None
+                if isinstance(value, (int, float)):
+                    numeric = float(value)
+                    return None if math.isnan(numeric) else numeric
+                return None
+
             for entry in daily_entries:
-                p_ret = entry.get("portfolio_return_1d", float("nan"))
-                b_ret = entry.get("benchmark_return_1d", float("nan"))
-                a_ret = entry.get("alpha_1d", float("nan"))
+                p_ret = _as_float_or_none(entry.get("portfolio_return_1d"))
+                b_ret = _as_float_or_none(entry.get("benchmark_return_1d"))
+                a_ret = _as_float_or_none(entry.get("alpha_1d"))
                 pos_rets = entry.get("position_returns", {})
 
-                p_str = f"{p_ret:+.1%}" if not math.isnan(p_ret) else "N/A"
-                b_str = f"{b_ret:+.1%}" if not math.isnan(b_ret) else "N/A"
-                a_str = f"{a_ret:+.1%}" if not math.isnan(a_ret) else "N/A"
+                p_str = f"{p_ret:+.1%}" if p_ret is not None else "N/A"
+                b_str = f"{b_ret:+.1%}" if b_ret is not None else "N/A"
+                a_str = f"{a_ret:+.1%}" if a_ret is not None else "N/A"
 
                 movers = []
                 if pos_rets:
@@ -386,12 +395,14 @@ class OpenAIStrategist(BaseAgent):
 
             # Cumulative stats
             cum_port = sum(
-                e.get("portfolio_return_1d", 0.0) for e in daily_entries
-                if not math.isnan(e.get("portfolio_return_1d", float("nan")))
+                p_ret for p_ret in (
+                    _as_float_or_none(e.get("portfolio_return_1d")) for e in daily_entries
+                ) if p_ret is not None
             )
             cum_bench = sum(
-                e.get("benchmark_return_1d", 0.0) for e in daily_entries
-                if not math.isnan(e.get("benchmark_return_1d", float("nan")))
+                b_ret for b_ret in (
+                    _as_float_or_none(e.get("benchmark_return_1d")) for e in daily_entries
+                ) if b_ret is not None
             )
             cum_alpha = cum_port - cum_bench
             lines.append(
@@ -424,8 +435,9 @@ class OpenAIStrategist(BaseAgent):
             # Strategy adaptation signal
             if len(daily_entries) >= 2:
                 recent_alpha = [
-                    e.get("alpha_1d", float("nan")) for e in daily_entries[-3:]
-                    if not math.isnan(e.get("alpha_1d", float("nan")))
+                    a for a in (
+                        _as_float_or_none(e.get("alpha_1d")) for e in daily_entries[-3:]
+                    ) if a is not None
                 ]
                 if recent_alpha:
                     avg_alpha = sum(recent_alpha) / len(recent_alpha)
@@ -448,12 +460,12 @@ class OpenAIStrategist(BaseAgent):
             # Fallback: show old-style benchmark trend if no P&L data yet
             lines += ["", "## Recent benchmark trend (S&P 500 20d return over last runs)"]
             for entry in perf_history:
-                bret = entry.get("benchmark_return_20d", float("nan"))
-                bret_str = f"{bret:+.1%}" if not math.isnan(bret) else "N/A"
+                bret = _as_float_or_none(entry.get("benchmark_return_20d"))
+                bret_str = f"{bret:+.1%}" if bret is not None else "N/A"
                 lines.append(f"  {entry['date']}: S&P 500 20d = {bret_str}")
-            first_bret = perf_history[0].get("benchmark_return_20d", float("nan"))
-            last_bret = perf_history[-1].get("benchmark_return_20d", float("nan"))
-            if not (math.isnan(first_bret) or math.isnan(last_bret)):
+            first_bret = _as_float_or_none(perf_history[0].get("benchmark_return_20d"))
+            last_bret = _as_float_or_none(perf_history[-1].get("benchmark_return_20d"))
+            if first_bret is not None and last_bret is not None:
                 delta = last_bret - first_bret
                 trend = "improving" if delta > 0.005 else ("deteriorating" if delta < -0.005 else "flat")
                 lines.append(f"  Trend: benchmark momentum is {trend} ({delta:+.1%} over {len(perf_history)} days).")

@@ -1,5 +1,6 @@
 """
-Persist and load the latest portfolio proposal plus structured daily decision history.
+Persist and load portfolio proposals and structured daily decision history
+from a PostgreSQL database.
 """
 from __future__ import annotations
 
@@ -7,17 +8,18 @@ import json
 import logging
 import math
 import os
-import tempfile
+import psycopg2
+from psycopg2.extras import Json, RealDictCursor
+from contextlib import contextmanager
 from copy import deepcopy
-from typing import Optional
+from typing import Optional, Generator
 
+from dotenv import load_dotenv
 from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
 
-_STORE_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
-
-RATIONALE_TAGS = (
+RATIONALE_TAGS: tuple[str, ...] = (
     "momentum",
     "high_sharpe",
     "breakout",
@@ -32,41 +34,27 @@ RATIONALE_TAGS = (
 )
 
 
-def _safe_read() -> dict:
-    path = os.path.abspath(_STORE_PATH)
-    if not os.path.exists(path):
-        return {}
-    try:
-        with open(path, "r") as f:
-            return json.load(f)
-    except Exception as exc:
-        logger.warning("Could not load portfolio history: %s", exc)
-        return {}
+load_dotenv()
+_DB_URL = os.environ.get("SUPABASE_CONNECTION_STRING")
+_db_conn = None
 
+def _get_db_connection():
+    """Lazy-load a singleton database connection to avoid connection latency."""
+    global _db_conn
+    if _db_conn is None or _db_conn.closed:
+        if not _DB_URL:
+            raise ConnectionError("SUPABASE_CONNECTION_STRING is not set in the environment.")
+        _db_conn = psycopg2.connect(_DB_URL)
+    return _db_conn
 
-def _sanitize(obj):
-    """Recursively replace float NaN/Inf with None so json.dump produces valid JSON."""
-    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
-        return None
-    if isinstance(obj, dict):
-        return {k: _sanitize(v) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [_sanitize(v) for v in obj]
-    return obj
-
-
-def _safe_write(data: dict) -> None:
-    path = os.path.abspath(_STORE_PATH)
-    try:
-        dir_ = os.path.dirname(path)
-        with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp") as f:
-            json.dump(_sanitize(data), f, indent=2)
-            tmp = f.name
-        os.replace(tmp, path)
-        logger.info("Saved portfolio to %s", path)
-    except Exception as exc:
-        logger.warning("Could not save portfolio history: %s", exc)
-
+@contextmanager
+def get_db_cursor(commit: bool = False) -> Generator[psycopg2.extensions.cursor, None, None]:
+    """Provides a database cursor. Commits transaction if commit=True."""
+    conn = _get_db_connection()
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        yield cur
+    if commit:
+        conn.commit()
 
 def _portfolio_to_dict(proposal: PortfolioProposal, signal_map: Optional[dict[str, dict]] = None) -> dict:
     signal_map = signal_map or {}
@@ -87,41 +75,6 @@ def _portfolio_to_dict(proposal: PortfolioProposal, signal_map: Optional[dict[st
         "confidence": float(proposal.confidence),
         "learning_reflection": proposal.learning_reflection,
     }
-
-
-def _legacy_entry_from_root(data: dict) -> Optional[dict]:
-    if not data.get("date"):
-        return None
-
-    positions = data.get("positions", [])
-    performance = None
-    perf_history = data.get("performance_history", [])
-    for entry in reversed(perf_history):
-        if entry.get("date") == data.get("date"):
-            performance = deepcopy(entry)
-            break
-
-    return {
-        "date": data.get("date"),
-        "provenance": data.get("source", "ai_proposed"),
-        "final_portfolio": {
-            "positions": deepcopy(positions),
-            "reasoning": data.get("reasoning", ""),
-            "confidence": float(data.get("confidence", 0.5)),
-            "learning_reflection": data.get("learning_reflection", ""),
-        },
-        "performance": performance or {},
-        "signal_snapshot": {},
-        "validation": {},
-    }
-
-
-def _ensure_history(data: dict) -> list[dict]:
-    history = data.get("history")
-    if isinstance(history, list):
-        return history
-    legacy = _legacy_entry_from_root(data)
-    return [legacy] if legacy else []
 
 
 def _build_signal_map(signal_snapshot: Optional[dict]) -> dict[str, dict]:
@@ -207,85 +160,166 @@ def derive_rationale_tags(ticker: str, rationale: str, signal: Optional[dict] = 
 
 def load_last() -> Optional[PortfolioProposal]:
     """Load the most recent saved portfolio, or None if no history exists."""
-    data = _safe_read()
-    positions = [
-        Position(
-            ticker=p["ticker"],
-            weight=float(p["weight"]),
-            rationale=p.get("rationale", ""),
-        )
-        for p in data.get("positions", [])
-    ]
-    if not positions:
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("SELECT date, decision_metrics FROM daily_runs ORDER BY date DESC LIMIT 1")
+            latest_run = cur.fetchone()
+            if not latest_run:
+                return None
+
+            latest_date = latest_run["date"]
+            cur.execute("SELECT ticker, weight, rationale FROM portfolio_positions WHERE date = %s", (latest_date,))
+            positions_data = cur.fetchall()
+
+            positions = [Position(**p) for p in positions_data]
+            if not positions:
+                return None
+
+            proposal = PortfolioProposal(
+                positions=positions,
+                reasoning="Loaded from database.",
+                confidence=0.5,
+                learning_reflection="",
+            )
+            logger.info(
+                "Loaded previous portfolio (%d positions) from %s",
+                len(positions),
+                latest_date,
+            )
+            return proposal
+    except Exception as exc:
+        logger.error("Failed to load last portfolio from DB: %s", exc)
         return None
-    proposal = PortfolioProposal(
-        positions=positions,
-        reasoning=data.get("reasoning", ""),
-        confidence=float(data.get("confidence", 0.5)),
-        learning_reflection=data.get("learning_reflection", ""),
-    )
-    logger.info(
-        "Loaded previous portfolio (%d positions) from %s",
-        len(positions),
-        data.get("date", "?"),
-    )
-    return proposal
 
 
 def load_performance_history(max_days: int = 5) -> list[dict]:
-    """Load last N days of legacy performance records."""
-    data = _safe_read()
-    return data.get("performance_history", [])[-max_days:]
+    """Load last N days of performance records from the database."""
+    return [h.get("performance", {}) for h in load_decision_history(max_days)]
 
 
 def load_decision_history(max_days: Optional[int] = None) -> list[dict]:
-    """Load structured per-day decision records, falling back to legacy root data."""
-    data = _safe_read()
-    history = _ensure_history(data)
-    if max_days is not None:
-        history = history[-max_days:]
-    return deepcopy(history)
+    """Load structured per-day decision records from the database."""
+    query = """
+        SELECT r.date, r.source AS provenance, r.regime, r.signal_snapshot, r.decision_metrics,
+               r.bear_cases, r.benchmark_return_1d, r.portfolio_return_1d, r.alpha_1d
+        FROM daily_runs r
+        ORDER BY r.date DESC
+    """
+    if max_days:
+        query += f" LIMIT {int(max_days)}"
+
+    try:
+        with get_db_cursor() as cur:
+            cur.execute(query)
+            runs = cur.fetchall()
+            if not runs:
+                return []
+
+            dates = [run['date'] for run in runs]
+            placeholders = ','.join(['%s'] * len(dates))
+
+            cur.execute(f"SELECT date, ticker, weight, rationale, tags, return_1d FROM portfolio_positions WHERE date IN ({placeholders})", dates)
+            all_positions = cur.fetchall()
+
+            cur.execute(f"SELECT date, agent, ticker, weight, rationale, tags FROM agent_proposals WHERE date IN ({placeholders})", dates)
+            all_agent_proposals = cur.fetchall()
+
+            cur.execute(f"SELECT date, rank, total_participants FROM competition_standings WHERE date IN ({placeholders})", dates)
+            all_standings = cur.fetchall()
+
+            pos_by_date = {d: [] for d in dates}
+            for p in all_positions:
+                pos_by_date[p['date']].append(p)
+
+            agent_prop_by_date = {d: {} for d in dates}
+            for ap in all_agent_proposals:
+                agent_prop_by_date[ap['date']].setdefault(ap['agent'], []).append(ap)
+
+            standings_by_date = {s['date']: s for s in all_standings}
+
+            history = []
+            for run in reversed(runs):
+                run_date = run['date']
+                positions = pos_by_date.get(run_date, [])
+                agent_proposals = agent_prop_by_date.get(run_date, {})
+
+                record = {
+                    "date": run_date.isoformat(),
+                    "provenance": run.get('provenance'),
+                    "regime": run.get('regime'),
+                    "final_portfolio": {
+                        "positions": positions,
+                        "reasoning": "",
+                        "confidence": 0.5,
+                        "learning_reflection": "",
+                    },
+                    "strategist_proposal": {"positions": agent_proposals.get("strategist", [])},
+                    "challenger_proposal": {"positions": agent_proposals.get("challenger", [])},
+                    "full_analyst_proposal": {"positions": agent_proposals.get("full_analyst", [])},
+                    "signal_snapshot": run.get('signal_snapshot'),
+                    "decision_metrics": run.get('decision_metrics'),
+                    "bear_cases": run.get('bear_cases'),
+                    "competition_standing": standings_by_date.get(run_date),
+                    "performance": {
+                        "date": run_date.isoformat(),
+                        "portfolio_return_1d": run.get('portfolio_return_1d'),
+                        "benchmark_return_1d": run.get('benchmark_return_1d'),
+                        "alpha_1d": run.get('alpha_1d'),
+                        "position_returns": {p['ticker']: p.get('return_1d') for p in positions if p.get('return_1d') is not None}
+                    },
+                    "outcomes": {
+                        "1d": {
+                            "portfolio_return": run.get('portfolio_return_1d'),
+                            "benchmark_return": run.get('benchmark_return_1d'),
+                            "alpha": run.get('alpha_1d'),
+                            "position_returns": {p['ticker']: p.get('return_1d') for p in positions if p.get('return_1d') is not None}
+                        }
+                    }
+                }
+                history.append(record)
+            return history
+    except Exception as exc:
+        logger.error("Failed to load decision history from DB: %s", exc)
+        return []
 
 
 def load_yesterday_prices() -> dict:
     """Return saved close_prices from the last portfolio save, or empty dict."""
-    data = _safe_read()
-    return data.get("close_prices", {})
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("SELECT price_map FROM daily_runs WHERE price_map IS NOT NULL ORDER BY date DESC LIMIT 1")
+            result = cur.fetchone()
+            return result['price_map'] if result else {}
+    except Exception as exc:
+        logger.error("Failed to load yesterday's prices from DB: %s", exc)
+        return {}
 
 
 def save_competition_standing(rank: int, total: int, date: str) -> None:
     """Patch today's history record with competition rank and total participants."""
-    existing = _safe_read()
-    history = _ensure_history(existing)
-
-    standing = {
-        "rank": rank,
-        "total": total,
-        "percentile_from_top": round((rank - 1) / total * 100, 1) if total > 0 else None,
-        "date": date,
-    }
-
-    if history and history[-1].get("date") == date:
-        history[-1]["competition_standing"] = standing
-    elif history:
-        history[-1]["competition_standing"] = standing
-
-    existing["competition_standing"] = standing
-    existing["history"] = history
-    _safe_write(existing)
-    logger.info("Competition standing saved: rank %d/%d for %s", rank, total, date)
+    try:
+        with get_db_cursor(commit=True) as cur:
+            cur.execute("""
+                INSERT INTO competition_standings (date, rank, total_participants)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (date) DO UPDATE SET
+                    rank = EXCLUDED.rank,
+                    total_participants = EXCLUDED.total_participants;
+            """, (date, rank, total))
+        logger.info("Competition standing saved: rank %d/%d for %s", rank, total, date)
+    except Exception as exc:
+        logger.error("Failed to save competition standing to DB: %s", exc)
 
 
 def load_competition_standing_history(max_days: int = 10) -> list[dict]:
     """Return the last N days of competition standings recorded in history."""
-    data = _safe_read()
-    history = _ensure_history(data)
-    standings = []
-    for record in history[-max_days:]:
-        cs = record.get("competition_standing")
-        if cs and cs.get("rank") and cs.get("total"):
-            standings.append(cs)
-    return standings
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("SELECT date, rank, total_participants FROM competition_standings ORDER BY date DESC LIMIT %s", (max_days,))
+            return cur.fetchall()
+    except Exception as exc:
+        logger.error("Failed to load competition standing history from DB: %s", exc)
+        return []
 
 
 def load_last_known_participant_count() -> Optional[int]:
@@ -302,101 +336,32 @@ def save_verified(
     close_prices: Optional[dict] = None,
 ) -> None:
     """Save the user's actual game portfolio as verified source of truth."""
-    existing = _safe_read()
-    performance_history = existing.get("performance_history", [])
-    history = _ensure_history(existing)
-
-    def _clean_tags(raw_tags) -> list[str]:
-        if not isinstance(raw_tags, list):
-            return []
-        cleaned: list[str] = []
-        for tag in raw_tags:
-            if isinstance(tag, str) and tag in RATIONALE_TAGS and tag not in cleaned:
-                cleaned.append(tag)
-        return cleaned
-
-    previous_tags: dict[str, list[str]] = {}
-    for entry in existing.get("positions", []):
-        ticker = entry.get("ticker")
-        if isinstance(ticker, str):
-            tags = _clean_tags(entry.get("tags", []))
-            if tags:
-                previous_tags[ticker] = tags
-
-    previous_signal_map: dict[str, dict] = {}
-    if history:
-        latest_history = history[-1]
-        latest_positions = latest_history.get("final_portfolio", {}).get("positions", [])
-        for entry in latest_positions:
-            ticker = entry.get("ticker")
-            if isinstance(ticker, str):
-                tags = _clean_tags(entry.get("tags", []))
-                if tags and ticker not in previous_tags:
-                    previous_tags[ticker] = tags
-        signal_snapshot = latest_history.get("signal_snapshot", {})
-        if isinstance(signal_snapshot, dict):
-            previous_signal_map = _build_signal_map(signal_snapshot)
-
     final_positions = [
         {
             "ticker": p["ticker"],
             "weight": round(float(p["weight"]), 6),
             "rationale": (p.get("rationale") or f"verified from game portfolio {date}"),
-            "tags": (
-                _clean_tags(p.get("tags", []))
-                or derive_rationale_tags(
-                    p["ticker"],
-                    p.get("rationale") or f"verified from game portfolio {date}",
-                    previous_signal_map.get(p["ticker"], {}),
-                )
-                or previous_tags.get(p["ticker"], [])
-            ),
+            "tags": p.get("tags", []),
         }
         for p in positions
     ]
 
-    data: dict = {
-        "date": date,
-        "source": "verified",
-        "positions": final_positions,
-        "reasoning": existing.get("reasoning", "Verified game portfolio"),
-        "confidence": existing.get("confidence", 1.0),
-        "learning_reflection": existing.get("learning_reflection", ""),
-        "performance_history": performance_history,
-        "history": history,
-    }
+    try:
+        with get_db_cursor(commit=True) as cur:
+            cur.execute("""
+                INSERT INTO daily_runs (date, source, price_map) VALUES (%s, 'verified', %s)
+                ON CONFLICT (date) DO UPDATE SET source = 'verified', price_map = COALESCE(EXCLUDED.price_map, daily_runs.price_map)
+            """, (date, Json(close_prices) if close_prices else None))
 
-    record = {
-        "date": date,
-        "provenance": "verified",
-        "final_portfolio": {
-            "positions": deepcopy(final_positions),
-            "reasoning": data["reasoning"],
-            "confidence": float(data["confidence"]),
-            "learning_reflection": data["learning_reflection"],
-        },
-        "performance": {},
-        "signal_snapshot": {},
-        "validation": {"verified_override": True},
-    }
-
-    _upsert_history_record(data["history"], record)
-
-    if close_prices is not None:
-        data["close_prices"] = close_prices
-    elif "close_prices" in existing:
-        data["close_prices"] = existing["close_prices"]
-
-    _safe_write(data)
-    logger.info("Verified portfolio saved: %d positions for %s", len(positions), date)
-
-
-def _upsert_history_record(history: list[dict], record: dict) -> None:
-    if history and history[-1].get("date") == record.get("date"):
-        history[-1] = record
-    else:
-        history.append(record)
-    del history[:-60]
+            cur.execute("DELETE FROM portfolio_positions WHERE date = %s", (date,))
+            for pos in final_positions:
+                cur.execute("""
+                    INSERT INTO portfolio_positions (date, ticker, weight, rationale, tags)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (date, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags'])))
+        logger.info("Verified portfolio saved to DB: %d positions for %s", len(positions), date)
+    except Exception as exc:
+        logger.error("Failed to save verified portfolio to DB: %s", exc)
 
 
 def build_signal_snapshot(candidates: list[dict], tickers: set[str], earnings_warning: str = "") -> dict[str, dict]:
@@ -435,6 +400,22 @@ def build_signal_snapshot(candidates: list[dict], tickers: set[str], earnings_wa
     return snapshot
 
 
+def _normalize_signal_snapshot(
+    signal_snapshot: Optional[object],
+    tickers: set[str],
+    earnings_warning: str = "",
+) -> dict[str, dict]:
+    if isinstance(signal_snapshot, dict):
+        normalized: dict[str, dict] = {}
+        for ticker, payload in signal_snapshot.items():
+            if ticker in tickers and isinstance(payload, dict):
+                normalized[ticker] = payload
+        return normalized
+    if isinstance(signal_snapshot, list):
+        return build_signal_snapshot(signal_snapshot, tickers, earnings_warning=earnings_warning)
+    return {}
+
+
 def _build_decision_metrics(
     proposal: PortfolioProposal,
     prior_portfolio: Optional[PortfolioProposal],
@@ -468,88 +449,39 @@ def _build_decision_metrics(
 
 
 def _attach_outcomes_to_prior_record(
-    history: list[dict],
+    cur: psycopg2.extensions.cursor,
     current_date: str,
     daily_performance: Optional[dict],
     returns_lookup: Optional[dict[str, float]] = None,
 ) -> None:
-    if not history or not daily_performance:
+    if not daily_performance:
         return
 
-    prior_record = None
-    for record in reversed(history):
-        if record.get("date") != current_date:
-            prior_record = record
-            break
-    if prior_record is None:
+    cur.execute("SELECT date FROM daily_runs WHERE date < %s ORDER BY date DESC LIMIT 1", (current_date,))
+    prior_date_record = cur.fetchone()
+    if not prior_date_record:
         return
+    prior_date = prior_date_record['date']
 
-    prior_record["performance"] = {
-        "date": current_date,
-        "portfolio_return_1d": round(daily_performance.get("portfolio_return_1d", 0.0), 6),
-        "benchmark_return_1d": round(daily_performance.get("benchmark_return_1d", 0.0), 6),
-        "alpha_1d": round(daily_performance.get("alpha_1d", 0.0), 6),
-        "position_returns": {
-            t: round(r, 6) for t, r in daily_performance.get("position_returns", {}).items()
-        },
-    }
-    prior_record["outcomes"] = {
-        "1d": {
-            "portfolio_return": round(daily_performance.get("portfolio_return_1d", 0.0), 6),
-            "benchmark_return": round(daily_performance.get("benchmark_return_1d", 0.0), 6),
-            "alpha": round(daily_performance.get("alpha_1d", 0.0), 6),
-            "position_returns": {
-                t: round(r, 6) for t, r in daily_performance.get("position_returns", {}).items()
-            },
-        }
-    }
+    cur.execute("""
+        UPDATE daily_runs SET
+            portfolio_return_1d = %s,
+            benchmark_return_1d = %s,
+            alpha_1d = %s
+        WHERE date = %s
+    """, (
+        daily_performance.get("portfolio_return_1d"),
+        daily_performance.get("benchmark_return_1d"),
+        daily_performance.get("alpha_1d"),
+        prior_date
+    ))
 
     returns_lookup = returns_lookup or {}
-    decision_metrics = prior_record.get("decision_metrics", {})
-    new_returns = [returns_lookup[t] for t in decision_metrics.get("new_tickers", []) if t in returns_lookup]
-    dropped_returns = [returns_lookup[t] for t in decision_metrics.get("dropped_tickers", []) if t in returns_lookup]
-    selected_returns = [
-        returns_lookup[t] for t in decision_metrics.get("selected_tickers", []) if t in returns_lookup
-    ]
-    alt_returns = [
-        returns_lookup[item["ticker"]]
-        for item in decision_metrics.get("candidate_alternatives", [])
-        if item.get("ticker") in returns_lookup
-    ]
-    evaluation = {
-        "new_avg_return_1d": round(sum(new_returns) / len(new_returns), 6) if new_returns else None,
-        "dropped_avg_return_1d": round(sum(dropped_returns) / len(dropped_returns), 6) if dropped_returns else None,
-        "hold_vs_replace_1d": round((sum(new_returns) / len(new_returns)) - (sum(dropped_returns) / len(dropped_returns)), 6)
-        if new_returns and dropped_returns else None,
-        "selected_avg_return_1d": round(sum(selected_returns) / len(selected_returns), 6) if selected_returns else None,
-        "alternatives_avg_return_1d": round(sum(alt_returns) / len(alt_returns), 6) if alt_returns else None,
-        "slot_opportunity_cost_1d": round((sum(alt_returns) / len(alt_returns)) - (sum(selected_returns) / len(selected_returns)), 6)
-        if alt_returns and selected_returns else None,
-    }
-    prior_record["decision_evaluation"] = evaluation
-
-    # Per-agent virtual returns: what would each proposal have returned?
-    agent_returns: dict[str, Optional[float]] = {}
-    for agent_key, label in [
-        ("strategist_proposal", "strategist"),
-        ("challenger_proposal", "challenger"),
-        ("full_analyst_proposal", "full_analyst"),
-    ]:
-        proposal = prior_record.get(agent_key) or {}
-        positions = proposal.get("positions", [])
-        if not positions:
-            agent_returns[label] = None
-            continue
-        covered = [
-            (float(p.get("weight", 0.0)), float(returns_lookup[p["ticker"]]))
-            for p in positions
-            if p.get("ticker") in returns_lookup
-        ]
-        if len(covered) < 2:
-            agent_returns[label] = None
-            continue
-        agent_returns[label] = round(sum(w * r for w, r in covered), 6)
-    prior_record["agent_returns_1d"] = agent_returns
+    for ticker, ret in returns_lookup.items():
+        cur.execute("""
+            UPDATE portfolio_positions SET return_1d = %s
+            WHERE date = %s AND ticker = %s
+        """, (ret, prior_date, ticker))
 
 
 def save(
@@ -560,103 +492,52 @@ def save(
     daily_performance: Optional[dict] = None,
     decision_context: Optional[dict] = None,
 ) -> None:
-    """Save portfolio plus structured per-day decision record."""
-    existing = _safe_read()
+    """Save portfolio plus structured per-day decision record to the database."""
+    try:
+        with get_db_cursor(commit=True) as cur:
+            cur.execute("SELECT 1 FROM daily_runs WHERE date = %s AND source = 'verified'", (date,))
+            if cur.fetchone():
+                logger.info("Verified portfolio exists for %s — AI proposal will not overwrite", date)
+                _attach_outcomes_to_prior_record(cur, date, daily_performance, (decision_context or {}).get("returns_1d", {}))
+                return
 
-    is_verified_today = existing.get("date") == date and existing.get("source") == "verified"
-    already_saved_today = existing.get("date") == date and existing.get("positions")
-    if is_verified_today:
-        logger.info("Verified portfolio exists for %s — AI proposal will not overwrite it", date)
-    elif already_saved_today:
-        logger.info("Portfolio already saved for %s — skipping proposal overwrite, updating performance only", date)
+            _attach_outcomes_to_prior_record(cur, date, daily_performance, (decision_context or {}).get("returns_1d", {}))
 
-    performance_history: list[dict] = existing.get("performance_history", [])
-    if not performance_history or performance_history[-1].get("date") != date:
-        entry: dict = {"date": date}
-        if benchmark_return is not None:
-            entry["benchmark_return_20d"] = round(benchmark_return, 4)
-        if daily_performance is not None:
-            entry["portfolio_return_1d"] = round(daily_performance.get("portfolio_return_1d", 0.0), 6)
-            entry["benchmark_return_1d"] = round(daily_performance.get("benchmark_return_1d", 0.0), 6)
-            entry["alpha_1d"] = round(daily_performance.get("alpha_1d", 0.0), 6)
-            entry["position_returns"] = {
-                t: round(r, 6) for t, r in daily_performance.get("position_returns", {}).items()
-            }
-        performance_history.append(entry)
-    else:
-        entry = performance_history[-1]
-        if benchmark_return is not None:
-            entry["benchmark_return_20d"] = round(benchmark_return, 4)
-        if daily_performance is not None:
-            entry["portfolio_return_1d"] = round(daily_performance.get("portfolio_return_1d", 0.0), 6)
-            entry["benchmark_return_1d"] = round(daily_performance.get("benchmark_return_1d", 0.0), 6)
-            entry["alpha_1d"] = round(daily_performance.get("alpha_1d", 0.0), 6)
-            entry["position_returns"] = {
-                t: round(r, 6) for t, r in daily_performance.get("position_returns", {}).items()
-            }
-    performance_history = performance_history[-60:]
+            decision_context = decision_context or {}
+            signal_snapshot = _normalize_signal_snapshot(
+                decision_context.get("signal_snapshot"),
+                {p.ticker for p in proposal.positions},
+                earnings_warning=decision_context.get("earnings_warning", ""),
+            )
+            final_portfolio_dict = _portfolio_to_dict(proposal, signal_snapshot)
 
-    signal_snapshot = _build_signal_map((decision_context or {}).get("signal_snapshot"))
-    final_portfolio = _portfolio_to_dict(proposal, signal_snapshot)
-    history = _ensure_history(existing)
-    _attach_outcomes_to_prior_record(
-        history,
-        date,
-        daily_performance,
-        (decision_context or {}).get("returns_1d", {}),
-    )
-    decision_metrics = _build_decision_metrics(
-        proposal,
-        (decision_context or {}).get("prior_portfolio"),
-        candidate_alternatives=(decision_context or {}).get("candidate_alternatives"),
-    )
-    record = {
-        "date": date,
-        "provenance": "ai_proposed",
-        "final_portfolio": final_portfolio,
-        "strategist_proposal": _portfolio_to_dict((decision_context or {}).get("strategist_proposal"), signal_snapshot)
-        if (decision_context or {}).get("strategist_proposal") else None,
-        "challenger_proposal": _portfolio_to_dict((decision_context or {}).get("challenger_proposal"), signal_snapshot)
-        if (decision_context or {}).get("challenger_proposal") else None,
-        "full_analyst_proposal": _portfolio_to_dict((decision_context or {}).get("full_analyst_proposal"), signal_snapshot)
-        if (decision_context or {}).get("full_analyst_proposal") else None,
-        "regime": (decision_context or {}).get("regime"),
-        "bear_cases": deepcopy((decision_context or {}).get("bear_cases", {})),
-        "validation": deepcopy((decision_context or {}).get("validation", {})),
-        "signal_snapshot": signal_snapshot,
-        "decision_metrics": decision_metrics,
-        "performance": {},
-        "outcomes": {},
-    }
-    _upsert_history_record(history, record)
+            decision_metrics = _build_decision_metrics(
+                proposal,
+                decision_context.get("prior_portfolio"),
+                candidate_alternatives=decision_context.get("candidate_alternatives"),
+            )
 
-    if is_verified_today or already_saved_today:
-        data: dict = {
-            "date": existing["date"],
-            "positions": existing["positions"],
-            "reasoning": existing.get("reasoning", proposal.reasoning),
-            "confidence": existing.get("confidence", proposal.confidence),
-            "learning_reflection": existing.get("learning_reflection", proposal.learning_reflection),
-            "performance_history": performance_history,
-            "history": history,
-        }
-        if existing.get("source"):
-            data["source"] = existing["source"]
-    else:
-        data = {
-            "date": date,
-            "positions": final_portfolio["positions"],
-            "reasoning": proposal.reasoning,
-            "confidence": proposal.confidence,
-            "learning_reflection": proposal.learning_reflection,
-            "performance_history": performance_history,
-            "history": history,
-            "source": "ai_proposed",
-        }
+            cur.execute("""
+                INSERT INTO daily_runs (date, source, regime, signal_snapshot, decision_metrics, bear_cases, price_map)
+                VALUES (%s, 'ai_proposed', %s, %s, %s, %s, %s)
+                ON CONFLICT (date) DO UPDATE SET
+                    source = 'ai_proposed', regime = EXCLUDED.regime, signal_snapshot = EXCLUDED.signal_snapshot,
+                    decision_metrics = EXCLUDED.decision_metrics, bear_cases = EXCLUDED.bear_cases, price_map = EXCLUDED.price_map;
+            """, (date, decision_context.get("regime"), Json(signal_snapshot), Json(decision_metrics), Json(decision_context.get("bear_cases")), Json(close_prices)))
 
-    if close_prices is not None:
-        data["close_prices"] = close_prices
-    elif "close_prices" in existing:
-        data["close_prices"] = existing["close_prices"]
+            cur.execute("DELETE FROM portfolio_positions WHERE date = %s", (date,))
+            for pos in final_portfolio_dict.get("positions", []):
+                cur.execute("INSERT INTO portfolio_positions (date, ticker, weight, rationale, tags) VALUES (%s, %s, %s, %s, %s)",
+                            (date, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags'])))
 
-    _safe_write(data)
+            cur.execute("DELETE FROM agent_proposals WHERE date = %s", (date,))
+            for agent_key, agent_name in [("strategist_proposal", "strategist"), ("challenger_proposal", "challenger"), ("full_analyst_proposal", "full_analyst")]:
+                agent_proposal = decision_context.get(agent_key)
+                if agent_proposal:
+                    agent_dict = _portfolio_to_dict(agent_proposal, signal_snapshot)
+                    for pos in agent_dict.get("positions", []):
+                        cur.execute("INSERT INTO agent_proposals (date, agent, ticker, weight, rationale, tags) VALUES (%s, %s, %s, %s, %s, %s)",
+                                    (date, agent_name, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags'])))
+        logger.info("Saved AI proposal to DB for %s", date)
+    except Exception as exc:
+        logger.error("Failed to save portfolio to DB: %s", exc)

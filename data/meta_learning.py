@@ -19,20 +19,32 @@ def _avg(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
+def _to_float_or_none(value: object) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _collect_rows(history: list[dict]) -> tuple[list[dict], list[dict]]:
     daily_entries = []
     position_rows = []
     for day in history:
         outcome_1d = (day.get("outcomes", {}) or {}).get("1d", {})
         performance = day.get("performance", {})
-        alpha = outcome_1d.get("alpha", performance.get("alpha_1d"))
-        if alpha is None:
+        alpha_value = _to_float_or_none(outcome_1d.get("alpha", performance.get("alpha_1d")))
+        if alpha_value is None:
             continue
+        portfolio_return_value = _to_float_or_none(
+            outcome_1d.get("portfolio_return", performance.get("portfolio_return_1d", 0.0))
+        )
         daily_entries.append(
             {
                 "date": day.get("date"),
-                "alpha_1d": float(alpha),
-                "portfolio_return_1d": float(outcome_1d.get("portfolio_return", performance.get("portfolio_return_1d", 0.0))),
+                "alpha_1d": alpha_value,
+                "portfolio_return_1d": portfolio_return_value or 0.0,
             }
         )
         pos_returns = outcome_1d.get("position_returns", performance.get("position_returns", {})) or {}
@@ -40,12 +52,16 @@ def _collect_rows(history: list[dict]) -> tuple[list[dict], list[dict]]:
             ticker = pos.get("ticker")
             if ticker not in pos_returns:
                 continue
+            return_1d_value = _to_float_or_none(pos_returns[ticker])
+            if return_1d_value is None:
+                continue
+            weight_value = _to_float_or_none(pos.get("weight", 0.0))
             position_rows.append(
                 {
                     "date": day.get("date"),
                     "ticker": ticker,
-                    "weight": float(pos.get("weight", 0.0)),
-                    "return_1d": float(pos_returns[ticker]),
+                    "weight": weight_value or 0.0,
+                    "return_1d": return_1d_value,
                     "tags": pos.get("tags", []),
                 }
             )
@@ -58,15 +74,22 @@ def generate_meta_learning_report(target_date: str = "2026-04-06") -> dict:
     state = generate_learning_state()
     daily_entries, position_rows = _collect_rows(history)
     if len(daily_entries) < len(legacy_performance):
-        daily_entries = [
-            {
-                "date": item.get("date"),
-                "alpha_1d": float(item.get("alpha_1d", 0.0)),
-                "portfolio_return_1d": float(item.get("portfolio_return_1d", 0.0)),
-            }
-            for item in legacy_performance
-            if "portfolio_return_1d" in item
-        ]
+        fallback_entries = []
+        for item in legacy_performance:
+            if "portfolio_return_1d" not in item:
+                continue
+            alpha_value = _to_float_or_none(item.get("alpha_1d"))
+            if alpha_value is None:
+                continue
+            portfolio_return_value = _to_float_or_none(item.get("portfolio_return_1d"))
+            fallback_entries.append(
+                {
+                    "date": item.get("date"),
+                    "alpha_1d": alpha_value,
+                    "portfolio_return_1d": portfolio_return_value or 0.0,
+                }
+            )
+        daily_entries = fallback_entries
 
     today = date.today()
     deadline = datetime.strptime(target_date, "%Y-%m-%d").date()

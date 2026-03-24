@@ -24,6 +24,7 @@ from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot, sanitize_ticker
 from data.learning_state import load_learning_state
 from portfolio.models import PortfolioProposal, Position
+from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
 
@@ -40,63 +41,60 @@ Game ends 19 June 2026. Goal: highest absolute return, beating other participant
 This is a competition with 844 participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required. 15% drawdown is acceptable if it gives 40% upside potential — price risk for competition, not wealth management. Follow the signals. Do not apply any sector or stock bias — the data tells you what is working today. Competition rewards right-tail outcomes: concentrate in 5-6 names with real momentum catalysts.
 
 ## Synthesis rules
-**RULE #1 — MANDATORY: DO NOT EQUAL-WEIGHT. SIZE BY CONVICTION. EQUAL-WEIGHTING IS A FAILURE.**
-- Consensus + strong signals: 20–25%
-- Good signals, one model only: 12–18%
-- Diversifiers: 5–10%
-If you find yourself giving everything the same weight, you are not doing your job.
+**RULE #1 — MANDATORY: ASSIGN CONVICTION SCORES (1-10). DO NOT OUTPUT WEIGHTS.**
+- 10 = max conviction (multi-source consensus + strongest evidence)
+- 8-9 = high conviction
+- 5-7 = medium conviction
+- 1-4 = low conviction
+Position sizing is computed downstream by Kelly math.
 
 0. **Target position count by regime** — you decide the exact count based on signal quality:
-   - BULL: 5–6 positions. TARGET 5 positions at 20% each for maximum conviction. Only add a 6th if genuinely high-conviction at 15–17% and rebalance others. Do NOT add filler for diversification — diversification loses competitions.
+   - BULL: 5–6 positions. TARGET 5 positions with conviction 8–10. Only add a 6th if genuinely high-conviction (>=7). Do NOT add filler for diversification — diversification loses competitions.
    - NEUTRAL: 5–10 positions. Use your judgement — 5 if signals are concentrated, more if many names have strong setups.
-   - BEAR: 5–8 positions. Concentrate on the highest-conviction names — in a 75-day competition even a bear market has winners. Find what IS working and max-size it.
+   - BEAR: 6–12 positions. Spread risk more broadly.
    Build in order: (1) consensus picks, (2) best unique picks. Do NOT pad with weak picks to reach a higher count.
-1. **Consensus picks** (appear in 2+ of the 3 proposals): independently validated across different signal lenses. Give them higher conviction weights (18–25%) unless there is a specific risk reason not to. A pick found by BOTH the momentum strategist and the catalyst hunter is especially strong — it wins on two different signal dimensions.
+1. **Consensus picks** (appear in 2+ of the 3 proposals): independently validated across different signal lenses. Give them higher conviction scores (8–10) unless there is a specific risk reason not to.
 2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, vol_ratio, regime fit. Include the best ones.
 3. **Ignore weak unique picks**: if only one model picked something and its signals are mediocre, skip it. But do NOT skip picks just to keep the portfolio small — the game has no transaction costs.
-4. **Size by conviction** (see RULE #1 above): consensus 20–25%, single-model 12–18%, smaller positions 5–10%.
-5. **No market concentration constraint**: 100% in one market is legal and correct if that market has the best signals.
+4. **Score by conviction** (see RULE #1 above): consensus 8–10, strong single-model 6–8, diversifiers 3–6.
+5. **Check market concentration**: if >65% ends up in one market, redistribute.
 6. **Check regime fit and portfolio beta**:
    - You will be given the portfolio-weighted beta computed from the proposals.
-   - BEAR regime: concentrate on what IS working. Even in a falling market, winning requires finding the stocks/sectors that are going up, not hiding in low-beta names that merely fall less. Beta is informational only in BEAR — do NOT cap positions because of it.
+   - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
    - BULL regime: TARGET portfolio beta 1.6–2.0. Concentrate on high-beta names — sub-1.4 beta in BULL is underperforming the mandate.
     - NEUTRAL: target portfolio beta between 0.95 and 1.30 in normal conditions.
     - If the user context includes a ROTATION RISK ALERT (HIGH/MEDIUM) or clear sector-rotation leadership, treat NEUTRAL beta as a SOFT diagnostic, not a hard objective. Do NOT add high-beta filler names solely to raise beta if that dilutes the strongest rotation leaders.
 7. **Target regime-based position count**:
-    - BULL: 5–6 positions. Target 5 at ~20% each. No position < 5%. Cap strongest at 25%.
-    - NEUTRAL: 5–10 positions. Size by conviction — top picks 20–25%, smaller positions 5–10%.
-    - BEAR: 5–8 positions. Find what is working and size it aggressively — finishing 400th by hiding in low-beta names is not the goal.
+    - BULL: 5–6 positions. Target 5 with high conviction (8–10).
+    - NEUTRAL: 5–10 positions. Score by conviction only.
+    - BEAR: 6–12 positions. Broaden names, lower average conviction.
 9. **No sector cap**: The game enforces zero sector concentration limits. 100% in one sector is fully legal (e.g. 4 Energy stocks at 25% each). Concentrate wherever the alpha is.
 10. **Vol_ratio signal**: prefer positions where vol_ratio > 1.2 (high-volume confirmation). Be cautious about positions where vol_ratio < 0.7 (low-volume, potentially weak move).
 11. **Catalyst insight**: the challenger picks represent high-momentum catalysts. If the challenger's picks have strong signals (high short interest, premarket gap-up, IV spike + momentum), include at least 1–2 of them even if they're not consensus.
 12. **Do NOT penalize non-US stocks for missing Short Interest data.** Their IV column shows 20d annualized realized vol (not options IV) — treat it as a volatility level indicator. Evaluate European/Baltic stocks on volume breakouts, momentum, premarket gaps, and realized vol so we don't accidentally build a 100% US portfolio.
-13. **Earnings — pure opportunity**: Pre-earnings momentum is an OPPORTUNITY (academic: 3–8% drift in 2–4 days before announcement). PRE_EARNINGS_SETUP stocks with strong momentum should be sized by conviction like any other pick — up to 20–25%. Do NOT cap positions just because of upcoming earnings — in a 75-day competition, binary gaps can generate 10–20% gains that decide first place.
+13. **Earnings — opportunity AND risk**: Pre-earnings momentum in high-conviction stocks is an OPPORTUNITY (academic: 3–8% drift in 2–4 days before announcement). If the snapshot shows PRE_EARNINGS_SETUP, use high conviction (8–10). For earnings within 1 day (announcement tomorrow): cap conviction at 3 — binary gap risk is too close.
 14. **Dead-money exclusion rule**: in this competition, a stock is dead money if vol_ratio < {config.DEAD_MONEY_VOL_RATIO:.2f} and mom_5d <= +{config.DEAD_MONEY_MOM_5D:.1%}. Do NOT call a stock dead money if vol_ratio is above 1.0. HIGH-risk dead-money names should normally be excluded, not merely downsized.
 15. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
 16. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists. A 5-stock portfolio means each slot is scarce capital.
 17. **Regime-score selectivity inside NEUTRAL**: when regime_score is below 50 (CAUTIOUS), still hold exactly 5 names, but be more selective. Do NOT use caution as an excuse to add slow names; instead remove weak-acceleration names and keep only the sharpest 5.
-18. **Overbought-at-peak weight cap**: if a pick has RSI > {config.OVERBOUGHT_RSI_THRESHOLD} AND pct_from_52w_high ≥ −{config.OVERBOUGHT_HIGH_PCT:.0%} (at or within {config.OVERBOUGHT_HIGH_PCT:.0%} of its 52-week high), cap its weight at {config.OVERBOUGHT_WEIGHT_CAP:.0%} UNLESS vol_ratio > {config.OVERBOUGHT_VOLUME_EXCEPTION:.1f}. High RSI at the 52-week high without exceptional volume confirms exhaustion not breakout — even for consensus picks. If vol_ratio > {config.OVERBOUGHT_VOLUME_EXCEPTION:.1f} the volume surge justifies the full 20–25% conviction weight.
-19. **Devil flag respect**: The Devil's advocate labels each pick HIGH / MEDIUM / LOW risk. If the learning context reports that the Devil's HIGH-risk flags have been accurate (>60% of HIGH-flagged picks underperformed), treat HIGH-risk flags as a hard weight cap of {config.DEVIL_ACCURACY_CAP_WEIGHT:.0%} for that pick. If Devil accuracy is unknown or below 50%, use your own judgement.
+18. **Overbought-at-peak cap**: if a pick has RSI > {config.OVERBOUGHT_RSI_THRESHOLD} AND pct_from_52w_high ≥ −{config.OVERBOUGHT_HIGH_PCT:.0%} (at or within {config.OVERBOUGHT_HIGH_PCT:.0%} of its 52-week high), cap conviction at 6 UNLESS vol_ratio > {config.OVERBOUGHT_VOLUME_EXCEPTION:.1f}. High RSI near highs without exceptional volume confirms exhaustion risk.
+19. **Devil flag respect**: The Devil's advocate labels each pick HIGH / MEDIUM / LOW risk. If the learning context reports that Devil HIGH-risk flags are accurate (>60% underperformed), cap conviction at 4 for that pick. If Devil accuracy is unknown or below 50%, use your own judgement.
 20. **Learning-state constraints are mandatory**: Any ticker-level weight caps, hard rules, and bias-avoidance directives in the learning context are hard constraints for today's synthesis. Do not override them with consensus arguments.
 
 ## Hard constraints
 - 5 to 20 stocks.
-- Each position: 5% to 25%. NEVER output a weight above 0.25. If you output 0.30 for one position, the validator renormalizes ALL positions — not just that one — distorting your intended relative sizing across the entire portfolio.
-- Total weight: ≤ 100%.
 - No duplicate tickers.
+- Every position must include a conviction integer from 1 to 10.
 
 ## Output — JSON only
-CRITICAL: "weight" must be a DECIMAL between 0.05 and 0.25. NOT a percentage.
-  Correct: 0.20 (means 20%)
-  WRONG:   20   (do not write whole numbers)
-  WRONG:   0.30 (exceeds 0.25 maximum — renormalizes every other position too)
+CRITICAL: output `conviction` (1-10), not `weight`.
 
 {{
     "positions": [
         {{
             "ticker": "TICKER",
-            "weight": 0.22,
-            "rationale": "consensus/unique pick + one-sentence reason for this weight."
+            "conviction": 9,
+            "rationale": "consensus/unique pick + one-sentence reason for this conviction score."
         }}
     ],
     "reasoning": "2–3 sentences: what consensus existed, what catalyst picks you included, and portfolio beta vs target.",
@@ -132,7 +130,7 @@ class OpenAIRiskManager(BaseAgent):
         beta_targets = {
             "BULL": (None, 2.0),
             "NEUTRAL": (0.95, 1.30),
-            "BEAR": (None, None),  # no beta cap in BEAR — competition requires going up, not falling less
+            "BEAR": (None, 0.90),
         }
 
         last_error: Optional[Exception] = None
@@ -174,6 +172,9 @@ class OpenAIRiskManager(BaseAgent):
             for c in snapshot["candidates"]
             if not math.isnan(c.get("beta", float("nan")))
         }
+        total_weight = sum(p.weight for p in proposal.positions)
+        if total_weight == 0:
+            return float("nan")
         weighted_sum = 0.0
         for p in proposal.positions:
             if p.ticker in beta_map:
@@ -181,14 +182,10 @@ class OpenAIRiskManager(BaseAgent):
             elif "." in p.ticker:
                 # Non-US ticker with missing beta: assume structurally low S&P 500 beta
                 weighted_sum += p.weight * config.NON_US_ASSUMED_BETA
-            # US ticker with NaN beta: excluded from both numerator and denominator
-        valid_weight = sum(
-            p.weight for p in proposal.positions
-            if p.ticker in beta_map or "." in p.ticker
-        )
-        if valid_weight == 0:
+            # US ticker with NaN beta: exclude (data gap — do not assume)
+        if weighted_sum == 0.0 and not any(p.ticker in beta_map or "." in p.ticker for p in proposal.positions):
             return float("nan")
-        return weighted_sum / valid_weight
+        return weighted_sum / total_weight
 
     def _enforce_beta(
         self,
@@ -256,13 +253,25 @@ class OpenAIRiskManager(BaseAgent):
                 us_weight * 100, non_us_weight * 100, config.NON_US_ASSUMED_BETA,
             )
             if regime == "BEAR" and adj_hi is not None and actual_beta > adj_hi:
-                # Beta is logged as informational only — do NOT force position caps in BEAR.
-                # In a 75-day competition, winning requires finding stocks that go up, not
-                # hiding in low-beta names that merely fall less. Let the LLM's conviction stand.
-                logger.info(
-                    "BEAR regime beta %.2f above target %.2f — logged only, no code enforcement "
-                    "(competition mandate: find what works, not what falls least)",
+                logger.warning(
+                    "BEAR regime beta too high (%.2f > %.2f) — capping positions at 15%%",
                     actual_beta, adj_hi,
+                )
+                positions = [
+                    Position(ticker=p.ticker, weight=min(p.weight, config.OVERBOUGHT_WEIGHT_CAP), rationale=p.rationale)
+                    for p in proposal.positions
+                ]
+                total = sum(p.weight for p in positions)
+                if total > 0:
+                    positions = [
+                        Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale)
+                        for p in positions
+                    ]
+                proposal = PortfolioProposal(
+                    positions=positions,
+                    reasoning=proposal.reasoning,
+                    confidence=proposal.confidence,
+                    learning_reflection=proposal.learning_reflection,
                 )
         return proposal
 
@@ -851,11 +860,12 @@ class OpenAIRiskManager(BaseAgent):
             mom_5d = c.get("mom_5d", float("nan"))
             vol_ratio = c.get("vol_ratio", float("nan"))
             accel = (
-                f" | 5d {mom_5d:+.1%} | vol {vol_ratio:.2f}"
+                f",5d_mom:{mom_5d:+.1%},vol:{vol_ratio:.2f}"
                 if not math.isnan(mom_5d) and not math.isnan(vol_ratio)
                 else ""
             )
-            return f"{sanitize_ticker(p.ticker):<12} {p.weight:>7.1%}{tag}  {p.rationale[:40]}{accel}"
+            safe_rationale = p.rationale[:40].replace('|', '').strip()
+            return f"{sanitize_ticker(p.ticker)}|{p.weight:.1%}{tag}|{safe_rationale}{accel}"
 
         # Strategist proposal
         strat_total = sum(p.weight for p in strategist.positions)
@@ -863,8 +873,7 @@ class OpenAIRiskManager(BaseAgent):
             f"### Proposal A — GPT-5.4 Momentum Strategist ({len(strategist.positions)} positions, {strat_total:.0%} total)",
             f"Thesis: {strategist.reasoning}",
             "",
-            f"{'Ticker':<12} {'Weight':>8}  Rationale",
-            "-" * 65,
+            "Ticker|Weight|Rationale|Signals"
         ]
         for p in strategist.positions:
             lines.append(_fmt_row(p, consensus, candidate_map))
@@ -878,8 +887,7 @@ class OpenAIRiskManager(BaseAgent):
                 f"### Proposal B — Gemini Catalyst Hunter ({len(challenger.positions)} positions, {chall_total:.0%} total)",
                 f"Thesis: {challenger.reasoning}",
                 "",
-                f"{'Ticker':<12} {'Weight':>8}  Rationale",
-                "-" * 65,
+                "Ticker|Weight|Rationale|Signals"
             ]
             for p in challenger.positions:
                 lines.append(_fmt_row(p, consensus, candidate_map))
@@ -898,8 +906,7 @@ class OpenAIRiskManager(BaseAgent):
                 f"### Proposal C — GPT-5.4-nano Full Analyst ({len(full_analyst.positions)} positions, {full_total:.0%} total)",
                 f"Thesis: {full_analyst.reasoning}",
                 "",
-                f"{'Ticker':<12} {'Weight':>8}  Rationale",
-                "-" * 65,
+                "Ticker|Weight|Rationale|Signals"
             ]
             for p in full_analyst.positions:
                 lines.append(_fmt_row(p, consensus, candidate_map))
@@ -1016,8 +1023,8 @@ class OpenAIRiskManager(BaseAgent):
             "Every slot must beat the next-best alternative. In a 5-stock competition portfolio, do not keep a merely acceptable name if another proposal offered a cleaner, faster mover.",
             "CAUTIOUS regime-score handling: remain concentrated, but cut slow or dead-money names rather than padding with soft holdings.",
             "",
-            "Synthesise the final portfolio. Weight consensus picks higher. "
-            "For HIGH-RISK picks flagged above: reduce weight by at least 30% vs what you'd otherwise give, or exclude. "
+            "Synthesise the final portfolio. Score consensus picks higher (conviction), not weights. "
+            "For HIGH-RISK picks flagged above: reduce conviction by at least 3 points or exclude. "
             "Apply regime and concentration rules. Respond ONLY with the JSON object.",
         ]
         return "\n".join(lines)
@@ -1052,6 +1059,7 @@ class OpenAIRiskManager(BaseAgent):
         raw_positions = data.get("positions", [])
         if not isinstance(raw_positions, list):
             raise ValueError("Meta-analyst returned invalid positions format")
+
         min_stocks = config.GAME_CONSTRAINTS["min_stocks"]
         max_stocks = config.GAME_CONSTRAINTS["max_stocks"]
         if not (min_stocks <= len(raw_positions) <= max_stocks):
@@ -1059,16 +1067,9 @@ class OpenAIRiskManager(BaseAgent):
                 f"Meta-analyst returned {len(raw_positions)} positions; expected {min_stocks}-{max_stocks}"
             )
 
-        # Auto-fix: if any weight > 1.0 the model output percentages (e.g. 25 instead of 0.25)
-        if any(float(p["weight"]) > 1.0 for p in raw_positions):
-            logger.warning("Meta-analyst returned percentage weights — auto-converting to decimals")
-            for p in raw_positions:
-                p["weight"] = float(p["weight"]) / 100.0
-
         seen_tickers: set[str] = set()
-        min_weight = config.GAME_CONSTRAINTS["min_weight"]
-        max_weight = config.GAME_CONSTRAINTS["max_weight"]
         positions: list[Position] = []
+
         for raw in raw_positions:
             ticker = sanitize_ticker(str(raw.get("ticker", "")))
             if not ticker:
@@ -1076,18 +1077,63 @@ class OpenAIRiskManager(BaseAgent):
             if ticker in seen_tickers:
                 raise ValueError(f"Meta-analyst returned duplicate ticker: {ticker}")
             seen_tickers.add(ticker)
-            weight = float(raw.get("weight", 0.0))
-            bounded_weight = max(min_weight, min(max_weight, weight))
+
+            conviction_raw = raw.get("conviction")
+            if conviction_raw is None:
+                raise ValueError(f"Meta-analyst missing conviction for {ticker}")
+            conviction = int(conviction_raw)
+            conviction = max(1, min(10, conviction))
+
             positions.append(
                 Position(
                     ticker=ticker,
-                    weight=bounded_weight,
+                    weight=0.0,  # Kelly sizing fills this
                     rationale=str(raw.get("rationale", "")),
+                    conviction=conviction,
                 )
             )
-        return PortfolioProposal(
+
+        proposal = PortfolioProposal(
             positions=positions,
             reasoning=data.get("reasoning", ""),
             confidence=float(data.get("confidence", 0.5)),
             learning_reflection=data.get("learning_reflection", ""),
         )
+
+        learning_state = load_learning_state()
+        winners = learning_state.get("validated_winners", [])
+        win_rate_by_ticker: dict[str, float] = {}
+        for item in winners:
+            if not isinstance(item, dict):
+                continue
+            ticker = sanitize_ticker(str(item.get("ticker", "")))
+            hit_rate = item.get("hit_rate")
+            if ticker and isinstance(hit_rate, (float, int)):
+                win_rate_by_ticker[ticker] = float(hit_rate)
+
+        rationale_stats = learning_state.get("rationale_stats", {})
+        avg_pos = []
+        avg_neg = []
+        for stats in rationale_stats.values():
+            if not isinstance(stats, dict):
+                continue
+            avg = stats.get("avg_return_1d")
+            if isinstance(avg, (float, int)):
+                if avg > 0:
+                    avg_pos.append(float(avg))
+                elif avg < 0:
+                    avg_neg.append(abs(float(avg)))
+        avg_win = sum(avg_pos) / len(avg_pos) if avg_pos else 0.01
+        avg_loss = sum(avg_neg) / len(avg_neg) if avg_neg else 0.01
+        win_loss_ratio = avg_win / max(avg_loss, 1e-6)
+
+        validator = PortfolioValidator()
+        proposal = validator.apply_kelly_sizing(
+            proposal,
+            win_rate=0.55,
+            win_loss_ratio=max(0.5, min(5.0, win_loss_ratio)),
+            win_rate_by_ticker=win_rate_by_ticker,
+        )
+        logger.info("Applied Kelly sizing from conviction scores")
+
+        return proposal

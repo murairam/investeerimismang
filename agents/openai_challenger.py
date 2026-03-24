@@ -12,7 +12,6 @@ import os
 from datetime import date
 from typing import Optional
 
-import openai
 from openai import APIConnectionError, APITimeoutError, BadRequestError, OpenAI
 
 from agents.base_agent import BaseAgent
@@ -62,7 +61,7 @@ def _extract_json(text: str) -> dict:
 
 _REGIME_GUIDANCE = {
     "BULL": "BULL regime — TARGET 5 positions for maximum conviction. Only add a 6th if genuinely high-conviction. Push top picks to 20–25%. 5 names at 20% each is ideal. Do NOT add filler for diversification — diversification loses competitions.",
-    "BEAR": "BEAR regime — 5–8 positions. Find what is going up and concentrate there. No position caps — size by conviction. Earnings catalysts are opportunities, not risks.",
+    "BEAR": "BEAR regime — 6–12 positions. Spread risk broadly. Cap individual positions at 15%. Prefer names with earnings visibility.",
     "NEUTRAL": "NEUTRAL regime — 5–10 positions. Quality over quantity — only add a position if signals are genuinely compelling.",
 }
 
@@ -165,7 +164,7 @@ class OpenAIFullAnalyst(BaseAgent):
                     proposal.confidence * 100,
                 )
                 return proposal
-            except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError, openai.RateLimitError, openai.InternalServerError) as exc:
+            except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError) as exc:
                 logger.warning("FullAnalyst attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
                 if attempt == self.MAX_RETRIES:
                     logger.warning("FullAnalyst exhausted retries — returning empty proposal")
@@ -208,13 +207,7 @@ class OpenAIFullAnalyst(BaseAgent):
         if not ranked:
             ranked = snapshot.get("candidates", [])
 
-        header = (
-            f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d Ret':>8} {'Sharpe':>7} "
-            f"{'5d Ret':>7} {'60d Ret':>8} {'RSI':>6} {'vs Idx':>8} {'52wH%':>7} "
-            f"{'Beta':>6} {'VolR':>6} {'MACD':>7} {'ATR%':>6} "
-            f"{'ShrtInt':>8} {'PreMkt':>8} {'IV':>7} {'DivYld':>7} "
-            f"{'AnaRtg':>7} {'AnaUp%':>8} {'Price':>10}"
-        )
+        header = "Ticker,Market,Sector,20dRet,Sharpe,5dRet,60dRet,RSI,vsIdx,52wH%,Beta,VolR,MACD,ATR%,ShrtInt,PreMkt,IV,DivYld,AnaRtg,AnaUp%,Price"
 
         comm = snapshot.get("commodity_context", {})
         comm_line = ""
@@ -286,8 +279,7 @@ class OpenAIFullAnalyst(BaseAgent):
             "ShrtInt = short % of float (N/A for Baltic/Nordic). PreMkt = premarket gap. IV = implied vol or realized HV fallback.",
             "AnaRtg: analyst consensus 1=StrongBuy→5=StrongSell. AnaUp%: implied upside to mean target. High momentum + positive upside = conviction. High momentum + negative upside = stretched/crowded.",
             "",
-            header,
-            "-" * len(header),
+            header
         ]
 
         def fmt(v: float, fmt_str: str = ".1%") -> str:
@@ -303,31 +295,21 @@ class OpenAIFullAnalyst(BaseAgent):
             pm = premarket_gap.get(t)
             iv = iv_proxy.get(t)
             lines.append(
-                f"{safe_ticker:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
-                f"{fmt(c['momentum']):>8} "
-                f"{fmt(c['sharpe_20d'], '.2f'):>7} "
-                f"{fmt(c['mom_5d']):>7} "
-                f"{fmt(c['mom_60d']):>8} "
-                f"{fmt(c['rsi_14'], '.1f'):>6} "
-                f"{fmt(c['vs_index']):>8} "
-                f"{fmt(c['pct_from_52w_high']):>7} "
-                f"{fmt(c['beta'], '.2f'):>6} "
-                f"{fmt(c['vol_ratio'], '.2f'):>6} "
-                f"{fmt(c.get('macd_hist', float('nan'))):>7} "
-                f"{fmt(c.get('atr_pct', float('nan'))):>6} "
-                f"{fmt_opt(si, '.1%'):>8} "
-                f"{fmt_opt(pm, '+.1%'):>8} "
-                f"{fmt_opt(iv, '.2f'):>7} "
-                f"{fmt(c.get('dividend_yield', float('nan'))):>7} "
-                f"{fmt(c.get('analyst_rating', float('nan')), '.1f'):>7} "
-                f"{fmt(c.get('analyst_upside', float('nan'))):>8} "
-                f"{c['last_price']:>10.2f}"
+                f"{safe_ticker},{c['market']},{c.get('sector', '?')},"
+                f"{fmt(c['momentum'])},{fmt(c['sharpe_20d'], '.2f')},"
+                f"{fmt(c['mom_5d'])},{fmt(c['mom_60d'])},{fmt(c['rsi_14'], '.1f')},"
+                f"{fmt(c['vs_index'])},{fmt(c['pct_from_52w_high'])},"
+                f"{fmt(c['beta'], '.2f')},{fmt(c['vol_ratio'], '.2f')},"
+                f"{fmt(c.get('macd_hist', float('nan')))},{fmt(c.get('atr_pct', float('nan')))},"
+                f"{fmt_opt(si, '.1%')},{fmt_opt(pm, '+.1%')},{fmt_opt(iv, '.2f')},"
+                f"{fmt(c.get('dividend_yield', float('nan')))},{fmt(c.get('analyst_rating', float('nan')), '.1f')},"
+                f"{fmt(c.get('analyst_upside', float('nan')))},{c['last_price']:.2f}"
             )
 
         if prior_proposal and prior_proposal.positions:
             lines += ["", "Yesterday's holdings (for continuity reference):"]
             for pos in prior_proposal.positions:
-                lines.append(f"  {sanitize_ticker(pos.ticker):<12} {pos.weight:.1%}")
+                lines.append(f"{sanitize_ticker(pos.ticker)},{pos.weight:.1%}")
 
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]
@@ -380,7 +362,7 @@ class OpenAIFullAnalyst(BaseAgent):
 
         try:
             response = self.client.chat.completions.create(model=self.model, **call_kwargs)
-        except (BadRequestError, APIConnectionError, APITimeoutError, openai.RateLimitError, openai.InternalServerError) as exc:
+        except (BadRequestError, APIConnectionError, APITimeoutError) as exc:
             if self._openrouter_enabled and self.model != self.MODEL:
                 logger.warning("OpenRouter FullAnalyst request failed (%s). Falling back to OpenAI.", exc)
                 self._switch_to_openai_fallback()

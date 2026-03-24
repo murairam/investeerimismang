@@ -41,7 +41,13 @@ from data.learning_state import load_learning_state
 from data.learning_report import generate_pregame_learning_report
 from data.meta_learning import generate_meta_learning_report, detect_strategy_decay
 from data.mode_guard import enforce_mode_and_freeze, generate_live_handoff_if_due
-from data.earnings_fetcher import fetch_upcoming_earnings, format_earnings_opportunity, format_earnings_warning
+from data.earnings_fetcher import (
+    fetch_upcoming_earnings,
+    format_earnings_opportunity,
+    format_earnings_warning,
+    scan_pead_candidates,
+    format_pead_signals,
+)
 from data.news_fetcher import fetch_candidate_news, format_news_for_prompt
 from data.insider_fetcher import fetch_insider_trades, format_insider_context
 from data.trends_fetcher import fetch_search_interest, format_trends_context
@@ -213,20 +219,36 @@ class AlphaSharkOrchestrator:
 
         def _fetch_earnings():
             try:
+                # 1. Upcoming earnings
                 earnings = fetch_upcoming_earnings(top_tickers_50)
+                snapshot["earnings"] = earnings # Store raw data
+                
                 if earnings:
                     logger.info("Earnings within 7 days: %s",
                                 ", ".join(f"{e['ticker']} {e['earnings_date']}" for e in earnings))
+                
                 candidates = snapshot["candidates"]
                 opportunity_text = format_earnings_opportunity(candidates, earnings)
                 warning_text = format_earnings_warning(earnings, candidates)
+                
                 if opportunity_text:
                     logger.info("Pre-earnings opportunities identified: %s",
                                 ", ".join(e["ticker"] for e in earnings))
-                combined = "\n".join(part for part in [opportunity_text, warning_text] if part)
+
+                # 2. PEAD (Post-Earnings Announcement Drift)
+                pead_signals = scan_pead_candidates(top_tickers_50)
+                snapshot["pead_signals"] = pead_signals # Store raw data
+                pead_text = format_pead_signals(pead_signals)
+                if pead_text:
+                    logger.info("PEAD opportunities identified: %s", 
+                                ", ".join(s['ticker'] for s in pead_signals))
+
+                combined = "\n".join(part for part in [pead_text, opportunity_text, warning_text] if part)
                 return "earnings_warning", combined
             except Exception as exc:
                 logger.warning("Earnings fetch failed (non-fatal): %s", exc)
+                snapshot["earnings"] = []
+                snapshot["pead_signals"] = []
                 return "earnings_warning", ""
 
         def _fetch_insider():
@@ -666,9 +688,9 @@ class AlphaSharkOrchestrator:
 
         signal_tickers = {
             pos.ticker for pos in final_proposal.positions
-        } | {
-            pos.ticker for pos in strategist_proposal.positions
         } | (
+            {pos.ticker for pos in strategist_proposal.positions} if strategist_proposal and strategist_proposal.positions else set()
+        ) | (
             {pos.ticker for pos in challenger_proposal.positions} if challenger_proposal and challenger_proposal.positions else set()
         ) | (
             {pos.ticker for pos in full_analyst_proposal.positions} if full_analyst_proposal and full_analyst_proposal.positions else set()

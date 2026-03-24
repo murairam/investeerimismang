@@ -40,6 +40,15 @@ def _max_drawdown(equity_curve: list[float]) -> float:
     return abs(max_dd)
 
 
+def _to_float_or_none(value: object) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def generate_pregame_learning_report(target_date: str = "2026-04-06") -> dict:
     history = load_decision_history(max_days=60)
     legacy_performance = load_performance_history(max_days=60)
@@ -66,15 +75,21 @@ def generate_pregame_learning_report(target_date: str = "2026-04-06") -> dict:
             }
         )
     if len(daily_entries) < len(legacy_performance):
-        daily_entries = [
-            {
-                "date": item.get("date"),
-                "alpha_1d": float(item.get("alpha_1d", 0.0)),
-                "position_returns": item.get("position_returns", {}),
-            }
-            for item in legacy_performance
-            if "alpha_1d" in item
-        ]
+        fallback_entries = []
+        for item in legacy_performance:
+            if "alpha_1d" not in item:
+                continue
+            alpha_value = _to_float_or_none(item.get("alpha_1d"))
+            if alpha_value is None:
+                continue
+            fallback_entries.append(
+                {
+                    "date": item.get("date"),
+                    "alpha_1d": alpha_value,
+                    "position_returns": item.get("position_returns", {}),
+                }
+            )
+        daily_entries = fallback_entries
 
     wins = [entry for entry in daily_entries if entry["alpha_1d"] > 0]
     losses = [entry for entry in daily_entries if entry["alpha_1d"] < 0]

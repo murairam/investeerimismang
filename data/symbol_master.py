@@ -8,6 +8,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 
+from data.phase2_store import load_ticker_records, upsert_ticker_records
 from data.universe_loader import load_game_universe
 from data.yahoo_symbols import load_unavailable_yahoo_tickers, lookup_symbol_metadata, upsert_aliases
 
@@ -18,6 +19,16 @@ _MASTER_PATH = os.path.join(_ROOT, "symbol_master.json")
 
 
 def load_symbol_master() -> dict:
+    try:
+        db_records = load_ticker_records()
+        if db_records:
+            return {
+                "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+                "tickers": db_records,
+            }
+    except Exception as exc:
+        logger.warning("Could not load symbol master from DB, falling back to JSON: %s", exc)
+
     if not os.path.exists(_MASTER_PATH):
         return {"generated_at": None, "tickers": {}}
     try:
@@ -34,6 +45,13 @@ def load_symbol_master() -> dict:
 def save_symbol_master(master: dict) -> None:
     with open(_MASTER_PATH, "w") as f:
         json.dump(master, f, indent=2, sort_keys=True)
+
+    try:
+        records = master.get("tickers", {}) if isinstance(master, dict) else {}
+        if isinstance(records, dict):
+            upsert_ticker_records(records)
+    except Exception as exc:
+        logger.warning("Failed to mirror symbol master to DB (JSON backup still saved): %s", exc)
 
 
 def get_symbol_record(game_ticker: str) -> dict | None:

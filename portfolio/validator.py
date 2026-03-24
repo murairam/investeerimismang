@@ -21,6 +21,16 @@ class PortfolioValidator:
     def __init__(self) -> None:
         self.c = GAME_CONSTRAINTS
 
+    @staticmethod
+    def calculate_kelly_fraction(win_rate: float, win_loss_ratio: float) -> float:
+        """
+        Kelly fraction: f* = W - ((1 - W) / R)
+        where W is win probability and R is average win/loss ratio.
+        """
+        if win_loss_ratio <= 0:
+            raise ValueError("win_loss_ratio must be > 0")
+        return win_rate - ((1.0 - win_rate) / win_loss_ratio)
+
     def validate(self, proposal: PortfolioProposal, regime: Optional[str] = None) -> ValidationResult:
         errors: list[str] = []
         min_stocks = self.c["min_stocks"]
@@ -182,3 +192,58 @@ class PortfolioValidator:
             learning_reflection=proposal.learning_reflection,
         )
 
+    def apply_kelly_sizing(
+        self,
+        proposal: PortfolioProposal,
+        win_rate: float = 0.55,
+        win_loss_ratio: float = 2.0,
+        win_rate_by_ticker: dict[str, float] | None = None,
+        win_loss_ratio_by_ticker: dict[str, float] | None = None,
+    ) -> PortfolioProposal:
+        """
+        Apply Kelly Criterion sizing based on conviction scores (1-10).
+        Formula: K% = W - (1-W)/R
+        Scaled by conviction: Weight = K% * (Conviction / 10)
+        """
+        # Validate default Kelly inputs and log if baseline is non-positive.
+        baseline_kelly = self.calculate_kelly_fraction(win_rate, win_loss_ratio)
+        if baseline_kelly <= 0:
+            logger.warning(
+                "Baseline Kelly fraction <= 0 (%.2f%%). Per-ticker fallback floor will be used.",
+                baseline_kelly * 100,
+            )
+
+        new_positions = []
+        win_rate_by_ticker = win_rate_by_ticker or {}
+        win_loss_ratio_by_ticker = win_loss_ratio_by_ticker or {}
+        for p in proposal.positions:
+            ticker_win_rate = float(win_rate_by_ticker.get(p.ticker, win_rate))
+            ticker_win_loss = float(win_loss_ratio_by_ticker.get(p.ticker, win_loss_ratio))
+            ticker_kelly = self.calculate_kelly_fraction(ticker_win_rate, ticker_win_loss)
+            if ticker_kelly <= 0:
+                ticker_kelly = 0.10
+            # Scale Kelly by conviction (1-10)
+            # 10 = Full Kelly, 1 = 0.1 * Kelly
+            # Default to 5 if conviction not set (or 0)
+            conviction = p.conviction if p.conviction > 0 else 5
+            target_weight = ticker_kelly * (conviction / 10.0)
+            
+            # Clip to game constraints immediately to avoid massive overweights
+            target_weight = min(self.c["max_weight"], target_weight)
+            target_weight = max(self.c["min_weight"], target_weight)
+            
+            new_positions.append(Position(
+                ticker=p.ticker,
+                weight=target_weight,
+                rationale=p.rationale,
+                conviction=conviction
+            ))
+
+        updated_proposal = PortfolioProposal(
+            positions=new_positions,
+            reasoning=proposal.reasoning,
+            confidence=proposal.confidence,
+            learning_reflection=proposal.learning_reflection
+        )
+        
+        return self.normalize(updated_proposal)
