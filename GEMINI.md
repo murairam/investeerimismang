@@ -12,11 +12,11 @@ AlphaShark is an autonomous quantitative trading agent built to compete in the Ã
 - **`orchestrator.py`**: Coordinates the entire pipeline, from data fetching to portfolio generation and submission.
 - **`config.py`**: Contains key configuration parameters, including the universe of stocks, signal parameters, and game constraints.
 - **`agents/`**: This directory contains the logic for the different AI agents:
-    - `openai_strategist.py`: The primary agent, focused on momentum and breakout strategies.
-    - `gemini_challenger.py`: A catalyst-hunting agent.
-    - `openai_challenger.py`: A third agent providing an all-signals view.
-    - `openai_devil.py`: A bear-case stress tester.
-    - `openai_risk_manager.py`: Synthesizes the proposals from the other agents into a final portfolio.
+    - `strategist.py`: The primary agent, focused on momentum and breakout strategies.
+    - `challenger.py`: A catalyst-hunting agent.
+    - `full_analyst.py`: A third agent providing an all-signals view.
+    - `devil.py`: A bear-case stress tester.
+    - `risk_manager.py`: Synthesizes the proposals from the other agents into a final portfolio.
 - **`data/`**: Modules for fetching, storing, and managing financial data.
 - **`portfolio/`**: Contains models and validation logic for the investment portfolio.
 - **`scripts/`**: A collection of utility scripts for tasks like checking status, verifying portfolios, and running backtests.

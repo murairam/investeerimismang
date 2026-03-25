@@ -14,14 +14,14 @@ An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game
 
 These are the non-obvious design decisions worth explaining in depth.
 
-**Adversarial multi-model ensemble**
-Three agents propose portfolios in parallel — GPT-5.4 (Strategist), NVIDIA Nemotron-Super-120B via OpenRouter (Challenger primary, free tier), and DeepSeek V3.2 via OpenRouter (Full Analyst, with GPT-5.4-nano fallback). Using multiple model families (OpenAI + NVIDIA + DeepSeek + Qwen) reduces correlated reasoning errors. The Devil's Advocate runs on Qwen3-235B-A22B via OpenRouter (with GPT-5.4-nano fallback). The Challenger fallback chain is: NVIDIA Nemotron → Gemini 2.5 Flash → GPT-5.4-nano.
+**Adversarial multi-agent ensemble**
+Three agents propose portfolios in parallel — Strategist, Challenger, and Full Analyst — using configurable model routes and fallbacks. A separate Devil pass stress-tests the combined shortlist, then the Risk Manager synthesizes the final portfolio. Agent roles are stable; model routing is intentionally configurable via `config.py`.
 
 **Self-improving learning loop**
 Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record without any human labelling.
 
-**Cross-agent debate (second pass)**
-After initial proposals are generated, each agent runs a lightweight second-pass LLM call to surface explicit agreements and disagreements with the other two proposals. The debate summary is injected into the Risk Manager's context. This was added because the first pass was too independent — agents couldn't see each other's reasoning and converged on the same overbought names.
+**Optional cross-agent debate (second pass)**
+The debate pass is available behind `ENABLE_CROSS_CHECK` for shadow comparison experiments. When enabled, agents surface agreements/disagreements for Risk Manager context; when disabled (default), the pipeline skips this latency/cost step.
 
 **Competition-optimized quantitative ranking**
 Candidates are ranked by `competition_score`, a regime-specific Z-score composite: in BULL regimes it weights `mom_20d` 35%, `mom_5d` 25%, `sharpe_20d` 20%, `beta` 20% — different weights in NEUTRAL and BEAR. The regime is determined by a 0–100 composite score from VIX level, VIX term structure, SPX vs 200d SMA, market breadth, and credit spreads.
@@ -49,13 +49,13 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 | Enrichment | pytrends, SEC EDGAR Form 4 API, yfinance news | Catalyst signals not in price data |
 | Automation | GitHub Actions | Zero-infra scheduled runs; secrets management; auto-commit results |
 | Notifications | Discord webhooks | Formatted daily embeds; @mention reminders in LIVE mode |
-| Persistence | JSON files (portfolio_history, learning_state) | Human-readable, diff-friendly, no database dependency |
+| Persistence | Supabase PostgreSQL + derived JSON/Markdown artifacts | Canonical DB state with local artifacts for auditability and reports |
 
 ---
 
 ## Key Features
 
-- **Mixed AI decision stack**: GPT-5.4 Strategist + NVIDIA Nemotron-Super-120B (OpenRouter free) Challenger + DeepSeek V3.2 (OpenRouter) Full Analyst run in parallel, Qwen3-235B-A22B (OpenRouter) Devil's Advocate pressure-tests the picks, and GPT-5.4 Risk Manager synthesizes the final portfolio. Challenger fallback chain: Nemotron → Gemini 2.5 Flash → GPT-5.4-nano.
+- **Mixed AI decision stack**: Strategist + Challenger + Full Analyst run in parallel, Devil pressure-tests the shortlist, and Risk Manager synthesizes the final portfolio. Routes/fallbacks are configurable in `config.py`.
 - **Full-universe candidate set**: agents see the current filtered universe instead of a tiny shortlist capped per market
 - **Rich signal snapshot**: momentum, Sharpe, RSI, beta, volume confirmation, MACD, ATR, dividend yield, regime data, and catalyst overlays
 - **Parallel enrichment layer**: news, earnings, insider buying, and Google Trends are fetched concurrently and injected into prompts
@@ -63,7 +63,7 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 - **Pre-earnings opportunity signal**: tags stocks with earnings in 2–6 days + strong momentum as `PRE_EARNINGS_SETUP`; `EARNINGS RISK` warnings for low-conviction earners
 - **Competition-optimized ranking**: regime-specific Z-score weighted `competition_score` (BULL: mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%; NEUTRAL/BEAR variants) replaces the generic selection score
 - **Commodity price context**: live Brent crude, WTI, and Henry Hub nat gas injected for energy thesis validation
-- **Cross-agent debate**: after initial proposals, each agent runs a lightweight second pass surfacing agreements/disagreements with peers; debate summary injected into the Risk Manager
+- **Optional cross-agent debate**: second-pass agreement/disagreement analysis is available behind `ENABLE_CROSS_CHECK` for shadow comparisons
 - **Dynamic signal importance**: `learning_state.py` tracks directional accuracy of each signal vs next-day returns; most predictive signals flagged in the learning context
 - **Strategy decay monitoring**: compares recent 5-day alpha vs prior 10-day alpha; Risk Manager sees a STRATEGY DECAY ALERT when momentum gap exceeds threshold
 - **Confidence calibration tracking**: flags overconfidence patterns when high-confidence days underperform expectations
@@ -354,11 +354,11 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 │   └── diary.py                 # appends entries to PREGAME_LOG.md or DAILY_LOG.md
 ├── agents/
 │   ├── base_agent.py            # abstract base class (includes cross_check() debate hook)
-│   ├── openai_strategist.py     # GPT-5.4 — momentum-driven portfolio selection
-│   ├── gemini_challenger.py     # Catalyst-hunter; primary: NVIDIA Nemotron (OpenRouter free), fallback: Gemini 2.5 Flash → GPT-5.4-nano
-│   ├── openai_challenger.py     # DeepSeek V3.2 via OpenRouter (or GPT-5.4-nano) — full analyst third proposal
-│   ├── openai_devil.py          # Qwen3-235B-A22B via OpenRouter (or GPT-5.4-nano) — bear-case stress test
-│   └── openai_risk_manager.py   # GPT-5.4 — synthesises all proposals + debate + bear cases
+│   ├── strategist.py            # Strategist role (model route configured in config.py)
+│   ├── challenger.py            # Challenger role (primary/fallback route in config.py)
+│   ├── full_analyst.py          # Full Analyst role (all-signals proposal)
+│   ├── devil.py                 # Devil role (bear-case stress test)
+│   └── risk_manager.py          # Risk Manager role (final synthesis)
 ├── portfolio/
 │   ├── models.py                # Position, PortfolioProposal dataclasses
 │   └── validator.py             # constraint validation + normalisation

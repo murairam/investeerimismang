@@ -171,17 +171,43 @@ class GeminiChallenger(BaseAgent):
             proposal = self._call_openrouter_primary(user_message, regime, learning_context)
             if proposal.positions:
                 logger.info(
-                        "Challenger[OpenRouter:%s] produced %d positions (confidence %.0f%%)",
-                        config.OPENROUTER_CHALLENGER_MODEL,
-                        len(proposal.positions),
-                        proposal.confidence * 100,
+                    "Challenger produced %d positions (confidence %.0f%%, model: %s)",
+                    len(proposal.positions),
+                    proposal.confidence * 100,
+                    self.model,
                 )
                 return proposal
-            logger.warning("OpenRouter challenger returned empty proposal — falling back to Gemini")
-        except (json.JSONDecodeError, KeyError, ValueError) as exc:
-            logger.warning("GeminiChallenger OpenRouter failed: %s", exc)
+            logger.warning("OpenRouter challenger returned empty proposal — checking for salvageable output")
         except Exception as exc:
-            logger.warning("GeminiChallenger OpenRouter API error: %s", exc)
+            # Check for truncation and try to salvage output
+            msg = str(exc)
+            if "truncated" in msg or "max_tokens" in msg:
+                logger.warning("OpenRouter challenger hit max_tokens/truncation: attempting to repair with Gemini")
+                raw = getattr(exc, 'response', None)
+                if raw:
+                    try:
+                        # Use Gemini to repair/complete the JSON
+                        gemini_prompt = f"Fix or complete this truncated JSON for a portfolio proposal. Return only valid JSON.\n\n{raw}"
+                        gemini_response = self.client.generate_content(
+                            model=self.MODEL,
+                            contents=[{"role": "user", "parts": [gemini_prompt]}],
+                            generation_config=types.GenerationConfig(temperature=0.1, max_output_tokens=1024),
+                        )
+                        fixed_json = gemini_response.candidates[0].content.parts[0].text
+                        data = _extract_json(fixed_json)
+                        positions = _sanitize_positions(data.get("positions", []))
+                        if positions:
+                            proposal = PortfolioProposal(
+                                positions=[Position(**p) for p in positions],
+                                confidence=data.get("confidence", 0.5),
+                                reasoning=data.get("reasoning", "[truncated output repaired by Gemini]"),
+                                learning_reflection=data.get("learning_reflection", "[truncated output repaired by Gemini]"),
+                            )
+                            logger.warning("Challenger used Gemini to repair truncated OpenRouter output: %d positions (model: %s)", len(positions), self.model)
+                            return proposal
+                    except Exception as repair_exc:
+                        logger.warning("Gemini repair of truncated OpenRouter output failed: %s", repair_exc)
+            logger.warning("GeminiChallenger OpenRouter failed: %s", exc)
 
         # First fallback: Gemini
         logger.info("OpenRouter challenger unavailable — falling back to Gemini (%s)", self.MODEL)
@@ -189,10 +215,10 @@ class GeminiChallenger(BaseAgent):
             try:
                 proposal = self._call_gemini(user_message, regime, learning_context)
                 logger.info(
-                    "Challenger[Gemini:%s] produced %d positions (confidence %.0f%%)",
-                    self.MODEL,
+                    "Challenger produced %d positions (confidence %.0f%%, route: Gemini:%s)",
                     len(proposal.positions),
                     proposal.confidence * 100,
+                    self.MODEL,
                 )
                 return proposal
             except (json.JSONDecodeError, KeyError, ValueError) as exc:

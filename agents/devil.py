@@ -150,11 +150,12 @@ class OpenAIDevil:
                 result = self._call_openai(user_message)
                 result = self._postprocess_bear_cases(result, snapshot)
                 logger.info(
-                    "Devil's advocate challenged %d picks: %d HIGH, %d MEDIUM, %d LOW risk",
+                    "Devil's advocate challenged %d picks: %d HIGH, %d MEDIUM, %d LOW risk (model: %s)",
                     len(result),
                     sum(1 for v in result.values() if v["risk"] == "HIGH"),
                     sum(1 for v in result.values() if v["risk"] == "MEDIUM"),
                     sum(1 for v in result.values() if v["risk"] == "LOW"),
+                    self.model,
                 )
                 return result
             except Exception as exc:

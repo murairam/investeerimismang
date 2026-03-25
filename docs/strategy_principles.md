@@ -44,24 +44,24 @@ higher-momentum candidate.
 - **Rule:** RSI > 79 + within 2% of 52-week high → max 15% position weight
 - **Exception:** volume_ratio > 1.8 allows full 25% (genuine breakout volume overrides overbought signal)
 - **Rationale:** Breakout moves often exhaust at peaks; strong volume confirmation trumps RSI
-- **Implementation:** `agents/openai_risk_manager.py` rules 18 & 19
+- **Implementation:** `agents/risk_manager.py` rules 18 & 19
 
 ### Sector Concentration Policy
 - **Rule:** No sector caps are enforced in code. If alpha clusters in one sector, concentration is allowed up to game position limits.
 - **Rationale:** The game has no sector concentration rule; artificial caps can dilute winning momentum clusters.
-- **Implementation:** Sector concentration remains unconstrained in `agents/openai_risk_manager.py`.
+- **Implementation:** Sector concentration remains unconstrained in `agents/risk_manager.py`.
 
 ### Beta — Informational Only in BEAR
 - **Rule:** In BULL/NEUTRAL, beta target is 1.6–2.0 (BULL) or 0.95–1.30 (NEUTRAL) as a soft guide.
 - **BEAR:** Beta is logged for information only. No position caps, no forced beta reduction. The goal is to find stocks going UP, not stocks that fall less.
 - **Override in NEUTRAL:** If rotation risk is active (HIGH/MEDIUM), beta target is a soft diagnostic. Do not add high-beta filler to hit a number.
-- **Implementation:** `agents/openai_risk_manager.py::_enforce_beta()` (BEAR enforcement removed 2026-03-24)
+- **Implementation:** `agents/risk_manager.py::_enforce_beta()` (BEAR enforcement removed 2026-03-24)
 
 ### Low-Volume Concentration Guard
 - **Rule:** Positions with `vol_ratio < 0.80` are capped at **18%** (even outside BEAR).
 - **Portfolio check:** weighted-average `vol_ratio` warning fires below **0.85**.
 - **Rationale:** Prevent portfolios dominated by unconfirmed breakouts.
-- **Implementation:** `agents/openai_risk_manager.py::_enforce_selection_quality()` + config thresholds
+- **Implementation:** `agents/risk_manager.py::_enforce_selection_quality()` + config thresholds
 
 ### Devil's Advocate Accuracy Tracking
 - **Mechanism:** Devil tracks HIGH-flagged picks and compares their 1d returns vs all other picks

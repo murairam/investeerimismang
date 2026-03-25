@@ -32,9 +32,9 @@ import yfinance as yf
 # Allow importing from project root
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from agents.openai_challenger import OpenAIChallenger
-from agents.openai_risk_manager import OpenAIRiskManager
-from agents.openai_strategist import OpenAIStrategist
+from agents.full_analyst import OpenAIChallenger
+from agents.risk_manager import OpenAIRiskManager
+from agents.strategist import OpenAIStrategist
 from config import (
     BETA_BENCHMARK,
     BETA_WINDOW,

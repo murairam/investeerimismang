@@ -34,13 +34,13 @@ yfinance primary market data + EODHD fallback for edge-case Nordic/Baltic symbol
     ↓
 data/fetcher.py — 15 signals per stock + macro context (regime score 0-100, VIX, breadth)
     ↓ (parallel)
-agents/openai_strategist.py (GPT-5.4)          ─┐ Proposal A: momentum strategist
-agents/gemini_challenger.py (Gemini 2.5 Flash)  ─┤ Proposal B: catalyst hunter
-agents/openai_challenger.py (DeepSeek V3.2 via OpenRouter, fallback GPT-5.4-nano) ─┘ Proposal C: full analyst (all signals)
+agents/strategist.py (GPT-5.4)          ─┐ Proposal A: momentum strategist
+agents/challenger.py (Gemini 2.5 Flash)  ─┤ Proposal B: catalyst hunter
+agents/full_analyst.py (DeepSeek V3.2 via OpenRouter, fallback GPT-5.4-nano) ─┘ Proposal C: full analyst (all signals)
     ↓
-agents/openai_devil.py (Qwen3-235B-A22B via OpenRouter, fallback GPT-5.4-nano) — stress-tests top picks → bear cases
+agents/devil.py (Qwen3-235B-A22B via OpenRouter, fallback GPT-5.4-nano) — stress-tests top picks → bear cases
     ↓
-agents/openai_risk_manager.py (GPT-5.4) — synthesises all 3 proposals + bear cases → PortfolioProposal
+agents/risk_manager.py (GPT-5.4) — synthesises all 3 proposals + bear cases → PortfolioProposal
     ↓
 portfolio/validator.py — enforces game constraints, normalises weights
     ↓
@@ -115,7 +115,7 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 ### BEAR Regime Beta Cap
 - **When triggered:** BEAR regime AND portfolio beta exceeds adjusted target (≤0.90 scaled for non-US exposure)
 - **Action:** All individual position weights capped at 15%, then re-normalized
-- **Where enforced:** `_enforce_beta()` in `agents/openai_risk_manager.py`
+- **Where enforced:** `_enforce_beta()` in `agents/risk_manager.py`
 - **Rationale:** Prevents high-beta concentration in bear markets where downside risk is asymmetric
 
 ### Analyst Consensus + Price Target

@@ -23,11 +23,11 @@ _GAME_START_DATE = "2026-04-06"
 _PROTECTED_FILES = [
     "config.py",
     "docs/rules.txt",
-    "agents/openai_strategist.py",
-    "agents/openai_challenger.py",
-    "agents/openai_devil.py",
-    "agents/openai_risk_manager.py",
-    "agents/gemini_challenger.py",
+    "agents/strategist.py",
+    "agents/full_analyst.py",
+    "agents/devil.py",
+    "agents/risk_manager.py",
+    "agents/challenger.py",
 ]
 
 

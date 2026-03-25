@@ -54,11 +54,11 @@ PREGAME_LOG.md / DAILY_LOG.md — human-readable entry appended
 | `orchestrator.py` | Full pipeline wiring |
 | `config.py` | Universe, signal params, game constraints, sector map |
 | `agents/base_agent.py` | Abstract base class all LLM agents must implement |
-| `agents/openai_strategist.py` | GPT-5.4 momentum-driven portfolio selection |
-| `agents/gemini_challenger.py` | Gemini 2.5 Flash catalyst-hunter second opinion |
-| `agents/openai_challenger.py` | DeepSeek V3.2 full analyst third proposal (OpenRouter; fallback GPT-5.4-nano) |
-| `agents/openai_devil.py` | Qwen3-235B bear-case stress tester (OpenRouter; fallback GPT-5.4-nano) |
-| `agents/openai_risk_manager.py` | GPT-5.4 that synthesises all proposals + debate + bear cases |
+| `agents/strategist.py` | GPT-5.4 momentum-driven portfolio selection |
+| `agents/challenger.py` | Gemini 2.5 Flash catalyst-hunter second opinion |
+| `agents/full_analyst.py` | DeepSeek V3.2 full analyst third proposal (OpenRouter; fallback GPT-5.4-nano) |
+| `agents/devil.py` | Qwen3-235B bear-case stress tester (OpenRouter; fallback GPT-5.4-nano) |
+| `agents/risk_manager.py` | GPT-5.4 that synthesises all proposals + debate + bear cases |
 | `data/fetcher.py` | Market data + 15 signal computations + macro context |
 | `data/earnings_fetcher.py` | Upcoming earnings calendar (7-day risk warnings) |
 | `data/news_fetcher.py` | Recent headlines for top candidates |

@@ -970,7 +970,7 @@ class OpenAIRiskManager(BaseAgent):
         # Strategist proposal
         strat_total = sum(p.weight for p in strategist.positions)
         lines += [
-            f"### Proposal A — GPT-5.4 Momentum Strategist ({len(strategist.positions)} positions, {strat_total:.0%} total)",
+            f"### Proposal A — Strategist ({len(strategist.positions)} positions, {strat_total:.0%} total)",
             f"Thesis: {strategist.reasoning}",
             "",
             "Ticker|Weight|Rationale"
@@ -984,7 +984,7 @@ class OpenAIRiskManager(BaseAgent):
         if challenger and challenger.positions:
             chall_total = sum(p.weight for p in challenger.positions)
             lines += [
-                f"### Proposal B — Gemini Catalyst Hunter ({len(challenger.positions)} positions, {chall_total:.0%} total)",
+                f"### Proposal B — Challenger ({len(challenger.positions)} positions, {chall_total:.0%} total)",
                 f"Thesis: {challenger.reasoning}",
                 "",
                 "Ticker|Weight|Rationale"
@@ -993,7 +993,7 @@ class OpenAIRiskManager(BaseAgent):
                 lines.append(_fmt_row(p, consensus))
         else:
             lines += [
-                "### Proposal B — Gemini Catalyst Hunter",
+                "### Proposal B — Challenger",
                 "Not available — weight Proposal A and C more heavily.",
             ]
 
@@ -1003,7 +1003,7 @@ class OpenAIRiskManager(BaseAgent):
         if full_analyst and full_analyst.positions:
             full_total = sum(p.weight for p in full_analyst.positions)
             lines += [
-                f"### Proposal C — GPT-5.4-nano Full Analyst ({len(full_analyst.positions)} positions, {full_total:.0%} total)",
+                f"### Proposal C — Full Analyst ({len(full_analyst.positions)} positions, {full_total:.0%} total)",
                 f"Thesis: {full_analyst.reasoning}",
                 "",
                 "Ticker|Weight|Rationale"
@@ -1012,7 +1012,7 @@ class OpenAIRiskManager(BaseAgent):
                 lines.append(_fmt_row(p, consensus))
         else:
             lines += [
-                "### Proposal C — GPT-5.4-nano Full Analyst",
+                "### Proposal C — Full Analyst",
                 "Not available — use Proposals A and B.",
             ]
 

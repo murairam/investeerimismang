@@ -158,10 +158,10 @@ class OpenAIFullAnalyst(BaseAgent):
             try:
                 proposal = self._call_openai(user_message, regime, learning_context)
                 logger.info(
-                    "FullAnalyst[%s] produced %d positions (confidence %.0f%%)",
-                    self.model,
+                    "FullAnalyst produced %d positions (confidence %.0f%%, model: %s)",
                     len(proposal.positions),
                     proposal.confidence * 100,
+                    self.model,
                 )
                 return proposal
             except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError) as exc:

@@ -162,7 +162,7 @@ def load_last() -> Optional[PortfolioProposal]:
     """Load the most recent saved portfolio, or None if no history exists."""
     try:
         with get_db_cursor() as cur:
-            cur.execute("SELECT date, decision_metrics FROM daily_runs ORDER BY date DESC LIMIT 1")
+            cur.execute("SELECT date, decision_metrics FROM daily_runs ORDER BY date DESC, run_time DESC NULLS LAST LIMIT 1")
             latest_run = cur.fetchone()
             if not latest_run:
                 return None
@@ -195,6 +195,9 @@ def load_last() -> Optional[PortfolioProposal]:
 def load_latest_verified(date: Optional[str] = None) -> Optional[dict]:
     """Load the most recent verified portfolio from DB.
 
+    Reads from the ``verified_positions`` JSONB column on ``daily_runs`` so
+    the AI proposal in ``portfolio_positions`` is never disturbed.
+
     Args:
         date: Optional ISO date string. If provided, only considers verified
             portfolios on or before this date.
@@ -207,9 +210,11 @@ def load_latest_verified(date: Optional[str] = None) -> Optional[dict]:
             if date:
                 cur.execute(
                     """
-                    SELECT date
+                    SELECT date, verified_positions
                     FROM daily_runs
-                    WHERE source = 'verified' AND date <= %s
+                    WHERE source = 'verified'
+                      AND verified_positions IS NOT NULL
+                      AND date <= %s
                     ORDER BY date DESC
                     LIMIT 1
                     """,
@@ -218,34 +223,22 @@ def load_latest_verified(date: Optional[str] = None) -> Optional[dict]:
             else:
                 cur.execute(
                     """
-                    SELECT date
+                    SELECT date, verified_positions
                     FROM daily_runs
                     WHERE source = 'verified'
+                      AND verified_positions IS NOT NULL
                     ORDER BY date DESC
                     LIMIT 1
                     """
                 )
 
             row = cur.fetchone()
-            if not row:
+            if not row or not row["verified_positions"]:
                 return None
 
-            verified_date = row["date"]
-            cur.execute(
-                """
-                SELECT ticker, weight, rationale, tags
-                FROM portfolio_positions
-                WHERE date = %s
-                ORDER BY weight DESC, ticker ASC
-                """,
-                (verified_date,),
-            )
-            positions = cur.fetchall()
-            if not positions:
-                return None
-
+            positions = row["verified_positions"]
             return {
-                "date": verified_date.isoformat(),
+                "date": row["date"].isoformat(),
                 "source": "verified",
                 "positions": [
                     {
@@ -405,7 +398,12 @@ def save_verified(
     date: str,
     close_prices: Optional[dict] = None,
 ) -> None:
-    """Save the user's actual game portfolio as verified source of truth."""
+    """Save the user's actual game portfolio as verified source of truth.
+
+    Stores verified holdings in the ``verified_positions`` JSONB column on
+    ``daily_runs`` so the AI proposal in ``portfolio_positions`` is preserved
+    and can still be shown by ``load_ai_proposal``.
+    """
     final_positions = [
         {
             "ticker": p["ticker"],
@@ -419,16 +417,14 @@ def save_verified(
     try:
         with get_db_cursor(commit=True) as cur:
             cur.execute("""
-                INSERT INTO daily_runs (date, source, price_map) VALUES (%s, 'verified', %s)
-                ON CONFLICT (date) DO UPDATE SET source = 'verified', price_map = COALESCE(EXCLUDED.price_map, daily_runs.price_map)
-            """, (date, Json(close_prices) if close_prices else None))
-
-            cur.execute("DELETE FROM portfolio_positions WHERE date = %s", (date,))
-            for pos in final_positions:
-                cur.execute("""
-                    INSERT INTO portfolio_positions (date, ticker, weight, rationale, tags)
-                    VALUES (%s, %s, %s, %s, %s)
-                """, (date, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags'])))
+                INSERT INTO daily_runs (date, source, price_map, verified_positions, run_time)
+                VALUES (%s, 'verified', %s, %s, now())
+                ON CONFLICT (date) DO UPDATE SET
+                    source = 'verified',
+                    price_map = COALESCE(EXCLUDED.price_map, daily_runs.price_map),
+                    verified_positions = EXCLUDED.verified_positions,
+                    run_time = now()
+            """, (date, Json(close_prices) if close_prices else None, Json(final_positions)))
         logger.info("Verified portfolio saved to DB: %d positions for %s", len(positions), date)
     except Exception as exc:
         logger.error("Failed to save verified portfolio to DB: %s", exc)
@@ -588,17 +584,21 @@ def save(
             )
 
             cur.execute("""
-                INSERT INTO daily_runs (date, source, regime, signal_snapshot, decision_metrics, bear_cases, price_map)
-                VALUES (%s, 'ai_proposed', %s, %s, %s, %s, %s)
+                INSERT INTO daily_runs (date, source, regime, signal_snapshot, decision_metrics, bear_cases, price_map, run_time)
+                VALUES (%s, 'ai_proposed', %s, %s, %s, %s, %s, now())
                 ON CONFLICT (date) DO UPDATE SET
                     source = 'ai_proposed', regime = EXCLUDED.regime, signal_snapshot = EXCLUDED.signal_snapshot,
-                    decision_metrics = EXCLUDED.decision_metrics, bear_cases = EXCLUDED.bear_cases, price_map = EXCLUDED.price_map;
+                    decision_metrics = EXCLUDED.decision_metrics, bear_cases = EXCLUDED.bear_cases, price_map = EXCLUDED.price_map,
+                    run_time = now()
+                RETURNING run_time;
             """, (date, decision_context.get("regime"), Json(signal_snapshot), Json(decision_metrics), Json(decision_context.get("bear_cases")), Json(close_prices)))
+            run_row = cur.fetchone()
+            run_time = run_row["run_time"] if run_row else None
 
             cur.execute("DELETE FROM portfolio_positions WHERE date = %s", (date,))
             for pos in final_portfolio_dict.get("positions", []):
-                cur.execute("INSERT INTO portfolio_positions (date, ticker, weight, rationale, tags) VALUES (%s, %s, %s, %s, %s)",
-                            (date, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags'])))
+                cur.execute("INSERT INTO portfolio_positions (date, ticker, weight, rationale, tags, run_time) VALUES (%s, %s, %s, %s, %s, %s)",
+                            (date, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags']), run_time))
 
             cur.execute("DELETE FROM agent_proposals WHERE date = %s", (date,))
             for agent_key, agent_name in [("strategist_proposal", "strategist"), ("challenger_proposal", "challenger"), ("full_analyst_proposal", "full_analyst")]:
@@ -606,8 +606,8 @@ def save(
                 if agent_proposal:
                     agent_dict = _portfolio_to_dict(agent_proposal, signal_snapshot)
                     for pos in agent_dict.get("positions", []):
-                        cur.execute("INSERT INTO agent_proposals (date, agent, ticker, weight, rationale, tags) VALUES (%s, %s, %s, %s, %s, %s)",
-                                    (date, agent_name, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags'])))
+                        cur.execute("INSERT INTO agent_proposals (date, agent, ticker, weight, rationale, tags, run_time) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                                    (date, agent_name, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags']), run_time))
         logger.info("Saved AI proposal to DB for %s", date)
     except Exception as exc:
         logger.error("Failed to save portfolio to DB: %s", exc)
@@ -658,12 +658,23 @@ def load_learning_state_from_db() -> Optional[dict]:
 
 
 def load_ai_proposal(date: str) -> Optional[list[dict]]:
-    """Load today's AI-proposed positions from the DB. Returns None if not found."""
+    """Load the AI-proposed positions for the given date from the DB.
+
+    ``portfolio_positions`` always holds the AI proposal — it is never
+    overwritten by verification (verified holdings are stored separately in
+    ``daily_runs.verified_positions``).  Returns None if no positions exist
+    for the date.
+    """
     try:
         with get_db_cursor() as cur:
-            cur.execute("SELECT 1 FROM daily_runs WHERE date = %s", (date,))
-            if not cur.fetchone():
+            cur.execute(
+                "SELECT run_time FROM daily_runs WHERE date = %s",
+                (date,),
+            )
+            run = cur.fetchone()
+            if not run:
                 return None
+            run_time = run["run_time"]
             cur.execute(
                 "SELECT ticker, weight, rationale FROM portfolio_positions WHERE date = %s ORDER BY weight DESC",
                 (date,),
@@ -671,6 +682,8 @@ def load_ai_proposal(date: str) -> Optional[list[dict]]:
             rows = cur.fetchall()
             if not rows:
                 return None
+            if run_time:
+                logger.info("Loaded AI proposal for %s (run at %s UTC)", date, run_time.strftime("%H:%M"))
             return [{"ticker": r["ticker"], "weight": float(r["weight"]), "rationale": r.get("rationale", "")} for r in rows]
     except Exception as exc:
         logger.error("Failed to load AI proposal from DB: %s", exc)

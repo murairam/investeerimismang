@@ -4,11 +4,11 @@ AlphaSharkOrchestrator — wires the full pipeline end-to-end.
 Pipeline:
   1. DataFetcher.get_market_snapshot()
   2. Load previous portfolio from portfolio_history.json (if exists)
-  3a. OpenAIStrategist (GPT-5.4)        ─┐ run IN PARALLEL (ThreadPoolExecutor 3 workers)
-  3b. GeminiChallenger (Gemini 2.5 Flash)─┤ (Catalyst Hunter — FREE, independent)
-    3c. OpenAIFullAnalyst (DeepSeek V3.2 via OpenRouter, fallback gpt-5.4-nano) ─┘ (All-signal analyst — independent)
-  3d. OpenAIDevil (gpt-5.4-nano): stress-tests top picks from all 3 proposals
-  4. OpenAIRiskManager (GPT-5.4): synthesises all 3 proposals + bear cases
+    3a. Strategist        ─┐ run IN PARALLEL (ThreadPoolExecutor 3 workers)
+    3b. Challenger        ─┤
+        3c. Full Analyst    ─┘
+    3d. Devil: stress-tests top picks from all 3 proposals
+    4. Risk Manager: synthesises all 3 proposals + bear cases
   5. PortfolioValidator.validate() → normalize if needed
   6. Save portfolio to portfolio_history.json
   7. Append entry to DAILY_LOG.md
@@ -26,11 +26,11 @@ from concurrent.futures import (
 )
 from typing import Optional
 
-from agents.gemini_challenger import GeminiChallenger
-from agents.openai_challenger import OpenAIFullAnalyst
-from agents.openai_devil import OpenAIDevil
-from agents.openai_risk_manager import OpenAIRiskManager
-from agents.openai_strategist import OpenAIStrategist
+from agents.challenger import GeminiChallenger
+from agents.full_analyst import OpenAIFullAnalyst
+from agents.devil import OpenAIDevil
+from agents.risk_manager import OpenAIRiskManager
+from agents.strategist import OpenAIStrategist
 from config import (
     CASH_POLICY,
     API_TIMEOUT_SECONDS,
@@ -40,6 +40,7 @@ from config import (
     OPENAI_FALLBACK_MODEL,
     OPENROUTER_ANALYST_MODEL,
     OPENROUTER_CHALLENGER_MODEL,
+    OPENROUTER_DEVIL_MODEL,
 )
 from data.cost_tracker import get_total_cost
 from data.diary import append_entry as append_daily_log
@@ -416,8 +417,7 @@ class AlphaSharkOrchestrator:
 
         # Steps 3a + 3b + 3c: run all 3 analysts IN PARALLEL — fully independent
         logger.info(
-            "Calling Strategist (gpt-5.4) + Challenger (primary %s → fallback gemini-2.5-flash → fallback %s) "
-            "+ FullAnalyst (primary %s via OpenRouter → fallback %s) in parallel …",
+            "Calling Strategist + Challenger + FullAnalyst in parallel … models: strategist=gpt-5.4, challenger=%s→gemini-2.5-flash→%s, full_analyst=%s→%s",
             OPENROUTER_CHALLENGER_MODEL,
             OPENAI_FALLBACK_MODEL,
             OPENROUTER_ANALYST_MODEL,
@@ -433,19 +433,19 @@ class AlphaSharkOrchestrator:
             future_strategist = executor.submit(
                 self.strategist.propose, snapshot, prior_portfolio
             )
-            future_start_times[future_strategist] = ("Strategist[gpt-5.4]", time.perf_counter())
+            future_start_times[future_strategist] = ("Strategist", time.perf_counter())
             future_challenger = executor.submit(
                 self.gemini_challenger.propose, snapshot, prior_portfolio
             )
             future_start_times[future_challenger] = (
-                f"Challenger[{OPENROUTER_CHALLENGER_MODEL}→gemini-2.5-flash→{OPENAI_FALLBACK_MODEL}]",
+                "Challenger",
                 time.perf_counter(),
             )
             future_full = executor.submit(
                 self.full_analyst.propose, snapshot, prior_portfolio
             )
             future_start_times[future_full] = (
-                f"FullAnalyst[{OPENROUTER_ANALYST_MODEL}→{OPENAI_FALLBACK_MODEL}]",
+                "FullAnalyst",
                 time.perf_counter(),
             )
 
@@ -471,9 +471,9 @@ class AlphaSharkOrchestrator:
             except FuturesTimeoutError:
                 future_challenger.cancel()
                 label, started = future_start_times[future_challenger]
-                logger.error("[%s] timed out after %.1fs — continuing without GeminiChallenger", label, time.perf_counter() - started)
+                logger.error("[%s] timed out after %.1fs — continuing without Challenger", label, time.perf_counter() - started)
             except Exception as exc:
-                logger.exception("GeminiChallenger failed: %s", exc)
+                logger.exception("Challenger failed: %s", exc)
                 label, started = future_start_times[future_challenger]
                 logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
 
@@ -513,26 +513,26 @@ class AlphaSharkOrchestrator:
             logger.warning("Strategist unavailable — using first available proposal as base for Risk Manager")
 
         if not challenger_proposal or not challenger_proposal.positions:
-            logger.warning("GeminiChallenger unavailable — meta-analyst will use 2 proposals only")
+            logger.warning("Challenger unavailable — meta-analyst will use 2 proposals only")
 
         if not full_analyst_proposal or not full_analyst_proposal.positions:
             logger.warning("FullAnalyst unavailable — meta-analyst will use 2 proposals only")
 
         if strategist_proposal and strategist_proposal.positions:
-            logger.info("Strategist[gpt-5.4] produced %d positions", len(strategist_proposal.positions))
+            logger.info("Strategist produced %d positions (model: gpt-5.4)", len(strategist_proposal.positions))
         if challenger_proposal and challenger_proposal.positions:
             logger.info(
-                "Challenger[%s→gemini-2.5-flash→%s] produced %d positions",
+                "Challenger produced %d positions (route: %s→gemini-2.5-flash→%s)",
+                len(challenger_proposal.positions),
                 OPENROUTER_CHALLENGER_MODEL,
                 OPENAI_FALLBACK_MODEL,
-                len(challenger_proposal.positions),
             )
         if full_analyst_proposal and full_analyst_proposal.positions:
             logger.info(
-                "FullAnalyst[%s→%s] produced %d positions",
+                "FullAnalyst produced %d positions (route: %s→%s)",
+                len(full_analyst_proposal.positions),
                 OPENROUTER_ANALYST_MODEL,
                 OPENAI_FALLBACK_MODEL,
-                len(full_analyst_proposal.positions),
             )
 
         # Log 3-way overlap — high cross-proposal overlap = strong conviction signal
@@ -623,7 +623,7 @@ class AlphaSharkOrchestrator:
             logger.info("Cross-agent debate disabled by config flag (ENABLE_CROSS_CHECK=false)")
 
         # Step 3e: Devil's advocate — stress-tests top picks from all 3 proposals
-        logger.info("Calling OpenAIDevil — stress-testing top picks …")
+        logger.info("Calling Devil — stress-testing top picks (route: %s→%s) …", OPENROUTER_DEVIL_MODEL, OPENAI_FALLBACK_MODEL)
         bear_cases: dict = {}
         # Build a merged "challenger" view for Devil (union of all non-strategist picks)
         devil_challenger = PortfolioProposal(
@@ -643,7 +643,7 @@ class AlphaSharkOrchestrator:
 
         # Step 4: Meta-analyst synthesises all available proposals + bear cases
         _available = sum(1 for p in [strategist_proposal, challenger_proposal, full_analyst_proposal] if p and p.positions)
-        logger.info("Calling OpenAIRiskManager (GPT-5.4) — synthesising %d proposal(s) …", _available)
+        logger.info("Calling Risk Manager — synthesising %d proposal(s) (model: gpt-5.4) …", _available)
         final_proposal = self.risk_manager.propose(
             snapshot,
             prior_proposal=base_proposal,
