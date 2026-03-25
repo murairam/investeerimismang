@@ -76,7 +76,7 @@ def _resolve_ticker(raw: str) -> Optional[str]:
 
     return None
 
-from data.portfolio_store import save_verified, save_competition_standing, load_last_known_participant_count
+from data.portfolio_store import save_verified, save_competition_standing, load_last_known_participant_count, load_ai_proposal
 from data.verification_tracker import mark_verified
 from data.paper_account import sync_verified_positions
 from data.diary import mark_verified_entry
@@ -237,10 +237,18 @@ def main() -> None:
         _input_from_string(input_str, equity, rank=rank, total=total)
         return
 
-    data = load()
-    if data is None:
-        print("\n  No portfolio on record yet. Run python main.py first.\n")
-        return
+    # Try loading today's AI proposal from DB first; fall back to local JSON
+    today = date.today().isoformat()
+    ai_positions = load_ai_proposal(today)
+    if ai_positions is not None:
+        data = {"date": today, "positions": ai_positions, "reasoning": "(from today's AI run)"}
+        print("\n  Showing today's AI recommendation from DB:")
+    else:
+        data = load()
+        if data is None:
+            print("\n  No portfolio on record yet. Run python main.py first.\n")
+            return
+        print("\n  Showing last recorded portfolio (no DB proposal found for today):")
 
     print_portfolio(data)
 
@@ -251,7 +259,6 @@ def main() -> None:
     answer = input("  > ").strip().lower()
 
     if answer == "y":
-        today = date.today().isoformat()
         positions = data.get("positions", [])
         _apply_learning_caps(positions)
         save_verified(positions, today, close_prices=data.get("close_prices"))

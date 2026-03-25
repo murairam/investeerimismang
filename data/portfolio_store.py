@@ -541,3 +541,23 @@ def save(
         logger.info("Saved AI proposal to DB for %s", date)
     except Exception as exc:
         logger.error("Failed to save portfolio to DB: %s", exc)
+
+
+def load_ai_proposal(date: str) -> Optional[list[dict]]:
+    """Load today's AI-proposed positions from the DB. Returns None if not found."""
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("SELECT 1 FROM daily_runs WHERE date = %s", (date,))
+            if not cur.fetchone():
+                return None
+            cur.execute(
+                "SELECT ticker, weight, rationale FROM portfolio_positions WHERE date = %s ORDER BY weight DESC",
+                (date,),
+            )
+            rows = cur.fetchall()
+            if not rows:
+                return None
+            return [{"ticker": r["ticker"], "weight": float(r["weight"]), "rationale": r.get("rationale", "")} for r in rows]
+    except Exception as exc:
+        logger.error("Failed to load AI proposal from DB: %s", exc)
+        return None

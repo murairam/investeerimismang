@@ -3,20 +3,18 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "XOM": 17.89444668,
-    "APA": 43.40782975,
-    "AKAM": 20.66822791,
-    "PLTR": 13.23285743,
-    "DELL": 7.10018479,
-    "CVX": 6.80600148
+    "PSX": 15.52013387,
+    "MPC": 11.71566122,
+    "AKAM": 22.87717372,
+    "XOM": 10.79924601,
+    "DELL": 10.09541191
   },
   "verified_weights": {
-    "XOM": 0.25,
-    "APA": 0.15,
-    "AKAM": 0.2,
-    "PLTR": 0.18,
-    "DELL": 0.1,
-    "CVX": 0.12
+    "PSX": 0.24,
+    "MPC": 0.24,
+    "AKAM": 0.22,
+    "XOM": 0.15,
+    "DELL": 0.15
   },
   "pending_order": null,
   "history": [
@@ -295,8 +293,25 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-03-25",
+      "equity": 10267.0,
+      "cash": 0.0,
+      "daily_return": 0.006371,
+      "return_since_start": 0.0267,
+      "turnover": 0.0,
+      "positions": {
+        "PSX": 15.52013387,
+        "MPC": 11.71566122,
+        "AKAM": 22.87717372,
+        "XOM": 10.79924601,
+        "DELL": 10.09541191
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-03-24",
-  "last_equity": 10202.0
+  "last_rebalanced_date": "2026-03-25",
+  "last_equity": 10267.0
 }
