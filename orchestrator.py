@@ -35,6 +35,7 @@ from config import (
     CASH_POLICY,
     API_TIMEOUT_SECONDS,
     ENABLE_COMPETITOR_INTEL,
+    ENABLE_CROSS_CHECK,
     COMPETITOR_INTEL_URLS,
     OPENAI_FALLBACK_MODEL,
     OPENROUTER_ANALYST_MODEL,
@@ -559,64 +560,67 @@ class AlphaSharkOrchestrator:
         if consensus - triple:
             logger.info("Double consensus (2/3 agents): %s", ", ".join(sorted(consensus - triple)))
 
-        # Step 3d: Cross-agent debate — lightweight second pass to surface disagreements
-        # Only include proposals that genuinely exist — no duplicates from fallback copies.
-        debate_flags: dict[str, dict] = {}
-        live_proposals = []
-        if strategist_proposal and strategist_proposal.positions:
-            live_proposals.append(("strategist", self.strategist, strategist_proposal))
-        if challenger_proposal and challenger_proposal.positions:
-            live_proposals.append(("challenger", self.gemini_challenger, challenger_proposal))
-        if full_analyst_proposal and full_analyst_proposal.positions:
-            live_proposals.append(("full_analyst", self.full_analyst, full_analyst_proposal))
-        if len(live_proposals) >= 2:
-            with ThreadPoolExecutor(max_workers=3) as dex:
-                debate_futures = {
-                    name: dex.submit(
-                        agent.cross_check,
-                        snapshot,
-                        own,
-                        [p for n, a, p in live_proposals if p is not own],
-                    )
-                    for name, agent, own in live_proposals
-                }
-                for name, fut in debate_futures.items():
-                    try:
-                        debate_flags[name] = fut.result(timeout=45)
-                    except Exception as exc:
-                        logger.warning("Cross-check for %s failed (non-fatal): %s", name, exc)
+        # Step 3d: Optional cross-agent debate (deprecated; keep behind flag for shadow comparison)
+        if ENABLE_CROSS_CHECK:
+            # Only include proposals that genuinely exist — no duplicates from fallback copies.
+            debate_flags: dict[str, dict] = {}
+            live_proposals = []
+            if strategist_proposal and strategist_proposal.positions:
+                live_proposals.append(("strategist", self.strategist, strategist_proposal))
+            if challenger_proposal and challenger_proposal.positions:
+                live_proposals.append(("challenger", self.gemini_challenger, challenger_proposal))
+            if full_analyst_proposal and full_analyst_proposal.positions:
+                live_proposals.append(("full_analyst", self.full_analyst, full_analyst_proposal))
+            if len(live_proposals) >= 2:
+                with ThreadPoolExecutor(max_workers=3) as dex:
+                    debate_futures = {
+                        name: dex.submit(
+                            agent.cross_check,
+                            snapshot,
+                            own,
+                            [p for n, a, p in live_proposals if p is not own],
+                        )
+                        for name, agent, own in live_proposals
+                    }
+                    for name, fut in debate_futures.items():
+                        try:
+                            debate_flags[name] = fut.result(timeout=45)
+                        except Exception as exc:
+                            logger.warning("Cross-check for %s failed (non-fatal): %s", name, exc)
 
-            # Compile debate flags into a summary string for the Risk Manager
-            debate_lines = []
-            all_disagrees: dict[str, list[str]] = {}
-            all_agrees: list[str] = []
-            for agent_name, result in debate_flags.items():
-                agrees = result.get("agrees", [])
-                disagrees = result.get("disagrees", [])
-                if agrees:
-                    all_agrees.extend(agrees)
-                for item in disagrees:
-                    ticker = item.get("ticker", "?")
-                    reason = item.get("reason", "")
-                    all_disagrees.setdefault(ticker, []).append(f"{agent_name}: {reason}")
+                # Compile debate flags into a summary string for the Risk Manager
+                debate_lines = []
+                all_disagrees: dict[str, list[str]] = {}
+                all_agrees: list[str] = []
+                for agent_name, result in debate_flags.items():
+                    agrees = result.get("agrees", [])
+                    disagrees = result.get("disagrees", [])
+                    if agrees:
+                        all_agrees.extend(agrees)
+                    for item in disagrees:
+                        ticker = item.get("ticker", "?")
+                        reason = item.get("reason", "")
+                        all_disagrees.setdefault(ticker, []).append(f"{agent_name}: {reason}")
 
-            if all_agrees:
-                from collections import Counter
-                agree_counts = Counter(all_agrees)
-                strong = [t for t, n in agree_counts.items() if n >= 2]
-                if strong:
-                    debate_lines.append(f"Cross-agent agreements (2+ agents agree): {', '.join(sorted(set(strong)))}")
-            if all_disagrees:
-                debate_lines.append("Cross-agent disagreements (one agent excluded while peers included at >=15%):")
-                for ticker, reasons in all_disagrees.items():
-                    debate_lines.append(f"  {ticker}: " + " | ".join(reasons[:2]))
+                if all_agrees:
+                    from collections import Counter
+                    agree_counts = Counter(all_agrees)
+                    strong = [t for t, n in agree_counts.items() if n >= 2]
+                    if strong:
+                        debate_lines.append(f"Cross-agent agreements (2+ agents agree): {', '.join(sorted(set(strong)))}")
+                if all_disagrees:
+                    debate_lines.append("Cross-agent disagreements (one agent excluded while peers included at >=15%):")
+                    for ticker, reasons in all_disagrees.items():
+                        debate_lines.append(f"  {ticker}: " + " | ".join(reasons[:2]))
 
-            if debate_lines:
-                snapshot["debate_summary"] = "\n".join(debate_lines)
-                logger.info("Cross-agent debate: %d agreements, %d disagreements surfaced",
-                            len(all_agrees), len(all_disagrees))
-            else:
-                logger.info("Cross-agent debate: no significant disagreements")
+                if debate_lines:
+                    snapshot["debate_summary"] = "\n".join(debate_lines)
+                    logger.info("Cross-agent debate: %d agreements, %d disagreements surfaced",
+                                len(all_agrees), len(all_disagrees))
+                else:
+                    logger.info("Cross-agent debate: no significant disagreements")
+        else:
+            logger.info("Cross-agent debate disabled by config flag (ENABLE_CROSS_CHECK=false)")
 
         # Step 3e: Devil's advocate — stress-tests top picks from all 3 proposals
         logger.info("Calling OpenAIDevil — stress-testing top picks …")

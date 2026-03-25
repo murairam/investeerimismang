@@ -93,6 +93,9 @@ Output ONLY valid JSON, no other text:
 class OpenAIDevil:
     MODEL = "gpt-5.4-nano"
     MAX_RETRIES = 2
+    OPENROUTER_MAX_TICKERS = 10
+    OPENAI_MAX_TICKERS = 12
+    OPENROUTER_MAX_TOKENS = 2600
 
     def __init__(self) -> None:
         self._openrouter_enabled = config.USE_OPENROUTER_FOR_SECONDARY_AGENTS and bool(os.environ.get("OPENROUTER_API_KEY"))
@@ -135,7 +138,8 @@ class OpenAIDevil:
         for p in (challenger.positions or []):
             seen[p.ticker] = seen.get(p.ticker, 0.0) + p.weight
 
-        top_tickers = sorted(seen, key=lambda t: -seen[t])[:12]
+        max_tickers = self.OPENROUTER_MAX_TICKERS if (self._openrouter_enabled and self.model != self.MODEL) else self.OPENAI_MAX_TICKERS
+        top_tickers = sorted(seen, key=lambda t: -seen[t])[:max_tickers]
         if not top_tickers:
             return {}
 
@@ -277,7 +281,7 @@ class OpenAIDevil:
             ],
         )
         if openrouter_call:
-            call_kwargs["max_tokens"] = 2000  # was 1000 — too small for 12 tickers, caused truncation
+            call_kwargs["max_tokens"] = self.OPENROUTER_MAX_TOKENS
         else:
             call_kwargs["response_format"] = {"type": "json_object"}
 
@@ -294,15 +298,14 @@ class OpenAIDevil:
                 raise
 
         if (response.choices[0].finish_reason or "").lower() == "length":
-            logger.warning("Devil response truncated (finish_reason=length) — attempting partial JSON parse")
-            # Truncation means max_tokens was too small or the model is still insufficient.
-            # Switch to the GPT fallback immediately so the retry loop uses a better model.
+            logger.warning("Devil response truncated (finish_reason=length) — retrying with fallback model")
             if self._openrouter_enabled and self.model != self.MODEL:
                 logger.warning(
                     "Switching Devil from OpenRouter '%s' to OpenAI fallback '%s' due to truncation",
                     self.model, self.MODEL,
                 )
                 self._switch_to_openai_fallback()
+            raise RuntimeError("Devil response truncated (finish_reason=length)")
 
         usage = response.usage
         cost = log_usage(

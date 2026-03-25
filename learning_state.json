@@ -10,16 +10,16 @@
   "biases_to_avoid": [],
   "validated_winners": [
     {
+      "ticker": "AKAM",
+      "observations": 6,
+      "avg_return_1d": 0.025313,
+      "hit_rate": 0.6667
+    },
+    {
       "ticker": "APA",
       "observations": 10,
       "avg_return_1d": 0.023618,
       "hit_rate": 0.8
-    },
-    {
-      "ticker": "AKAM",
-      "observations": 6,
-      "avg_return_1d": 0.023244,
-      "hit_rate": 0.6667
     }
   ],
   "recurring_losers": [
@@ -108,27 +108,27 @@
   "rationale_stats": {
     "momentum": {
       "observations": 21,
-      "avg_return_1d": 0.005494,
+      "avg_return_1d": 0.005993,
       "hit_rate": 0.4286
     },
     "high_sharpe": {
       "observations": 21,
-      "avg_return_1d": 0.005494,
+      "avg_return_1d": 0.005993,
       "hit_rate": 0.4286
     },
     "breakout": {
       "observations": 4,
-      "avg_return_1d": 0.000948,
+      "avg_return_1d": 0.004931,
       "hit_rate": 0.5
     },
     "consensus": {
       "observations": 16,
-      "avg_return_1d": 0.011262,
+      "avg_return_1d": 0.012101,
       "hit_rate": 0.5
     },
     "catalyst": {
       "observations": 2,
-      "avg_return_1d": 0.017398,
+      "avg_return_1d": 0.013044,
       "hit_rate": 0.5
     },
     "diversifier": {
@@ -143,18 +143,18 @@
     },
     "overbought": {
       "observations": 10,
-      "avg_return_1d": 0.009493,
+      "avg_return_1d": 0.010937,
       "hit_rate": 0.5
     },
     "at_52w_high": {
       "observations": 16,
-      "avg_return_1d": 0.012864,
+      "avg_return_1d": 0.014063,
       "hit_rate": 0.5
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.002658,
-    "tier2_avg_return_1d": 0.003912,
+    "tier1_avg_return_1d": 0.002298,
+    "tier2_avg_return_1d": 0.004874,
     "tier3_avg_return_1d": -0.008521,
     "tier1_observations": 11,
     "tier2_observations": 15,
@@ -164,8 +164,8 @@
   "devil_accuracy": {
     "status": "early_data",
     "observations": 4,
-    "high_risk_avg_return_1d": 0.020612,
-    "low_risk_avg_return_1d": -0.001375,
+    "high_risk_avg_return_1d": 0.024594,
+    "low_risk_avg_return_1d": -0.001577,
     "high_risk_negative_rate": 0.25,
     "accuracy": 0.25,
     "devil_is_accurate": false,
@@ -224,14 +224,14 @@
   },
   "yesterday_postmortem": {
     "date": "2026-03-24",
-    "portfolio_return_1d": 0.0078,
-    "benchmark_return_1d": 0.0065,
-    "alpha_1d": 0.0014,
+    "portfolio_return_1d": 0.0104,
+    "benchmark_return_1d": 0.0054,
+    "alpha_1d": 0.005,
     "winners": [
       {
         "ticker": "HPE",
-        "return_1d": 0.091,
-        "vs_benchmark": 0.0846,
+        "return_1d": 0.0823,
+        "vs_benchmark": 0.0769,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -244,8 +244,8 @@
       },
       {
         "ticker": "AKAM",
-        "return_1d": 0.0381,
-        "vs_benchmark": 0.0316,
+        "return_1d": 0.0443,
+        "vs_benchmark": 0.0388,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -258,8 +258,8 @@
       },
       {
         "ticker": "DELL",
-        "return_1d": 0.0279,
-        "vs_benchmark": 0.0214,
+        "return_1d": 0.0438,
+        "vs_benchmark": 0.0384,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -276,8 +276,8 @@
     "losers": [
       {
         "ticker": "XOM",
-        "return_1d": -0.0077,
-        "vs_benchmark": -0.0141,
+        "return_1d": -0.0092,
+        "vs_benchmark": -0.0146,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -290,8 +290,8 @@
       },
       {
         "ticker": "MPC",
-        "return_1d": -0.0058,
-        "vs_benchmark": -0.0123,
+        "return_1d": -0.0073,
+        "vs_benchmark": -0.0127,
         "tags": [
           "momentum",
           "high_sharpe",

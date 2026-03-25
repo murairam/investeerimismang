@@ -49,6 +49,8 @@ COMPETITOR_INTEL_URLS: list[str] = [
 ]
 
 USE_OPENROUTER_FOR_SECONDARY_AGENTS = True  # set False to revert to OpenAI for all
+ENABLE_CROSS_CHECK = False  # deprecating debate phase; keep flag for shadow comparison
+ENABLE_TOOL_CALLING_RISK_MANAGER = False  # phased rollout guard for future tool-calling migration
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 OPENROUTER_DEVIL_MODEL = "qwen/qwen3-235b-a22b"
 OPENROUTER_ANALYST_MODEL = "deepseek/deepseek-v3.2"

@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import requests
 import yfinance as yf
 
+from data.portfolio_store import load_latest_verified
 from output.dispatcher import format_security_label
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
@@ -36,11 +37,27 @@ _EMBED_COLOUR = 0x3498DB  # Blue
 
 
 def _load_portfolio() -> dict | None:
+    verified = load_latest_verified(date.today().isoformat())
+    if verified and verified.get("positions"):
+        logger.info(
+            "Loaded verified portfolio from DB (%s, %d positions)",
+            verified.get("date"),
+            len(verified.get("positions", [])),
+        )
+        return verified
+
     path = os.path.abspath(_PORTFOLIO_PATH)
     if not os.path.exists(path):
         return None
     with open(path) as f:
-        return json.load(f)
+        portfolio = json.load(f)
+
+    logger.info(
+        "Using local portfolio_history.json fallback (%s, source=%s)",
+        portfolio.get("date"),
+        portfolio.get("source", "unknown"),
+    )
+    return portfolio
 
 
 def _fetch_prices(tickers: list[str]) -> dict[str, tuple[float, float]]:
@@ -96,7 +113,7 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
                     ),
                 },
             ],
-            max_tokens=100,
+            max_completion_tokens=100,
             temperature=0.3,
         )
         return resp.choices[0].message.content.strip()

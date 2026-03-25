@@ -16,7 +16,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - Latest day status: verified
 
 ## What's Working ✅
-- Conviction sizing is working: Tier 1 +0.3% > Tier 3 -0.9%
+- Conviction sizing is working: Tier 1 +0.2% > Tier 3 -0.9%
 - Strategy is producing alpha 67% of days.
 
 ## Systematic Biases / Errors ⚠️
@@ -25,21 +25,21 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
 |---|---:|---:|---:|
-| momentum | 21 | +0.55% | 43% |
-| high_sharpe | 21 | +0.55% | 43% |
-| breakout | 4 | +0.09% | 50% |
-| consensus | 16 | +1.13% | 50% |
-| catalyst | 2 | +1.74% | 50% |
+| momentum | 21 | +0.60% | 43% |
+| high_sharpe | 21 | +0.60% | 43% |
+| breakout | 4 | +0.49% | 50% |
+| consensus | 16 | +1.21% | 50% |
+| catalyst | 2 | +1.30% | 50% |
 | diversifier | 1 | +1.23% | 100% |
 | non_us_differentiator | 6 | -1.94% | 0% |
-| overbought | 10 | +0.95% | 50% |
-| at_52w_high | 16 | +1.29% | 50% |
+| overbought | 10 | +1.09% | 50% |
+| at_52w_high | 16 | +1.41% | 50% |
 
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 11 | +0.27% |
-| Tier 2 (medium conviction) | 12-18% | 15 | +0.39% |
+| Tier 1 (high conviction) | 20-25% | 11 | +0.23% |
+| Tier 2 (medium conviction) | 12-18% | 15 | +0.49% |
 | Tier 3 (low conviction) | 5-10% | 5 | -0.85% |
 
 ## Structured Learning State

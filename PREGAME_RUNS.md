@@ -1517,3 +1517,37 @@ Winners: AKAM +3.8%, DELL +2.8% | Losers: PSX -0.9%, XOM -0.8%, MPC -0.6%
 - ▼ **AKAM**: 22.0% → 17.0% (-5.0%)
 
 ---
+## 2026-03-25 22:25:52
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.6% · VIX: 25.3 · S&P 500 20d: -5.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.0% · Benchmark +0.5% · Alpha +0.5%
+Winners: AKAM +4.4%, DELL +4.4% | Losers: PSX -1.2%, XOM -0.9%, MPC -0.7%
+
+**Paper account:** Equity €10,267.00 (start €10,000) · Today +0.64% · Since start +2.67% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the triple-consensus core of HPE, AKAM, and DELL because recent realized alpha came from momentum winners and these names were independently validated across all three proposals. I cut the weakest current laggards in losing or decelerating setups—especially MPC, PSX, and XOM—then added AMD for cleaner acceleration and APA as the strongest remaining energy expression despite overbought risk. Portfolio stays concentrated at 5 names, accepts US concentration because the signal cluster is clearly superior today, and does not force beta filler given the rotation-risk override in this cautious neutral regime.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **HPE** | 25.0% | Triple-consensus pick and best new add versus current holdings; exceptional 5d momentum and strongest volume confirmation (vol_ratio 2.50) offset overbought risk enough to keep it high conviction. |
+| 2 | **AKAM** | 16.0% | Triple-consensus pick and current winner that just delivered strong realized performance; low-beta but powerful relative strength and solid volume support justify keeping it as a core name despite RSI 84. |
+| 3 | **DELL** | 17.0% | Triple-consensus pick with elite short-term acceleration and recent portfolio contribution, but conviction is trimmed because it is overbought, recently repeat-flagged by Devil, and volume confirmation is only borderline at 0.98. |
+| 4 | **AMD** | 25.0% | Best unique high-beta breakout candidate from the full analyst; strong 5d momentum and healthy volume make it the preferred offensive replacement for slower legacy energy names in a competition portfolio. |
+| 5 | **APA** | 17.0% | Best energy hold/add from the proposals as a way to stay exposed to the leading sector while rotating out weaker current refiners, but conviction is capped by extreme RSI 91 and medium rotation-risk deceleration in energy. |
+
+**Changes from yesterday:**
+- ➕ Added **HPE** at 25.0%
+- ➕ Added **AMD** at 25.0%
+- ➕ Added **APA** at 17.0%
+- ➖ Removed **PSX** (was 24.0%)
+- ➖ Removed **MPC** (was 24.0%)
+- ➖ Removed **XOM** (was 15.0%)
+- ▼ **AKAM**: 22.0% → 16.0% (-6.0%)
+- ▲ **DELL**: 15.0% → 17.0% (+2.0%)
+
+---

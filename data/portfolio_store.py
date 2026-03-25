@@ -192,6 +192,76 @@ def load_last() -> Optional[PortfolioProposal]:
         return None
 
 
+def load_latest_verified(date: Optional[str] = None) -> Optional[dict]:
+    """Load the most recent verified portfolio from DB.
+
+    Args:
+        date: Optional ISO date string. If provided, only considers verified
+            portfolios on or before this date.
+
+    Returns:
+        Dict with keys ``date``, ``source`` and ``positions`` or ``None``.
+    """
+    try:
+        with get_db_cursor() as cur:
+            if date:
+                cur.execute(
+                    """
+                    SELECT date
+                    FROM daily_runs
+                    WHERE source = 'verified' AND date <= %s
+                    ORDER BY date DESC
+                    LIMIT 1
+                    """,
+                    (date,),
+                )
+            else:
+                cur.execute(
+                    """
+                    SELECT date
+                    FROM daily_runs
+                    WHERE source = 'verified'
+                    ORDER BY date DESC
+                    LIMIT 1
+                    """
+                )
+
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            verified_date = row["date"]
+            cur.execute(
+                """
+                SELECT ticker, weight, rationale, tags
+                FROM portfolio_positions
+                WHERE date = %s
+                ORDER BY weight DESC, ticker ASC
+                """,
+                (verified_date,),
+            )
+            positions = cur.fetchall()
+            if not positions:
+                return None
+
+            return {
+                "date": verified_date.isoformat(),
+                "source": "verified",
+                "positions": [
+                    {
+                        "ticker": p["ticker"],
+                        "weight": float(p["weight"]),
+                        "rationale": p.get("rationale"),
+                        "tags": p.get("tags") or [],
+                    }
+                    for p in positions
+                ],
+            }
+    except Exception as exc:
+        logger.error("Failed to load latest verified portfolio from DB: %s", exc)
+        return None
+
+
 def load_performance_history(max_days: int = 5) -> list[dict]:
     """Load last N days of performance records from the database."""
     return [h.get("performance", {}) for h in load_decision_history(max_days)]

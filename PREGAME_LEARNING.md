@@ -8,7 +8,7 @@ Days remaining: 12
 - Training days with measurable alpha: 6
 - Win days (alpha > 0): 4
 - Loss days (alpha < 0): 2
-- Average daily alpha: +0.27%
+- Average daily alpha: +0.33%
 - Paper account equity: €10,267.00 (from €10,000.00, return +2.67%)
 - Max drawdown (paper): 1.39%
 - Average turnover: 30.77%
@@ -30,8 +30,8 @@ Days remaining: 12
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
+| AKAM | winner | 6 | +2.53% | 67% |
 | APA | winner | 10 | +2.36% | 80% |
-| AKAM | winner | 6 | +2.32% | 67% |
 | AKRBP.OL | loser | 6 | -4.14% | 0% |
 | EQNR.OL | loser | 6 | -0.93% | 0% |
 | NESTE.HE | loser | 6 | -0.74% | 0% |

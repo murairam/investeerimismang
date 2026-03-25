@@ -103,7 +103,7 @@ The Risk Manager will synthesize all three. Your value is finding picks that nei
 - Good setups: any 3-4 of the above
 - Avoid: negative vs_index AND vol_ratio < 0.8 AND negative MACD (dead momentum)
 - Non-US names are optional alpha sources — include them only when they beat available US alternatives on current signals
-- Baltic/Nordic: do NOT penalize for N/A short interest or IV — evaluate on volume, momentum, RSI
+- ShortInt and IV fields are shown only when available in today's data
 
 ## Sizing — MANDATORY
 - Highest conviction (4+ positive signals): 20–25%
@@ -207,7 +207,34 @@ class OpenAIFullAnalyst(BaseAgent):
         if not ranked:
             ranked = snapshot.get("candidates", [])
 
-        header = "Ticker,Market,Sector,20d(σ),Sh(σ),5d(σ),60dRet,RSI,vIdx(σ),52wH%,Beta,VR(σ),MACD,ATR%,ShrtInt,PreMkt,IV,DivYld,AnaRtg,AnaUp%,Price"
+        preprocessed_rows: list[dict] = []
+        for c in ranked:
+            ticker = c["ticker"]
+            preprocessed_rows.append(
+                {
+                    "candidate": c,
+                    "short_interest": short_interest.get(ticker),
+                    "premarket_gap": premarket_gap.get(ticker),
+                    "iv_proxy": iv_proxy.get(ticker),
+                }
+            )
+
+        show_short_interest = any(row["short_interest"] is not None for row in preprocessed_rows)
+        show_premarket_gap = any(row["premarket_gap"] is not None for row in preprocessed_rows)
+        show_iv = any(row["iv_proxy"] is not None for row in preprocessed_rows)
+
+        header_fields = [
+            "Ticker", "Market", "Sector", "20d(σ)", "Sh(σ)", "5d(σ)", "60dRet", "RSI", "vIdx(σ)",
+            "52wH%", "Beta", "VR(σ)", "MACD", "ATR%",
+        ]
+        if show_short_interest:
+            header_fields.append("ShrtInt")
+        if show_premarket_gap:
+            header_fields.append("PreMkt")
+        if show_iv:
+            header_fields.append("IV")
+        header_fields += ["DivYld", "AnaRtg", "AnaUp%", "Price"]
+        header = ",".join(header_fields)
 
         comm = snapshot.get("commodity_context", {})
         comm_line = ""
@@ -276,7 +303,7 @@ class OpenAIFullAnalyst(BaseAgent):
         lines += [
             "",
             "Top candidates (sorted by combined score) — ALL signals:",
-            "ShrtInt = short % of float (N/A for Baltic/Nordic). PreMkt = premarket gap. IV = implied vol or realized HV fallback.",
+            "ShrtInt / PreMkt / IV columns are included only when available in today's data.",
             "AnaRtg: analyst consensus 1=StrongBuy→5=StrongSell. AnaUp%: implied upside to mean target. High momentum + positive upside = conviction. High momentum + negative upside = stretched/crowded.",
             "",
             header
@@ -286,28 +313,43 @@ class OpenAIFullAnalyst(BaseAgent):
             return "N/A" if (v is None or (isinstance(v, float) and math.isnan(v))) else format(v, fmt_str)
 
         def fmt_opt(v: "float | None", fmt_str: str = ".1%") -> str:
-            return "N/A" if v is None else format(v, fmt_str)
+            return "" if v is None else format(v, fmt_str)
 
         def fmtz(v: float) -> str:
             return "N/A" if (v is None or (isinstance(v, float) and math.isnan(v))) else f"{v:+.1f}"
 
-        for c in ranked:
-            t = c["ticker"]
-            safe_ticker = sanitize_ticker(t)
-            si = short_interest.get(t)
-            pm = premarket_gap.get(t)
-            iv = iv_proxy.get(t)
-            lines.append(
-                f"{safe_ticker},{c['market']},{c.get('sector', '?')},"
-                f"{fmtz(c.get('z_momentum', float('nan')))},{fmtz(c.get('z_sharpe_20d', float('nan')))},"
-                f"{fmtz(c.get('z_mom_5d', float('nan')))},{fmt(c['mom_60d'])},{fmt(c['rsi_14'], '.1f')},"
-                f"{fmtz(c.get('z_vs_index', float('nan')))},{fmt(c['pct_from_52w_high'])},"
-                f"{fmt(c['beta'], '.2f')},{fmtz(c.get('z_vol_ratio', float('nan')))},"
-                f"{fmt(c.get('macd_hist', float('nan')))},{fmt(c.get('atr_pct', float('nan')))},"
-                f"{fmt_opt(si, '.1%')},{fmt_opt(pm, '+.1%')},{fmt_opt(iv, '.2f')},"
-                f"{fmt(c.get('dividend_yield', float('nan')))},{fmt(c.get('analyst_rating', float('nan')), '.1f')},"
-                f"{fmt(c.get('analyst_upside', float('nan')))},{c['last_price']:.2f}"
-            )
+        for row in preprocessed_rows:
+            c = row["candidate"]
+            safe_ticker = sanitize_ticker(c["ticker"])
+            values = [
+                safe_ticker,
+                c["market"],
+                c.get("sector", "?"),
+                fmtz(c.get("z_momentum", float("nan"))),
+                fmtz(c.get("z_sharpe_20d", float("nan"))),
+                fmtz(c.get("z_mom_5d", float("nan"))),
+                fmt(c["mom_60d"]),
+                fmt(c["rsi_14"], ".1f"),
+                fmtz(c.get("z_vs_index", float("nan"))),
+                fmt(c["pct_from_52w_high"]),
+                fmt(c["beta"], ".2f"),
+                fmtz(c.get("z_vol_ratio", float("nan"))),
+                fmt(c.get("macd_hist", float("nan"))),
+                fmt(c.get("atr_pct", float("nan"))),
+            ]
+            if show_short_interest:
+                values.append(fmt_opt(row["short_interest"], ".1%"))
+            if show_premarket_gap:
+                values.append(fmt_opt(row["premarket_gap"], "+.1%"))
+            if show_iv:
+                values.append(fmt_opt(row["iv_proxy"], ".2f"))
+            values += [
+                fmt(c.get("dividend_yield", float("nan"))),
+                fmt(c.get("analyst_rating", float("nan")), ".1f"),
+                fmt(c.get("analyst_upside", float("nan"))),
+                f"{c['last_price']:.2f}",
+            ]
+            lines.append(",".join(values))
 
         if prior_proposal and prior_proposal.positions:
             lines += ["", "Yesterday's holdings (for continuity reference):"]

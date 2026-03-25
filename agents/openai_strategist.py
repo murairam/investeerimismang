@@ -44,8 +44,8 @@ _REGIME_GUIDANCE = {
     ),
     "NEUTRAL": (
         "Market regime: NEUTRAL (SPX near 200d SMA). "
-        "5–10 positions — use as many slots as you have genuinely strong picks for. "
-        "Quality over quantity: do not pad with weak names, but do not cap at 5 if more are compelling."
+        "5–8 positions — concentrate in genuine strength and avoid weak filler names. "
+        "Quality over quantity: do not pad with weak names, and keep the book tight unless conviction breadth is truly high."
     ),
 }
 
@@ -94,7 +94,7 @@ Focus on MOMENTUM + HIGH-BETA BREAKOUT:
 - Favour stocks with the strongest risk-adjusted momentum (Sharpe_20d = 20d return / annualised vol).
 - High Sharpe means a smooth, persistent uptrend — much better than a volatile spike.
 - Prefer high-beta names in bull-market conditions — they amplify gains.
-- Regime-based position count: BULL target 5 (max 6), NEUTRAL 5–10, BEAR 5–8. You decide the exact count based on signal quality — more positions only if multiple names genuinely earn their slot. Daily rebalancing replaces diversification — rotate out losers tomorrow. No token 5% picks unless a name has a clear catalyst reason.
+- Regime-based position count: BULL target 5 (max 6), NEUTRAL 5–8, BEAR 5–8. You decide the exact count based on signal quality — more positions only if multiple names genuinely earn their slot. Daily rebalancing replaces diversification — rotate out losers tomorrow. No token 5% picks unless a name has a clear catalyst reason.
 - Single-market concentration is fine if signals are concentrated there. Do NOT add positions in other markets just for geographic diversification.
 - Stocks near 52-week highs (pct_from_52w_high close to 0%) are breaking out — favour them IF 5d momentum is strong (> 5%). If a stock is at its 52w high but 5d momentum is weak (< 3%) and MACD is flat or negative, the move is likely exhausted — treat it as a hold candidate, not a fresh entry at full size.
 - vs_index > 0 means the stock beat its own market — pure alpha signal.

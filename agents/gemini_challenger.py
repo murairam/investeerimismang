@@ -118,10 +118,9 @@ You are a SECOND OPINION to a separate Momentum Strategist who sees trend/Sharpe
 - RSI > 75 with vol_ratio > 1.5 = confirmed breakout (bullish). RSI > 82 AND pct_from_52w_high ≥ -2% AND vol_ratio < 1.8 = exhaustion not breakout — cap at 15%.
 - vol_ratio > 1.5: move confirmed by volume — strong buy signal. vol_ratio > 1.8 overrides the exhaustion warning.
 - pct_from_52w_high is ALWAYS <= 0%. 0.0% = AT 52-week high. Bullish only when vol_ratio confirms. Without volume, at-peak = no pullback cushion.
-- ShortInt = short % of float (N/A for Baltic/Nordic — no options chain, not a penalty).
+- ShortInt = short % of float when available.
 - PreMktGap = gap vs prior close. Positive = opening momentum.
-- IV = implied vol from options (US) or 20d annualized realized vol (non-US fallback). Same unit.
-- Do NOT penalize non-US stocks for N/A short interest or IV — evaluate on volume breakouts and RSI.
+- IV = implied vol from options (US) or 20d annualized realized vol (non-US fallback), shown when available.
 
 ## Baltic market guidance
 Baltic stocks are underrepresented in competitor portfolios — genuine edge:
@@ -242,11 +241,49 @@ class GeminiChallenger(BaseAgent):
         if not catalyst_ranked:
             catalyst_ranked = snapshot.get("candidates", [])
 
-        header = (
-            f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'5d(σ)':>6} {'RSI':>6} "
-            f"{'vIdx(σ)':>8} {'52wH%':>7} {'VR(σ)':>6} {'ShortInt':>9} "
-            f"{'PreMktGap':>10} {'IV':>7} {'ATR%':>6} {'DivYld':>7} {'CatScore':>9} {'Price':>10}"
-        )
+        preprocessed_rows: list[dict] = []
+        for c in catalyst_ranked:
+            ticker = c["ticker"]
+            si = short_interest.get(ticker)
+            pm = premarket_gap.get(ticker)
+            iv = iv_proxy.get(ticker)
+            preprocessed_rows.append(
+                {
+                    "candidate": c,
+                    "short_interest": si,
+                    "premarket_gap": pm,
+                    "iv_proxy": iv,
+                    "cat_score": self._catalyst_score(c, si, pm, iv),
+                }
+            )
+
+        show_short_interest = any(row["short_interest"] is not None for row in preprocessed_rows)
+        show_premarket_gap = any(row["premarket_gap"] is not None for row in preprocessed_rows)
+        show_iv = any(row["iv_proxy"] is not None for row in preprocessed_rows)
+
+        header_parts = [
+            f"{'Ticker':<12}",
+            f"{'Market':<12}",
+            f"{'Sector':<7}",
+            f"{'5d(σ)':>6}",
+            f"{'RSI':>6}",
+            f"{'vIdx(σ)':>8}",
+            f"{'52wH%':>7}",
+            f"{'VR(σ)':>6}",
+        ]
+        if show_short_interest:
+            header_parts.append(f"{'ShortInt':>9}")
+        if show_premarket_gap:
+            header_parts.append(f"{'PreMktGap':>10}")
+        if show_iv:
+            header_parts.append(f"{'IV':>7}")
+        header_parts += [
+            f"{'ATR%':>6}",
+            f"{'DivYld':>7}",
+            f"{'CatScore':>9}",
+            f"{'Price':>10}",
+        ]
+        header = " ".join(header_parts)
 
         # Sector rotation context
         sector_mom = snapshot.get("sector_momentum", {})
@@ -295,9 +332,9 @@ class GeminiChallenger(BaseAgent):
         lines += [
             "",
             "Top candidates (sorted by catalyst score) — CATALYST signals only:",
-            "ShortInt = short % of float (N/A for Baltic/Nordic — no data, not a penalty).",
+            "ShortInt/PreMktGap/IV columns are shown only when available in today's data.",
             "PreMktGap = gap vs prior close (EU=morning gap, US=after-hours).",
-            "IV = implied vol from options (US) or 20d annualized realized vol (non-US fallback).",
+            "IV = implied vol from options (US) or 20d annualized realized vol (non-US fallback), when available.",
             "CatScore = internal catalyst ranking. Use this as your primary ordering.",
             "",
             header,
@@ -308,32 +345,37 @@ class GeminiChallenger(BaseAgent):
             return "N/A" if (v is None or (isinstance(v, float) and math.isnan(v))) else format(v, fmt_str)
 
         def fmt_opt(v: "float | None", fmt_str: str = ".1%") -> str:
-            return "N/A" if v is None else format(v, fmt_str)
+            return "" if v is None else format(v, fmt_str)
 
         def fmtz(v: float) -> str:
             return "N/A" if math.isnan(v) else f"{v:+.1f}σ"
 
-        for c in catalyst_ranked:
-            t = c["ticker"]
-            safe_ticker = sanitize_ticker(t)
-            si = short_interest.get(t)
-            pm = premarket_gap.get(t)
-            iv = iv_proxy.get(t)
-            lines.append(
-                f"{safe_ticker:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
-                f"{fmtz(c.get('z_mom_5d', float('nan'))):>6} "
-                f"{fmt(c['rsi_14'], '.1f'):>6} "
-                f"{fmtz(c.get('z_vs_index', float('nan'))):>8} "
-                f"{fmt(c['pct_from_52w_high']):>7} "
-                f"{fmtz(c.get('z_vol_ratio', float('nan'))):>6} "
-                f"{fmt_opt(si, '.1%'):>9} "
-                f"{fmt_opt(pm, '+.1%'):>10} "
-                f"{fmt_opt(iv, '.2f'):>7} "
-                f"{fmt(c.get('atr_pct', float('nan'))):>6} "
-                f"{fmt(c.get('dividend_yield', float('nan'))):>7} "
-                f"{self._catalyst_score(c, si, pm, iv):>9.2f} "
-                f"{c['last_price']:>10.2f}"
-            )
+        for row in preprocessed_rows:
+            c = row["candidate"]
+            safe_ticker = sanitize_ticker(c["ticker"])
+            values = [
+                f"{safe_ticker:<12}",
+                f"{c['market']:<12}",
+                f"{c.get('sector', '?'):<7}",
+                f"{fmtz(c.get('z_mom_5d', float('nan'))):>6}",
+                f"{fmt(c['rsi_14'], '.1f'):>6}",
+                f"{fmtz(c.get('z_vs_index', float('nan'))):>8}",
+                f"{fmt(c['pct_from_52w_high']):>7}",
+                f"{fmtz(c.get('z_vol_ratio', float('nan'))):>6}",
+            ]
+            if show_short_interest:
+                values.append(f"{fmt_opt(row['short_interest'], '.1%'):>9}")
+            if show_premarket_gap:
+                values.append(f"{fmt_opt(row['premarket_gap'], '+.1%'):>10}")
+            if show_iv:
+                values.append(f"{fmt_opt(row['iv_proxy'], '.2f'):>7}")
+            values += [
+                f"{fmt(c.get('atr_pct', float('nan'))):>6}",
+                f"{fmt(c.get('dividend_yield', float('nan'))):>7}",
+                f"{row['cat_score']:>9.2f}",
+                f"{c['last_price']:>10.2f}",
+            ]
+            lines.append(" ".join(values))
 
         if prior_proposal and prior_proposal.positions:
             lines += ["", "Yesterday's holdings (for continuity reference):"]
