@@ -543,6 +543,50 @@ def save(
         logger.error("Failed to save portfolio to DB: %s", exc)
 
 
+def save_learning_state_to_db(state: dict) -> None:
+    """Persist learning state JSONB to DB (upsert single keyed row)."""
+    try:
+        with get_db_cursor(commit=True) as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS learning_cache (
+                    key TEXT PRIMARY KEY,
+                    state JSONB NOT NULL,
+                    updated_at TIMESTAMPTZ DEFAULT now()
+                )
+            """)
+            cur.execute("""
+                INSERT INTO learning_cache (key, state, updated_at)
+                VALUES ('main', %s, now())
+                ON CONFLICT (key) DO UPDATE SET
+                    state = EXCLUDED.state,
+                    updated_at = now()
+            """, (Json(state),))
+        logger.info("Learning state saved to DB")
+    except Exception as exc:
+        logger.error("Failed to save learning state to DB: %s", exc)
+
+
+def load_learning_state_from_db() -> Optional[dict]:
+    """Load the most recent learning state from DB. Returns None if unavailable."""
+    try:
+        with get_db_cursor(commit=True) as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS learning_cache (
+                    key TEXT PRIMARY KEY,
+                    state JSONB NOT NULL,
+                    updated_at TIMESTAMPTZ DEFAULT now()
+                )
+            """)
+            cur.execute("SELECT state FROM learning_cache WHERE key = 'main'")
+            row = cur.fetchone()
+            if row:
+                return dict(row["state"])
+            return None
+    except Exception as exc:
+        logger.error("Failed to load learning state from DB: %s", exc)
+        return None
+
+
 def load_ai_proposal(date: str) -> Optional[list[dict]]:
     """Load today's AI-proposed positions from the DB. Returns None if not found."""
     try:

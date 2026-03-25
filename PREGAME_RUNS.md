@@ -1342,3 +1342,111 @@ Winners: DELL +7.0%, APA +4.1%, XOM +2.2% | Losers: PLTR -4.2%, AKAM -0.4%
 - ▲ **CVX**: 12.0% → 15.0% (+3.0%)
 
 ---
+## 2026-03-25 12:42:42
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 25.4 · S&P 500 20d: -4.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Paper account:** Equity €10,267.00 (start €10,000) · Today +0.64% · Since start +2.67% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the strongest current winners from the verified portfolio where there was independent agreement—MPC and PSX as triple-consensus core holdings, plus DELL as a reduced-conviction double-consensus hold—while cutting weaker laggards/excess exposure such as AKAM and de-emphasizing XOM because Energy is decelerating and Tech breadth is poor. I included APA as the best aggressive catalyst add and DOW as the best rotation-balancing non-tech/non-laggard slot; this stays concentrated at exactly 5 names for a cautious NEUTRAL regime and avoids adding beta filler despite the low strategist beta because rotation-risk guidance makes beta secondary today.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MPC** | 24.0% | Triple-consensus keep and current holding; refining remains in the leading sector, recent portfolio alpha supports keeping strong winners, and despite Devil HIGH risk the flag accuracy is weak so conviction is reduced but still high. |
+| 2 | **PSX** | 24.0% | Triple-consensus keep and current holding; strongest rotation leadership is still Energy and PSX is an under-the-radar refiner with solid 5d acceleration, but conviction is capped below max due to overbought/HIGH-risk warning and sector deceleration. |
+| 3 | **APA** | 15.0% | Triple-consensus add with validated-winner history and the sharpest 5d energy acceleration, making it the best aggressive new slot, but RSI 90.9 and repeat Devil HIGH-risk history require a meaningful conviction haircut. |
+| 4 | **DELL** | 15.0% | Double-consensus hold from current portfolio because it has been a recent winner and offers a non-energy right-tail catalyst, but Tech breadth is weak, the stock is repeat HIGH-risk flagged, and conviction must be reduced accordingly. |
+| 5 | **DOW** | 22.0% | Double-consensus replacement/add that earns its slot as the best non-tech, non-energy alternative; it helps reduce reliance on decelerating Energy while avoiding weak sectors like telecom/Baltic/Nordics, though modest 5d acceleration keeps conviction in the mid-high range. |
+
+**Changes from yesterday:**
+- ➕ Added **APA** at 15.0%
+- ➕ Added **DOW** at 22.0%
+- ➖ Removed **AKAM** (was 22.0%)
+- ➖ Removed **XOM** (was 15.0%)
+
+---
+## 2026-03-25 13:01:56
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 25.0 · S&P 500 20d: -4.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Paper account:** Equity €10,267.00 (start €10,000) · Today +0.64% · Since start +2.67% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I kept the strongest verified winners from the current portfolio—PSX, MPC, XOM, and AKAM—because recent 5-day alpha is positive and the sector-action rule still favors redeployment toward Energy rather than churn into weak-breadth sectors. From the non-core names, HPE earns inclusion as the sharpest acceleration play, while APA is the only catalyst-style add kept despite risk because it has cross-proposal support and competition-winning upside, but its conviction is capped hard by the HIGH-risk warning. Portfolio remains concentrated and rotation-led; beta likely stays below the normal NEUTRAL target, but that is acceptable because rotation-risk guidance explicitly says not to add beta filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **PSX** | 19.0% | Double-consensus current holding and recent winner; continuity is justified by positive portfolio alpha, strong 5d momentum, low retail crowding, and Energy still being the clear sector leader despite deceleration. |
+| 2 | **MPC** | 19.0% | Double-consensus current holding with strong recent contribution (+5.0% in the post-mortem), validated winner status, and under-the-radar search interest; keep as a core refiner while rotation remains Energy-led. |
+| 3 | **XOM** | 15.0% | Double-consensus Energy leader and existing holding; conviction is high but slightly capped because RSI is >79 and Energy has MEDIUM rotation-risk deceleration, so it stays but not at max conviction. |
+| 4 | **AKAM** | 15.0% | Double-consensus current holding and historically validated winner; Tech sector breadth is weak, but AKAM has been working in this portfolio and recent alpha argues for keeping strong winners rather than forcing a full exit. |
+| 5 | **HPE** | 17.0% | Best unique non-Energy addition: yesterday's strongest winner (+7.8%) with breakout-style momentum and better acceleration than slower alternatives, earning the fifth slot over weaker catalyst names. |
+| 6 | **APA** | 15.0% | Consensus pick with elite momentum, but conviction is hard-cut by the explicit HIGH-risk flag plus extreme RSI 90.9 and repeat Devil flag history; include only as a lower-conviction right-tail catalyst rather than a core anchor. |
+
+**Changes from yesterday:**
+- ➕ Added **HPE** at 17.0%
+- ➕ Added **APA** at 15.0%
+- ➖ Removed **DELL** (was 15.0%)
+- ▼ **PSX**: 24.0% → 19.0% (-5.0%)
+- ▼ **MPC**: 24.0% → 19.0% (-5.0%)
+- ▼ **AKAM**: 22.0% → 15.0% (-7.0%)
+
+---
+## 2026-03-25 13:21:10
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 25.4 · S&P 500 20d: -4.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Paper account:** Equity €10,267.00 (start €10,000) · Today +0.64% · Since start +2.67% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the strongest validated winners from the current book—MPC, PSX, XOM, and DELL—because recent portfolio alpha has been positive and the consensus names dominate both proposals. I cut AKAM because Tech breadth is weak and the sector-action rule says reduce the weakest lagging-sector exposure, then redeployed that slot into VLO as the cleanest Energy continuation play; portfolio remains concentrated in the leading rotation, and beta stays below the normal NEUTRAL target but that is acceptable because rotation-risk guidance explicitly says not to add beta filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MPC** | 24.0% | Double-consensus core hold and one of the current portfolio’s strongest winners; refinery momentum remains intact, search interest is uncrowded, and recent alpha argues for keeping this leader. |
+| 2 | **PSX** | 24.0% | Double-consensus core hold with strong 5d momentum and direct exposure to the leading Energy rotation; keep as a top conviction winner despite medium rotation-risk deceleration in the sector. |
+| 3 | **XOM** | 15.0% | Double-consensus hold and energy anchor, but conviction is capped by HIGH-risk overbought flag, RSI above 79 near highs, and sector deceleration risk even though Energy remains the leadership group. |
+| 4 | **DELL** | 15.0% | Double-consensus momentum winner with exceptional 5d acceleration and strong recent contribution, but conviction is cut sharply by HIGH-risk overbought status, repeat Devil flag, and Tech being a lagging sector with weak breadth. |
+| 5 | **VLO** | 22.0% | Best unique add from the catalyst side: another Energy/refining leader that fits the dominant rotation better than weaker sectors, and it earns the slot over APA because APA carries a deeper overbought/high-risk profile. |
+
+**Changes from yesterday:**
+- ➕ Added **VLO** at 22.0%
+- ➖ Removed **AKAM** (was 22.0%)
+
+---
+## 2026-03-25 13:33:35
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 25.1 · S&P 500 20d: -4.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Paper account:** Equity €10,267.00 (start €10,000) · Today +0.64% · Since start +2.67% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the two triple-consensus energy leaders MPC and PSX as highest-conviction anchors because recent portfolio alpha has been driven by momentum continuity, while cutting weaker current holding XOM under the sector-action rule since Energy remains strong but is decelerating and XOM was the weakest existing energy name. I included DOW as the best consensus redeployment outside lagging Tech, while retaining AKAM and DELL only at reduced conviction because current holdings have been working but Tech breadth is 0% and DELL carries repeat risk flags; this stays concentrated at exactly 5 names as required in cautious NEUTRAL, with beta likely still below the soft target but acceptable under the rotation-risk override.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MPC** | 24.0% | Triple-consensus core hold and one of the current portfolio’s strongest winners; momentum/high-Sharpe leadership remains intact and low retail crowding supports staying concentrated. |
+| 2 | **PSX** | 24.0% | Triple-consensus core hold with strong recent relative strength and direct alignment with the still-leading Energy rotation; continuity is justified given recent alpha and no evidence of breakdown. |
+| 3 | **DOW** | 24.0% | Double-consensus addition that earns its slot as the cleaner non-tech, non-integrated cyclical diversifier; moderate momentum but better regime fit than weaker lagging sectors and helps avoid overconcentration in decelerating Energy. |
+| 4 | **AKAM** | 15.0% | Double-consensus current holding and historically validated winner, but Tech is a laggard sector with 0% breadth and AKAM is overbought, so it stays only at reduced conviction rather than as a core position. |
+| 5 | **DELL** | 13.0% | Double-consensus and a major recent winner, but repeat Devil HIGH-risk flags, RSI above 80, and weak sector breadth in Tech force a capped conviction despite strong 5-day momentum. |
+
+**Changes from yesterday:**
+- ➕ Added **DOW** at 24.0%
+- ➖ Removed **XOM** (was 15.0%)
+- ▼ **AKAM**: 22.0% → 15.0% (-7.0%)
+
+---

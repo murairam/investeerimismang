@@ -151,6 +151,29 @@ def _compute_competition_scores(records: list[dict], regime: str) -> None:
         r["competition_score"] = score
 
 
+def _add_signal_z_scores(records: list[dict]) -> None:
+    """Compute cross-sectional Z-scores for key signals across the top-N candidate pool.
+
+    Adds z_{signal} fields to each record so agents receive relative rankings
+    (+2.1σ) instead of raw values, improving LLM cross-sectional reasoning.
+    Z-scores are clamped to [-3, 3] and NaN-safe (missing → NaN, not 0).
+    """
+    SIGNALS = ["momentum", "mom_5d", "sharpe_20d", "vs_index", "vol_ratio"]
+    for sig in SIGNALS:
+        vals = [r.get(sig, float("nan")) for r in records]
+        vals_clean = [v for v in vals if not math.isnan(v)]
+        if len(vals_clean) < 2:
+            for r in records:
+                r[f"z_{sig}"] = float("nan")
+            continue
+        mean = sum(vals_clean) / len(vals_clean)
+        var = sum((v - mean) ** 2 for v in vals_clean) / len(vals_clean)
+        std = var ** 0.5 if var > 0 else 1.0
+        for r in records:
+            val = r.get(sig, float("nan"))
+            r[f"z_{sig}"] = max(-3.0, min(3.0, (val - mean) / std)) if not math.isnan(val) else float("nan")
+
+
 def detect_rotation_risk(
     sector_momentum: dict[str, dict],
     sector_records: dict[str, list[dict]],
@@ -474,7 +497,11 @@ class DataFetcher:
         return vol.rename("vol")
 
     def compute_beta(
-        self, close: pd.DataFrame, benchmark_close: pd.Series, window: int = BETA_WINDOW
+        self,
+        close: pd.DataFrame,
+        benchmark_close: pd.Series,
+        market_map: dict[str, str],
+        window: int = BETA_WINDOW,
     ) -> pd.Series:
         """Rolling beta of each ticker vs benchmark over the last *window* days."""
         if len(close) < window:
@@ -500,7 +527,22 @@ class DataFetcher:
                 betas[ticker] = float("nan")
                 continue
             cov = stock_series.cov(bench_series)
-            betas[ticker] = cov / bench_var
+            beta = cov / bench_var
+
+            sector = self._sector_tag(ticker, market_map.get(ticker, "UNKNOWN"))
+
+            # Sanity check: only reject truly impossible values (statistical artifacts
+            # from very short/corrupt price series). Near-zero or mildly negative betas
+            # are empirically valid — energy stocks often have negative 60d rolling betas
+            # when they outperform during a broad-market selloff.
+            if beta < -3.0 or beta > 5.0:
+                logger.warning(
+                    "Rejecting implausible beta %.2f for %s (sector: %s) — likely corrupt price data.",
+                    beta, ticker, sector,
+                )
+                betas[ticker] = float("nan")
+            else:
+                betas[ticker] = beta
         return pd.Series(betas, name="beta")
 
     def compute_regime(self, bench_close: pd.Series) -> tuple[str, float]:
@@ -1131,7 +1173,7 @@ class DataFetcher:
         momentum_60d = self.compute_momentum(close_ff, MOM_LONG)
         vol_20d = self.compute_vol(close_ff, MOMENTUM_WINDOW)
         rsi = self.compute_rsi(close_ff, RSI_WINDOW)
-        beta = self.compute_beta(close_ff, bench_close)
+        beta = self.compute_beta(close_ff, bench_close, market_map=market_map)
         vol_ratio = self.compute_vol_ratio(volume, MOMENTUM_WINDOW)
         macd_hist = self.compute_macd(close_ff)
         atr_pct = self.compute_atr(high, low, close_ff)
@@ -1324,6 +1366,9 @@ class DataFetcher:
             breadth_pct * 100 if not math.isnan(breadth_pct) else 0,
             regime_score,
         )
+
+        # Add cross-sectional Z-scores relative to the top-N pool (not full 627-ticker universe).
+        _add_signal_z_scores(top)
 
         candidates: list[CandidateInfo] = [CandidateInfo(**r) for r in top]
         return MarketSnapshot(

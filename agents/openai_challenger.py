@@ -207,7 +207,7 @@ class OpenAIFullAnalyst(BaseAgent):
         if not ranked:
             ranked = snapshot.get("candidates", [])
 
-        header = "Ticker,Market,Sector,20dRet,Sharpe,5dRet,60dRet,RSI,vsIdx,52wH%,Beta,VolR,MACD,ATR%,ShrtInt,PreMkt,IV,DivYld,AnaRtg,AnaUp%,Price"
+        header = "Ticker,Market,Sector,20d(σ),Sh(σ),5d(σ),60dRet,RSI,vIdx(σ),52wH%,Beta,VR(σ),MACD,ATR%,ShrtInt,PreMkt,IV,DivYld,AnaRtg,AnaUp%,Price"
 
         comm = snapshot.get("commodity_context", {})
         comm_line = ""
@@ -288,6 +288,9 @@ class OpenAIFullAnalyst(BaseAgent):
         def fmt_opt(v: "float | None", fmt_str: str = ".1%") -> str:
             return "N/A" if v is None else format(v, fmt_str)
 
+        def fmtz(v: float) -> str:
+            return "N/A" if (v is None or (isinstance(v, float) and math.isnan(v))) else f"{v:+.1f}"
+
         for c in ranked:
             t = c["ticker"]
             safe_ticker = sanitize_ticker(t)
@@ -296,10 +299,10 @@ class OpenAIFullAnalyst(BaseAgent):
             iv = iv_proxy.get(t)
             lines.append(
                 f"{safe_ticker},{c['market']},{c.get('sector', '?')},"
-                f"{fmt(c['momentum'])},{fmt(c['sharpe_20d'], '.2f')},"
-                f"{fmt(c['mom_5d'])},{fmt(c['mom_60d'])},{fmt(c['rsi_14'], '.1f')},"
-                f"{fmt(c['vs_index'])},{fmt(c['pct_from_52w_high'])},"
-                f"{fmt(c['beta'], '.2f')},{fmt(c['vol_ratio'], '.2f')},"
+                f"{fmtz(c.get('z_momentum', float('nan')))},{fmtz(c.get('z_sharpe_20d', float('nan')))},"
+                f"{fmtz(c.get('z_mom_5d', float('nan')))},{fmt(c['mom_60d'])},{fmt(c['rsi_14'], '.1f')},"
+                f"{fmtz(c.get('z_vs_index', float('nan')))},{fmt(c['pct_from_52w_high'])},"
+                f"{fmt(c['beta'], '.2f')},{fmtz(c.get('z_vol_ratio', float('nan')))},"
                 f"{fmt(c.get('macd_hist', float('nan')))},{fmt(c.get('atr_pct', float('nan')))},"
                 f"{fmt_opt(si, '.1%')},{fmt_opt(pm, '+.1%')},{fmt_opt(iv, '.2f')},"
                 f"{fmt(c.get('dividend_yield', float('nan')))},{fmt(c.get('analyst_rating', float('nan')), '.1f')},"
@@ -358,7 +361,7 @@ class OpenAIFullAnalyst(BaseAgent):
             if "deepseek" in self.model.lower():
                 call_kwargs["extra_body"] = {"reasoning": {"enabled": True}}
                 call_kwargs["max_tokens"] = 10000  # reasoning mode needs ~8k tokens; 3k causes truncation + retries
-                call_kwargs["timeout"] = 400  # reasoning mode observed up to 357s; give headroom
+                call_kwargs["timeout"] = 480  # reasoning mode: normal ~140s, allow up to 480s before orchestrator's 540s window expires
         else:
             call_kwargs["response_format"] = {"type": "json_object"}
 

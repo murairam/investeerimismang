@@ -1,8 +1,8 @@
 # AI Self-Critique Report
 
-Generated: 2026-03-24
-Training days analyzed: 5
-Days until live mode: 13
+Generated: 2026-03-25
+Training days analyzed: 6
+Days until live mode: 12
 
 ## Meta-Learning Question
 **Is the AI's reasoning accurate, or just lucky/unlucky?**
@@ -13,46 +13,42 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
 - Minimum rationale observations for bias claims: 5
-- Latest day status: experimental / unverified
+- Latest day status: verified
 
 ## What's Working ✅
-- Strategy is producing alpha 60% of days.
+- 'overbought' rationale is working: +1.8% avg, 60% hit rate
+- 'at_52w_high' rationale is working: +1.9% avg, 62% hit rate
+- Conviction sizing is working: Tier 1 +0.3% > Tier 3 -0.9%
+- Strategy is producing alpha 67% of days.
 
 ## Systematic Biases / Errors ⚠️
-- 'momentum' rationale is weak: -0.2% avg, 38% hit rate
-- 'high_sharpe' rationale is weak: -0.2% avg, 38% hit rate
-- 'consensus' rationale is weak: +0.2% avg, 38% hit rate
 - 'non_us_differentiator' rationale is weak: -1.9% avg, 0% hit rate
-- INVERTED CONVICTION: Tier 1 averaged -1.2% vs Tier 3 -0.8%. Cap large weights.
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
 |---|---:|---:|---:|
-| momentum | 16 | -0.17% | 38% |
-| high_sharpe | 16 | -0.17% | 38% |
-| breakout | 3 | -0.79% | 33% |
-| consensus | 13 | +0.19% | 38% |
-| catalyst | 1 | -5.60% | 0% |
-| diversifier | 1 | +1.25% | 100% |
+| momentum | 21 | +0.97% | 52% |
+| high_sharpe | 21 | +0.97% | 52% |
+| breakout | 4 | +1.28% | 50% |
+| consensus | 16 | +1.11% | 50% |
+| catalyst | 2 | +1.10% | 50% |
+| diversifier | 1 | +1.23% | 100% |
 | non_us_differentiator | 6 | -1.94% | 0% |
-| overbought | 8 | +0.94% | 50% |
-| at_52w_high | 12 | +1.29% | 50% |
+| overbought | 10 | +1.77% | 60% |
+| at_52w_high | 16 | +1.91% | 62% |
 
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 8 | -1.18% |
-| Tier 2 (medium conviction) | 12-18% | 13 | +0.31% |
-| Tier 3 (low conviction) | 5-10% | 5 | -0.84% |
+| Tier 1 (high conviction) | 20-25% | 11 | +0.32% |
+| Tier 2 (medium conviction) | 12-18% | 15 | +0.94% |
+| Tier 3 (low conviction) | 5-10% | 5 | -0.85% |
 
 ## Structured Learning State
-- Active hard rules: 1
+- Active hard rules: 0
 - Changed hard rules since yesterday: 0
-- Validated winners tracked: 1
+- Validated winners tracked: 2
 - Recurring losers tracked: 3
 
 ## Action Items for the AI
-- Cap all positions at 15% until Tier 1 returns exceed Tier 3 returns over recent history.
-- Avoid overusing momentum rationales until their hit rate recovers above 40%.
-- Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.
-- Avoid overusing consensus rationales until their hit rate recovers above 40%.
+- No strong structured bias detected yet. Keep monitoring before changing strategy.

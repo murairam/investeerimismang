@@ -1032,3 +1032,30 @@ Winners: DELL +7.0%, APA +4.1%, XOM +2.2% | Losers: PLTR -4.2%, AKAM -0.4%
 
 ---
 
+## 2026-03-25 13:33:35
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 25.1 · S&P 500 20d: -4.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Paper account:** Equity €10,267.00 (start €10,000) · Today +0.64% · Since start +2.67% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the two triple-consensus energy leaders MPC and PSX as highest-conviction anchors because recent portfolio alpha has been driven by momentum continuity, while cutting weaker current holding XOM under the sector-action rule since Energy remains strong but is decelerating and XOM was the weakest existing energy name. I included DOW as the best consensus redeployment outside lagging Tech, while retaining AKAM and DELL only at reduced conviction because current holdings have been working but Tech breadth is 0% and DELL carries repeat risk flags; this stays concentrated at exactly 5 names as required in cautious NEUTRAL, with beta likely still below the soft target but acceptable under the rotation-risk override.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MPC** | 24.0% | Triple-consensus core hold and one of the current portfolio’s strongest winners; momentum/high-Sharpe leadership remains intact and low retail crowding supports staying concentrated. |
+| 2 | **PSX** | 24.0% | Triple-consensus core hold with strong recent relative strength and direct alignment with the still-leading Energy rotation; continuity is justified given recent alpha and no evidence of breakdown. |
+| 3 | **DOW** | 24.0% | Double-consensus addition that earns its slot as the cleaner non-tech, non-integrated cyclical diversifier; moderate momentum but better regime fit than weaker lagging sectors and helps avoid overconcentration in decelerating Energy. |
+| 4 | **AKAM** | 15.0% | Double-consensus current holding and historically validated winner, but Tech is a laggard sector with 0% breadth and AKAM is overbought, so it stays only at reduced conviction rather than as a core position. |
+| 5 | **DELL** | 13.0% | Double-consensus and a major recent winner, but repeat Devil HIGH-risk flags, RSI above 80, and weak sector breadth in Tech force a capped conviction despite strong 5-day momentum. |
+
+**Changes from yesterday:**
+- ➕ Added **DOW** at 24.0%
+- ➖ Removed **XOM** (was 15.0%)
+- ▼ **AKAM**: 22.0% → 15.0% (-7.0%)
+
+---
+

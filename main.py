@@ -38,6 +38,9 @@ from orchestrator import AlphaSharkOrchestrator  # noqa: E402 (after dotenv)
 
 def main() -> None:
     AlphaSharkOrchestrator().run()
+    # Force-exit to avoid hanging on network threads (e.g. timed-out DeepSeek connection)
+    # that Python's atexit would otherwise join() indefinitely.
+    os._exit(0)
 
 
 if __name__ == "__main__":

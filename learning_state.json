@@ -1,25 +1,25 @@
 {
-  "generated_from_days": 6,
-  "position_observations": 26,
+  "generated_from_days": 7,
+  "position_observations": 31,
   "minimums": {
     "strong_daily_observations": 5,
     "strong_ticker_observations": 5,
     "strong_rationale_observations": 5
   },
-  "hard_rules": [
-    "Cap all positions at 15% until Tier 1 returns exceed Tier 3 returns over recent history."
-  ],
-  "biases_to_avoid": [
-    "Avoid overusing momentum rationales until their hit rate recovers above 40%.",
-    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.",
-    "Avoid overusing consensus rationales until their hit rate recovers above 40%."
-  ],
+  "hard_rules": [],
+  "biases_to_avoid": [],
   "validated_winners": [
     {
       "ticker": "APA",
       "observations": 10,
-      "avg_return_1d": 0.023665,
+      "avg_return_1d": 0.023618,
       "hit_rate": 0.8
+    },
+    {
+      "ticker": "AKAM",
+      "observations": 6,
+      "avg_return_1d": 0.010939,
+      "hit_rate": 0.6667
     }
   ],
   "recurring_losers": [
@@ -43,11 +43,6 @@
     }
   ],
   "weight_caps": [
-    {
-      "scope": "global",
-      "max_weight": 0.15,
-      "reason": "inverted_conviction"
-    },
     {
       "scope": "ticker",
       "ticker": "AKRBP.OL",
@@ -76,25 +71,35 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.315,
+    "avg_turnover_estimate": 0.416,
     "observations": 0,
     "status": "insufficient_data"
   },
   "confidence_notes": [
     {
+      "tag": "momentum",
+      "instruction": "Prefer momentum setups when other signals are comparable.",
+      "observations": 21
+    },
+    {
+      "tag": "high_sharpe",
+      "instruction": "Prefer high_sharpe setups when other signals are comparable.",
+      "observations": 21
+    },
+    {
       "tag": "consensus",
       "instruction": "Prefer consensus setups when other signals are comparable.",
-      "observations": 13
+      "observations": 16
     },
     {
       "tag": "overbought",
       "instruction": "Prefer overbought setups when other signals are comparable.",
-      "observations": 8
+      "observations": 10
     },
     {
       "tag": "at_52w_high",
       "instruction": "Prefer at_52w_high setups when other signals are comparable.",
-      "observations": 12
+      "observations": 16
     }
   ],
   "early_warning_notes": [
@@ -102,33 +107,33 @@
   ],
   "rationale_stats": {
     "momentum": {
-      "observations": 16,
-      "avg_return_1d": -0.001654,
-      "hit_rate": 0.375
+      "observations": 21,
+      "avg_return_1d": 0.009669,
+      "hit_rate": 0.5238
     },
     "high_sharpe": {
-      "observations": 16,
-      "avg_return_1d": -0.001654,
-      "hit_rate": 0.375
+      "observations": 21,
+      "avg_return_1d": 0.009669,
+      "hit_rate": 0.5238
     },
     "breakout": {
-      "observations": 3,
-      "avg_return_1d": -0.007944,
-      "hit_rate": 0.3333
+      "observations": 4,
+      "avg_return_1d": 0.01283,
+      "hit_rate": 0.5
     },
     "consensus": {
-      "observations": 13,
-      "avg_return_1d": 0.001878,
-      "hit_rate": 0.3846
+      "observations": 16,
+      "avg_return_1d": 0.011125,
+      "hit_rate": 0.5
     },
     "catalyst": {
-      "observations": 1,
-      "avg_return_1d": -0.055995,
-      "hit_rate": 0.0
+      "observations": 2,
+      "avg_return_1d": 0.010999,
+      "hit_rate": 0.5
     },
     "diversifier": {
       "observations": 1,
-      "avg_return_1d": 0.012524,
+      "avg_return_1d": 0.01229,
       "hit_rate": 1.0
     },
     "non_us_differentiator": {
@@ -137,67 +142,63 @@
       "hit_rate": 0.0
     },
     "overbought": {
-      "observations": 8,
-      "avg_return_1d": 0.009401,
-      "hit_rate": 0.5
+      "observations": 10,
+      "avg_return_1d": 0.017704,
+      "hit_rate": 0.6
     },
     "at_52w_high": {
-      "observations": 12,
-      "avg_return_1d": 0.012879,
-      "hit_rate": 0.5
+      "observations": 16,
+      "avg_return_1d": 0.019143,
+      "hit_rate": 0.625
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": -0.011757,
-    "tier2_avg_return_1d": 0.003051,
-    "tier3_avg_return_1d": -0.008428,
-    "tier1_observations": 8,
-    "tier2_observations": 13,
+    "tier1_avg_return_1d": 0.003163,
+    "tier2_avg_return_1d": 0.009386,
+    "tier3_avg_return_1d": -0.008521,
+    "tier1_observations": 11,
+    "tier2_observations": 15,
     "tier3_observations": 5
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
     "status": "early_data",
-    "observations": 3,
-    "high_risk_avg_return_1d": 0.01843,
-    "low_risk_avg_return_1d": -0.006601,
-    "high_risk_negative_rate": 0.3333,
-    "accuracy": 0.3333,
+    "observations": 4,
+    "high_risk_avg_return_1d": 0.032494,
+    "low_risk_avg_return_1d": 0.000111,
+    "high_risk_negative_rate": 0.25,
+    "accuracy": 0.25,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
-        "ticker": "DELL",
+        "ticker": "APA",
         "flag_count": 3
       },
       {
-        "ticker": "LYB",
-        "flag_count": 2
-      },
-      {
-        "ticker": "APA",
+        "ticker": "DELL",
         "flag_count": 2
       }
     ]
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.375,
-      "mom_5d": 0.375,
-      "sharpe_20d": 0.375,
-      "rsi_14": 0.375,
-      "vs_index": 0.375,
-      "vol_ratio": 0.375,
-      "beta": 0.4375
+      "momentum": 0.5238,
+      "mom_5d": 0.5238,
+      "sharpe_20d": 0.5238,
+      "rsi_14": 0.5238,
+      "vs_index": 0.5238,
+      "vol_ratio": 0.5238,
+      "beta": 0.5714
     },
     "per_regime": {
       "NEUTRAL": {
-        "momentum": 0.375,
-        "mom_5d": 0.375,
-        "sharpe_20d": 0.375,
-        "rsi_14": 0.375,
-        "vs_index": 0.375,
-        "vol_ratio": 0.375,
-        "beta": 0.4375
+        "momentum": 0.5238,
+        "mom_5d": 0.5238,
+        "sharpe_20d": 0.5238,
+        "rsi_14": 0.5238,
+        "vs_index": 0.5238,
+        "vol_ratio": 0.5238,
+        "beta": 0.5714
       }
     }
   },
@@ -222,113 +223,84 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-03-23",
-    "portfolio_return_1d": 0.0107,
+    "date": "2026-03-24",
+    "portfolio_return_1d": 0.0157,
     "benchmark_return_1d": -0.0037,
-    "alpha_1d": 0.0144,
+    "alpha_1d": 0.0194,
     "winners": [
       {
-        "ticker": "DELL",
-        "return_1d": 0.0704,
-        "vs_benchmark": 0.0741,
+        "ticker": "HPE",
+        "return_1d": 0.0782,
+        "vs_benchmark": 0.082,
         "tags": [
           "momentum",
           "high_sharpe",
           "consensus",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Triple-consensus keep from current holdings with solid acceleration (5d +5.1%, vol_ratio 1.05); main",
-        "rsi_at_entry": 73.827661,
-        "vol_ratio_at_entry": 1.052006
-      },
-      {
-        "ticker": "APA",
-        "return_1d": 0.0409,
-        "vs_benchmark": 0.0446,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Triple-consensus and a validated historical winner with the strongest current energy momentum (5d +1",
-        "rsi_at_entry": 83.996194,
-        "vol_ratio_at_entry": 1.430529
-      },
-      {
-        "ticker": "XOM",
-        "return_1d": 0.0219,
-        "vs_benchmark": 0.0257,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Triple-consensus continuity holding and validated winner; lower-beta but still justified as a liquid",
-        "rsi_at_entry": 71.213512,
-        "vol_ratio_at_entry": 1.080991
-      },
-      {
-        "ticker": "COP",
-        "return_1d": 0.0125,
-        "vs_benchmark": 0.0163,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "diversifier",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Best unique energy replacement for VLO/LYB/OXY exposure: upstream tilt fits the energy rotation bett",
-        "rsi_at_entry": 70.266501,
-        "vol_ratio_at_entry": 0.815603
-      }
-    ],
-    "losers": [
-      {
-        "ticker": "DDOG",
-        "return_1d": -0.056,
-        "vs_benchmark": -0.0523,
-        "tags": [
-          "momentum",
-          "high_sharpe",
           "catalyst"
         ],
-        "rationale_snippet": "Included only as a small catalyst challenger pick to preserve right-tail upside, but heavily reduced",
-        "rsi_at_entry": 68.685795,
-        "vol_ratio_at_entry": 0.568336
+        "rationale_snippet": "Catalyst inclusion from Proposal B that satisfies the requirement to include at least one strong non",
+        "rsi_at_entry": 69.230776,
+        "vol_ratio_at_entry": 1.33944
       },
       {
-        "ticker": "PLTR",
-        "return_1d": -0.0421,
-        "vs_benchmark": -0.0384,
+        "ticker": "DELL",
+        "return_1d": 0.0754,
+        "vs_benchmark": 0.0791,
         "tags": [
           "momentum",
           "high_sharpe",
           "breakout",
-          "consensus"
+          "consensus",
+          "overbought",
+          "at_52w_high"
         ],
-        "rationale_snippet": "Triple-consensus breakout and the cleanest non-energy accelerator (5d +5.3%, vol_ratio 1.13); with c",
-        "rsi_at_entry": 64.670391,
-        "vol_ratio_at_entry": 1.125832
+        "rationale_snippet": "Double-consensus pick and yesterday's strongest winner (+7.0%) with the best volume confirmation in ",
+        "rsi_at_entry": 79.151195,
+        "vol_ratio_at_entry": 1.517655
+      },
+      {
+        "ticker": "MPC",
+        "return_1d": 0.0495,
+        "vs_benchmark": 0.0532,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Best unique energy add from Proposal A: acceptable volume confirmation (1.09), positive 5d momentum ",
+        "rsi_at_entry": 70.206057,
+        "vol_ratio_at_entry": 1.092033
+      },
+      {
+        "ticker": "XOM",
+        "return_1d": 0.0269,
+        "vs_benchmark": 0.0307,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Keep as a core winner from the current book because Energy remains the dominant leadership sector an",
+        "rsi_at_entry": 82.201977,
+        "vol_ratio_at_entry": 1.107871
       },
       {
         "ticker": "AKAM",
-        "return_1d": -0.0038,
-        "vs_benchmark": -0.0001,
+        "return_1d": 0.0011,
+        "vs_benchmark": 0.0049,
         "tags": [
           "momentum",
           "high_sharpe",
           "consensus",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus and yesterday's strongest actual winner (+3.6%) with strong 5d momentum (+8.5%) and",
-        "rsi_at_entry": 74.709883,
-        "vol_ratio_at_entry": 1.261485
+        "rationale_snippet": "Double-consensus pick that earns its slot as a non-energy holdover while weak-tech breadth argues fo",
+        "rsi_at_entry": 73.841057,
+        "vol_ratio_at_entry": 0.966854
       }
     ],
+    "losers": [],
     "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'high_sharpe' entries outperformed \u2014 continue favouring this setup"
   }
 }

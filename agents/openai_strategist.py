@@ -225,8 +225,8 @@ class OpenAIStrategist(BaseAgent):
         )
 
         header = (
-            f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d Ret':>8} {'Sharpe':>7} "
-            f"{'5d Ret':>7} {'60d Ret':>8} {'vs Idx':>8} "
+            f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'20d(σ)':>7} {'Sh(σ)':>6} "
+            f"{'5d(σ)':>6} {'60dRet':>7} {'vIdx(σ)':>8} "
             f"{'52wH%':>7} {'Beta':>6} {'MACD':>7} {'Price':>10}"
         )
         fx = snapshot.get("fx_context", {})
@@ -320,15 +320,18 @@ class OpenAIStrategist(BaseAgent):
         def fmt(v: float, fmt_str: str = ".1%") -> str:
             return "N/A" if math.isnan(v) else format(v, fmt_str)
 
+        def fmtz(v: float) -> str:
+            return "N/A" if math.isnan(v) else f"{v:+.1f}σ"
+
         for c in snapshot["candidates"]:
             safe_ticker = sanitize_ticker(c["ticker"])
             lines.append(
                 f"{safe_ticker:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
-                f"{fmt(c['momentum']):>8} "
-                f"{fmt(c['sharpe_20d'], '.2f'):>7} "
-                f"{fmt(c['mom_5d']):>7} "
-                f"{fmt(c['mom_60d']):>8} "
-                f"{fmt(c['vs_index']):>8} "
+                f"{fmtz(c.get('z_momentum', float('nan'))):>7} "
+                f"{fmtz(c.get('z_sharpe_20d', float('nan'))):>6} "
+                f"{fmtz(c.get('z_mom_5d', float('nan'))):>6} "
+                f"{fmt(c['mom_60d']):>7} "
+                f"{fmtz(c.get('z_vs_index', float('nan'))):>8} "
                 f"{fmt(c['pct_from_52w_high']):>7} "
                 f"{fmt(c['beta'], '.2f'):>6} "
                 f"{fmt(c.get('macd_hist', float('nan'))):>7} "

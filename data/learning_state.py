@@ -16,6 +16,8 @@ from data.portfolio_store import (
     load_decision_history,
     load_performance_history,
     load_competition_standing_history,
+    save_learning_state_to_db,
+    load_learning_state_from_db,
 )
 
 logger = logging.getLogger(__name__)
@@ -127,22 +129,29 @@ def _position_records(history: list[dict]) -> list[dict]:
 
 
 def load_learning_state() -> dict:
+    db_state = load_learning_state_from_db()
+    if db_state is not None:
+        return db_state
     if not os.path.exists(_STATE_PATH):
         return {}
     try:
         with open(_STATE_PATH, "r") as f:
             return json.load(f)
     except Exception as exc:
-        logger.warning("Could not load learning state: %s", exc)
+        logger.warning("Could not load learning state from JSON: %s", exc)
         return {}
 
 
 def save_learning_state(state: dict) -> None:
+    save_learning_state_to_db(state)
     dir_ = os.path.dirname(_STATE_PATH)
-    with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp") as f:
-        json.dump(state, f, indent=2)
-        tmp = f.name
-    os.replace(tmp, _STATE_PATH)
+    try:
+        with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp") as f:
+            json.dump(state, f, indent=2)
+            tmp = f.name
+        os.replace(tmp, _STATE_PATH)
+    except Exception as exc:
+        logger.warning("Could not save learning state to JSON: %s", exc)
 
 
 def generate_learning_state() -> dict:

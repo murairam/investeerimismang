@@ -63,6 +63,32 @@ def _extract_json(text: str) -> dict:
                 continue
     raise ValueError("Could not extract valid JSON from model response")
 
+def _sanitize_positions(raw: list) -> list:
+    """Strip Z-score suffixes (σ) and other non-numeric chars from weight fields.
+    Nemotron sometimes copies signal-table values (e.g. '-0.1σ') into the weight field."""
+    import re as _re
+    cleaned = []
+    for p in raw:
+        if not isinstance(p, dict):
+            continue
+        w = p.get("weight")
+        if isinstance(w, str):
+            w = _re.sub(r"[^\d.\-]", "", w)
+            try:
+                w = float(w)
+            except (ValueError, TypeError):
+                continue  # skip malformed position
+        try:
+            w = float(w)
+        except (ValueError, TypeError):
+            continue
+        if w <= 0:
+            continue  # skip zero/negative weights
+        p["weight"] = w
+        cleaned.append(p)
+    return cleaned
+
+
 _REGIME_GUIDANCE = {
     "BULL": "BULL regime — TARGET 5 catalyst plays for maximum conviction. Only add a 6th if genuinely high-conviction. Vol_ratio > 1.5 + RSI > 75 = ideal breakout. Size top picks at 20-25%. No filler — diversification loses competitions.",
     "BEAR": "BEAR regime — 5-8 positions. Find stocks with positive momentum regardless of regime. Max-size the winners — going up in a bear market beats falling less.",
@@ -217,8 +243,8 @@ class GeminiChallenger(BaseAgent):
             catalyst_ranked = snapshot.get("candidates", [])
 
         header = (
-            f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'5d Ret':>7} {'RSI':>6} "
-            f"{'vs Idx':>8} {'52wH%':>7} {'VolRatio':>9} {'ShortInt':>9} "
+            f"{'Ticker':<12} {'Market':<12} {'Sector':<7} {'5d(σ)':>6} {'RSI':>6} "
+            f"{'vIdx(σ)':>8} {'52wH%':>7} {'VR(σ)':>6} {'ShortInt':>9} "
             f"{'PreMktGap':>10} {'IV':>7} {'ATR%':>6} {'DivYld':>7} {'CatScore':>9} {'Price':>10}"
         )
 
@@ -284,6 +310,9 @@ class GeminiChallenger(BaseAgent):
         def fmt_opt(v: "float | None", fmt_str: str = ".1%") -> str:
             return "N/A" if v is None else format(v, fmt_str)
 
+        def fmtz(v: float) -> str:
+            return "N/A" if math.isnan(v) else f"{v:+.1f}σ"
+
         for c in catalyst_ranked:
             t = c["ticker"]
             safe_ticker = sanitize_ticker(t)
@@ -292,11 +321,11 @@ class GeminiChallenger(BaseAgent):
             iv = iv_proxy.get(t)
             lines.append(
                 f"{safe_ticker:<12} {c['market']:<12} {c.get('sector', '?'):<7} "
-                f"{fmt(c['mom_5d']):>7} "
+                f"{fmtz(c.get('z_mom_5d', float('nan'))):>6} "
                 f"{fmt(c['rsi_14'], '.1f'):>6} "
-                f"{fmt(c['vs_index']):>8} "
+                f"{fmtz(c.get('z_vs_index', float('nan'))):>8} "
                 f"{fmt(c['pct_from_52w_high']):>7} "
-                f"{fmt(c['vol_ratio'], '.2f'):>9} "
+                f"{fmtz(c.get('z_vol_ratio', float('nan'))):>6} "
                 f"{fmt_opt(si, '.1%'):>9} "
                 f"{fmt_opt(pm, '+.1%'):>10} "
                 f"{fmt_opt(iv, '.2f'):>7} "
@@ -450,6 +479,37 @@ class GeminiChallenger(BaseAgent):
             + user_message
         )
 
+        _PROPOSAL_SCHEMA = {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "portfolio_proposal",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "positions": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "ticker": {"type": "string"},
+                                    "weight": {"type": "number"},
+                                    "rationale": {"type": "string"},
+                                },
+                                "required": ["ticker", "weight", "rationale"],
+                                "additionalProperties": False,
+                            },
+                        },
+                        "reasoning": {"type": "string"},
+                        "confidence": {"type": "number"},
+                        "learning_reflection": {"type": "string"},
+                    },
+                    "required": ["positions", "reasoning", "confidence", "learning_reflection"],
+                    "additionalProperties": False,
+                },
+            },
+        }
+
         for attempt in range(1, 3):
             try:
                 request_kwargs = {
@@ -457,6 +517,8 @@ class GeminiChallenger(BaseAgent):
                     "temperature": 0.4,
                     "timeout": config.API_TIMEOUT_SECONDS,
                     "max_tokens": 8192,  # Nemotron observed up to 6k tokens; give headroom
+                    "response_format": _PROPOSAL_SCHEMA,
+                    "extra_body": {"plugins": [{"id": "response_healing"}]},
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": effective_user_message},
@@ -488,8 +550,14 @@ class GeminiChallenger(BaseAgent):
                     data = self._repair_openrouter_json(raw_text)
                     if data is None:
                         raise
-                raw_positions = data.get("positions", [])
-                if any(float(p["weight"]) > 1.0 for p in raw_positions):
+                # Nemotron occasionally wraps the response in a JSON array
+                if isinstance(data, list):
+                    if data and isinstance(data[0], dict) and "positions" in data[0]:
+                        data = data[0]
+                    else:
+                        data = {"positions": data, "reasoning": "", "confidence": 0.5, "learning_reflection": ""}
+                raw_positions = _sanitize_positions(data.get("positions", []))
+                if raw_positions and any(float(p["weight"]) > 1.0 for p in raw_positions):
                     for p in raw_positions:
                         p["weight"] = float(p["weight"]) / 100.0
                 positions = [
@@ -625,12 +693,41 @@ class GeminiChallenger(BaseAgent):
             "(b) any ticker a peer proposes at >=15% that you excluded — one-sentence reason you disagree or concede\n\n"
             'Return JSON only: {"agrees": ["TICKER1", ...], "disagrees": [{"ticker": "X", "reason": "..."}]}'
         )
+        _CROSSCHECK_SCHEMA = {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "cross_check",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "agrees": {"type": "array", "items": {"type": "string"}},
+                        "disagrees": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "ticker": {"type": "string"},
+                                    "reason": {"type": "string"},
+                                },
+                                "required": ["ticker", "reason"],
+                                "additionalProperties": False,
+                            },
+                        },
+                    },
+                    "required": ["agrees", "disagrees"],
+                    "additionalProperties": False,
+                },
+            },
+        }
         try:
             if self._openrouter_fallback is not None and self._openrouter_fallback_available:
                 resp = self._openrouter_fallback.chat.completions.create(
                     model=config.OPENROUTER_CHALLENGER_MODEL,
                     temperature=0.0,
                     max_tokens=1200,
+                    response_format=_CROSSCHECK_SCHEMA,
+                    extra_body={"plugins": [{"id": "response_healing"}]},
                     messages=[
                         {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
                         {"role": "user", "content": prompt},
