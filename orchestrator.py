@@ -34,6 +34,8 @@ from agents.openai_strategist import OpenAIStrategist
 from config import (
     CASH_POLICY,
     API_TIMEOUT_SECONDS,
+    ENABLE_COMPETITOR_INTEL,
+    COMPETITOR_INTEL_URLS,
     OPENAI_FALLBACK_MODEL,
     OPENROUTER_ANALYST_MODEL,
     OPENROUTER_CHALLENGER_MODEL,
@@ -42,6 +44,7 @@ from data.cost_tracker import get_total_cost
 from data.diary import append_entry as append_daily_log
 from data.fetcher import DataFetcher
 from data.learning_context import get_learning_context
+from data.leaderboard_fetcher import refresh_competitor_intel_file
 from data.learning_state import load_learning_state
 from data.learning_report import generate_pregame_learning_report
 from data.meta_learning import generate_meta_learning_report, detect_strategy_decay
@@ -157,6 +160,22 @@ class AlphaSharkOrchestrator:
         else:
             snapshot["game_equity"] = 10000.0
             snapshot["game_return_pct"] = 0.0
+
+        # Step 1b-i: refresh competitor intelligence from manual watchlist (rate-limited)
+        if ENABLE_COMPETITOR_INTEL and COMPETITOR_INTEL_URLS:
+            try:
+                refreshed = refresh_competitor_intel_file(
+                    profile_urls=COMPETITOR_INTEL_URLS,
+                    output_path="docs/competitor_intel.md",
+                    min_refresh_hours=12.0,
+                    force=False,
+                )
+                if refreshed:
+                    logger.info("Competitor intelligence refreshed from manual watchlist")
+                else:
+                    logger.info("Competitor intelligence is fresh — reusing existing snapshot")
+            except Exception as exc:
+                logger.warning("Competitor intelligence refresh failed (non-fatal): %s", exc)
 
         # Step 1b: inject learning context (what worked / didn't in past runs)
         learning_context = get_learning_context(current_regime=snapshot.get("regime", "NEUTRAL"))

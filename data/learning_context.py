@@ -36,6 +36,7 @@ def _sanitize_learning_text(text: str) -> str:
 _LEARNING_PATH = os.path.join(os.path.dirname(__file__), "..", "PREGAME_LEARNING.md")
 _CRITIQUE_PATH = os.path.join(os.path.dirname(__file__), "..", "AI_SELF_CRITIQUE.md")
 _STRATEGY_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "strategy_principles.md")
+_COMPETITOR_INTEL_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "competitor_intel.md")
 
 
 def get_learning_context(current_regime: str = "NEUTRAL") -> str:
@@ -50,11 +51,19 @@ def get_learning_context(current_regime: str = "NEUTRAL") -> str:
     if critique:
         fallback_sections.append(critique)
 
+    competitor_intel = _extract_competitor_intel_summary()
+    if competitor_intel:
+        fallback_sections.append(competitor_intel)
+
     raw = build_prompt_learning_context(
         strategy_text=strategy,
         fallback_sections=fallback_sections,
         current_regime=current_regime,
     )
+
+    if competitor_intel:
+        raw += "\n\n=== COMPETITOR INTELLIGENCE (manual watchlist) ===\n" + competitor_intel
+
     return _sanitize_learning_text(raw)
 
 
@@ -115,3 +124,16 @@ def _extract_critique_summary() -> str:
     if actions:
         parts.append("Specific instructions from self-critique:\n" + "\n".join(actions[:4]))
     return "\n\n".join(parts) if parts else ""
+
+
+def _extract_competitor_intel_summary() -> str:
+    content = _read_file(_COMPETITOR_INTEL_PATH)
+    if not content:
+        return ""
+
+    sections = []
+    if content.strip():
+        lines = [line.rstrip() for line in content.splitlines() if line.strip()]
+        sections.append("Competitor intelligence snapshot:\n" + "\n".join(lines[:28]))
+
+    return "\n\n".join(sections) if sections else ""

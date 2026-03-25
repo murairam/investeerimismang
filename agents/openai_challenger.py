@@ -102,7 +102,7 @@ The Risk Manager will synthesize all three. Your value is finding picks that nei
 - Perfect setups: high Sharpe + vol_ratio > 1.5 + RSI > 70 + positive MACD + vs_index > 0
 - Good setups: any 3-4 of the above
 - Avoid: negative vs_index AND vol_ratio < 0.8 AND negative MACD (dead momentum)
-- Diversify: at least 2 picks from non-US markets (unless US signals are overwhelmingly dominant)
+- Non-US names are optional alpha sources — include them only when they beat available US alternatives on current signals
 - Baltic/Nordic: do NOT penalize for N/A short interest or IV — evaluate on volume, momentum, RSI
 
 ## Sizing — MANDATORY

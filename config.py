@@ -33,6 +33,21 @@ CASH_POLICY = {
 OPENAI_FALLBACK_MODEL = "gpt-5.4-nano"  # used if primary model unavailable
 API_TIMEOUT_SECONDS = 45
 
+# ── Competitor intelligence (manual watchlist only; no broad crawling) ──────
+ENABLE_COMPETITOR_INTEL = True
+COMPETITOR_INTEL_URLS: list[str] = [
+    "https://www.aripaev.ee/investeerimismang/mangija/14145?portfell=16",
+    "https://www.aripaev.ee/investeerimismang/mangija/14236?portfell=115",
+    "https://www.aripaev.ee/investeerimismang/mangija/15463?portfell=1254",
+    "https://www.aripaev.ee/investeerimismang/mangija/14290?portfell=169",
+    "https://www.aripaev.ee/investeerimismang/mangija/15069?portfell=903",
+    "https://www.aripaev.ee/investeerimismang/mangija/14962?portfell=807",
+    "https://www.aripaev.ee/investeerimismang/mangija/14255?portfell=134",
+    "https://www.aripaev.ee/investeerimismang/mangija/15601?portfell=1384",
+    "https://www.aripaev.ee/investeerimismang/mangija/14947?portfell=793",
+    "https://www.aripaev.ee/investeerimismang/mangija/14333?portfell=219",
+]
+
 USE_OPENROUTER_FOR_SECONDARY_AGENTS = True  # set False to revert to OpenAI for all
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 OPENROUTER_DEVIL_MODEL = "qwen/qwen3-235b-a22b"
@@ -51,11 +66,21 @@ BETA_CHECK_MIN_US_WEIGHT = 0.25
 NON_US_ASSUMED_BETA = 0.70
 FALLBACK_REPLACEMENT_WEIGHT = 0.05
 MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
-ROTATION_RISK_HIGH_SECTOR_CAP = 0.60    # max sector weight when rotation risk = HIGH
-ROTATION_RISK_MEDIUM_SECTOR_CAP = 0.75  # max sector weight when rotation risk = MEDIUM
 LOW_VOLUME_VOL_RATIO_THRESHOLD = 0.80   # low-volume confirmation floor for concentration caps
 LOW_VOLUME_MAX_WEIGHT = 0.18
 PORTFOLIO_MIN_AVG_VOL_RATIO = 0.85
+
+# Competition-oriented pre-cap weighting (applied in Risk Manager before hard caps)
+QUALITY_REBALANCE_STRONG_MOM_5D = 0.04
+QUALITY_REBALANCE_STRONG_VOLUME = 1.20
+QUALITY_REBALANCE_MOMENTUM_BONUS = 1.08
+QUALITY_REBALANCE_CONFIRMATION_BONUS = 1.06
+QUALITY_REBALANCE_LOW_VOLUME_PENALTY = 0.88
+QUALITY_REBALANCE_WEAK_VOLUME_PENALTY = 0.78
+QUALITY_REBALANCE_MEDIUM_RISK_PENALTY = 0.90
+QUALITY_REBALANCE_HIGH_RISK_PENALTY = 0.76
+QUALITY_REBALANCE_OVERBOUGHT_PENALTY = 0.86
+QUALITY_REBALANCE_DEAD_MONEY_PENALTY = 0.70
 
 # Regime thresholds
 VIX_HIGH_THRESHOLD = 30

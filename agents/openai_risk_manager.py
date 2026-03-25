@@ -71,7 +71,7 @@ Position sizing is computed downstream by Kelly math.
 9. **No sector cap**: The game enforces zero sector concentration limits. 100% in one sector is fully legal (e.g. 4 Energy stocks at 25% each). Concentrate wherever the alpha is.
 10. **Vol_ratio signal**: prefer positions where vol_ratio > 1.2 (high-volume confirmation). Be cautious about positions where vol_ratio < 0.7 (low-volume, potentially weak move).
 11. **Catalyst insight**: the challenger picks represent high-momentum catalysts. If the challenger's picks have strong signals (high short interest, premarket gap-up, IV spike + momentum), include at least 1–2 of them even if they're not consensus.
-12. **Do NOT penalize non-US stocks for missing Short Interest data.** Their IV column shows 20d annualized realized vol (not options IV) — treat it as a volatility level indicator. Evaluate European/Baltic stocks on volume breakouts, momentum, premarket gaps, and realized vol so we don't accidentally build a 100% US portfolio.
+12. **Do NOT penalize non-US stocks for missing Short Interest data.** Their IV column shows 20d annualized realized vol (not options IV) — treat it as a volatility level indicator. Evaluate European/Baltic stocks on volume breakouts, momentum, premarket gaps, and realized vol on equal footing with US names.
 13. **Earnings — opportunity AND risk**: Pre-earnings momentum in high-conviction stocks is an OPPORTUNITY (academic: 3–8% drift in 2–4 days before announcement). If the snapshot shows PRE_EARNINGS_SETUP, use high conviction (8–10). For earnings within 1 day (announcement tomorrow): cap conviction at 3 — binary gap risk is too close.
 14. **Dead-money exclusion rule**: in this competition, a stock is dead money if vol_ratio < {config.DEAD_MONEY_VOL_RATIO:.2f} and mom_5d <= +{config.DEAD_MONEY_MOM_5D:.1%}. Do NOT call a stock dead money if vol_ratio is above 1.0. HIGH-risk dead-money names should normally be excluded, not merely downsized.
 15. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
@@ -365,6 +365,8 @@ class OpenAIRiskManager(BaseAgent):
         if not kept:
             return proposal
 
+        kept = self._rebalance_for_competition_edge(kept, candidate_map, bear_cases, regime_score)
+
         # Pass A — Overbought-at-peak cap (Rule 18): code-enforced hard cap
         overbought_capped_indices: set[int] = set()
         for i, pos in enumerate(kept):
@@ -542,53 +544,8 @@ class OpenAIRiskManager(BaseAgent):
             # Overbought-capped positions must not receive excess — their cap would be violated again
             kept = _redistribute_excess(kept, low_vol_excess, low_vol_indices | overbought_capped_indices)
 
-        # Conditional sector cap when rotation risk is HIGH or MEDIUM.
-        rotation_risk = snapshot.get("rotation_risk", {})
-        high_risk_sectors = {
-            sector for sector, info in rotation_risk.items()
-            if isinstance(info, dict) and info.get("level") == "HIGH"
-        }
-        medium_risk_sectors = {
-            sector for sector, info in rotation_risk.items()
-            if isinstance(info, dict) and info.get("level") == "MEDIUM"
-        } - high_risk_sectors  # don't double-process sectors already caught by HIGH
-
-        def _apply_sector_cap(
-            positions: list[Position],
-            sectors: set[str],
-            sector_cap: float,
-            level: str,
-        ) -> list[Position]:
-            sector_indices = [
-                i
-                for i, pos in enumerate(positions)
-                if candidate_map.get(pos.ticker, {}).get("sector") in sectors
-            ]
-            sector_weight = sum(positions[i].weight for i in sector_indices)
-            if sector_weight > sector_cap + 1e-9 and sector_indices and len(sector_indices) < len(positions):
-                scale = sector_cap / sector_weight
-                excess = 0.0
-                for i in sector_indices:
-                    old_w = positions[i].weight
-                    new_w = old_w * scale
-                    excess += old_w - new_w
-                    positions[i] = Position(ticker=positions[i].ticker, weight=new_w, rationale=positions[i].rationale)
-                positions = _redistribute_excess(positions, excess, set(sector_indices))
-                logger.info(
-                    "Rotation %s-risk sector cap applied: %.0f%% → %.0f%% (sectors: %s)",
-                    level, sector_weight * 100, sector_cap * 100, ", ".join(sorted(sectors)),
-                )
-            elif sector_weight > sector_cap + 1e-9:
-                logger.warning(
-                    "Rotation %s-risk sector concentration %.0f%% exceeds %.0f%% but no alternate positions to redistribute to",
-                    level, sector_weight * 100, sector_cap * 100,
-                )
-            return positions
-
-        if high_risk_sectors:
-            kept = _apply_sector_cap(kept, high_risk_sectors, config.ROTATION_RISK_HIGH_SECTOR_CAP, "HIGH")
-        if medium_risk_sectors:
-            kept = _apply_sector_cap(kept, medium_risk_sectors, config.ROTATION_RISK_MEDIUM_SECTOR_CAP, "MEDIUM")
+        # No sector caps are applied. Rotation risk remains an informational input for sizing quality,
+        # but legal concentration is preserved if the strongest alpha clusters in one sector.
 
         weighted_vol_sum = 0.0
         vol_weight_covered = 0.0
@@ -619,12 +576,187 @@ class OpenAIRiskManager(BaseAgent):
                     mom_5d * 100,
                 )
 
+        kept = self._enforce_hard_weight_bounds(kept)
+
         return PortfolioProposal(
             positions=kept,
             reasoning=proposal.reasoning,
             confidence=proposal.confidence,
             learning_reflection=proposal.learning_reflection,
         )
+
+    @staticmethod
+    def _rebalance_for_competition_edge(
+        positions: list[Position],
+        candidate_map: dict[str, dict],
+        bear_cases: dict[str, dict],
+        regime_score: int,
+    ) -> list[Position]:
+        if not positions:
+            return positions
+
+        original_total = sum(position.weight for position in positions)
+        if original_total <= 1e-12:
+            return positions
+
+        weighted: list[Position] = []
+        cautious_market = regime_score < 50
+        for position in positions:
+            candidate = candidate_map.get(position.ticker, {})
+            vol_ratio = candidate.get("vol_ratio", float("nan"))
+            momentum_5d = candidate.get("mom_5d", float("nan"))
+            rsi = candidate.get("rsi_14", float("nan"))
+            pct_from_high = candidate.get("pct_from_52w_high", float("nan"))
+            devil_risk = (bear_cases.get(position.ticker, {}) or {}).get("risk", "")
+
+            multiplier = 1.0
+            if not math.isnan(momentum_5d) and momentum_5d >= config.QUALITY_REBALANCE_STRONG_MOM_5D:
+                multiplier *= config.QUALITY_REBALANCE_MOMENTUM_BONUS
+
+            if not math.isnan(vol_ratio) and vol_ratio >= config.QUALITY_REBALANCE_STRONG_VOLUME:
+                multiplier *= config.QUALITY_REBALANCE_CONFIRMATION_BONUS
+
+            if not math.isnan(vol_ratio) and vol_ratio < config.DEAD_MONEY_VOL_RATIO:
+                multiplier *= config.QUALITY_REBALANCE_LOW_VOLUME_PENALTY
+                if cautious_market and vol_ratio < config.LOW_VOLUME_VOL_RATIO_THRESHOLD:
+                    multiplier *= config.QUALITY_REBALANCE_WEAK_VOLUME_PENALTY
+
+            if (
+                not math.isnan(rsi)
+                and rsi > config.OVERBOUGHT_RSI_THRESHOLD
+                and not math.isnan(pct_from_high)
+                and pct_from_high >= -config.OVERBOUGHT_HIGH_PCT
+                and (math.isnan(vol_ratio) or vol_ratio <= config.OVERBOUGHT_VOLUME_EXCEPTION)
+            ):
+                multiplier *= config.QUALITY_REBALANCE_OVERBOUGHT_PENALTY
+
+            if devil_risk == "HIGH":
+                multiplier *= config.QUALITY_REBALANCE_HIGH_RISK_PENALTY
+            elif devil_risk == "MEDIUM":
+                multiplier *= config.QUALITY_REBALANCE_MEDIUM_RISK_PENALTY
+
+            if (
+                not math.isnan(vol_ratio)
+                and not math.isnan(momentum_5d)
+                and vol_ratio < config.DEAD_MONEY_VOL_RATIO
+                and momentum_5d <= config.DEAD_MONEY_MOM_5D
+            ):
+                multiplier *= config.QUALITY_REBALANCE_DEAD_MONEY_PENALTY
+
+            weighted.append(
+                Position(
+                    ticker=position.ticker,
+                    weight=max(1e-6, position.weight * multiplier),
+                    rationale=position.rationale,
+                )
+            )
+
+        adjusted_total = sum(position.weight for position in weighted)
+        if adjusted_total <= 1e-12:
+            return positions
+
+        return [
+            Position(
+                ticker=position.ticker,
+                weight=(position.weight / adjusted_total) * original_total,
+                rationale=position.rationale,
+            )
+            for position in weighted
+        ]
+
+    @staticmethod
+    def _enforce_hard_weight_bounds(positions: list[Position]) -> list[Position]:
+        """Ensure final weights satisfy min/max bounds and sum to 100%.
+
+        This is a final guardrail after quality passes (caps, sector/volume redistributions).
+        Those passes can unintentionally re-inflate uncapped names above max weight.
+        """
+        if not positions:
+            return positions
+
+        minimum_weight = config.GAME_CONSTRAINTS["min_weight"]
+        maximum_weight = config.GAME_CONSTRAINTS["max_weight"]
+        target_total = config.GAME_CONSTRAINTS["max_total_weight"]
+
+        normalized_total = sum(position.weight for position in positions)
+        if normalized_total <= 1e-12:
+            return positions
+
+        bounded_positions = [
+            Position(
+                ticker=position.ticker,
+                weight=max(minimum_weight, min(maximum_weight, position.weight / normalized_total)),
+                rationale=position.rationale,
+            )
+            for position in positions
+        ]
+
+        for _ in range(10):
+            current_total = sum(position.weight for position in bounded_positions)
+            delta = target_total - current_total
+            if abs(delta) <= 1e-8:
+                break
+
+            if delta > 0:
+                candidate_indices = [
+                    index for index, position in enumerate(bounded_positions)
+                    if position.weight < maximum_weight - 1e-9
+                ]
+                if not candidate_indices:
+                    break
+                total_headroom = sum(maximum_weight - bounded_positions[index].weight for index in candidate_indices)
+                if total_headroom <= 1e-12:
+                    break
+                updated_positions = bounded_positions[:]
+                for index in candidate_indices:
+                    increment = delta * ((maximum_weight - bounded_positions[index].weight) / total_headroom)
+                    updated_positions[index] = Position(
+                        ticker=bounded_positions[index].ticker,
+                        weight=min(maximum_weight, bounded_positions[index].weight + increment),
+                        rationale=bounded_positions[index].rationale,
+                    )
+                bounded_positions = updated_positions
+            else:
+                reduction = -delta
+                candidate_indices = [
+                    index for index, position in enumerate(bounded_positions)
+                    if position.weight > minimum_weight + 1e-9
+                ]
+                if not candidate_indices:
+                    break
+                total_reducible = sum(bounded_positions[index].weight - minimum_weight for index in candidate_indices)
+                if total_reducible <= 1e-12:
+                    break
+                updated_positions = bounded_positions[:]
+                for index in candidate_indices:
+                    decrement = reduction * ((bounded_positions[index].weight - minimum_weight) / total_reducible)
+                    updated_positions[index] = Position(
+                        ticker=bounded_positions[index].ticker,
+                        weight=max(minimum_weight, bounded_positions[index].weight - decrement),
+                        rationale=bounded_positions[index].rationale,
+                    )
+                bounded_positions = updated_positions
+
+        final_total = sum(position.weight for position in bounded_positions)
+        if final_total > 1e-12 and abs(final_total - target_total) > 1e-6:
+            rescaled_positions = [
+                Position(
+                    ticker=position.ticker,
+                    weight=position.weight / final_total,
+                    rationale=position.rationale,
+                )
+                for position in bounded_positions
+            ]
+            bounded_positions = [
+                Position(
+                    ticker=position.ticker,
+                    weight=max(minimum_weight, min(maximum_weight, position.weight)),
+                    rationale=position.rationale,
+                )
+                for position in rescaled_positions
+            ]
+
+        return bounded_positions
 
     @staticmethod
     def _merge_proposals(

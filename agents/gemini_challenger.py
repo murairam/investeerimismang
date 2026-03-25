@@ -136,7 +136,7 @@ Every position must have a different weight.
 
 ## What to AVOID
 - Do NOT fill the portfolio with US mega-cap names just because they are large.
-- At least 2 picks from non-US markets (unless US catalyst setups are overwhelmingly superior).
+- Non-US picks are optional alpha sources — include them only when their setup is stronger than available US alternatives.
 - Do NOT simply choose the top Sharpe-ranked names — Sharpe is already covered by the Strategist.
 - Do NOT avoid high-RSI stocks — they are the momentum leaders.
 
@@ -383,10 +383,6 @@ class GeminiChallenger(BaseAgent):
         if iv_proxy is not None:
             score += max(0.0, min(1.0, (iv_proxy - 0.35) * 2.0))
 
-        # Small bonus for non-US tickers (differentiated alpha vs competitors)
-        if "." in candidate["ticker"]:
-            score += 0.25
-
         return score
 
     def _call_openai_fallback(
@@ -510,15 +506,15 @@ class GeminiChallenger(BaseAgent):
             },
         }
 
-        for attempt in range(1, 3):
+        for attempt in range(1, 2):  # Single attempt only — truncation = fail fast to fallback
             try:
+                max_tokens_limit = 10000  # Increased from 8192 to avoid truncation; Nemotron typically ~6-7k
                 request_kwargs = {
                     "model": config.OPENROUTER_CHALLENGER_MODEL,
                     "temperature": 0.4,
                     "timeout": config.API_TIMEOUT_SECONDS,
-                    "max_tokens": 8192,  # Nemotron observed up to 6k tokens; give headroom
+                    "max_tokens": max_tokens_limit,
                     "response_format": _PROPOSAL_SCHEMA,
-                    "extra_body": {"plugins": [{"id": "response_healing"}]},
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": effective_user_message},
@@ -541,6 +537,14 @@ class GeminiChallenger(BaseAgent):
                     completion_tokens,
                     cost,
                 )
+
+                # Detect truncation: if output_tokens >= max_tokens_limit, response is incomplete
+                if completion_tokens >= max_tokens_limit:
+                    logger.warning(
+                        "OpenRouter challenger hit max_tokens limit (%d) — truncated output, failing fast to fallback",
+                        max_tokens_limit,
+                    )
+                    raise ValueError("Model response truncated at max_tokens")
 
                 raw_text = response.choices[0].message.content or ""
                 try:
@@ -572,7 +576,7 @@ class GeminiChallenger(BaseAgent):
                     learning_reflection=data.get("learning_reflection", ""),
                 )
             except Exception as exc:
-                logger.warning("OpenRouter challenger attempt %d/2 failed: %s", attempt, exc)
+                logger.warning("OpenRouter challenger failed: %s", exc)
                 msg = str(exc)
                 if "No endpoints found" in msg or "404" in msg:
                     logger.warning(
@@ -727,7 +731,6 @@ class GeminiChallenger(BaseAgent):
                     temperature=0.0,
                     max_tokens=1200,
                     response_format=_CROSSCHECK_SCHEMA,
-                    extra_body={"plugins": [{"id": "response_healing"}]},
                     messages=[
                         {"role": "system", "content": "You are a portfolio analyst. Return JSON only."},
                         {"role": "user", "content": prompt},

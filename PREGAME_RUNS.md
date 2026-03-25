@@ -1450,3 +1450,70 @@ Winners: DELL +7.0%, APA +4.1%, XOM +2.2% | Losers: PLTR -4.2%, AKAM -0.4%
 - ▼ **AKAM**: 22.0% → 15.0% (-7.0%)
 
 ---
+## 2026-03-25 17:37:54
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.5% · VIX: 26.0 · S&P 500 20d: -5.0%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.9% · Benchmark +0.7% · Alpha +0.2%
+Winners: AKAM +3.9%, DELL +2.5% | Losers: PSX -0.8%, XOM -0.5%, MPC -0.4%
+
+**Paper account:** Equity €10,267.00 (start €10,000) · Today +0.64% · Since start +2.67% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the portfolio at exactly 5 names because regime score 42 requires selectivity, and the strongest cross-agent consensus clustered in HPE, CTY1S.HE, NIBE-B.ST, AKAM, and DELL. Relative to current holdings, this means keeping the strong tech winners AKAM/DELL, exiting weak-volume energy laggards PSX, MPC, and XOM under the sector-action rule, and rotating into the best validated catalyst names; portfolio beta likely remains around the soft NEUTRAL range’s low end, which is acceptable because rotation-risk guidance says not to add beta filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **HPE** | 24.0% | Triple-consensus pick and the cleanest current accelerator with +20.6% 5d momentum and vol_ratio 1.31; despite overbought risk, volume confirmation and yesterday’s momentum lesson justify top conviction. |
+| 2 | **CTY1S.HE** | 24.0% | Double-consensus pick with solid 5d momentum, neutral-to-good volume confirmation at 1.00, and a fresh breakout profile that earns a slot as a non-US rotation leader. |
+| 3 | **NIBE-B.ST** | 18.0% | Double-consensus pick with strong +16.7% 5d momentum, but conviction is capped below top tier because vol_ratio 0.79 is below preferred confirmation and beta is muted. |
+| 4 | **AKAM** | 15.0% | Triple-consensus validated winner and current holding that has worked, so it should be kept rather than churned, but RSI 84 with weak vol_ratio 0.62 triggers a meaningful conviction haircut. |
+| 5 | **DELL** | 19.0% | Triple-consensus and a major recent winner, but repeat HIGH-risk flag, RSI 81, and weak vol_ratio 0.60 require a sharp conviction reduction even though momentum remains exceptional. |
+
+**Changes from yesterday:**
+- ➕ Added **HPE** at 24.0%
+- ➕ Added **CTY1S.HE** at 24.0%
+- ➕ Added **NIBE-B.ST** at 18.0%
+- ➖ Removed **PSX** (was 24.0%)
+- ➖ Removed **MPC** (was 24.0%)
+- ➖ Removed **XOM** (was 15.0%)
+- ▼ **AKAM**: 22.0% → 15.0% (-7.0%)
+- ▲ **DELL**: 15.0% → 19.0% (+4.0%)
+
+---
+## 2026-03-25 18:00:38
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.5% · VIX: 25.5 · S&P 500 20d: -5.0%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.8% · Benchmark +0.6% · Alpha +0.1%
+Winners: AKAM +3.8%, DELL +2.8% | Losers: PSX -0.9%, XOM -0.8%, MPC -0.6%
+
+**Paper account:** Equity €10,267.00 (start €10,000) · Today +0.64% · Since start +2.67% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I keep the strongest current winners and consensus names—HPE, DELL, and AKAM—while cutting persistent laggards/weak-volume energy holdings from the current book such as XOM, PSX, and MPC, which now violate the sector-action and dead-money logic more than they help. I still include one energy catalyst in APA because it has cross-model support, but with reduced conviction due to extreme overbought/low-volume conditions, and I add NIBE-B.ST as the best unique high-acceleration alternative; portfolio beta remains acceptable as a soft diagnostic in this rotation-risk NEUTRAL regime without adding filler just to raise it.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **HPE** | 25.0% | Triple-consensus pick and the cleanest active breakout in the set: +21.3% 5d momentum with vol_ratio 1.44 gives real confirmation, and yesterday's HPE win supports rotating toward fresh momentum leaders. |
+| 2 | **DELL** | 16.0% | Triple-consensus and a recent winner, so it earns a slot, but conviction is capped by repeat HIGH-risk flags, RSI 81.7, and weak volume confirmation (vol_ratio 0.63). |
+| 3 | **AKAM** | 17.0% | Triple-consensus validated winner with strong recent contribution and historical hit quality, but low-beta/low-volume profile plus RSI 83.5 prevents high conviction in this competition setup. |
+| 4 | **APA** | 17.0% | Double-consensus energy alpha name with strong 5d momentum and a validated-winner history, but conviction is cut sharply because vol_ratio 0.48 is poor, RSI 91 is extreme, and energy rotation risk is already flagged MEDIUM. |
+| 5 | **NIBE-B.ST** | 25.0% | Best unique catalyst pick: +17.5% 5d momentum with acceptable volume confirmation (vol_ratio 1.09) offers a non-energy, non-US acceleration name that beats slower alternatives on slot cost. |
+
+**Changes from yesterday:**
+- ➕ Added **HPE** at 25.0%
+- ➕ Added **APA** at 17.0%
+- ➕ Added **NIBE-B.ST** at 25.0%
+- ➖ Removed **PSX** (was 24.0%)
+- ➖ Removed **MPC** (was 24.0%)
+- ➖ Removed **XOM** (was 15.0%)
+- ▼ **AKAM**: 22.0% → 17.0% (-5.0%)
+
+---

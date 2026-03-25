@@ -8,7 +8,7 @@ Days remaining: 12
 - Training days with measurable alpha: 6
 - Win days (alpha > 0): 4
 - Loss days (alpha < 0): 2
-- Average daily alpha: +0.57%
+- Average daily alpha: +0.27%
 - Paper account equity: €10,267.00 (from €10,000.00, return +2.67%)
 - Max drawdown (paper): 1.39%
 - Average turnover: 30.77%
@@ -19,7 +19,7 @@ Days remaining: 12
 - Latest day is verified against the actual game portfolio.
 
 ## Best and worst day
-- Best alpha day: 2026-03-24 (+1.94%)
+- Best alpha day: 2026-03-23 (+1.42%)
 - Worst alpha day: 2026-03-22 (-0.89%)
 
 ## Structured learning state
@@ -31,7 +31,7 @@ Days remaining: 12
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
 | APA | winner | 10 | +2.36% | 80% |
-| AKAM | winner | 6 | +1.09% | 67% |
+| AKAM | winner | 6 | +2.32% | 67% |
 | AKRBP.OL | loser | 6 | -4.14% | 0% |
 | EQNR.OL | loser | 6 | -0.93% | 0% |
 | NESTE.HE | loser | 6 | -0.74% | 0% |

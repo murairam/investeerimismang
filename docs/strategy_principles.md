@@ -46,10 +46,10 @@ higher-momentum candidate.
 - **Rationale:** Breakout moves often exhaust at peaks; strong volume confirmation trumps RSI
 - **Implementation:** `agents/openai_risk_manager.py` rules 18 & 19
 
-### Conditional Rotation-Risk Sector Cap
-- **Rule:** There is no permanent sector cap, but if `rotation_risk` marks a sector as **HIGH**, that sector is temporarily capped at **60%** of portfolio weight (and **MEDIUM** risk sectors at **75%**).
-- **Rationale:** Prevent concentration drift into sectors with clear momentum deceleration while preserving legal concentration in normal conditions.
-- **Implementation:** `agents/openai_risk_manager.py::_enforce_selection_quality()` + `config.ROTATION_RISK_HIGH_SECTOR_CAP`
+### Sector Concentration Policy
+- **Rule:** No sector caps are enforced in code. If alpha clusters in one sector, concentration is allowed up to game position limits.
+- **Rationale:** The game has no sector concentration rule; artificial caps can dilute winning momentum clusters.
+- **Implementation:** Sector concentration remains unconstrained in `agents/openai_risk_manager.py`.
 
 ### Beta — Informational Only in BEAR
 - **Rule:** In BULL/NEUTRAL, beta target is 1.6–2.0 (BULL) or 0.95–1.30 (NEUTRAL) as a soft guide.

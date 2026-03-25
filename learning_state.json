@@ -18,7 +18,7 @@
     {
       "ticker": "AKAM",
       "observations": 6,
-      "avg_return_1d": 0.010939,
+      "avg_return_1d": 0.023244,
       "hit_rate": 0.6667
     }
   ],
@@ -108,27 +108,27 @@
   "rationale_stats": {
     "momentum": {
       "observations": 21,
-      "avg_return_1d": 0.009669,
-      "hit_rate": 0.5238
+      "avg_return_1d": 0.005494,
+      "hit_rate": 0.4286
     },
     "high_sharpe": {
       "observations": 21,
-      "avg_return_1d": 0.009669,
-      "hit_rate": 0.5238
+      "avg_return_1d": 0.005494,
+      "hit_rate": 0.4286
     },
     "breakout": {
       "observations": 4,
-      "avg_return_1d": 0.01283,
+      "avg_return_1d": 0.000948,
       "hit_rate": 0.5
     },
     "consensus": {
       "observations": 16,
-      "avg_return_1d": 0.011125,
+      "avg_return_1d": 0.011262,
       "hit_rate": 0.5
     },
     "catalyst": {
       "observations": 2,
-      "avg_return_1d": 0.010999,
+      "avg_return_1d": 0.017398,
       "hit_rate": 0.5
     },
     "diversifier": {
@@ -143,18 +143,18 @@
     },
     "overbought": {
       "observations": 10,
-      "avg_return_1d": 0.017704,
-      "hit_rate": 0.6
+      "avg_return_1d": 0.009493,
+      "hit_rate": 0.5
     },
     "at_52w_high": {
       "observations": 16,
-      "avg_return_1d": 0.019143,
-      "hit_rate": 0.625
+      "avg_return_1d": 0.012864,
+      "hit_rate": 0.5
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.003163,
-    "tier2_avg_return_1d": 0.009386,
+    "tier1_avg_return_1d": 0.002658,
+    "tier2_avg_return_1d": 0.003912,
     "tier3_avg_return_1d": -0.008521,
     "tier1_observations": 11,
     "tier2_observations": 15,
@@ -164,8 +164,8 @@
   "devil_accuracy": {
     "status": "early_data",
     "observations": 4,
-    "high_risk_avg_return_1d": 0.032494,
-    "low_risk_avg_return_1d": 0.000111,
+    "high_risk_avg_return_1d": 0.020612,
+    "low_risk_avg_return_1d": -0.001375,
     "high_risk_negative_rate": 0.25,
     "accuracy": 0.25,
     "devil_is_accurate": false,
@@ -182,23 +182,23 @@
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.5238,
-      "mom_5d": 0.5238,
-      "sharpe_20d": 0.5238,
-      "rsi_14": 0.5238,
-      "vs_index": 0.5238,
-      "vol_ratio": 0.5238,
-      "beta": 0.5714
+      "momentum": 0.4286,
+      "mom_5d": 0.4286,
+      "sharpe_20d": 0.4286,
+      "rsi_14": 0.4286,
+      "vs_index": 0.4286,
+      "vol_ratio": 0.4286,
+      "beta": 0.4762
     },
     "per_regime": {
       "NEUTRAL": {
-        "momentum": 0.5238,
-        "mom_5d": 0.5238,
-        "sharpe_20d": 0.5238,
-        "rsi_14": 0.5238,
-        "vs_index": 0.5238,
-        "vol_ratio": 0.5238,
-        "beta": 0.5714
+        "momentum": 0.4286,
+        "mom_5d": 0.4286,
+        "sharpe_20d": 0.4286,
+        "rsi_14": 0.4286,
+        "vs_index": 0.4286,
+        "vol_ratio": 0.4286,
+        "beta": 0.4762
       }
     }
   },
@@ -224,14 +224,14 @@
   },
   "yesterday_postmortem": {
     "date": "2026-03-24",
-    "portfolio_return_1d": 0.0157,
-    "benchmark_return_1d": -0.0037,
-    "alpha_1d": 0.0194,
+    "portfolio_return_1d": 0.0078,
+    "benchmark_return_1d": 0.0065,
+    "alpha_1d": 0.0014,
     "winners": [
       {
         "ticker": "HPE",
-        "return_1d": 0.0782,
-        "vs_benchmark": 0.082,
+        "return_1d": 0.091,
+        "vs_benchmark": 0.0846,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -243,9 +243,23 @@
         "vol_ratio_at_entry": 1.33944
       },
       {
+        "ticker": "AKAM",
+        "return_1d": 0.0381,
+        "vs_benchmark": 0.0316,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Double-consensus pick that earns its slot as a non-energy holdover while weak-tech breadth argues fo",
+        "rsi_at_entry": 73.841057,
+        "vol_ratio_at_entry": 0.966854
+      },
+      {
         "ticker": "DELL",
-        "return_1d": 0.0754,
-        "vs_benchmark": 0.0791,
+        "return_1d": 0.0279,
+        "vs_benchmark": 0.0214,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -257,24 +271,13 @@
         "rationale_snippet": "Double-consensus pick and yesterday's strongest winner (+7.0%) with the best volume confirmation in ",
         "rsi_at_entry": 79.151195,
         "vol_ratio_at_entry": 1.517655
-      },
-      {
-        "ticker": "MPC",
-        "return_1d": 0.0495,
-        "vs_benchmark": 0.0532,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Best unique energy add from Proposal A: acceptable volume confirmation (1.09), positive 5d momentum ",
-        "rsi_at_entry": 70.206057,
-        "vol_ratio_at_entry": 1.092033
-      },
+      }
+    ],
+    "losers": [
       {
         "ticker": "XOM",
-        "return_1d": 0.0269,
-        "vs_benchmark": 0.0307,
+        "return_1d": -0.0077,
+        "vs_benchmark": -0.0141,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -286,21 +289,19 @@
         "vol_ratio_at_entry": 1.107871
       },
       {
-        "ticker": "AKAM",
-        "return_1d": 0.0011,
-        "vs_benchmark": 0.0049,
+        "ticker": "MPC",
+        "return_1d": -0.0058,
+        "vs_benchmark": -0.0123,
         "tags": [
           "momentum",
           "high_sharpe",
-          "consensus",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick that earns its slot as a non-energy holdover while weak-tech breadth argues fo",
-        "rsi_at_entry": 73.841057,
-        "vol_ratio_at_entry": 0.966854
+        "rationale_snippet": "Best unique energy add from Proposal A: acceptable volume confirmation (1.09), positive 5d momentum ",
+        "rsi_at_entry": 70.206057,
+        "vol_ratio_at_entry": 1.092033
       }
     ],
-    "losers": [],
     "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'high_sharpe' entries outperformed \u2014 continue favouring this setup"
   }
 }
