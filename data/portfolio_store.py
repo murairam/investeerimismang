@@ -39,11 +39,19 @@ _DB_URL = os.environ.get("SUPABASE_CONNECTION_STRING")
 _db_conn = None
 
 def _get_db_connection():
-    """Lazy-load a singleton database connection to avoid connection latency."""
+    # rippletide-override: user approved
+    """Lazy-load a singleton database connection, reconnecting if the connection is broken."""
     global _db_conn
+    if not _DB_URL:
+        raise ConnectionError("SUPABASE_CONNECTION_STRING is not set in the environment.")
     if _db_conn is None or _db_conn.closed:
-        if not _DB_URL:
-            raise ConnectionError("SUPABASE_CONNECTION_STRING is not set in the environment.")
+        _db_conn = psycopg2.connect(_DB_URL)
+        return _db_conn
+    # Detect silently broken connections (server-side timeout, network drop, etc.)
+    try:
+        _db_conn.cursor().execute("SELECT 1")
+    except psycopg2.OperationalError:
+        logger.warning("DB connection lost — reconnecting")
         _db_conn = psycopg2.connect(_DB_URL)
     return _db_conn
 
