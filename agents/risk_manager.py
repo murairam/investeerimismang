@@ -222,13 +222,13 @@ class OpenAIRiskManager(BaseAgent):
                     actual_beta, hi,
                 )
                 positions = [
-                    Position(ticker=p.ticker, weight=min(p.weight, config.OVERBOUGHT_WEIGHT_CAP), rationale=p.rationale)
+                    Position(ticker=p.ticker, weight=min(p.weight, config.OVERBOUGHT_WEIGHT_CAP), rationale=p.rationale, conviction=p.conviction)
                     for p in proposal.positions
                 ]
                 total = sum(p.weight for p in positions)
                 if total > 0:
                     positions = [
-                        Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale)
+                        Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale, conviction=p.conviction)
                         for p in positions
                     ]
                 proposal = PortfolioProposal(
@@ -344,7 +344,7 @@ class OpenAIRiskManager(BaseAgent):
                 and (math.isnan(vol_ratio) or vol_ratio <= config.OVERBOUGHT_VOLUME_EXCEPTION)
             )
             if overbought and pos.weight > config.OVERBOUGHT_WEIGHT_CAP:
-                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale)
+                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale, conviction=pos.conviction)
                 overbought_capped_indices.add(i)
                 logger.info(
                     "Overbought-peak cap: %s → 15%% (RSI %.0f, 52wH %+.1f%%)",
@@ -352,22 +352,24 @@ class OpenAIRiskManager(BaseAgent):
                 )
 
         # Pass B — Devil accuracy cap (Rule 19): code-enforced hard cap
-        devil = load_learning_state().get("devil_accuracy", {})
+        devil_capped_indices: set[int] = set()
+        learning_state = load_learning_state()
+        devil = learning_state.get("devil_accuracy", {})
         if devil.get("devil_is_accurate"):
             for i, pos in enumerate(kept):
                 bear = bear_cases.get(pos.ticker, {})
                 if bear.get("risk") == "HIGH" and pos.weight > config.DEVIL_ACCURACY_CAP_WEIGHT:
-                    kept[i] = Position(ticker=pos.ticker, weight=config.DEVIL_ACCURACY_CAP_WEIGHT, rationale=pos.rationale)
+                    kept[i] = Position(ticker=pos.ticker, weight=config.DEVIL_ACCURACY_CAP_WEIGHT, rationale=pos.rationale, conviction=pos.conviction)
+                    devil_capped_indices.add(i)
                     logger.info(
                         "Devil accuracy cap: %s → 10%% (Devil accuracy active, HIGH flag)",
                         pos.ticker,
                     )
-
-        learning_state = load_learning_state()
         raw_caps = learning_state.get("weight_caps", [])
         ticker_caps: dict[str, tuple[float, str]] = {}
         # rationale_tag_caps: tag keyword → (max_weight, reason)
         rationale_tag_caps: dict[str, tuple[float, str]] = {}
+        global_cap: Optional[tuple[float, str]] = None
         for cap in raw_caps:
             if not isinstance(cap, dict):
                 continue
@@ -380,7 +382,10 @@ class OpenAIRiskManager(BaseAgent):
             if cap_value <= 0:
                 continue
             cap_reason = str(cap.get("reason", "learning_state_cap"))
-            if scope == "ticker":
+            if scope == "global":
+                if global_cap is None or cap_value < global_cap[0]:
+                    global_cap = (cap_value, cap_reason)
+            elif scope == "ticker":
                 ticker = cap.get("ticker")
                 if isinstance(ticker, str):
                     ticker_caps[ticker] = (cap_value, cap_reason)
@@ -389,6 +394,17 @@ class OpenAIRiskManager(BaseAgent):
                 if isinstance(tag, str):
                     rationale_tag_caps[tag] = (cap_value, cap_reason)
 
+        # Apply global cap to all positions
+        if global_cap is not None:
+            gc_value, gc_reason = global_cap
+            for i, pos in enumerate(kept):
+                if pos.weight > gc_value:
+                    logger.info(
+                        "Global cap: %s %.0f%% → %.0f%% (%s)",
+                        pos.ticker, pos.weight * 100, gc_value * 100, gc_reason,
+                    )
+                    kept[i] = Position(ticker=pos.ticker, weight=gc_value, rationale=pos.rationale, conviction=pos.conviction)
+
         for i, pos in enumerate(kept):
             cap_info = ticker_caps.get(pos.ticker)
             if not cap_info:
@@ -396,7 +412,7 @@ class OpenAIRiskManager(BaseAgent):
             max_weight, cap_reason = cap_info
             if pos.weight > max_weight:
                 old_weight = pos.weight
-                kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale)
+                kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale, conviction=pos.conviction)
                 logger.info(
                     "Learning cap: %s %.0f%% → %.0f%% (%s)",
                     pos.ticker,
@@ -413,7 +429,7 @@ class OpenAIRiskManager(BaseAgent):
             for tag, (max_weight, cap_reason) in rationale_tag_caps.items():
                 if tag.lower() in rationale_lower and pos.weight > max_weight:
                     old_weight = pos.weight
-                    kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale)
+                    kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale, conviction=pos.conviction)
                     logger.info(
                         "Rationale-tag cap: %s %.0f%% → %.0f%% (tag '%s' %s)",
                         pos.ticker,
@@ -430,7 +446,7 @@ class OpenAIRiskManager(BaseAgent):
 
         weights = [p.weight / total_weight for p in kept]
         kept = [
-            Position(ticker=p.ticker, weight=w, rationale=p.rationale)
+            Position(ticker=p.ticker, weight=w, rationale=p.rationale, conviction=p.conviction)
             for p, w in zip(kept, weights)
         ]
 
@@ -456,6 +472,7 @@ class OpenAIRiskManager(BaseAgent):
                     ticker=updated[i].ticker,
                     weight=updated[i].weight + delta,
                     rationale=updated[i].rationale,
+                    conviction=updated[i].conviction,
                 )
             return updated
 
@@ -464,9 +481,18 @@ class OpenAIRiskManager(BaseAgent):
         for i, pos in enumerate(kept):
             if i in overbought_capped_indices and pos.weight > config.OVERBOUGHT_WEIGHT_CAP:
                 ob_excess += pos.weight - config.OVERBOUGHT_WEIGHT_CAP
-                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale)
+                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale, conviction=pos.conviction)
         if ob_excess > 1e-9:
             kept = _redistribute_excess(kept, ob_excess, overbought_capped_indices)
+
+        # Re-enforce devil accuracy cap after normalization — same pattern as overbought.
+        devil_excess = 0.0
+        for i, pos in enumerate(kept):
+            if i in devil_capped_indices and pos.weight > config.DEVIL_ACCURACY_CAP_WEIGHT:
+                devil_excess += pos.weight - config.DEVIL_ACCURACY_CAP_WEIGHT
+                kept[i] = Position(ticker=pos.ticker, weight=config.DEVIL_ACCURACY_CAP_WEIGHT, rationale=pos.rationale, conviction=pos.conviction)
+        if devil_excess > 1e-9:
+            kept = _redistribute_excess(kept, devil_excess, devil_capped_indices | overbought_capped_indices)
 
         # Re-enforce ticker caps after normalization to avoid cap drift.
         capped_excess = 0.0
@@ -478,7 +504,7 @@ class OpenAIRiskManager(BaseAgent):
             max_weight, _ = cap_info
             if pos.weight > max_weight:
                 capped_excess += pos.weight - max_weight
-                kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale)
+                kept[i] = Position(ticker=pos.ticker, weight=max_weight, rationale=pos.rationale, conviction=pos.conviction)
                 capped_indices.add(i)
         kept = _redistribute_excess(kept, capped_excess, capped_indices)
 
@@ -495,7 +521,7 @@ class OpenAIRiskManager(BaseAgent):
                 and pos.weight > config.LOW_VOLUME_MAX_WEIGHT
             ):
                 low_vol_excess += pos.weight - config.LOW_VOLUME_MAX_WEIGHT
-                kept[i] = Position(ticker=pos.ticker, weight=config.LOW_VOLUME_MAX_WEIGHT, rationale=pos.rationale)
+                kept[i] = Position(ticker=pos.ticker, weight=config.LOW_VOLUME_MAX_WEIGHT, rationale=pos.rationale, conviction=pos.conviction)
                 low_vol_indices.add(i)
                 logger.info(
                     "Low-volume cap: %s → %.0f%% (vol_ratio %.2f < %.2f)",
@@ -612,6 +638,7 @@ class OpenAIRiskManager(BaseAgent):
                     ticker=position.ticker,
                     weight=max(1e-6, position.weight * multiplier),
                     rationale=position.rationale,
+                    conviction=position.conviction,
                 )
             )
 
@@ -624,6 +651,7 @@ class OpenAIRiskManager(BaseAgent):
                 ticker=position.ticker,
                 weight=(position.weight / adjusted_total) * original_total,
                 rationale=position.rationale,
+                conviction=position.conviction,
             )
             for position in weighted
         ]
@@ -651,6 +679,7 @@ class OpenAIRiskManager(BaseAgent):
                 ticker=position.ticker,
                 weight=max(minimum_weight, min(maximum_weight, position.weight / normalized_total)),
                 rationale=position.rationale,
+                conviction=position.conviction,
             )
             for position in positions
         ]
@@ -678,6 +707,7 @@ class OpenAIRiskManager(BaseAgent):
                         ticker=bounded_positions[index].ticker,
                         weight=min(maximum_weight, bounded_positions[index].weight + increment),
                         rationale=bounded_positions[index].rationale,
+                        conviction=bounded_positions[index].conviction,
                     )
                 bounded_positions = updated_positions
             else:
@@ -698,6 +728,7 @@ class OpenAIRiskManager(BaseAgent):
                         ticker=bounded_positions[index].ticker,
                         weight=max(minimum_weight, bounded_positions[index].weight - decrement),
                         rationale=bounded_positions[index].rationale,
+                        conviction=bounded_positions[index].conviction,
                     )
                 bounded_positions = updated_positions
 
@@ -708,6 +739,7 @@ class OpenAIRiskManager(BaseAgent):
                     ticker=position.ticker,
                     weight=position.weight / final_total,
                     rationale=position.rationale,
+                    conviction=position.conviction,
                 )
                 for position in bounded_positions
             ]
@@ -716,6 +748,7 @@ class OpenAIRiskManager(BaseAgent):
                     ticker=position.ticker,
                     weight=max(minimum_weight, min(maximum_weight, position.weight)),
                     rationale=position.rationale,
+                    conviction=position.conviction,
                 )
                 for position in rescaled_positions
             ]
@@ -730,15 +763,17 @@ class OpenAIRiskManager(BaseAgent):
     ) -> PortfolioProposal:
         """Equal-weight merge fallback when meta-analyst fails entirely."""
         proposals = [strategist]
-        weights_per_proposal = [0.50]
+        weights_per_proposal = [1.0]
         if challenger and challenger.positions:
             proposals.append(challenger)
-            weights_per_proposal = [0.40, 0.35]
+            weights_per_proposal = [0.55, 0.45]
         if full_analyst and full_analyst.positions:
             proposals.append(full_analyst)
-            # Normalize weights to sum to 1
-            total_w = sum(weights_per_proposal) + 0.25
-            weights_per_proposal = [w / total_w for w in weights_per_proposal] + [0.25 / total_w]
+            weights_per_proposal = [0.40, 0.35, 0.25]
+        # Normalize weights to sum to 1.0 for all cases
+        total_w = sum(weights_per_proposal)
+        if total_w > 0:
+            weights_per_proposal = [w / total_w for w in weights_per_proposal]
 
         merged: dict[str, list] = {}
         for proposal, prop_weight in zip(proposals, weights_per_proposal):
@@ -862,13 +897,20 @@ class OpenAIRiskManager(BaseAgent):
             wti_20d = comm.get("wti_20d", float("nan"))
             natgas = comm.get("natgas_price", float("nan"))
             natgas_20d = comm.get("natgas_20d", float("nan"))
-            comm_line = (
-                f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d) | "
-                f"WTI ${wti:.1f} ({wti_20d:+.1%} 20d) | "
-                f"NatGas ${natgas:.2f} ({natgas_20d:+.1%} 20d)"
-                if not math.isnan(wti) and not math.isnan(natgas) else
-                f"Commodities: Brent ${brent:.1f} ({brent_20d:+.1%} 20d)"
-            )
+            parts = [f"Brent ${brent:.1f}"]
+            if not math.isnan(brent_20d):
+                parts[0] += f" ({brent_20d:+.1%} 20d)"
+            if not math.isnan(wti):
+                wti_part = f"WTI ${wti:.1f}"
+                if not math.isnan(wti_20d):
+                    wti_part += f" ({wti_20d:+.1%} 20d)"
+                parts.append(wti_part)
+            if not math.isnan(natgas):
+                ng_part = f"NatGas ${natgas:.2f}"
+                if not math.isnan(natgas_20d):
+                    ng_part += f" ({natgas_20d:+.1%} 20d)"
+                parts.append(ng_part)
+            comm_line = "Commodities: " + " | ".join(parts)
 
         # Sector rotation context
         sector_mom = snapshot.get("sector_momentum", {})

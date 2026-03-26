@@ -363,9 +363,10 @@ class AlphaSharkOrchestrator:
         # Step 2: load previous portfolio for continuity
         # Prefer the verified game portfolio (from verify.py) so agents reason about
         # actual holdings, not the AI's prior proposal which may differ from the game.
-        prior_portfolio = load_verified_as_proposal() or load_last()
+        verified_portfolio = load_verified_as_proposal()
+        prior_portfolio = verified_portfolio or load_last()
         if prior_portfolio:
-            source = "verified game" if load_verified_as_proposal() else "AI proposal"
+            source = "verified game" if verified_portfolio else "AI proposal"
             logger.info("Prior portfolio loaded (%d positions, source: %s)", len(prior_portfolio.positions), source)
         else:
             logger.info("No previous portfolio — cold start")

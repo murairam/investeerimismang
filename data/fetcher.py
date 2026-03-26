@@ -89,6 +89,7 @@ class MarketSnapshot(TypedDict):
     pead_signals: list[dict] # Post-Earnings Announcement Drift signals
     sector_momentum: dict # {sector: {avg_mom_20d, avg_mom_5d, avg_rsi, breadth, count}}
     rotation_risk: dict  # {sector: {"level": "HIGH"|"MEDIUM", "reason": str}} for exhausted leading sectors
+    commodity_context: dict  # {brent_price, brent_20d_return, ...} or empty dict if fetch fails
 
 
 def sanitize_ticker(ticker: str) -> str:
@@ -1224,8 +1225,8 @@ class DataFetcher:
 
             sharpe = mom / vol if (not math.isnan(vol) and vol > 0) else 0.0
             last_price = float(close_ff[ticker].dropna().iloc[-1]) if ticker in close_ff.columns else 0.0
-            high = float(high_52w.get(ticker, np.nan)) if ticker in high_52w.index else float("nan")
-            pct_from_high = (last_price / high - 1) if (not math.isnan(high) and high > 0) else float("nan")
+            high_52w_val = float(high_52w.get(ticker, np.nan)) if ticker in high_52w.index else float("nan")
+            pct_from_high = (last_price / high_52w_val - 1) if (not math.isnan(high_52w_val) and high_52w_val > 0) else float("nan")
 
             vr = float(vol_ratio.get(ticker, np.nan)) if not vol_ratio.empty and ticker in vol_ratio.index else float("nan")
             mh = float(macd_hist.get(ticker, np.nan)) if not macd_hist.empty and ticker in macd_hist.index else float("nan")
@@ -1355,7 +1356,9 @@ class DataFetcher:
         as_of = date.today().isoformat()
 
         # 1-day returns for ALL tickers (for P&L computation)
-        returns_1d_series = (close.iloc[-1] / close.iloc[-2] - 1) if len(close) >= 2 else pd.Series(dtype=float)
+        # Use forward-filled close so Nordic/Baltic stocks that didn't trade on a US holiday
+        # carry their last known price instead of producing NaN returns.
+        returns_1d_series = (close_ff.iloc[-1] / close_ff.iloc[-2] - 1) if len(close_ff) >= 2 else pd.Series(dtype=float)
         returns_1d: dict = returns_1d_series.dropna().to_dict()
         price_map: dict = {t: float(close[t].dropna().iloc[-1]) for t in close.columns if t in close.columns and not close[t].dropna().empty}
         benchmark_return_1d = float(bench_close.iloc[-1] / bench_close.iloc[-2] - 1) if len(bench_close) >= 2 else 0.0
@@ -1393,5 +1396,5 @@ class DataFetcher:
             rotation_risk=rotation_risk,
             earnings=[],
             pead_signals=[],
-            commodity_context="",
+            commodity_context={},
         )
