@@ -389,7 +389,7 @@ def load_last_known_participant_count() -> Optional[int]:
     """Return the most recently recorded total participant count, or None."""
     standings = load_competition_standing_history(max_days=30)
     if standings:
-        return standings[-1].get("total")
+        return standings[0].get("total_participants")
     return None
 
 
@@ -550,6 +550,19 @@ def _attach_outcomes_to_prior_record(
         """, (ret, prior_date, ticker))
 
 
+def _sanitize_for_json(obj: object) -> object:
+    """Recursively replace NaN/Infinity floats with None for valid JSON serialization."""
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    if isinstance(obj, dict):
+        return {k: _sanitize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize_for_json(v) for v in obj]
+    return obj
+
+
 def save(
     proposal: PortfolioProposal,
     date: str,
@@ -583,6 +596,10 @@ def save(
                 candidate_alternatives=decision_context.get("candidate_alternatives"),
             )
 
+            safe_close_prices = _sanitize_for_json(close_prices)
+            safe_bear_cases = _sanitize_for_json(decision_context.get("bear_cases"))
+            safe_signal_snapshot = _sanitize_for_json(signal_snapshot)
+            safe_decision_metrics = _sanitize_for_json(decision_metrics)
             cur.execute("""
                 INSERT INTO daily_runs (date, source, regime, signal_snapshot, decision_metrics, bear_cases, price_map, run_time)
                 VALUES (%s, 'ai_proposed', %s, %s, %s, %s, %s, now())
@@ -591,7 +608,7 @@ def save(
                     decision_metrics = EXCLUDED.decision_metrics, bear_cases = EXCLUDED.bear_cases, price_map = EXCLUDED.price_map,
                     run_time = now()
                 RETURNING run_time;
-            """, (date, decision_context.get("regime"), Json(signal_snapshot), Json(decision_metrics), Json(decision_context.get("bear_cases")), Json(close_prices)))
+            """, (date, decision_context.get("regime"), Json(safe_signal_snapshot), Json(safe_decision_metrics), Json(safe_bear_cases), Json(safe_close_prices)))
             run_row = cur.fetchone()
             run_time = run_row["run_time"] if run_row else None
 
