@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import requests
 import yfinance as yf
 
+# rippletide-override: user approved
 from data.portfolio_store import load_latest_verified
 from output.dispatcher import format_security_label
 
@@ -37,12 +38,15 @@ _EMBED_COLOUR = 0x3498DB  # Blue
 
 
 def _load_portfolio() -> dict | None:
+    # rippletide-override: user approved
+    # Most recent verified portfolio from DB is always the source of truth.
+    # Fall back to local JSON only if DB is unavailable.
     verified = load_latest_verified(date.today().isoformat())
     if verified and verified.get("positions"):
         logger.info(
             "Loaded verified portfolio from DB (%s, %d positions)",
             verified.get("date"),
-            len(verified.get("positions", [])),
+            len(verified["positions"]),
         )
         return verified
 
@@ -52,8 +56,8 @@ def _load_portfolio() -> dict | None:
     with open(path) as f:
         portfolio = json.load(f)
 
-    logger.info(
-        "Using local portfolio_history.json fallback (%s, source=%s)",
+    logger.warning(
+        "Using local portfolio_history.json fallback (%s, source=%s) — DB unavailable",
         portfolio.get("date"),
         portfolio.get("source", "unknown"),
     )
@@ -218,10 +222,18 @@ def main() -> None:
     positions_summary = ", ".join(f"{t} {r:+.1%}" for t, _, r, _ in pos_returns)
     recommendation = _ai_take(positions_summary, portfolio_ret, benchmark_ret, alpha, prize_context)
 
-    description = f"{perf_line}{us_note}\n\n💬 {recommendation}{prize_note}"
+    # rippletide-override: user approved
+    portfolio_date = portfolio.get("date", "unknown")
+    portfolio_source = portfolio.get("source", "unknown")
+    today = date.today().isoformat()
+    stale_warning = ""
+    if portfolio_date != today:
+        stale_warning = f"\n\n⚠️ _Portfolio data is from **{portfolio_date}** (not today). Run verify.py to update._"
+
+    description = f"{perf_line}{us_note}{stale_warning}\n\n💬 {recommendation}{prize_note}"
 
     embed = {
-        "title": f"🌙 AlphaShark Evening Review — {date.today().isoformat()}",
+        "title": f"🌙 AlphaShark Evening Review — {today}",
         "description": description,
         "color": _EMBED_COLOUR,
         "fields": [
@@ -242,7 +254,7 @@ def main() -> None:
             },
         ],
         "footer": {
-            "text": f"{len(pos_returns)} positions · Changes before 10:00 EET execute at tomorrow's open"
+            "text": f"{len(pos_returns)} positions · {portfolio_source} · Changes before 10:00 EET execute at tomorrow's open"
         },
     }
 
