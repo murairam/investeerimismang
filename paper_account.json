@@ -3,11 +3,11 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "AKAM": 16.1427128,
-    "HPE": 116.57560391,
-    "DELL": 11.10601099,
-    "APA": 49.45830195,
-    "VRSN": 11.94008417
+    "AKAM": 16.2337313,
+    "HPE": 118.16189281,
+    "DELL": 11.36174632,
+    "APA": 47.14034667,
+    "VRSN": 11.81618964
   },
   "verified_weights": {
     "AKAM": 0.16,
@@ -310,8 +310,25 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-03-26",
+      "equity": 10273.0,
+      "cash": 0.0,
+      "daily_return": -0.011831,
+      "return_since_start": 0.0273,
+      "turnover": 0.0,
+      "positions": {
+        "AKAM": 16.2337313,
+        "HPE": 118.16189281,
+        "DELL": 11.36174632,
+        "APA": 47.14034667,
+        "VRSN": 11.81618964
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-03-25",
-  "last_equity": 10396.0
+  "last_rebalanced_date": "2026-03-26",
+  "last_equity": 10273.0
 }

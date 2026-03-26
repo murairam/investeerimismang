@@ -54,7 +54,7 @@ ENABLE_TOOL_CALLING_RISK_MANAGER = False  # phased rollout guard for future tool
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 OPENROUTER_DEVIL_MODEL = "qwen/qwen3-235b-a22b"
 OPENROUTER_ANALYST_MODEL = "deepseek/deepseek-v3.2"
-OPENROUTER_CHALLENGER_MODEL = "nvidia/nemotron-3-super-120b-a12b"  # paid model (was free nemotron-3-super-120b-a12)
+OPENROUTER_CHALLENGER_MODEL = "nvidia/nemotron-3-super-120b-a12b"  # paid model (was free nemotron-3-super-120b-a12:free)
 
 # Risk control thresholds
 OVERBOUGHT_RSI_THRESHOLD = 79   # was 82; lowered to catch RSI 79-82 exhaustion before full overbought

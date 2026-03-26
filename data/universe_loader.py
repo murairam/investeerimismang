@@ -183,18 +183,26 @@ def _load_nasdaq_index(index_key: str, suffix: str) -> list[str]:
 def _load_euronext_obx() -> list[str]:
     html = _fetch_html(_SOURCE_URLS["OBX"])
     if not html:
+        logger.warning("OBX HTML fetch failed, using fallback universe.")
         return _FALLBACK_UNIVERSE["OBX"][:]
     try:
         tables = pd.read_html(StringIO(html))
-        for table in tables:
-            cols = {str(col).strip().lower(): col for col in table.columns}
-            symbol_col = None
-            for key in ("symbol", "ticker", "mnemo", "instrument symbol"):
-                if key in cols:
-                    symbol_col = cols[key]
-                    break
-            if symbol_col is None:
-                continue
+    except ValueError as exc:
+        # pandas raises ValueError("No tables found") if the page structure changed
+        logger.warning("No tables found when parsing OBX constituents: %s. Check if the source page structure has changed.", exc)
+        return _FALLBACK_UNIVERSE["OBX"][:]
+    except Exception as exc:
+        logger.warning("Failed to parse OBX constituents (unexpected error): %s", exc)
+        return _FALLBACK_UNIVERSE["OBX"][:]
+
+    for table in tables:
+        cols = {str(col).strip().lower(): col for col in table.columns}
+        symbol_col = None
+        for key in ("symbol", "ticker", "mnemo", "instrument symbol", "isin"):
+            if key in cols:
+                symbol_col = cols[key]
+                break
+        if symbol_col is not None:
             symbols = [
                 _to_yahoo_symbol(str(value).strip().upper(), ".OL")
                 for value in table[symbol_col].tolist()
@@ -202,8 +210,14 @@ def _load_euronext_obx() -> list[str]:
             ]
             if len(symbols) >= 10:
                 return symbols
-    except Exception as exc:
-        logger.warning("Failed to parse OBX constituents: %s", exc)
+        # Fallback: try to extract OBX-like tickers from any column if not found
+        for col in table.columns:
+            values = table[col].astype(str).str.upper().str.strip()
+            obx_like = [v for v in values if v.endswith('.OL') or v.endswith('-OL') or v.endswith(' OL')]
+            if len(obx_like) >= 10:
+                symbols = [_to_yahoo_symbol(v.replace(' ', '').replace('-', ''), ".OL") for v in obx_like]
+                return symbols
+    logger.warning("OBX table(s) found but no valid symbol column detected. Using fallback universe.")
     return _FALLBACK_UNIVERSE["OBX"][:]
 
 
