@@ -11,6 +11,9 @@ from data.learning_state import build_prompt_learning_context
 logger = logging.getLogger(__name__)
 
 _MAX_LINE_LEN = 400
+# Hard cap on total context characters injected into agent system prompts (~900 tokens).
+# Prevents unbounded token bloat as learning_state.json grows over the 75-day game.
+_MAX_CONTEXT_CHARS = 3_500
 # Lines that could hijack LLM instruction-following when re-injected as system prompt
 _INJECTION_RE = re.compile(
     r"^\s*(ignore|disregard|forget|override|system\s*:|<[^>]+>|\[inst\])",
@@ -64,7 +67,23 @@ def get_learning_context(current_regime: str = "NEUTRAL") -> str:
     if competitor_intel:
         raw += "\n\n=== COMPETITOR INTELLIGENCE (manual watchlist) ===\n" + competitor_intel
 
-    return _sanitize_learning_text(raw)
+    sanitized = _sanitize_learning_text(raw)
+
+    # Enforce total character budget — truncate at a clean line boundary
+    if len(sanitized) > _MAX_CONTEXT_CHARS:
+        truncated = sanitized[:_MAX_CONTEXT_CHARS]
+        last_newline = truncated.rfind("\n")
+        if last_newline > 0:
+            truncated = truncated[:last_newline]
+        sanitized = truncated + "\n[...truncated — see learning_state.json for full state]"
+        logger.info(
+            "Learning context truncated from %d to %d chars (budget: %d)",
+            len(raw),
+            len(sanitized),
+            _MAX_CONTEXT_CHARS,
+        )
+
+    return sanitized
 
 
 def _read_file(path: str) -> str:

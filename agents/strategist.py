@@ -14,7 +14,7 @@ from typing import Optional
 import openai
 from openai import APIConnectionError, APITimeoutError, OpenAI
 
-from agents.base_agent import BaseAgent
+from agents.base_agent import BaseAgent, conviction_to_weight
 from config import (
     API_TIMEOUT_SECONDS,
     MOMENTUM_WINDOW,
@@ -33,9 +33,8 @@ logger = logging.getLogger(__name__)
 _REGIME_GUIDANCE = {
     "BULL": (
         "Market regime: BULL (SPX above 200d SMA by ≥2%). "
-        "TARGET 5 positions for maximum conviction — only add a 6th if genuinely high-conviction. "
-        "5 names at 20% each is the ideal BULL portfolio. High beta (up to 2.0), push top picks to 20–25%. "
-        "This is the regime for big gains. Do NOT add filler to reach 7–8."
+        "TARGET 5 positions for maximum conviction — only add a 6th if genuinely high-conviction (score ≥ 8). "
+        "Favour high-beta names (beta up to 2.0). This is the regime for big gains. Do NOT add filler to reach 7–8."
     ),
     "BEAR": (
         "Market regime: BEAR (SPX below 200d SMA by ≥2%). "
@@ -55,7 +54,7 @@ def _vix_guidance(vix: float) -> str:
     if vix > VIX_HIGH_THRESHOLD:
         return (
             f"VIX is {vix:.1f} — extreme fear. Reduce overall beta. "
-            "Cap your highest-conviction positions at 20% and prefer names with strong earnings visibility. "
+            "Lower conviction on high-beta speculative picks. Prefer names with strong earnings visibility. "
             "This is not the time for speculative breakouts."
         )
     if vix > VIX_NEUTRAL_THRESHOLD:
@@ -84,8 +83,6 @@ You are the Momentum Strategist — your signal table shows trend/momentum signa
 
 ## Game rules you MUST follow
 - Portfolio must hold between 5 and 20 different stocks.
-- Each position must be allocated between 5% and 25% of the portfolio (inclusive).
-- Total allocation must be ≤ 100%.
 - Orders submitted before 10:00 EET execute at the same day's open price.
 - Available markets: Baltic Main List, US S&P 500, OMX Helsinki Large Cap (Finland), OMX Stockholm 30 (Sweden), OBX (Norway), OMX Copenhagen 25 (Denmark).
 
@@ -117,12 +114,12 @@ Baltic stocks behave differently from US/Nordic names — apply specific caution
 Let winners ride. Only exit a current holding if momentum has broken (negative vs_index, declining MACD, and 5d return turning negative) or a clearly superior alternative exists (Sharpe_20d ≥ 20% higher). Do not rotate for marginal gains — each trade executes at next-day open price.
 
 ## Position sizing — MANDATORY RULES
-You MUST size by conviction. Equal-weighting is forbidden.
-- Tier 1 (best Sharpe + breakout signal): 20–25% each, max 2–3 positions
-- Tier 2 (solid momentum): 12–18% each
-- Tier 3 (diversifiers, lower conviction): 5–10% each
-- Every position must have a different weight that reflects your actual conviction level.
-- If any two positions have the same weight, explain why in the rationale.
+Output `conviction` (integer 1–10), NOT a weight. Python converts conviction to position size.
+- 10 = max conviction (your single best momentum idea today — clear breakout + Sharpe leader)
+- 8–9 = high conviction (strong smooth trend, beats index)
+- 5–7 = medium conviction (solid signals, worth a slot)
+- 1–4 = low conviction / speculative (include only if genuinely additive)
+Every position must have a DIFFERENT conviction score — equal scoring across all positions is not acceptable.
 
 ## Market regime
 {regime_guidance}
@@ -137,23 +134,21 @@ You must respond with a valid JSON object and nothing else.
   "positions": [
     {{
       "ticker": "TICKER",
-      "weight": 0.20,
-      "rationale": "One-sentence reason for THIS ticker at THIS specific weight."
+      "conviction": 9,
+      "rationale": "One-sentence reason for THIS ticker at THIS specific conviction score."
     }}
   ],
-  "reasoning": "2-3 sentence thesis: which are your top picks and why are they sized that way.",
+  "reasoning": "2-3 sentence thesis: which are your top picks and why are they your highest conviction.",
   "confidence": 0.75,
   "learning_reflection": "One sentence: how today's picks adapt based on recent learning context."
 }}
 
 Rules:
-- "weight" is a decimal fraction (0.20 = 20%).
+- "conviction" is an integer from 1 to 10.
 - "confidence" is between 0.0 and 1.0.
-- Weights must sum to ≤ 1.00.
-- Every position weight must be ≥ 0.05 and ≤ 0.25.
 - Include between 5 and 20 positions.
 - No duplicate tickers.
-- Positions MUST have varied weights — equal weighting across all positions is not acceptable.
+- Positions MUST have varied conviction scores — equal scoring across all positions is not acceptable.
 """
 
 
@@ -508,7 +503,11 @@ class OpenAIStrategist(BaseAgent):
         # Inject learning context into the system prompt so it has mandatory-instruction weight.
         # Placed after the strategy rules so it acts as a live override, not a soft suggestion.
         if learning_context:
-            system_prompt += f"\n\n## Live learning — MANDATORY overrides from past runs\n{learning_context}"
+            system_prompt += (
+                "\n\n## ═══ LIVE LEARNING CONSTRAINTS — HIGHEST PRIORITY ═══\n"
+                "These rules are derived from verified game performance and OVERRIDE any base instruction above.\n"
+                + learning_context
+            )
 
         response = self.client.chat.completions.create(
             model=self.MODEL,
@@ -537,14 +536,23 @@ class OpenAIStrategist(BaseAgent):
 
         data = json.loads(response.choices[0].message.content)
 
-        positions = [
-            Position(
+        positions = []
+        for p in data["positions"]:
+            # Accept conviction (new schema) or weight (defensive fallback for stale model output).
+            # Guard: float in (0, 1] means the model returned a weight decimal (e.g. 0.20) — map it back.
+            raw_conviction = p.get("conviction") or p.get("weight")
+            if isinstance(raw_conviction, float) and 0.0 < raw_conviction <= 1.0:
+                conviction = max(1, min(10, round(raw_conviction * 40)))
+            elif raw_conviction is not None:
+                conviction = max(1, min(10, int(raw_conviction)))
+            else:
+                conviction = 5
+            positions.append(Position(
                 ticker=p["ticker"],
-                weight=float(p["weight"]),
+                weight=conviction_to_weight(conviction),
                 rationale=p.get("rationale", ""),
-            )
-            for p in data["positions"]
-        ]
+                conviction=conviction,
+            ))
         return PortfolioProposal(
             positions=positions,
             reasoning=data.get("reasoning", ""),

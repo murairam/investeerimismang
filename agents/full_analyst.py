@@ -14,7 +14,7 @@ from typing import Optional
 
 from openai import APIConnectionError, APITimeoutError, BadRequestError, OpenAI
 
-from agents.base_agent import BaseAgent
+from agents.base_agent import BaseAgent, conviction_to_weight
 from config import (
     API_TIMEOUT_SECONDS,
     MOMENTUM_WINDOW,
@@ -60,8 +60,8 @@ def _extract_json(text: str) -> dict:
 
 
 _REGIME_GUIDANCE = {
-    "BULL": "BULL regime — TARGET 5 positions for maximum conviction. Only add a 6th if genuinely high-conviction. Push top picks to 20–25%. 5 names at 20% each is ideal. Do NOT add filler for diversification — diversification loses competitions.",
-    "BEAR": "BEAR regime — 6–12 positions. Spread risk broadly. Cap individual positions at 15%. Prefer names with earnings visibility.",
+    "BULL": "BULL regime — TARGET 5 positions for maximum conviction. Only add a 6th if genuinely high-conviction (score ≥ 8). 5 names at full conviction is ideal. Do NOT add filler for diversification — diversification loses competitions.",
+    "BEAR": "BEAR regime — 6–12 positions. Spread risk broadly. Lower conviction on high-beta names. Prefer names with earnings visibility.",
     "NEUTRAL": "NEUTRAL regime — 5–10 positions. Quality over quantity — only add a position if signals are genuinely compelling.",
 }
 
@@ -79,14 +79,14 @@ You are one of THREE independent analysts:
 The Risk Manager will synthesize all three. Your value is finding picks that neither specialist might surface — stocks with good all-round signals across both momentum and catalyst dimensions.
 
 ## Game rules
-- 5 to 20 stocks. Each position: 5%–25%. Total weight: ≤100%. No duplicates.
+- 5 to 20 stocks. No duplicates.
 - Markets: US S&P 500, OMX Helsinki, OMX Stockholm, OBX Norway, OMX Copenhagen, Baltic.
 - Regime-based position count: {regime_guidance}
 
 ## Signal guide — use ALL columns
 - **Sharpe_20d**: risk-adjusted 20d momentum. High Sharpe = smooth persistent uptrend.
 - **5d Ret / 60d Ret**: recent acceleration vs longer trend.
-- **RSI**: > 75 with vol_ratio > 1.5 = confirmed breakout (bullish). RSI > 82 AND 52wH% ≥ -2% AND vol_ratio < 1.8 = exhaustion risk — cap at 15%, this is a hold not a fresh entry.
+- **RSI**: > 75 with vol_ratio > 1.5 = confirmed breakout (bullish). RSI > 82 AND 52wH% ≥ -2% AND vol_ratio < 1.8 = exhaustion risk, not a fresh entry — lower conviction (score ≤ 5).
 - **vs Idx**: stock beat its own market benchmark. Pure alpha signal.
 - **52wH%**: always ≤ 0%. 0.0% = AT 52-week high. Bullish when vol_ratio > 1.5 confirms the move. Without volume, at-peak = no cushion for a pullback.
 - **Beta**: amplifies gains in bull market. Target high beta in BULL regime.
@@ -106,16 +106,18 @@ The Risk Manager will synthesize all three. Your value is finding picks that nei
 - ShortInt and IV fields are shown only when available in today's data
 
 ## Sizing — MANDATORY
-- Highest conviction (4+ positive signals): 20–25%
-- Strong signals (3 positive): 12–18%
-- Speculative / diversifier: 5–10%
-Every position must have a different weight.
+Output `conviction` (integer 1–10), NOT a weight. Python converts conviction to position size.
+- 10 = max conviction (4+ positive signals, clear cross-signal consensus)
+- 8–9 = high conviction (strong on ≥3 signals)
+- 5–7 = medium conviction (solid signals, worth a slot)
+- 1–4 = speculative / diversifier
+Every position must have a DIFFERENT conviction score.
 
 ## Macro context
 Follow the signals — no hardcoded sector or stock bias. Whatever has the strongest combined signal today is your focus.
 
 ## Output — valid JSON only, no other text
-{{"positions":[{{"ticker":"X","weight":0.20,"rationale":"why this pick at this weight based on specific signals"}}],"reasoning":"2-3 sentence thesis","confidence":0.80,"learning_reflection":"One sentence: how today's picks adapt based on recent learning context."}}"""
+{{"positions":[{{"ticker":"X","conviction":9,"rationale":"why this pick at this conviction score based on specific signals"}}],"reasoning":"2-3 sentence thesis","confidence":0.80,"learning_reflection":"One sentence: how today's picks adapt based on recent learning context."}}"""
 
 
 class OpenAIFullAnalyst(BaseAgent):
@@ -383,7 +385,11 @@ class OpenAIFullAnalyst(BaseAgent):
             regime_guidance=regime_guidance,
         )
         if learning_context:
-            system_prompt += f"\n\n## Live learning — MANDATORY overrides from past runs\n{learning_context}"
+            system_prompt += (
+                "\n\n## ═══ LIVE LEARNING CONSTRAINTS — HIGHEST PRIORITY ═══\n"
+                "These rules are derived from verified game performance and OVERRIDE any base instruction above.\n"
+                + learning_context
+            )
 
         # OpenRouter does not reliably enforce response_format or handle long outputs —
         # use max_tokens to prevent truncation and omit response_format for OR calls.
@@ -444,20 +450,23 @@ class OpenAIFullAnalyst(BaseAgent):
         data = _extract_json(raw_content)
         raw_positions = data.get("positions", [])
 
-        # Auto-fix: if any weight > 1.0 the model output percentages
-        if any(float(p["weight"]) > 1.0 for p in raw_positions):
-            logger.warning("FullAnalyst returned percentage weights — auto-converting to decimals")
-            for p in raw_positions:
-                p["weight"] = float(p["weight"]) / 100.0
-
-        positions = [
-            Position(
+        positions = []
+        for p in raw_positions:
+            # Accept conviction (new schema) or weight (defensive fallback for stale model output).
+            # Guard: float in (0, 1] means the model returned a weight decimal — map it back.
+            raw_conv = p.get("conviction") or p.get("weight")
+            if isinstance(raw_conv, float) and 0.0 < raw_conv <= 1.0:
+                conviction = max(1, min(10, round(raw_conv * 40)))
+            elif raw_conv is not None:
+                conviction = max(1, min(10, int(raw_conv)))
+            else:
+                conviction = 5
+            positions.append(Position(
                 ticker=p["ticker"],
-                weight=float(p["weight"]),
+                weight=conviction_to_weight(conviction),
                 rationale=p.get("rationale", ""),
-            )
-            for p in raw_positions
-        ]
+                conviction=conviction,
+            ))
         return PortfolioProposal(
             positions=positions,
             reasoning=data.get("reasoning", ""),
