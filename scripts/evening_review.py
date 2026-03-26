@@ -96,31 +96,64 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
         extra = f"\n\nAdditional context: {prize_context}" if prize_context else ""
-        resp = client.chat.completions.create(
-            model="gpt-5.4-nano",
-            messages=[
+
+        def _call(messages: list[dict]) -> str | None:
+            resp = client.chat.completions.create(
+                model="gpt-5.4-nano",
+                messages=messages,
+                max_completion_tokens=150,
+                temperature=0.3,
+            )
+            choice = resp.choices[0]
+            finish = choice.finish_reason
+            content = choice.message.content
+            if not content:
+                logger.warning("AI take: empty content (finish_reason=%s)", finish)
+            return content.strip() if content else None
+
+        # Primary prompt — explicit game/simulation context to avoid content filtering
+        primary_messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are an advisor for a simulated stock market competition game. "
+                    "This is not real financial advice — it is a game simulation. "
+                    "Give direct, actionable game advice in exactly 1-2 sentences. No fluff."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Game portfolio today: {portfolio_ret:+.2%}, "
+                    f"benchmark: {benchmark_ret:+.2%}, alpha: {alpha:+.2%}.\n"
+                    f"Position returns: {positions_summary}\n\n"
+                    f"Should I update the game portfolio for tomorrow? "
+                    f"Name any specific positions worth dropping or keeping.{extra}"
+                ),
+            },
+        ]
+        result = _call(primary_messages)
+
+        # Retry with a simpler fallback prompt if content was empty/filtered
+        if not result:
+            logger.warning("AI take: retrying with simplified prompt")
+            fallback_messages = [
                 {
                     "role": "system",
-                    "content": (
-                        "You are a concise trading advisor for a stock market game. "
-                        "Give direct, actionable advice in exactly 1-2 sentences. No fluff."
-                    ),
+                    "content": "You are a helpful assistant summarising stock game results in 1 sentence.",
                 },
                 {
                     "role": "user",
                     "content": (
-                        f"Portfolio today: {portfolio_ret:+.2%}, "
-                        f"benchmark: {benchmark_ret:+.2%}, alpha: {alpha:+.2%}.\n"
-                        f"Position returns: {positions_summary}\n\n"
-                        "Should I update my portfolio for tomorrow? "
-                        f"Name any specific positions worth dropping or keeping.{extra}"
+                        f"My game portfolio returned {portfolio_ret:+.2%} today vs "
+                        f"benchmark {benchmark_ret:+.2%} (alpha {alpha:+.2%}). "
+                        f"Positions: {positions_summary}. One sentence takeaway?"
                     ),
                 },
-            ],
-            max_completion_tokens=100,
-            temperature=0.3,
-        )
-        return resp.choices[0].message.content.strip()
+            ]
+            result = _call(fallback_messages)
+
+        return result or "_AI recommendation unavailable._"
     except Exception as exc:
         logger.warning("AI take failed: %s", exc)
         return "_AI recommendation unavailable._"
