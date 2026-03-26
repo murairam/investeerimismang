@@ -23,7 +23,7 @@ from google.genai import types
 from openai import OpenAI
 
 import config
-from agents.base_agent import BaseAgent
+from agents.base_agent import BaseAgent, conviction_to_weight
 from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot, sanitize_ticker
 from portfolio.models import PortfolioProposal, Position
@@ -64,14 +64,14 @@ def _extract_json(text: str) -> dict:
     raise ValueError("Could not extract valid JSON from model response")
 
 def _sanitize_positions(raw: list) -> list:
-    """Strip Z-score suffixes (σ) and other non-numeric chars from weight fields.
-    Nemotron sometimes copies signal-table values (e.g. '-0.1σ') into the weight field."""
+    """Strip Z-score suffixes (σ) and other non-numeric chars from conviction/weight fields.
+    Nemotron sometimes copies signal-table values (e.g. '-0.1σ') into numeric fields."""
     import re as _re
     cleaned = []
     for p in raw:
         if not isinstance(p, dict):
             continue
-        w = p.get("weight")
+        w = p.get("conviction") or p.get("weight")
         if isinstance(w, str):
             w = _re.sub(r"[^\d.\-]", "", w)
             try:
@@ -83,14 +83,14 @@ def _sanitize_positions(raw: list) -> list:
         except (ValueError, TypeError):
             continue
         if w <= 0:
-            continue  # skip zero/negative weights
-        p["weight"] = w
+            continue  # skip zero/negative values
+        p["conviction"] = w
         cleaned.append(p)
     return cleaned
 
 
 _REGIME_GUIDANCE = {
-    "BULL": "BULL regime — TARGET 5 catalyst plays for maximum conviction. Only add a 6th if genuinely high-conviction. Vol_ratio > 1.5 + RSI > 75 = ideal breakout. Size top picks at 20-25%. No filler — diversification loses competitions.",
+    "BULL": "BULL regime — TARGET 5 catalyst plays for maximum conviction. Only add a 6th if genuinely high-conviction (score ≥ 8). Vol_ratio > 1.5 + RSI > 75 = ideal breakout. No filler — diversification loses competitions.",
     "BEAR": "BEAR regime — 5-8 positions. Find stocks with positive momentum regardless of regime. Max-size the winners — going up in a bear market beats falling less.",
     "NEUTRAL": "NEUTRAL regime — 5-10 catalyst picks. Include a pick only if you have genuine conviction in its setup.",
 }
@@ -110,12 +110,12 @@ You are a SECOND OPINION to a separate Momentum Strategist who sees trend/Sharpe
 - Dividend yield edge: Baltic/Nordic stocks with 3-6% yield earn free return via auto-reinvestment. Factor into close-call decisions.
 
 ## Game rules
-- 5 to 20 stocks. Each position: 5%-25%. Total weight: <=100%. No duplicates.
+- 5 to 20 stocks. No duplicates.
 - Markets: US S&P 500, OMX Helsinki, OMX Stockholm, OBX Norway, OMX Copenhagen, Baltic.
 - Regime-based position count: REGIME_GUIDANCE
 
 ## Signal guidance
-- RSI > 75 with vol_ratio > 1.5 = confirmed breakout (bullish). RSI > 82 AND pct_from_52w_high ≥ -2% AND vol_ratio < 1.8 = exhaustion not breakout — cap at 15%.
+- RSI > 75 with vol_ratio > 1.5 = confirmed breakout (bullish). RSI > 82 AND pct_from_52w_high ≥ -2% AND vol_ratio < 1.8 = exhaustion risk, not a fresh breakout — lower conviction (score ≤ 5).
 - vol_ratio > 1.5: move confirmed by volume — strong buy signal. vol_ratio > 1.8 overrides the exhaustion warning.
 - pct_from_52w_high is ALWAYS <= 0%. 0.0% = AT 52-week high. Bullish only when vol_ratio confirms. Without volume, at-peak = no pullback cushion.
 - ShortInt = short % of float when available.
@@ -128,10 +128,12 @@ Baltic stocks are underrepresented in competitor portfolios — genuine edge:
 - Dividend edge: 3-6% yields — game auto-reinvests, generating free return
 
 ## Sizing — MANDATORY
-- Highest conviction catalyst picks: 20-25%
-- Strong signals, confirmed breakout: 15-20%
-- Speculative catalyst: 5-10%
-Every position must have a different weight.
+Output `conviction` (integer 1–10), NOT a weight. Python converts conviction to position size.
+- 10 = max conviction (explosive catalyst confirmed by high volume + momentum)
+- 8–9 = high conviction (strong breakout setup, confirmed vol_ratio > 1.5)
+- 5–7 = medium conviction (good signals but not perfect setup)
+- 1–4 = speculative / weak setup
+Every position must have a DIFFERENT conviction score.
 
 ## What to AVOID
 - Do NOT fill the portfolio with US mega-cap names just because they are large.
@@ -140,7 +142,7 @@ Every position must have a different weight.
 - Do NOT avoid high-RSI stocks — they are the momentum leaders.
 
 ## Output — valid JSON only, no other text
-{"positions":[{"ticker":"X","weight":0.20,"rationale":"why this catalyst pick at this weight"}],"reasoning":"2-3 sentence catalyst thesis","confidence":0.80,"learning_reflection":"One sentence: how today's picks adapt based on recent learning context."}"""
+{"positions":[{"ticker":"X","conviction":9,"rationale":"why this catalyst pick at this conviction score"}],"reasoning":"2-3 sentence catalyst thesis","confidence":0.80,"learning_reflection":"One sentence: how today's picks adapt based on recent learning context."}"""
 
 
 class GeminiChallenger(BaseAgent):
@@ -467,7 +469,11 @@ class GeminiChallenger(BaseAgent):
             .replace("REGIME_GUIDANCE", regime_guidance)
         )
         if learning_context:
-            system_prompt += f"\n\nLive learning — MANDATORY overrides from past runs:\n{learning_context}"
+            system_prompt += (
+                "\n\n## ═══ LIVE LEARNING CONSTRAINTS — HIGHEST PRIORITY ═══\n"
+                "These rules are derived from verified game performance and OVERRIDE any base instruction above.\n"
+                + learning_context
+            )
 
         for attempt in range(1, 3):
             try:
@@ -493,13 +499,16 @@ class GeminiChallenger(BaseAgent):
                 )
                 data = json.loads(response.choices[0].message.content)
                 raw_positions = data.get("positions", [])
-                if any(float(p["weight"]) > 1.0 for p in raw_positions):
-                    for p in raw_positions:
-                        p["weight"] = float(p["weight"]) / 100.0
-                positions = [
-                    Position(ticker=p["ticker"], weight=float(p["weight"]), rationale=p.get("rationale", ""))
-                    for p in raw_positions
-                ]
+                positions = []
+                for p in raw_positions:
+                    raw_conv = p.get("conviction") or p.get("weight")
+                    if isinstance(raw_conv, float) and 0.0 < raw_conv <= 1.0:
+                        conviction = max(1, min(10, round(raw_conv * 40)))
+                    elif raw_conv is not None:
+                        conviction = max(1, min(10, int(raw_conv)))
+                    else:
+                        conviction = 5
+                    positions.append(Position(ticker=p["ticker"], weight=conviction_to_weight(conviction), rationale=p.get("rationale", ""), conviction=conviction))
                 logger.info("OpenAI fallback produced %d positions", len(positions))
                 return PortfolioProposal(
                     positions=positions,
@@ -531,7 +540,11 @@ class GeminiChallenger(BaseAgent):
             .replace("REGIME_GUIDANCE", regime_guidance)
         )
         if learning_context:
-            system_prompt += f"\n\nLive learning — MANDATORY overrides from past runs:\n{learning_context}"
+            system_prompt += (
+                "\n\n## ═══ LIVE LEARNING CONSTRAINTS — HIGHEST PRIORITY ═══\n"
+                "These rules are derived from verified game performance and OVERRIDE any base instruction above.\n"
+                + learning_context
+            )
         system_prompt += (
             "\n\nCRITICAL OUTPUT FORMAT: Return exactly one valid JSON object and nothing else. "
             "No markdown, no code fences, no prose before or after JSON. "
@@ -557,10 +570,10 @@ class GeminiChallenger(BaseAgent):
                                 "type": "object",
                                 "properties": {
                                     "ticker": {"type": "string"},
-                                    "weight": {"type": "number"},
+                                    "conviction": {"type": "integer"},
                                     "rationale": {"type": "string"},
                                 },
-                                "required": ["ticker", "weight", "rationale"],
+                                "required": ["ticker", "conviction", "rationale"],
                                 "additionalProperties": False,
                             },
                         },
@@ -629,13 +642,16 @@ class GeminiChallenger(BaseAgent):
                     else:
                         data = {"positions": data, "reasoning": "", "confidence": 0.5, "learning_reflection": ""}
                 raw_positions = _sanitize_positions(data.get("positions", []))
-                if raw_positions and any(float(p["weight"]) > 1.0 for p in raw_positions):
-                    for p in raw_positions:
-                        p["weight"] = float(p["weight"]) / 100.0
-                positions = [
-                    Position(ticker=p["ticker"], weight=float(p["weight"]), rationale=p.get("rationale", ""))
-                    for p in raw_positions
-                ]
+                positions = []
+                for p in raw_positions:
+                    raw_conv = p.get("conviction") or p.get("weight")
+                    if isinstance(raw_conv, float) and 0.0 < raw_conv <= 1.0:
+                        conviction = max(1, min(10, round(raw_conv * 40)))
+                    elif raw_conv is not None:
+                        conviction = max(1, min(10, int(raw_conv)))
+                    else:
+                        conviction = 5
+                    positions.append(Position(ticker=p["ticker"], weight=conviction_to_weight(conviction), rationale=p.get("rationale", ""), conviction=conviction))
                 logger.info("OpenRouter challenger produced %d positions", len(positions))
                 return PortfolioProposal(
                     positions=positions,
@@ -666,7 +682,7 @@ class GeminiChallenger(BaseAgent):
                 "role": "system",
                 "content": (
                     "Convert the provided text to valid JSON with this exact schema keys: "
-                    "positions (array of {ticker, weight, rationale}), reasoning, confidence, learning_reflection. "
+                    "positions (array of {ticker, conviction (int 1-10), rationale}), reasoning, confidence, learning_reflection. "
                     "Return JSON only."
                 ),
             },
@@ -699,7 +715,11 @@ class GeminiChallenger(BaseAgent):
             .replace("REGIME_GUIDANCE", regime_guidance)
         )
         if learning_context:
-            system_prompt += f"\n\nLive learning — MANDATORY overrides from past runs:\n{learning_context}"
+            system_prompt += (
+                "\n\n## ═══ LIVE LEARNING CONSTRAINTS — HIGHEST PRIORITY ═══\n"
+                "These rules are derived from verified game performance and OVERRIDE any base instruction above.\n"
+                + learning_context
+            )
 
         response = self.client.models.generate_content(
             model=self.MODEL,
@@ -722,20 +742,21 @@ class GeminiChallenger(BaseAgent):
         data = json.loads(raw_text)
         raw_positions = data.get("positions", [])
 
-        # Auto-fix: if any weight > 1.0 the model output percentages
-        if any(float(p["weight"]) > 1.0 for p in raw_positions):
-            logger.warning("GeminiChallenger returned percentage weights — auto-converting to decimals")
-            for p in raw_positions:
-                p["weight"] = float(p["weight"]) / 100.0
-
-        positions = [
-            Position(
+        positions = []
+        for p in raw_positions:
+            raw_conv = p.get("conviction") or p.get("weight")
+            if isinstance(raw_conv, float) and 0.0 < raw_conv <= 1.0:
+                conviction = max(1, min(10, round(raw_conv * 40)))
+            elif raw_conv is not None:
+                conviction = max(1, min(10, int(raw_conv)))
+            else:
+                conviction = 5
+            positions.append(Position(
                 ticker=p["ticker"],
-                weight=float(p["weight"]),
+                weight=conviction_to_weight(conviction),
                 rationale=p.get("rationale", ""),
-            )
-            for p in raw_positions
-        ]
+                conviction=conviction,
+            ))
         return PortfolioProposal(
             positions=positions,
             reasoning=data.get("reasoning", ""),

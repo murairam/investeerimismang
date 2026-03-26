@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _STATE_PATH = os.path.join(_ROOT, "learning_state.json")
-_MIN_STRONG_DAILY_OBSERVATIONS = 5
-_MIN_STRONG_TICKER_OBSERVATIONS = 5
-_MIN_STRONG_RATIONALE_OBSERVATIONS = 5
-_MIN_MANDATORY_RATIONALE_OBSERVATIONS = 8
+_MIN_STRONG_DAILY_OBSERVATIONS = 7       # 7 trading days ≈ 1.5 weeks before daily conclusions are actionable
+_MIN_STRONG_TICKER_OBSERVATIONS = 8      # Raised from 5 — prevents 2-day noise from promoting a ticker bias to a hard rule
+_MIN_STRONG_RATIONALE_OBSERVATIONS = 8  # Same rationale as above
+_MIN_MANDATORY_RATIONALE_OBSERVATIONS = 12  # ~2.5 weeks before a rationale-tag cap becomes code-enforced
 
 
 def _avg(values: list[float]) -> float:
@@ -319,7 +319,7 @@ def generate_learning_state() -> dict:
             "strong_rationale_observations": _MIN_STRONG_RATIONALE_OBSERVATIONS,
         },
         "hard_rules": hard_rules,
-        "biases_to_avoid": biases_to_avoid,
+        "biases_to_avoid": biases_to_avoid[:4],  # Cap at 4 — prevents unbounded list growth
         "validated_winners": winners[:5],
         "recurring_losers": losers[:5],
         "weight_caps": weight_caps,
@@ -410,7 +410,7 @@ def _devil_accuracy(history: list[dict]) -> dict:
         "low_risk_avg_return_1d": round(low_avg, 6),
         "high_risk_negative_rate": round(high_neg_rate, 4),
         "accuracy": round(accuracy, 4),
-        "devil_is_accurate": accuracy >= 0.60 and len(high_returns) >= 5,
+        "devil_is_accurate": accuracy >= 0.60 and len(high_returns) >= _MIN_STRONG_TICKER_OBSERVATIONS,
         "high_flagged_tickers_recent": high_flagged_tickers_recent,
     }
 
@@ -698,17 +698,17 @@ def build_prompt_learning_context(
             lines.append("Biases to avoid (MANDATORY):")
             lines.extend(
                 f"- MANDATORY: DO NOT use this as a primary thesis driver today — {rule}"
-                for rule in state["biases_to_avoid"][:4]
+                for rule in state["biases_to_avoid"][:3]
             )
         if state.get("early_warning_notes"):
             lines.append("Biases under watch (EARLY WARNING):")
-            lines.extend(f"- {note}" for note in state["early_warning_notes"][:4])
+            lines.extend(f"- {note}" for note in state["early_warning_notes"][:3])
         weight_caps = state.get("weight_caps", [])
         ticker_caps = [cap for cap in weight_caps if isinstance(cap, dict) and cap.get("scope") == "ticker"]
         rationale_tag_caps = [cap for cap in weight_caps if isinstance(cap, dict) and cap.get("scope") == "rationale_tag"]
         if ticker_caps:
             lines.append("Ticker weight caps (MANDATORY — code-enforced):")
-            for cap in ticker_caps[:8]:
+            for cap in ticker_caps[:5]:
                 ticker = cap.get("ticker")
                 max_weight = cap.get("max_weight")
                 reason = cap.get("reason", "learning_state_cap")
@@ -723,7 +723,7 @@ def build_prompt_learning_context(
                 )
         if rationale_tag_caps:
             lines.append("Rationale-tag weight caps (MANDATORY — code-enforced for positions using these as primary thesis):")
-            for cap in rationale_tag_caps[:6]:
+            for cap in rationale_tag_caps[:4]:
                 tag = cap.get("tag")
                 max_weight = cap.get("max_weight")
                 reason = cap.get("reason", "learning_state_cap")
@@ -744,14 +744,14 @@ def build_prompt_learning_context(
             )
             lines.extend(
                 f"- {item['ticker']}: avg {item['avg_return_1d']:+.2%} over {item['observations']} obs"
-                for item in winners[:3]
+                for item in winners[:5]
             )
         losers = state.get("recurring_losers", [])
         if losers:
             lines.append("Recurring losers:")
             lines.extend(
                 f"- {item['ticker']}: avg {item['avg_return_1d']:+.2%} over {item['observations']} obs"
-                for item in losers[:3]
+                for item in losers[:5]
             )
         devil = state.get("devil_accuracy", {})
         if devil.get("status") in ("actionable", "early_data") and devil.get("observations", 0) > 0:
