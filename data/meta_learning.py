@@ -295,13 +295,13 @@ def detect_strategy_decay(history: list[dict], window_recent: int = 5, window_pr
     decay = prior_avg - recent_avg  # positive = recent alpha dropped
 
     return {
-        "status": "decay_detected" if decay > 0.002 else "stable",
+        "status": "decay_detected" if decay > 0.005 else "stable",
         "recent_avg_alpha": round(recent_avg, 6),
         "prior_avg_alpha": round(prior_avg, 6),
         "decay_magnitude": round(decay, 6),
         "recent_days": len(recent),
         "prior_days": len(prior),
-        "decay_detected": decay > 0.002,
+        "decay_detected": decay > 0.005,
     }
 
 
