@@ -12,6 +12,9 @@ jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    concurrency:
+      group: alphashark-daily
+      cancel-in-progress: true
     permissions:
       contents: write   # needed to commit portfolio_history.json + DAILY_LOG.md back
 
@@ -52,7 +55,8 @@ jobs:
         run: |
           git config user.name "AlphaShark Bot"
           git config user.email "alphashark@noreply"
-          git add portfolio_history.json DAILY_LOG.md PREGAME_LOG.md paper_account.json PREGAME_LEARNING.md AI_SELF_CRITIQUE.md cost_log.json verification_tracker.json live_mode_lock.json LIVE_HANDOFF*.md || true
+          git add portfolio_history.json DAILY_LOG.md PREGAME_LOG.md paper_account.json PREGAME_LEARNING.md AI_SELF_CRITIQUE.md cost_log.json verification_tracker.json live_mode_lock.json LIVE_HANDOFF*.md learning_state.json || true
           TODAY=$(date +%Y-%m-%d)
           git diff --staged --quiet || git commit -m "chore: daily portfolio update $TODAY"
+          git pull --rebase origin main
           git push

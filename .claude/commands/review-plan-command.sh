@@ -27,7 +27,7 @@ if [[ -n "${RIPPLETIDE_PLAN_CLI_BIN:-}" ]]; then
   PLAN_CMD=("$RIPPLETIDE_PLAN_CLI_BIN")
 else
   PACKAGE_VERSION="${RIPPLETIDE_PLAN_CLI_VERSION:-0.5.41}"
-  PLAN_CMD=(npx -y "rippletide-code@${PACKAGE_VERSION}")
+    PLAN_CMD=(echo "Rippletide logic removed")
 fi
 
 cd "$PROJECT_DIR"

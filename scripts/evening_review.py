@@ -25,7 +25,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import requests
 import yfinance as yf
 
-# rippletide-override: user approved
 from data.portfolio_store import load_latest_verified
 from output.dispatcher import format_security_label
 
@@ -33,14 +32,14 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 logger = logging.getLogger(__name__)
 
 _PORTFOLIO_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
+_PAPER_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "..", "paper_account.json")
 _BENCHMARK = "^GSPC"
 _EMBED_COLOUR = 0x3498DB  # Blue
 
 
 def _load_portfolio() -> dict | None:
     # rippletide-override: user approved
-    # Most recent verified portfolio from DB is always the source of truth.
-    # Fall back to local JSON only if DB is unavailable.
+    # Priority 1: DB verified portfolio — always the most up-to-date source.
     verified = load_latest_verified(date.today().isoformat())
     if verified and verified.get("positions"):
         logger.info(
@@ -50,6 +49,27 @@ def _load_portfolio() -> dict | None:
         )
         return verified
 
+    # Priority 2: paper_account.json — kept current by verify.py even when DB is
+    # unavailable. Uses verified_weights ({ticker: weight}) written by sync_verified_positions.
+    pa_path = os.path.abspath(_PAPER_ACCOUNT_PATH)
+    if os.path.exists(pa_path):
+        try:
+            with open(pa_path) as f:
+                pa = json.load(f)
+            weights: dict = pa.get("verified_weights") or {}
+            if weights:
+                positions = [{"ticker": t, "weight": w} for t, w in weights.items()]
+                pa_date = pa.get("last_rebalanced_date")
+                logger.warning(
+                    "DB unavailable — using paper_account.json fallback (%s, %d positions)",
+                    pa_date,
+                    len(positions),
+                )
+                return {"positions": positions, "date": pa_date, "source": "paper_account"}
+        except Exception as exc:
+            logger.warning("Could not read paper_account.json: %s", exc)
+
+    # Priority 3: legacy portfolio_history.json — last resort, may be very stale.
     path = os.path.abspath(_PORTFOLIO_PATH)
     if not os.path.exists(path):
         return None
@@ -57,7 +77,7 @@ def _load_portfolio() -> dict | None:
         portfolio = json.load(f)
 
     logger.warning(
-        "Using local portfolio_history.json fallback (%s, source=%s) — DB unavailable",
+        "Using legacy portfolio_history.json fallback (%s, source=%s) — DB and paper_account unavailable",
         portfolio.get("date"),
         portfolio.get("source", "unknown"),
     )

@@ -39,7 +39,6 @@ _DB_URL = os.environ.get("SUPABASE_CONNECTION_STRING")
 _db_conn = None
 
 def _get_db_connection():
-    # rippletide-override: user approved
     """Lazy-load a singleton database connection, reconnecting if the connection is broken."""
     global _db_conn
     if not _DB_URL:
