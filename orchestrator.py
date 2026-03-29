@@ -895,8 +895,9 @@ class AlphaSharkOrchestrator:
             prior_proposal=verified_prior or prior_portfolio,
             paper_metrics=paper_metrics,
         )
-        # Mention user in LIVE mode so they get a notification
-        self.dispatcher.send(embed, mention_user=True)
+        # Mention user only in LIVE mode so they get a phone notification; skip pings during PREGAME
+        is_live = mode_info.get("mode") == "LIVE"
+        self.dispatcher.send(embed, mention_user=is_live)
 
         # Step 9: Print cost summary
         cost_summary = get_total_cost()
