@@ -26,8 +26,8 @@ _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _STATE_PATH = os.path.join(_ROOT, "learning_state.json")
 _MIN_STRONG_DAILY_OBSERVATIONS = 7       # 7 trading days ≈ 1.5 weeks before daily conclusions are actionable
 _MIN_STRONG_TICKER_OBSERVATIONS = 8      # Raised from 5 — prevents 2-day noise from promoting a ticker bias to a hard rule
-_MIN_STRONG_RATIONALE_OBSERVATIONS = 8  # Same rationale as above
-_MIN_MANDATORY_RATIONALE_OBSERVATIONS = 12  # ~2.5 weeks before a rationale-tag cap becomes code-enforced
+_MIN_STRONG_RATIONALE_OBSERVATIONS = 5  # Rationale tags share observations across many positions — 5 obs is enough signal
+_MIN_MANDATORY_RATIONALE_OBSERVATIONS = 8   # ~1.5 weeks before a rationale-tag cap becomes code-enforced (75-day game moves fast)
 
 
 def _avg(values: list[float]) -> float:
