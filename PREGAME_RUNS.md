@@ -1622,3 +1622,39 @@ Winners: OXY +1.7%, FANG +0.1%, VWS.CO +0.0% | Losers: HPE -4.3%, AKAM -2.1%, DE
 - ▲ **OXY**: 11.0% → 15.0% (+4.0%)
 
 ---
+## 2026-03-30 17:28:33
+
+**Market:** BEAR regime · SPX vs 200d SMA: -3.9% · VIX: 29.6 · S&P 500 20d: -7.3%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.6% · Benchmark +0.2% · Alpha +1.4%
+Winners: LYB +3.3%, OXY +2.9%, XOM +2.6%
+
+**Paper account:** Equity €10,284.60 (start €10,000) · Today +1.60% · Since start +2.85% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized independently validated consensus names, but explicitly cut conviction on all HIGH-RISK overbought/low-volume names per the learning and devil overlays. Given the portfolio's recent positive alpha and the sector-action rule, I keep exposure to the winning energy/chemicals complex while upgrading away from slower incumbents like FANG/XOM/MPC toward cleaner consensus catalysts such as NHY.OL and SUBC.OL; portfolio beta should remain comfortably within BEAR tolerance and likely below the soft ≤0.90 guide due to the inclusion of lower-beta Nordic leaders.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **NHY.OL** | 25.0% | Double-consensus pick with the cleanest catalyst profile among leaders: strong 5d momentum, solid volume confirmation, and notably lower overbought/reversal risk than many energy names. |
+| 2 | **SUBC.OL** | 25.0% | Double-consensus pick and one of the best slot earners in this tape: energy-linked leadership with volume-backed momentum, making it a stronger add than stretched low-volume US energy names. |
+| 3 | **DOW** | 13.0% | Double-consensus pick with excellent acceleration and relative strength, but conviction is cut materially because the devil case is valid: RSI is elevated and volume confirmation is weak. |
+| 4 | **EQNR.OL** | 12.0% | Double-consensus pick and a strong non-US energy leader that fits the rotation, but conviction is reduced due to high-RSI/low-volume stretch and medium rotation-risk in energy. |
+| 5 | **APA** | 14.0% | Triple-consensus pick and current holding in the strongest sector, but mandatory conviction haircut applies because RSI/volume are extreme and unconfirmed; keep as a high-upside but lower-quality breakout. |
+| 6 | **OXY** | 11.0% | Double-consensus current winner with continued momentum, yet extreme overbought conditions and very weak volume make it the weakest retained energy slot versus fresher alternatives. |
+
+**Changes from yesterday:**
+- ➕ Added **NHY.OL** at 25.0%
+- ➕ Added **SUBC.OL** at 25.0%
+- ➕ Added **DOW** at 13.0%
+- ➕ Added **EQNR.OL** at 12.0%
+- ➖ Removed **FANG** (was 25.0%)
+- ➖ Removed **XOM** (was 16.0%)
+- ➖ Removed **LYB** (was 16.0%)
+- ➖ Removed **MPC** (was 13.0%)
+- ▼ **OXY**: 15.0% → 11.0% (-4.0%)
+
+---

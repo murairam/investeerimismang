@@ -4207,7 +4207,31 @@
       "input_tokens": 23350,
       "output_tokens": 10000,
       "cost_usd": 0.010005
+    },
+    {
+      "date": "2026-03-30",
+      "agent": "OpenAIFullAnalyst",
+      "model": "deepseek/deepseek-v3.2",
+      "input_tokens": 22490,
+      "output_tokens": 7276,
+      "cost_usd": 0.008612
+    },
+    {
+      "date": "2026-03-30",
+      "agent": "OpenAIDevil",
+      "model": "qwen/qwen3-235b-a22b",
+      "input_tokens": 1335,
+      "output_tokens": 550,
+      "cost_usd": 0.001608
+    },
+    {
+      "date": "2026-03-30",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 4518,
+      "output_tokens": 560,
+      "cost_usd": 0.019695
     }
   ],
-  "total_cost": 10.38414
+  "total_cost": 10.414055
 }

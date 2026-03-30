@@ -3,20 +3,20 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "FANG": 14.46315344,
-    "XOM": 10.92645977,
-    "LYB": 23.22331245,
-    "OXY": 26.81484553,
-    "APA": 39.45811503,
-    "MPC": 6.02598648
+    "NHY.OL": 280.80990455,
+    "SUBC.OL": 97.56220534,
+    "APA": 36.63399398,
+    "DOW": 36.08395853,
+    "EQNR.OL": 32.54240434,
+    "OXY": 19.22226968
   },
   "verified_weights": {
-    "FANG": 0.25,
-    "XOM": 0.16,
-    "LYB": 0.16,
-    "OXY": 0.15,
-    "APA": 0.15,
-    "MPC": 0.13
+    "NHY.OL": 0.25,
+    "SUBC.OL": 0.25,
+    "APA": 0.14,
+    "DOW": 0.13,
+    "EQNR.OL": 0.12,
+    "OXY": 0.11
   },
   "pending_order": null,
   "history": [
@@ -365,8 +365,26 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-03-30",
+      "equity": 10186.0,
+      "cash": 0.0,
+      "daily_return": 0.006223,
+      "return_since_start": 0.0186,
+      "turnover": 0.0,
+      "positions": {
+        "NHY.OL": 280.80990455,
+        "SUBC.OL": 97.56220534,
+        "APA": 36.63399398,
+        "DOW": 36.08395853,
+        "EQNR.OL": 32.54240434,
+        "OXY": 19.22226968
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-03-29",
-  "last_equity": 10123.0
+  "last_rebalanced_date": "2026-03-30",
+  "last_equity": 10186.0
 }
