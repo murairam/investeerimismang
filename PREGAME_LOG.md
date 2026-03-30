@@ -1067,3 +1067,40 @@ Winners: AKAM +4.4%, DELL +4.4% | Losers: PSX -1.2%, XOM -0.9%, MPC -0.7%
 
 ---
 
+## 2026-03-29 13:12:36
+
+**Market:** BEAR regime · SPX vs 200d SMA: -4.0% · VIX: 31.0 · S&P 500 20d: -7.4%
+
+**Verification:** Verified against actual game holdings at 13:53:52.
+
+**Yesterday's P&L:** Portfolio -1.2% · Benchmark -1.7% · Alpha +0.5%
+Winners: OXY +1.7%, FANG +0.1%, VWS.CO +0.0% | Losers: HPE -4.3%, AKAM -2.1%, DELL -2.1%
+
+**Paper account:** Equity €10,147.03 (start €10,000) · Today -1.04% · Since start +1.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I keep the validated energy core and rotate out the persistent laggards from the current portfolio—DELL, HPE, AKAM, and VWS.CO—because recent alpha has come from relative strength while tech/Nordic weakness and poor breadth argue for redeployment into leaders. Consensus names FANG, OXY, MPC, and APA anchor the list, but HIGH-risk flags force conviction cuts on APA and MPC; XOM and LYB are the best unique additions. Portfolio remains intentionally concentrated in the leading rotation, and in this BEAR setup beta is treated as informational rather than a reason to dilute the strongest movers.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **FANG** | 25.0% | Double-consensus pick and existing winner to keep; energy remains the clear leadership group, and FANG has solid momentum with better volume confirmation than several peers. |
+| 2 | **OXY** | 15.0% | Double-consensus pick and current holding with strong trend/Sharpe support plus very low retail crowding; conviction is trimmed slightly because RSI is overbought and volume confirmation is only moderate. |
+| 3 | **MPC** | 13.0% | Double-consensus pick with strong refining momentum and low crowding, but conviction is cut materially per the HIGH-risk warning due to RSI>81 and weak vol_ratio below 0.80. |
+| 4 | **APA** | 15.0% | Double-consensus pick with the strongest raw catalyst score, but conviction is reduced sharply because it is explicitly HIGH risk: RSI near 94, fading acceleration, and elevated retail crowding. |
+| 5 | **XOM** | 16.0% | Best unique energy replacement from the catalyst proposal and explicitly favored by the learning context; cleaner volume support than several alternatives and fits the dominant energy rotation despite overbought conditions. |
+| 6 | **LYB** | 16.0% | Best non-consensus unique pick to earn the final slot: strong alpha/Sharpe profile and exposure to the still-strong chemical trend, but kept at medium conviction because rotation risk in chemicals is flagged and volume is light. |
+
+**Changes from yesterday:**
+- ➕ Added **MPC** at 13.0%
+- ➕ Added **APA** at 15.0%
+- ➕ Added **XOM** at 16.0%
+- ➕ Added **LYB** at 16.0%
+- ➖ Removed **VWS.CO** (was 22.0%)
+- ➖ Removed **DELL** (was 20.0%)
+- ➖ Removed **HPE** (was 16.0%)
+- ➖ Removed **AKAM** (was 15.0%)
+- ▲ **FANG**: 16.0% → 25.0% (+9.0%)
+- ▲ **OXY**: 11.0% → 15.0% (+4.0%)
+
+---

@@ -363,6 +363,17 @@ class AlphaSharkOrchestrator:
         # Step 2: load previous portfolio for continuity
         # Prefer the verified game portfolio (from verify.py) so agents reason about
         # actual holdings, not the AI's prior proposal which may differ from the game.
+        # --- DEBUG: Log the absolute path and contents of paper_account.json ---
+        import os
+        from data.paper_account import _PAPER_STORE_PATH
+        logger.info("[DEBUG] paper_account.json absolute path: %s", os.path.abspath(_PAPER_STORE_PATH))
+        try:
+            with open(os.path.abspath(_PAPER_STORE_PATH), "r") as f:
+                paper_data = f.read()
+            logger.info("[DEBUG] paper_account.json contents: %s", paper_data)
+        except Exception as exc:
+            logger.warning("[DEBUG] Could not read paper_account.json: %s", exc)
+
         verified_portfolio = load_verified_as_proposal()
         prior_portfolio = verified_portfolio or load_last()
         if prior_portfolio:

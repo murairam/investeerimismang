@@ -1,67 +1,29 @@
 {
-  "generated_from_days": 7,
-  "position_observations": 31,
+  "generated_from_days": 10,
+  "position_observations": 42,
   "minimums": {
-    "strong_daily_observations": 5,
-    "strong_ticker_observations": 5,
+    "strong_daily_observations": 7,
+    "strong_ticker_observations": 8,
     "strong_rationale_observations": 5
   },
   "hard_rules": [],
   "biases_to_avoid": [],
   "validated_winners": [
     {
-      "ticker": "AKAM",
-      "observations": 6,
-      "avg_return_1d": 0.025313,
-      "hit_rate": 0.6667
-    },
-    {
       "ticker": "APA",
       "observations": 10,
       "avg_return_1d": 0.023618,
       "hit_rate": 0.8
+    },
+    {
+      "ticker": "DELL",
+      "observations": 8,
+      "avg_return_1d": 0.014514,
+      "hit_rate": 0.5
     }
   ],
-  "recurring_losers": [
-    {
-      "ticker": "AKRBP.OL",
-      "observations": 6,
-      "avg_return_1d": -0.041439,
-      "hit_rate": 0.0
-    },
-    {
-      "ticker": "EQNR.OL",
-      "observations": 6,
-      "avg_return_1d": -0.009283,
-      "hit_rate": 0.0
-    },
-    {
-      "ticker": "NESTE.HE",
-      "observations": 6,
-      "avg_return_1d": -0.007407,
-      "hit_rate": 0.0
-    }
-  ],
-  "weight_caps": [
-    {
-      "scope": "ticker",
-      "ticker": "AKRBP.OL",
-      "max_weight": 0.07,
-      "reason": "recurring_underperformer"
-    },
-    {
-      "scope": "ticker",
-      "ticker": "EQNR.OL",
-      "max_weight": 0.07,
-      "reason": "recurring_underperformer"
-    },
-    {
-      "scope": "ticker",
-      "ticker": "NESTE.HE",
-      "max_weight": 0.07,
-      "reason": "recurring_underperformer"
-    }
-  ],
+  "recurring_losers": [],
+  "weight_caps": [],
   "turnover_guidance": {
     "instruction": "Keep at least 50% of weight in existing holdings unless a replacement has materially stronger signals.",
     "min_hold_weight": 0.5,
@@ -71,7 +33,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.416,
+    "avg_turnover_estimate": 0.475714,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -79,52 +41,52 @@
     {
       "tag": "momentum",
       "instruction": "Prefer momentum setups when other signals are comparable.",
-      "observations": 21
+      "observations": 27
     },
     {
       "tag": "high_sharpe",
       "instruction": "Prefer high_sharpe setups when other signals are comparable.",
-      "observations": 21
+      "observations": 26
+    },
+    {
+      "tag": "breakout",
+      "instruction": "Prefer breakout setups when other signals are comparable.",
+      "observations": 5
     },
     {
       "tag": "consensus",
       "instruction": "Prefer consensus setups when other signals are comparable.",
-      "observations": 16
+      "observations": 21
     },
     {
       "tag": "overbought",
       "instruction": "Prefer overbought setups when other signals are comparable.",
-      "observations": 10
-    },
-    {
-      "tag": "at_52w_high",
-      "instruction": "Prefer at_52w_high setups when other signals are comparable.",
-      "observations": 16
+      "observations": 15
     }
   ],
   "early_warning_notes": [
-    "EARLY WARNING: non_us_differentiator has weak hit quality (0% over 6 obs)."
+    "EARLY WARNING: non_us_differentiator has weak hit quality (14% over 7 obs)."
   ],
   "rationale_stats": {
     "momentum": {
-      "observations": 21,
-      "avg_return_1d": 0.005993,
-      "hit_rate": 0.4286
+      "observations": 27,
+      "avg_return_1d": 0.0022,
+      "hit_rate": 0.4444
     },
     "high_sharpe": {
-      "observations": 21,
-      "avg_return_1d": 0.005993,
-      "hit_rate": 0.4286
+      "observations": 26,
+      "avg_return_1d": 0.002274,
+      "hit_rate": 0.4231
     },
     "breakout": {
-      "observations": 4,
-      "avg_return_1d": 0.004931,
-      "hit_rate": 0.5
+      "observations": 5,
+      "avg_return_1d": 0.004002,
+      "hit_rate": 0.6
     },
     "consensus": {
-      "observations": 16,
-      "avg_return_1d": 0.012101,
-      "hit_rate": 0.5
+      "observations": 21,
+      "avg_return_1d": 0.005237,
+      "hit_rate": 0.4762
     },
     "catalyst": {
       "observations": 2,
@@ -132,73 +94,86 @@
       "hit_rate": 0.5
     },
     "diversifier": {
-      "observations": 1,
-      "avg_return_1d": 0.01229,
+      "observations": 2,
+      "avg_return_1d": 0.006287,
       "hit_rate": 1.0
     },
     "non_us_differentiator": {
-      "observations": 6,
-      "avg_return_1d": -0.019376,
-      "hit_rate": 0.0
+      "observations": 7,
+      "avg_return_1d": -0.016568,
+      "hit_rate": 0.1429
     },
     "overbought": {
-      "observations": 10,
-      "avg_return_1d": 0.010937,
-      "hit_rate": 0.5
+      "observations": 15,
+      "avg_return_1d": 0.005714,
+      "hit_rate": 0.5333
     },
     "at_52w_high": {
-      "observations": 16,
-      "avg_return_1d": 0.014063,
-      "hit_rate": 0.5
+      "observations": 19,
+      "avg_return_1d": 0.011663,
+      "hit_rate": 0.5263
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.002298,
-    "tier2_avg_return_1d": 0.004874,
-    "tier3_avg_return_1d": -0.008521,
-    "tier1_observations": 11,
-    "tier2_observations": 15,
-    "tier3_observations": 5
+    "tier1_avg_return_1d": 0.003389,
+    "tier2_avg_return_1d": -0.00023,
+    "tier3_avg_return_1d": -0.004234,
+    "tier1_observations": 16,
+    "tier2_observations": 20,
+    "tier3_observations": 6
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
-    "status": "early_data",
-    "observations": 4,
-    "high_risk_avg_return_1d": 0.024594,
-    "low_risk_avg_return_1d": -0.001577,
-    "high_risk_negative_rate": 0.25,
-    "accuracy": 0.25,
+    "status": "actionable",
+    "observations": 8,
+    "high_risk_avg_return_1d": 0.006602,
+    "low_risk_avg_return_1d": -0.000841,
+    "high_risk_negative_rate": 0.375,
+    "accuracy": 0.375,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
         "ticker": "APA",
-        "flag_count": 3
+        "flag_count": 4
       },
       {
         "ticker": "DELL",
+        "flag_count": 2
+      },
+      {
+        "ticker": "EOG",
         "flag_count": 2
       }
     ]
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.4286,
-      "mom_5d": 0.4286,
-      "sharpe_20d": 0.4286,
-      "rsi_14": 0.4286,
-      "vs_index": 0.4286,
-      "vol_ratio": 0.4286,
-      "beta": 0.4762
+      "momentum": 0.4688,
+      "mom_5d": 0.4688,
+      "sharpe_20d": 0.4688,
+      "rsi_14": 0.4688,
+      "vs_index": 0.4688,
+      "vol_ratio": 0.4688,
+      "beta": 0.4375
     },
     "per_regime": {
       "NEUTRAL": {
-        "momentum": 0.4286,
-        "mom_5d": 0.4286,
-        "sharpe_20d": 0.4286,
-        "rsi_14": 0.4286,
-        "vs_index": 0.4286,
-        "vol_ratio": 0.4286,
-        "beta": 0.4762
+        "momentum": 0.4615,
+        "mom_5d": 0.4615,
+        "sharpe_20d": 0.4615,
+        "rsi_14": 0.4615,
+        "vs_index": 0.4615,
+        "vol_ratio": 0.4615,
+        "beta": 0.5
+      },
+      "BEAR": {
+        "momentum": 0.5,
+        "mom_5d": 0.5,
+        "sharpe_20d": 0.5,
+        "rsi_14": 0.5,
+        "vs_index": 0.5,
+        "vol_ratio": 0.5,
+        "beta": 0.1667
       }
     }
   },
@@ -223,85 +198,101 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-03-24",
-    "portfolio_return_1d": 0.0104,
-    "benchmark_return_1d": 0.0054,
-    "alpha_1d": 0.005,
+    "date": "2026-03-27",
+    "portfolio_return_1d": -0.0121,
+    "benchmark_return_1d": -0.0167,
+    "alpha_1d": 0.0046,
     "winners": [
       {
-        "ticker": "HPE",
-        "return_1d": 0.0823,
-        "vs_benchmark": 0.0769,
+        "ticker": "OXY",
+        "return_1d": 0.0172,
+        "vs_benchmark": 0.0339,
         "tags": [
           "momentum",
           "high_sharpe",
-          "consensus",
-          "catalyst"
-        ],
-        "rationale_snippet": "Catalyst inclusion from Proposal B that satisfies the requirement to include at least one strong non",
-        "rsi_at_entry": 69.230776,
-        "vol_ratio_at_entry": 1.33944
-      },
-      {
-        "ticker": "AKAM",
-        "return_1d": 0.0443,
-        "vs_benchmark": 0.0388,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
+          "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick that earns its slot as a non-energy holdover while weak-tech breadth argues fo",
-        "rsi_at_entry": 73.841057,
-        "vol_ratio_at_entry": 0.966854
+        "rationale_snippet": "Best unique replacement candidate from the strategist for redeploying out of weaker current holdings",
+        "rsi_at_entry": 80.981918,
+        "vol_ratio_at_entry": 0.966548
       },
       {
-        "ticker": "DELL",
-        "return_1d": 0.0438,
-        "vs_benchmark": 0.0384,
+        "ticker": "FANG",
+        "return_1d": 0.0006,
+        "vs_benchmark": 0.0173,
         "tags": [
           "momentum",
           "high_sharpe",
-          "breakout",
           "consensus",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick and yesterday's strongest winner (+7.0%) with the best volume confirmation in ",
-        "rsi_at_entry": 79.151195,
-        "vol_ratio_at_entry": 1.517655
+        "rationale_snippet": "Double-consensus energy leader aligned with the dominant rotation and under-owned by retail, but con",
+        "rsi_at_entry": 78.660344,
+        "vol_ratio_at_entry": 0.802636
+      },
+      {
+        "ticker": "VWS.CO",
+        "return_1d": 0.0003,
+        "vs_benchmark": 0.017,
+        "tags": [
+          "momentum",
+          "breakout",
+          "consensus",
+          "diversifier",
+          "non_us_differentiator",
+          "overbought"
+        ],
+        "rationale_snippet": "Double-consensus breakout with the strongest volume confirmation in the set and powerful 5-day accel",
+        "rsi_at_entry": 76.038792,
+        "vol_ratio_at_entry": 1.829882
       }
     ],
     "losers": [
       {
-        "ticker": "XOM",
-        "return_1d": -0.0092,
-        "vs_benchmark": -0.0146,
+        "ticker": "HPE",
+        "return_1d": -0.0428,
+        "vs_benchmark": -0.0261,
         "tags": [
           "momentum",
           "high_sharpe",
+          "consensus"
+        ],
+        "rationale_snippet": "Double-consensus current winner with very strong 5-day momentum, but HIGH risk and stretched conditi",
+        "rsi_at_entry": 73.792272,
+        "vol_ratio_at_entry": 1.15153
+      },
+      {
+        "ticker": "AKAM",
+        "return_1d": -0.0212,
+        "vs_benchmark": -0.0044,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Keep as a core winner from the current book because Energy remains the dominant leadership sector an",
-        "rsi_at_entry": 82.201977,
-        "vol_ratio_at_entry": 1.107871
+        "rationale_snippet": "Double-consensus pick and existing hold with positive recent contribution; medium risk is acceptable",
+        "rsi_at_entry": 81.426509,
+        "vol_ratio_at_entry": 1.156197
       },
       {
-        "ticker": "MPC",
-        "return_1d": -0.0073,
-        "vs_benchmark": -0.0127,
+        "ticker": "DELL",
+        "return_1d": -0.0205,
+        "vs_benchmark": -0.0038,
         "tags": [
           "momentum",
           "high_sharpe",
-          "at_52w_high"
+          "consensus",
+          "overbought"
         ],
-        "rationale_snippet": "Best unique energy add from Proposal A: acceptable volume confirmation (1.09), positive 5d momentum ",
-        "rsi_at_entry": 70.206057,
-        "vol_ratio_at_entry": 1.092033
+        "rationale_snippet": "Triple-consensus pick and a current winner we should keep; despite HIGH risk and stretched RSI, its ",
+        "rsi_at_entry": 72.294861,
+        "vol_ratio_at_entry": 0.996591
       }
     ],
-    "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'high_sharpe' entries outperformed \u2014 continue favouring this setup"
+    "lesson": "'high_sharpe' entries underperformed \u2014 review sizing for this thesis today; 'consensus' entries underperformed \u2014 review sizing for this thesis today"
   }
 }

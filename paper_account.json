@@ -3,20 +3,20 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "VWS.CO": 97.71555011,
-    "DELL": 13.44111724,
-    "FANG": 9.35048144,
-    "HPE": 75.41180247,
-    "AKAM": 15.11652877,
-    "OXY": 20.19530018
+    "FANG": 14.46315344,
+    "XOM": 10.92645977,
+    "LYB": 23.22331245,
+    "OXY": 26.81484553,
+    "APA": 39.45811503,
+    "MPC": 6.02598648
   },
   "verified_weights": {
-    "VWS.CO": 0.22,
-    "DELL": 0.2,
-    "FANG": 0.16,
-    "HPE": 0.16,
-    "AKAM": 0.15,
-    "OXY": 0.11
+    "FANG": 0.25,
+    "XOM": 0.16,
+    "LYB": 0.16,
+    "OXY": 0.15,
+    "APA": 0.15,
+    "MPC": 0.13
   },
   "pending_order": null,
   "history": [
@@ -347,8 +347,26 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-03-29",
+      "equity": 10123.0,
+      "cash": 0.0,
+      "daily_return": -0.012776,
+      "return_since_start": 0.0123,
+      "turnover": 0.0,
+      "positions": {
+        "FANG": 14.46315344,
+        "XOM": 10.92645977,
+        "LYB": 23.22331245,
+        "OXY": 26.81484553,
+        "APA": 39.45811503,
+        "MPC": 6.02598648
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-03-27",
-  "last_equity": 10254.0
+  "last_rebalanced_date": "2026-03-29",
+  "last_equity": 10123.0
 }
