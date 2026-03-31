@@ -3,9 +3,10 @@ name: AlphaShark Daily Run
 
 on:
   schedule:
-    # 06:00 UTC = 09:00 EEST (UTC+3, summer / game period)
-    # Runs Mon–Fri, ~60 min before the 10:00 EET submission cutoff — fresher data
-    - cron: '0 6 * * 1-5'
+    # 05:00 UTC = 08:00 EEST (UTC+3, summer / game period)
+    # Runs Mon–Fri, ~120 min before the 10:00 EEST submission cutoff
+    # Buffer needed: GitHub queue delay typically 30-60 min + pipeline ~20 min = ~80 min total
+    - cron: '0 5 * * 1-5'
   workflow_dispatch:   # allow manual trigger for testing
 
 jobs:
