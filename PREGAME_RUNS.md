@@ -1658,3 +1658,107 @@ Winners: LYB +3.3%, OXY +2.9%, XOM +2.6%
 - ▼ **OXY**: 15.0% → 11.0% (-4.0%)
 
 ---
+## 2026-03-31 17:41:40
+
+**Market:** BEAR regime · SPX vs 200d SMA: -3.2% · VIX: 27.5 · S&P 500 20d: -5.7%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.2% · Benchmark +1.3% · Alpha -0.1%
+Winners: SUBC.OL +2.9%, DOW +1.2%, OXY +1.2% | Losers: APA -0.8%
+
+**Paper account:** Equity €10,158.00 (start €10,000) · Today -0.27% · Since start +1.58% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 76% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I kept only the strongest existing winner from the current book in SUBC.OL and retained limited exposure to EQNR.OL, while cutting persistent low-volume, overbought lag-risk names like APA, OXY, and DOW despite their recent gains because the devil/risk overlay required conviction reductions of at least 3 points. With no Proposal B available, I leaned on Proposal C's higher-volume breakouts—VWS.CO, KOG.OL, NHY.OL, and SALM.OL—as cleaner slot earners in a cautious BEAR tape, while still respecting the energy rotation by not exiting it entirely. Portfolio construction shifts away from the prior concentrated oil/chemicals book that slightly lagged yesterday, and beta should remain moderate rather than forced lower, consistent with the learning rule that BEAR beta is informational only.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SUBC.OL** | 15.0% | Consensus pick across current holdings/Strategist context and still one of the cleaner existing winners; strong 5d momentum with acceptable volume confirmation makes it the best keep from the old book despite overbought risk. |
+| 2 | **VWS.CO** | 20.0% | Best unique catalyst/momentum breakout from Proposal C with very strong 5d acceleration, positive relative strength, and solid volume; medium risk from high RSI keeps it below top conviction. |
+| 3 | **KOG.OL** | 21.0% | High-volume momentum name with better confirmation than many overbought energy/chemical leaders; earns a slot as a cleaner BEAR-regime relative-strength winner with less exhaustion risk. |
+| 4 | **NHY.OL** | 16.0% | Although Strategist wanted to cut it, Proposal C retained it and the actual signals show strong 5d acceleration with decent volume and low beta; kept as a lower-volatility momentum hold rather than fully abandoning a recent winner. |
+| 5 | **SALM.OL** | 21.0% | Unique pick with strong volume-backed momentum and diversification away from crowded energy/chemicals; earns the fifth slot because its confirmation is better than the low-volume overbought alternatives. |
+| 6 | **EQNR.OL** | 7.0% | Current holding and energy rotation leader with low retail crowding, but HIGH-risk overbought/low-volume profile materially reduces conviction; included only as a smaller-conviction residual exposure to the strongest sector. |
+
+**Changes from yesterday:**
+- ➕ Added **VWS.CO** at 20.0%
+- ➕ Added **KOG.OL** at 21.0%
+- ➕ Added **SALM.OL** at 21.0%
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **OXY** (was 11.0%)
+- ▼ **SUBC.OL**: 25.0% → 15.0% (-10.0%)
+- ▼ **NHY.OL**: 25.0% → 16.0% (-9.0%)
+
+---
+## 2026-03-31 17:52:32
+
+**Market:** BEAR regime · SPX vs 200d SMA: -3.1% · VIX: 27.7 · S&P 500 20d: -5.6%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.2% · Benchmark +1.4% · Alpha -0.2%
+Winners: SUBC.OL +2.9%, OXY +1.3%, DOW +1.2% | Losers: APA -0.6%
+
+**Paper account:** Equity €10,158.00 (start €10,000) · Today -0.27% · Since start +1.58% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the strongest independently validated names from the double-consensus list—SUBC.OL, EQNR.OL, DOW, and LYB—while explicitly downgrading conviction on the HIGH-risk overbought/low-volume names as required. Versus current holdings, this implies keeping the winners SUBC.OL, EQNR.OL, and DOW, cutting persistent weaker-slot names NHY.OL plus the most stretched oil names APA/OXY, and adding VWS.CO as the best unique acceleration play. Portfolio remains concentrated in the working energy/commodity rotation but with one cleaner volume-backed diversifier; in this BEAR regime beta is informational only, and this mix avoids adding defensive filler while still reducing dependence on the most extended oil trades.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SUBC.OL** | 19.0% | Double-consensus pick and current holding that has been working; among the overbought names it has the cleanest confirmation with vol_ratio 1.02 and very strong 5d momentum, so it earns a top slot despite medium risk. |
+| 2 | **EQNR.OL** | 16.0% | Double-consensus energy leader and aligned with the dominant rotation, but conviction is cut materially because RSI 84 with weak vol_ratio 0.66 raises real exhaustion risk even though low search interest keeps crowding risk low. |
+| 3 | **DOW** | 20.0% | Double-consensus pick and existing winner that fits the chem/commodity momentum cluster, but the HIGH-risk flag and extremely weak vol_ratio 0.24 force a reduced conviction rather than a top score. |
+| 4 | **LYB** | 20.0% | Double-consensus replacement candidate for NHY.OL with strong momentum/Sharpe and better slot economics than keeping the laggard, but conviction is capped by the severe volume warning (vol_ratio 0.15) and overbought setup. |
+| 5 | **VWS.CO** | 25.0% | Best unique non-consensus add from Proposal C: strongest acceleration and solid volume confirmation versus most alternatives, giving the portfolio a faster mover outside the crowded oil complex despite medium overbought risk. |
+
+**Changes from yesterday:**
+- ➕ Added **LYB** at 20.0%
+- ➕ Added **VWS.CO** at 25.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **OXY** (was 11.0%)
+- ▼ **SUBC.OL**: 25.0% → 19.0% (-6.0%)
+- ▲ **EQNR.OL**: 7.0% → 16.0% (+9.0%)
+- ▲ **DOW**: 13.0% → 20.0% (+7.0%)
+
+---
+## 2026-03-31 20:14:37
+
+**Market:** BEAR regime · SPX vs 200d SMA: -2.2% · VIX: 26.3 · S&P 500 20d: -4.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.4% · Benchmark +2.3% · Alpha -2.7%
+Winners: SUBC.OL +2.9%, NHY.OL +1.0%, EQNR.OL +0.0% | Losers: APA -5.1%, OXY -4.0%, DOW -1.7%
+
+**Paper account:** Equity €10,158.00 (start €10,000) · Today -0.27% · Since start +1.58% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the two independently validated consensus names, OXY and VWS.CO, as the highest-conviction core. From the unique ideas, I favored catalyst names with stronger volume and acceleration, while cutting persistent laggards or stretched low-volume incumbents like NHY.OL, DOW, SUBC.OL, and EQNR.OL in line with the sector-breadth and devil-risk warnings. In this BEAR regime I stayed concentrated at 5 names, with beta treated as informational only per learning rules rather than forcing defensive filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **OXY** | 20.0% | Double-consensus pick across both proposals and a current holding; still aligned with energy leadership, has acceptable volume confirmation and low retail crowding, with devil risk only medium rather than disqualifying. |
+| 2 | **VWS.CO** | 21.0% | Double-consensus pick with the strongest fresh breakout/catalyst profile in the set; 5d momentum and volume are powerful enough to offset overbought conditions, making it the best non-energy aggressor. |
+| 3 | **KOG.OL** | 20.0% | Best unique catalyst pick from Proposal B after the consensus names; solid volume confirmation and decent short-term momentum make it a stronger slot use than weaker/overextended current holdings. |
+| 4 | **DEMANT.CO** | 20.0% | High-volume catalyst setup with room to mean-revert from well below its 52-week high; not as clean as the consensus names, but earns a slot as a differentiated non-energy breakout candidate. |
+| 5 | **APA** | 19.0% | Keep as a lower-conviction incumbent because energy remains the leading sector and recent portfolio alpha has not fully broken, but conviction is cut for overbought status, slower 5d momentum, and only mediocre volume. |
+
+**Changes from yesterday:**
+- ➕ Added **VWS.CO** at 21.0%
+- ➕ Added **KOG.OL** at 20.0%
+- ➕ Added **DEMANT.CO** at 20.0%
+- ➖ Removed **SUBC.OL** (was 25.0%)
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ▲ **OXY**: 11.0% → 20.0% (+9.0%)
+- ▲ **APA**: 14.0% → 19.0% (+5.0%)
+
+---

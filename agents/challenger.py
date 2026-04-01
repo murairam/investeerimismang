@@ -589,7 +589,7 @@ class GeminiChallenger(BaseAgent):
 
         for attempt in range(1, 2):  # Single attempt only — truncation = fail fast to fallback
             try:
-                max_tokens_limit = 10000  # Increased from 8192 to avoid truncation; Nemotron typically ~6-7k
+                max_tokens_limit = 16000  # Nemotron uses thinking blocks that consume 8-10k tokens before JSON output
                 request_kwargs = {
                     "model": config.OPENROUTER_CHALLENGER_MODEL,
                     "temperature": 0.4,
@@ -619,15 +619,25 @@ class GeminiChallenger(BaseAgent):
                     cost,
                 )
 
-                # Detect truncation: if output_tokens >= max_tokens_limit, response is incomplete
+                raw_text = response.choices[0].message.content or ""
+
+                # Detect truncation: if output_tokens >= max_tokens_limit, response may be incomplete.
+                # Try to parse anyway — _extract_json tolerates truncation. Only fail if parsing fails.
                 if completion_tokens >= max_tokens_limit:
                     logger.warning(
-                        "OpenRouter challenger hit max_tokens limit (%d) — truncated output, failing fast to fallback",
+                        "OpenRouter challenger hit max_tokens limit (%d) — attempting to parse truncated output",
                         max_tokens_limit,
                     )
-                    raise ValueError("Model response truncated at max_tokens")
-
-                raw_text = response.choices[0].message.content or ""
+                    try:
+                        data = _extract_json(raw_text)
+                        raw_positions = _sanitize_positions(data.get("positions", []))
+                        if raw_positions:
+                            logger.info("OpenRouter challenger: truncated output was parseable (%d positions)", len(raw_positions))
+                            # fall through to normal parsing below
+                        else:
+                            raise ValueError("No positions in truncated output")
+                    except (ValueError, Exception):
+                        raise ValueError("Model response truncated at max_tokens")
                 try:
                     data = _extract_json(raw_text)
                 except ValueError:

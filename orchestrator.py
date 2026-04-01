@@ -462,6 +462,7 @@ class AlphaSharkOrchestrator:
             )
 
             _agent_timeout = API_TIMEOUT_SECONDS * 3
+            _parallel_start = time.perf_counter()
 
             try:
                 strategist_proposal = future_strategist.result(timeout=_agent_timeout)
@@ -476,8 +477,11 @@ class AlphaSharkOrchestrator:
                 label, started = future_start_times[future_strategist]
                 logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
 
+            # Deadline-based timeout: 320s from when all futures were submitted.
+            # Nemotron observed at ~276s total; this gives headroom regardless of Strategist elapsed time.
+            _challenger_deadline = 320 - (time.perf_counter() - _parallel_start)
             try:
-                challenger_proposal = future_challenger.result(timeout=_agent_timeout)
+                challenger_proposal = future_challenger.result(timeout=max(_challenger_deadline, 10))
                 label, started = future_start_times[future_challenger]
                 logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
             except FuturesTimeoutError:
