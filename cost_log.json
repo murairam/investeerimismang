@@ -4695,7 +4695,23 @@
       "input_tokens": 4644,
       "output_tokens": 566,
       "cost_usd": 0.0201
+    },
+    {
+      "date": "2026-04-01",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 19546,
+      "output_tokens": 634,
+      "cost_usd": 0.058375
+    },
+    {
+      "date": "2026-04-02",
+      "agent": "OpenAIStrategist",
+      "model": "gpt-5.4",
+      "input_tokens": 19561,
+      "output_tokens": 573,
+      "cost_usd": 0.057497
     }
   ],
-  "total_cost": 11.564003
+  "total_cost": 11.679875
 }

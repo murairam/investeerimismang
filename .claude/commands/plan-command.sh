@@ -15,11 +15,11 @@ if [[ -z "${REQUEST//[[:space:]]/}" ]]; then
   exit 0
 fi
 
-if [[ -n "${RIPPLETIDE_PLAN_CLI_BIN:-}" ]]; then
-  PLAN_CMD=("$RIPPLETIDE_PLAN_CLI_BIN")
+if [[ -n "${PLAN_CLI_BIN:-}" ]]; then
+  PLAN_CMD=("$PLAN_CLI_BIN")
 else
-  PACKAGE_VERSION="${RIPPLETIDE_PLAN_CLI_VERSION:-0.5.41}"
-  PLAN_CMD=(npx -y "rippletide-code@${PACKAGE_VERSION}")
+  echo "PLAN_CLI_BIN is not set" >&2
+  exit 1
 fi
 
 cd "$PROJECT_DIR"

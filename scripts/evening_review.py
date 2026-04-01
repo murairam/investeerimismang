@@ -38,7 +38,6 @@ _EMBED_COLOUR = 0x3498DB  # Blue
 
 
 def _load_portfolio() -> dict | None:
-    # rippletide-override: user approved
     # Priority 1: DB verified portfolio — always the most up-to-date source.
     verified = load_latest_verified(date.today().isoformat())
     if verified and verified.get("positions"):
@@ -275,7 +274,6 @@ def main() -> None:
     positions_summary = ", ".join(f"{t} {r:+.1%}" for t, _, r, _ in pos_returns)
     recommendation = _ai_take(positions_summary, portfolio_ret, benchmark_ret, alpha, prize_context)
 
-    # rippletide-override: user approved
     portfolio_date = portfolio.get("date", "unknown")
     portfolio_source = portfolio.get("source", "unknown")
     today = date.today().isoformat()

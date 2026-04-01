@@ -440,6 +440,7 @@ class AlphaSharkOrchestrator:
         full_analyst_proposal = None
         n_agents = sum(1 for f in [self.strategist, self.gemini_challenger, self.full_analyst] if f is not None)
         executor = ThreadPoolExecutor(max_workers=n_agents)
+        _parallel_start = time.perf_counter()
         try:
             future_start_times: dict = {}
             future_strategist = executor.submit(
@@ -479,11 +480,12 @@ class AlphaSharkOrchestrator:
 
             # Deadline-based timeout: 320s from when all futures were submitted.
             # Nemotron observed at ~276s total; this gives headroom regardless of Strategist elapsed time.
-            _challenger_deadline = 320 - (time.perf_counter() - _parallel_start)
+            _challenger_deadline = max(1.0, 320 - (time.perf_counter() - _parallel_start))
             try:
-                challenger_proposal = future_challenger.result(timeout=_challenger_timeout)
+                _challenger_wait = min(_challenger_timeout, _challenger_deadline)
+                challenger_proposal = future_challenger.result(timeout=_challenger_wait)
                 label, started = future_start_times[future_challenger]
-                logger.info("[%s] completed in %.1fs (timeout %.1fs)", label, time.perf_counter() - started, _challenger_timeout)
+                logger.info("[%s] completed in %.1fs (timeout %.1fs)", label, time.perf_counter() - started, _challenger_wait)
             except FuturesTimeoutError:
                 future_challenger.cancel()
                 label, started = future_start_times[future_challenger]
@@ -491,7 +493,7 @@ class AlphaSharkOrchestrator:
                     "[%s] timed out after %.1fs (timeout %.1fs) — continuing without Challenger",
                     label,
                     time.perf_counter() - started,
-                    _challenger_timeout,
+                    min(_challenger_timeout, _challenger_deadline),
                 )
             except Exception as exc:
                 logger.exception("Challenger failed: %s", exc)
