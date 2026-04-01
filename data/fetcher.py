@@ -894,11 +894,18 @@ class DataFetcher:
                     continue
                 if corr_matrix.loc[t1, t2] > CORR_THRESHOLD:
                     # Keep the one with the higher competition_score (the primary sort key).
-                    # Fall back to selection_score only if competition_score is not yet populated.
-                    # Note: competition_score is initialised to 0.0 and populated before this filter runs
-                    # (see call order in get_market_snapshot), so the fallback is a safety net only.
-                    score1 = float(record_map[t1].get("competition_score") or record_map[t1].get("selection_score", self._selection_score(record_map[t1])))
-                    score2 = float(record_map[t2].get("competition_score") or record_map[t2].get("selection_score", self._selection_score(record_map[t2])))
+                    # Fall back to selection_score only if competition_score is not yet populated
+                    # or is an invalid NaN. A legitimate 0.0 competition_score must be treated
+                    # as a valid primary score and must not trigger the fallback.
+                    comp1 = record_map[t1].get("competition_score")
+                    if comp1 is None or (isinstance(comp1, float) and math.isnan(comp1)):
+                        comp1 = record_map[t1].get("selection_score", self._selection_score(record_map[t1]))
+                    score1 = float(comp1)
+
+                    comp2 = record_map[t2].get("competition_score")
+                    if comp2 is None or (isinstance(comp2, float) and math.isnan(comp2)):
+                        comp2 = record_map[t2].get("selection_score", self._selection_score(record_map[t2]))
+                    score2 = float(comp2)
                     if score1 >= score2:
                         to_remove.add(t2)
                     else:
