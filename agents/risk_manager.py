@@ -130,6 +130,7 @@ class OpenAIRiskManager(BaseAgent):
                 result = self._call_openai(user_message)
                 result = self._enforce_beta(result, snapshot, regime, beta_targets)
                 result = self._enforce_selection_quality(result, snapshot, bear_cases or {})
+                result = self._enforce_sector_rotation_cap(result, snapshot)
                 logger.info(
                     "Meta-analyst: synthesised %d positions from strategist(%d) + gemini(%d) + full(%d) (conf %.0f%%)",
                     len(result.positions),
@@ -172,6 +173,99 @@ class OpenAIRiskManager(BaseAgent):
         if covered_weight == 0.0:
             return float("nan")
         return weighted_sum / covered_weight
+
+    def _enforce_sector_rotation_cap(
+        self,
+        proposal: PortfolioProposal,
+        snapshot: MarketSnapshot,
+    ) -> PortfolioProposal:
+        """
+        Hard-cap sector concentration when rotation_risk signals exhaustion.
+        Uses sector tags from candidate records (same source as fetcher signals).
+        """
+        rotation_risk: dict = snapshot.get("rotation_risk", {})
+        candidate_map = {c["ticker"]: c for c in snapshot["candidates"]}
+
+        # Build sector → cap mapping from rotation risk levels
+        sector_caps: dict[str, float] = {}
+        for sector, info in rotation_risk.items():
+            level = info.get("level", "")
+            if level == "HIGH":
+                sector_caps[sector] = config.SECTOR_ROTATION_CAP_HIGH
+            elif level == "MEDIUM":
+                sector_caps[sector] = config.SECTOR_ROTATION_CAP_MEDIUM
+
+        # Compute current sector weights
+        sector_weights: dict[str, float] = {}
+        for pos in proposal.positions:
+            c = candidate_map.get(pos.ticker, {})
+            sector = c.get("sector", config.SECTOR_MAP.get(pos.ticker, "?"))
+            sector_weights[sector] = sector_weights.get(sector, 0.0) + pos.weight
+
+        # Check unconditional cap first, then rotation-risk caps
+        effective_caps: dict[str, float] = {}
+        for sector, weight in sector_weights.items():
+            cap = config.SECTOR_CAP_UNCONDITIONAL
+            if sector in sector_caps:
+                cap = min(cap, sector_caps[sector])
+            if weight > cap:
+                effective_caps[sector] = cap
+
+        if not effective_caps:
+            return proposal
+
+        positions = list(proposal.positions)
+        for sector, cap in effective_caps.items():
+            current = sum(
+                p.weight for p in positions
+                if (candidate_map.get(p.ticker, {}).get("sector")
+                    or config.SECTOR_MAP.get(p.ticker, "?")) == sector
+            )
+            if current <= cap + 1e-9:
+                continue
+            excess = current - cap
+            logger.warning(
+                "Sector rotation cap: %s at %.0f%% exceeds %s cap of %.0f%% — trimming",
+                sector, current * 100,
+                "rotation-risk" if sector in sector_caps else "unconditional",
+                cap * 100,
+            )
+            # Trim proportionally from the heaviest positions in this sector
+            sector_positions = sorted(
+                [(i, p) for i, p in enumerate(positions)
+                 if (candidate_map.get(p.ticker, {}).get("sector")
+                     or config.SECTOR_MAP.get(p.ticker, "?")) == sector],
+                key=lambda x: x[1].weight,
+                reverse=True,
+            )
+            remaining_excess = excess
+            for idx, pos in sector_positions:
+                if remaining_excess <= 1e-9:
+                    break
+                trim = min(remaining_excess, pos.weight - config.GAME_CONSTRAINTS["min_weight"])
+                if trim > 1e-9:
+                    positions[idx] = Position(
+                        ticker=pos.ticker,
+                        weight=pos.weight - trim,
+                        rationale=pos.rationale,
+                        conviction=pos.conviction,
+                    )
+                    remaining_excess -= trim
+
+        # Renormalize to 100%
+        total = sum(p.weight for p in positions)
+        if total > 1e-9 and abs(total - 1.0) > 1e-6:
+            positions = [
+                Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale, conviction=p.conviction)
+                for p in positions
+            ]
+
+        return PortfolioProposal(
+            positions=positions,
+            reasoning=proposal.reasoning,
+            confidence=proposal.confidence,
+            learning_reflection=proposal.learning_reflection,
+        )
 
     def _enforce_beta(
         self,
