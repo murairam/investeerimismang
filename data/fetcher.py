@@ -124,30 +124,49 @@ def _compute_competition_scores(records: list[dict], regime: str) -> None:
             b = r.get("beta", float("nan"))
             r["inv_beta"] = (1.0 - b) if not math.isnan(b) else float("nan")
 
-    # Compute mean + std for each feature used in this regime
-    stats: dict[str, tuple[float, float]] = {}
-    for feat in weights:
-        field = _field.get(feat, feat)
-        vals = [r.get(field, float("nan")) for r in records]
-        vals = [v for v in vals if not math.isnan(v)]
-        if not vals:
-            stats[feat] = (0.0, 1.0)
-            continue
-        mean = sum(vals) / len(vals)
-        var = sum((v - mean) ** 2 for v in vals) / len(vals)
-        stats[feat] = (mean, var ** 0.5 if var > 0 else 1.0)
+    # Compute mean + std per market group to avoid US momentum extremes compressing European Z-scores.
+    # Nordic/Baltic stocks trade in a completely different volatility/momentum regime from S&P500.
+    # Z-scoring across all 627 tickers together causes US bull-run leaders to dominate the mean,
+    # pushing European candidates toward zero even when they're strong within their own peer group.
+    def _group_stats(recs: list[dict]) -> dict[str, tuple[float, float]]:
+        s: dict[str, tuple[float, float]] = {}
+        for feat in weights:
+            field = _field.get(feat, feat)
+            vals = [r.get(field, float("nan")) for r in recs]
+            vals = [v for v in vals if not math.isnan(v)]
+            if not vals:
+                s[feat] = (0.0, 1.0)
+                continue
+            mean = sum(vals) / len(vals)
+            var = sum((v - mean) ** 2 for v in vals) / len(vals)
+            s[feat] = (mean, var ** 0.5 if var > 0 else 1.0)
+        return s
+
+    us_records = [r for r in records if r.get("market") == "SP500"]
+    non_us_records = [r for r in records if r.get("market") != "SP500"]
+    # Require at least 5 records per group for meaningful Z-scores; fall back to global stats otherwise.
+    _all_stats = _group_stats(records)
+    stats_us = _group_stats(us_records) if len(us_records) >= 5 else _all_stats
+    stats_non_us = _group_stats(non_us_records) if len(non_us_records) >= 5 else _all_stats
 
     # Score each record
     for r in records:
         score = 0.0
+        _stats = stats_us if r.get("market") == "SP500" else stats_non_us
         for feat, w in weights.items():
             field = _field.get(feat, feat)
             val = r.get(field, float("nan"))
             if math.isnan(val):
                 z = 0.0  # missing → neutral Z-score, not penalised
             else:
-                mean, std = stats[feat]
+                mean, std = _stats[feat]
                 z = max(-3.0, min(3.0, (val - mean) / std))
+            # Beta is a timezone artefact for non-US tickers: Nordic/Baltic stocks trade
+            # 7-9h before the US market opens, so same-day SPX correlation is near zero,
+            # producing structurally low betas (0.1-0.4) that do not reflect real risk.
+            # Zero out the beta/inv_beta Z-score contribution for non-SP500 tickers.
+            if feat in ("beta", "inv_beta") and r.get("market") != "SP500":
+                z = 0.0
             score += w * z
         r["competition_score"] = score
 
@@ -172,7 +191,12 @@ def _add_signal_z_scores(records: list[dict]) -> None:
         std = var ** 0.5 if var > 0 else 1.0
         for r in records:
             val = r.get(sig, float("nan"))
-            r[f"z_{sig}"] = max(-3.0, min(3.0, (val - mean) / std)) if not math.isnan(val) else float("nan")
+            if math.isnan(val):
+                # vol_ratio NaN means no trade data → penalise as illiquid rather than treating as median.
+                # All other missing signals get NaN passthrough (agent can see the gap).
+                r[f"z_{sig}"] = -0.5 if sig == "vol_ratio" else float("nan")
+            else:
+                r[f"z_{sig}"] = max(-3.0, min(3.0, (val - mean) / std))
 
 
 def detect_rotation_risk(
@@ -869,9 +893,12 @@ class DataFetcher:
                 if record_map[t1]["market"] != record_map[t2]["market"]:
                     continue
                 if corr_matrix.loc[t1, t2] > CORR_THRESHOLD:
-                    # Keep the one with stronger composite selection score.
-                    score1 = float(record_map[t1].get("selection_score", self._selection_score(record_map[t1])))
-                    score2 = float(record_map[t2].get("selection_score", self._selection_score(record_map[t2])))
+                    # Keep the one with the higher competition_score (the primary sort key).
+                    # Fall back to selection_score only if competition_score is not yet populated.
+                    # Note: competition_score is initialised to 0.0 and populated before this filter runs
+                    # (see call order in get_market_snapshot), so the fallback is a safety net only.
+                    score1 = float(record_map[t1].get("competition_score") or record_map[t1].get("selection_score", self._selection_score(record_map[t1])))
+                    score2 = float(record_map[t2].get("competition_score") or record_map[t2].get("selection_score", self._selection_score(record_map[t2])))
                     if score1 >= score2:
                         to_remove.add(t2)
                     else:
@@ -1184,6 +1211,10 @@ class DataFetcher:
         above_50 = (close_ff.iloc[-1] > sma_50).sum()
         valid_breadth = int(sma_50.notna().sum())
         breadth_pct = float(above_50 / valid_breadth) if valid_breadth > 0 else float("nan")
+        # NOTE (structural): Regime detection is US-centric (SPX vs 200d SMA + VIX + HYG/LQD).
+        # For a multi-market portfolio with heavy Nordic/Baltic exposure, a separate OMX50 regime
+        # signal would improve detection accuracy for European stocks. Full fix deferred post-April-6.
+        # The breadth_pct below is mixed-universe (US + EU), not US-only.
 
         # Credit spread proxy and composite regime score
         credit_change = self.fetch_credit_spread()
@@ -1223,7 +1254,9 @@ class DataFetcher:
             vol = float(vol_20d.get(ticker, np.nan))
             rsi_val = float(rsi.get(ticker, np.nan)) if ticker in rsi.index else float("nan")
 
-            sharpe = mom / vol if (not math.isnan(vol) and vol > 0) else 0.0
+            # De-annualise vol to the 20-day horizon before dividing (vol is annualised ×√252;
+            # mom is a raw 20-day return — dividing without adjustment underscales Sharpe by ~3.55×).
+            sharpe = mom / (vol * math.sqrt(20 / 252)) if (not math.isnan(vol) and vol > 0) else 0.0
             last_price = float(close_ff[ticker].dropna().iloc[-1]) if ticker in close_ff.columns else 0.0
             high_52w_val = float(high_52w.get(ticker, np.nan)) if ticker in high_52w.index else float("nan")
             pct_from_high = (last_price / high_52w_val - 1) if (not math.isnan(high_52w_val) and high_52w_val > 0) else float("nan")
