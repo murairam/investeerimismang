@@ -1,17 +1,17 @@
 # Pre-Game Learning Report
 
-Generated: 2026-03-30
+Generated: 2026-04-01
 Target go-live date: 2026-04-06
-Days remaining: 7
+Days remaining: 5
 
 ## Scoreboard
-- Training days with measurable alpha: 10
+- Training days with measurable alpha: 12
 - Win days (alpha > 0): 8
-- Loss days (alpha < 0): 2
-- Average daily alpha: +0.57%
-- Paper account equity: €10,284.60 (from €10,000.00, return +2.85%)
-- Max drawdown (paper): 2.63%
-- Average turnover: 23.53%
+- Loss days (alpha < 0): 4
+- Average daily alpha: -0.07%
+- Paper account equity: €9,452.83 (from €10,000.00, return -5.47%)
+- Max drawdown (paper): 9.07%
+- Average turnover: 21.05%
 
 ## Confidence note
 - Evidence status: actionable
@@ -20,22 +20,24 @@ Days remaining: 7
 
 ## Best and worst day
 - Best alpha day: 2026-03-23 (+1.42%)
-- Worst alpha day: 2026-03-22 (-0.89%)
+- Worst alpha day: 2026-03-31 (-3.76%)
 
 ## Structured learning state
 - Active hard rules: 0
 - Changed hard rules since yesterday: 0
-- Confidence notes: 5
+- Confidence notes: 2
 
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| APA | winner | 12 | +2.04% | 83% |
 | XOM | winner | 8 | +1.50% | 75% |
 | DELL | winner | 8 | +1.45% | 50% |
+| APA | winner | 14 | +1.03% | 71% |
+| EQNR.OL | loser | 10 | -1.56% | 20% |
 
 ## Action plan until April 6
-- Collect at least 3-5 daily observations before changing the strategy rules.
+- Avoid overusing momentum rationales until their hit rate recovers above 40%.
+- Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.
 
 ## Daily routine
 - Run: `python main.py`

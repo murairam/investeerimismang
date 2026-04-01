@@ -75,7 +75,7 @@ from portfolio.models import PortfolioProposal
 from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
-_FULL_ANALYST_RESULT_TIMEOUT = 540  # DeepSeek reasoning mode: observed up to 473s, give 540s headroom
+_FULL_ANALYST_RESULT_TIMEOUT = 600  # keep generous but avoid >10 minute hangs
 _ENRICHMENT_TOTAL_TIMEOUT = API_TIMEOUT_SECONDS * 3
 
 
@@ -462,6 +462,7 @@ class AlphaSharkOrchestrator:
             )
 
             _agent_timeout = API_TIMEOUT_SECONDS * 3
+            _challenger_timeout = max(API_TIMEOUT_SECONDS * 3, 400)  # give Challenger even more headroom (user prefers longer)
 
             try:
                 strategist_proposal = future_strategist.result(timeout=_agent_timeout)
@@ -477,13 +478,18 @@ class AlphaSharkOrchestrator:
                 logger.info("[%s] failed in %.1fs", label, time.perf_counter() - started)
 
             try:
-                challenger_proposal = future_challenger.result(timeout=_agent_timeout)
+                challenger_proposal = future_challenger.result(timeout=_challenger_timeout)
                 label, started = future_start_times[future_challenger]
-                logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
+                logger.info("[%s] completed in %.1fs (timeout %.1fs)", label, time.perf_counter() - started, _challenger_timeout)
             except FuturesTimeoutError:
                 future_challenger.cancel()
                 label, started = future_start_times[future_challenger]
-                logger.error("[%s] timed out after %.1fs — continuing without Challenger", label, time.perf_counter() - started)
+                logger.error(
+                    "[%s] timed out after %.1fs (timeout %.1fs) — continuing without Challenger",
+                    label,
+                    time.perf_counter() - started,
+                    _challenger_timeout,
+                )
             except Exception as exc:
                 logger.exception("Challenger failed: %s", exc)
                 label, started = future_start_times[future_challenger]
