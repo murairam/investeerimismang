@@ -68,6 +68,10 @@ BETA_CHECK_MIN_US_WEIGHT = 0.25
 NON_US_ASSUMED_BETA = 0.70
 FALLBACK_REPLACEMENT_WEIGHT = 0.05
 MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
+# Sector concentration caps — enforced when rotation_risk signals sector exhaustion
+SECTOR_CAP_UNCONDITIONAL = 0.70   # never exceed 70% in any single sector
+SECTOR_ROTATION_CAP_MEDIUM = 0.55 # cap at 55% when rotation risk is MEDIUM
+SECTOR_ROTATION_CAP_HIGH = 0.40   # cap at 40% when rotation risk is HIGH
 LOW_VOLUME_VOL_RATIO_THRESHOLD = 0.80   # low-volume confirmation floor for concentration caps
 LOW_VOLUME_MAX_WEIGHT = 0.18
 PORTFOLIO_MIN_AVG_VOL_RATIO = 0.85
@@ -133,7 +137,13 @@ SECTOR_MAP: dict[str, str] = {
     "JPM": "Fin", "V": "Fin", "MA": "Fin", "BAC": "Fin", "GS": "Fin", "SPGI": "Fin",
     # SP500 — Energy / Utilities
     "XOM": "Energy", "CVX": "Energy", "APA": "Energy", "VLO": "Energy",
-    "DVN": "Energy", "LYB": "Chem", "NEE": "Util",
+    "DVN": "Energy", "OXY": "Energy", "COP": "Energy", "EOG": "Energy",
+    "MPC": "Energy", "PSX": "Energy", "HES": "Energy", "FANG": "Energy",
+    "HAL": "Energy", "SLB": "Energy", "BKR": "Energy", "WMB": "Energy",
+    "PXD": "Energy", "CTRA": "Energy", "MRO": "Energy", "APC": "Energy",
+    "LYB": "Chem", "DOW": "Chem", "DD": "Chem", "EMN": "Chem",
+    "CF": "Chem", "NTR": "Chem", "ALB": "Chem", "CE": "Chem",
+    "NEE": "Util",
     "MU": "Tech",
     # SP500 — Industrials
     "HON": "Ind", "CAT": "Ind", "UPS": "Ind", "BA": "Ind",
@@ -159,7 +169,9 @@ SECTOR_MAP: dict[str, str] = {
     "NOVO-B.CO": "Health", "DSV.CO": "Ind", "ORSTED.CO": "Energy",
     "CARL-B.CO": "Cons", "GMAB.CO": "Health", "MAERSK-B.CO": "Ind",
     "COLO-B.CO": "Health", "GN.CO": "Health", "DEMANT.CO": "Health",
-    "PNDORA.CO": "Cons", "ISS.CO": "Ind",
+    "PNDORA.CO": "Cons", "ISS.CO": "Ind", "VWS.CO": "Ind",
+    "DANSKE.CO": "Fin", "NKT.CO": "Ind", "NSIS-B.CO": "Ind",
+    "TRYG.CO": "Fin", "RBREW.CO": "Cons", "AMBU-B.CO": "Health",
     # Baltic
     "LHV1T.TL": "Fin", "PRF1T.TL": "Cons", "TKM1T.TL": "Cons",
     "MRK1T.TL": "Ind", "ARC1T.TL": "RE", "TAL1T.TL": "Cons",

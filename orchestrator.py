@@ -75,7 +75,7 @@ from portfolio.models import PortfolioProposal
 from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
-_FULL_ANALYST_RESULT_TIMEOUT = 540  # DeepSeek reasoning mode: observed up to 473s, give 540s headroom
+_FULL_ANALYST_RESULT_TIMEOUT = 600  # keep generous but avoid >10 minute hangs
 _ENRICHMENT_TOTAL_TIMEOUT = API_TIMEOUT_SECONDS * 3
 
 
@@ -462,7 +462,7 @@ class AlphaSharkOrchestrator:
             )
 
             _agent_timeout = API_TIMEOUT_SECONDS * 3
-            _parallel_start = time.perf_counter()
+            _challenger_timeout = max(API_TIMEOUT_SECONDS * 3, 400)  # give Challenger even more headroom (user prefers longer)
 
             try:
                 strategist_proposal = future_strategist.result(timeout=_agent_timeout)
@@ -481,13 +481,18 @@ class AlphaSharkOrchestrator:
             # Nemotron observed at ~276s total; this gives headroom regardless of Strategist elapsed time.
             _challenger_deadline = 320 - (time.perf_counter() - _parallel_start)
             try:
-                challenger_proposal = future_challenger.result(timeout=max(_challenger_deadline, 10))
+                challenger_proposal = future_challenger.result(timeout=_challenger_timeout)
                 label, started = future_start_times[future_challenger]
-                logger.info("[%s] completed in %.1fs", label, time.perf_counter() - started)
+                logger.info("[%s] completed in %.1fs (timeout %.1fs)", label, time.perf_counter() - started, _challenger_timeout)
             except FuturesTimeoutError:
                 future_challenger.cancel()
                 label, started = future_start_times[future_challenger]
-                logger.error("[%s] timed out after %.1fs — continuing without Challenger", label, time.perf_counter() - started)
+                logger.error(
+                    "[%s] timed out after %.1fs (timeout %.1fs) — continuing without Challenger",
+                    label,
+                    time.perf_counter() - started,
+                    _challenger_timeout,
+                )
             except Exception as exc:
                 logger.exception("Challenger failed: %s", exc)
                 label, started = future_start_times[future_challenger]
@@ -711,6 +716,10 @@ class AlphaSharkOrchestrator:
 
         # Round all weights to whole percentages (game UI has 1% precision)
         final_proposal = self.validator.round_to_whole_pct(final_proposal)
+
+        # Step 5c: enforce sector rotation cap AFTER all normalization/rounding
+        # so that normalize() and round_to_whole_pct() cannot re-inflate a capped sector.
+        final_proposal = self.risk_manager._enforce_sector_rotation_cap(final_proposal, snapshot)
 
         total = sum(p.weight for p in final_proposal.positions)
         logger.info(

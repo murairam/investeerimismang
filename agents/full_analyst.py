@@ -9,6 +9,7 @@ import json
 import logging
 import math
 import os
+import time
 from datetime import date
 from typing import Optional
 
@@ -122,6 +123,12 @@ Follow the signals — no hardcoded sector or stock bias. Whatever has the stron
 
 class OpenAIFullAnalyst(BaseAgent):
     MAX_RETRIES = 3
+    MAX_CANDIDATES = 200  # allow full table per user preference
+    LONG_MAX_TOKENS = 10000
+    FAST_MAX_TOKENS = 4096
+    LONG_TIMEOUT = 300  # cap DeepSeek request to ~5 minutes to avoid hanging runs
+    FAST_TIMEOUT = 150  # seconds
+    FAST_TRIGGER_SECONDS = 240  # if primary exceeds this wall time, jump to fast fallback
     MODEL = "gpt-5.4-nano"
 
     def __init__(self) -> None:
@@ -146,6 +153,37 @@ class OpenAIFullAnalyst(BaseAgent):
         )
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
         self.model = self.MODEL
+        # Once on OpenAI, disable OpenRouter path to avoid flip-flop.
+        self._openrouter_enabled = False
+
+    def _repair_with_openai_gpt54(self, raw_text: str) -> Optional[dict]:
+        """Repair non-JSON or truncated output using gpt-5.4."""
+        if not raw_text.strip():
+            return None
+        prompt_messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Convert the provided text to valid JSON with keys: "
+                    "positions (array of {ticker, conviction (int 1-10), rationale}), "
+                    "reasoning, confidence, learning_reflection. Return JSON only."
+                ),
+            },
+            {"role": "user", "content": raw_text[:16000]},
+        ]
+        try:
+            repair_response = self.client.chat.completions.create(
+                model="gpt-5.4",
+                response_format={"type": "json_object"},
+                temperature=0.0,
+                timeout=API_TIMEOUT_SECONDS,
+                messages=prompt_messages,
+            )
+            repaired = repair_response.choices[0].message.content or ""
+            return _extract_json(repaired)
+        except Exception as exc:
+            logger.warning("FullAnalyst gpt-5.4 JSON repair failed: %s", exc)
+            return None
 
     def propose(
         self,
@@ -156,23 +194,42 @@ class OpenAIFullAnalyst(BaseAgent):
         regime = snapshot.get("regime", "NEUTRAL")
         learning_context = snapshot.get("learning_context", "")
 
-        for attempt in range(1, self.MAX_RETRIES + 1):
-            try:
-                proposal = self._call_openai(user_message, regime, learning_context)
-                logger.info(
-                    "FullAnalyst produced %d positions (confidence %.0f%%, model: %s)",
-                    len(proposal.positions),
-                    proposal.confidence * 100,
-                    self.model,
-                )
-                return proposal
-            except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError) as exc:
-                logger.warning("FullAnalyst attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
-                if attempt == self.MAX_RETRIES:
-                    logger.warning("FullAnalyst exhausted retries — returning empty proposal")
-                    return PortfolioProposal()
+        # Attempt 1: OpenRouter/DeepSeek with reasoning
+        start_time = time.perf_counter()
+        try:
+            proposal = self._call_openai(user_message, regime, learning_context, fast_mode=False)
+            logger.info(
+                "FullAnalyst produced %d positions (confidence %.0f%%, model: %s)",
+                len(proposal.positions),
+                proposal.confidence * 100,
+                self.model,
+            )
+            return proposal
+        except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError) as exc:
+            logger.warning("FullAnalyst primary attempt failed: %s", exc)
+            # If using OpenRouter, switch to OpenAI fast fallback
+            if self._openrouter_enabled and self.model != self.MODEL:
+                self._switch_to_openai_fallback()
 
-        return PortfolioProposal()
+        # If primary took too long, trigger fast fallback to keep wall-clock bounded
+        elapsed = time.perf_counter() - start_time
+        if elapsed > self.FAST_TRIGGER_SECONDS and self.model != self.MODEL:
+            self._switch_to_openai_fallback()
+
+        # Attempt 2: Fast OpenAI fallback (no reasoning mode, smaller token/timeout)
+        try:
+            proposal = self._call_openai(user_message, regime, learning_context, fast_mode=True)
+            logger.info(
+                "FullAnalyst produced %d positions (confidence %.0f%%, model: %s, fast_fallback=True)",
+                len(proposal.positions),
+                proposal.confidence * 100,
+                self.model,
+            )
+            return proposal
+        except (json.JSONDecodeError, KeyError, ValueError, BadRequestError, APIConnectionError, APITimeoutError) as exc2:
+            logger.warning("FullAnalyst fast fallback failed: %s", exc2)
+            logger.warning("FullAnalyst exhausted retries — returning empty proposal")
+            return PortfolioProposal()
 
     # ── Private helpers ───────────────────────────────────────────────────────
 
@@ -220,6 +277,14 @@ class OpenAIFullAnalyst(BaseAgent):
                     "iv_proxy": iv_proxy.get(ticker),
                 }
             )
+
+        if self.MAX_CANDIDATES and len(preprocessed_rows) > self.MAX_CANDIDATES:
+            logger.info(
+                "FullAnalyst truncating candidate table: %d → %d rows",
+                len(preprocessed_rows),
+                self.MAX_CANDIDATES,
+            )
+            preprocessed_rows = preprocessed_rows[: self.MAX_CANDIDATES]
 
         show_short_interest = any(row["short_interest"] is not None for row in preprocessed_rows)
         show_premarket_gap = any(row["premarket_gap"] is not None for row in preprocessed_rows)
@@ -371,13 +436,20 @@ class OpenAIFullAnalyst(BaseAgent):
             lines += ["", snapshot["trends_context"]]
 
         lines += ["", "Build your portfolio using all available signals. Return valid JSON only."]
-        return "\n".join(lines)
+        message = "\n".join(lines)
+        logger.info(
+            "FullAnalyst prompt size: %d chars, %d candidates",
+            len(message),
+            len(preprocessed_rows),
+        )
+        return message
 
     def _call_openai(
         self,
         user_message: str,
         regime: str = "NEUTRAL",
         learning_context: str = "",
+        fast_mode: bool = False,
     ) -> PortfolioProposal:
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = _SYSTEM_PROMPT.format(
@@ -393,7 +465,7 @@ class OpenAIFullAnalyst(BaseAgent):
 
         # OpenRouter does not reliably enforce response_format or handle long outputs —
         # use max_tokens to prevent truncation and omit response_format for OR calls.
-        openrouter_call = self._openrouter_enabled and self.model != self.MODEL
+        openrouter_call = self._openrouter_enabled and self.model != self.MODEL and not fast_mode
         # Qwen3 runs in "thinking" mode by default — disable it to avoid 3+ minute hangs
         effective_user_message = ("/no_think\n\n" + user_message) if openrouter_call and "qwen3" in self.model.lower() else user_message
         call_kwargs: dict = dict(
@@ -405,13 +477,17 @@ class OpenAIFullAnalyst(BaseAgent):
             ],
         )
         if openrouter_call:
-            call_kwargs["max_tokens"] = 3000
+            call_kwargs["max_tokens"] = self.LONG_MAX_TOKENS
             if "deepseek" in self.model.lower():
                 call_kwargs["extra_body"] = {"reasoning": {"enabled": True}}
-                call_kwargs["max_tokens"] = 10000  # reasoning mode needs ~8k tokens; 3k causes truncation + retries
-                call_kwargs["timeout"] = 480  # reasoning mode: normal ~140s, allow up to 480s before orchestrator's 540s window expires
+                call_kwargs["timeout"] = self.LONG_TIMEOUT  # allow long reasoning but under orchestrator window
         else:
             call_kwargs["response_format"] = {"type": "json_object"}
+            if fast_mode:
+                call_kwargs["max_completion_tokens"] = self.FAST_MAX_TOKENS
+                call_kwargs["timeout"] = self.FAST_TIMEOUT
+            else:
+                call_kwargs["timeout"] = API_TIMEOUT_SECONDS
 
         try:
             response = self.client.chat.completions.create(model=self.model, **call_kwargs)
@@ -420,6 +496,8 @@ class OpenAIFullAnalyst(BaseAgent):
                 logger.warning("OpenRouter FullAnalyst request failed (%s). Falling back to OpenAI.", exc)
                 self._switch_to_openai_fallback()
                 call_kwargs.pop("max_tokens", None)
+                call_kwargs.pop("extra_body", None)  # OpenRouter-specific; not valid for OpenAI
+                call_kwargs["timeout"] = API_TIMEOUT_SECONDS  # reset any DeepSeek-specific timeout override
                 call_kwargs["response_format"] = {"type": "json_object"}
                 response = self.client.chat.completions.create(model=self.model, **call_kwargs)
             else:
@@ -447,7 +525,14 @@ class OpenAIFullAnalyst(BaseAgent):
         )
 
         raw_content = response.choices[0].message.content or ""
-        data = _extract_json(raw_content)
+        # OpenRouter (DeepSeek) returns text; parse to JSON, with repair via GPT-5.4 if needed.
+        try:
+            data = _extract_json(raw_content)
+        except ValueError:
+            logger.warning("FullAnalyst primary output not valid JSON — attempting repair with gpt-5.4")
+            data = self._repair_with_openai_gpt54(raw_content)
+            if data is None:
+                raise ValueError("FullAnalyst could not repair non-JSON output")
         raw_positions = data.get("positions", [])
 
         positions = []

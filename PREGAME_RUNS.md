@@ -1762,3 +1762,414 @@ Winners: SUBC.OL +2.9%, NHY.OL +1.0%, EQNR.OL +0.0% | Losers: APA -5.1%, OXY -4.
 - ▲ **APA**: 14.0% → 19.0% (+5.0%)
 
 ---
+## 2026-04-01 14:30:40
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 24.2 · S&P 500 20d: -4.2%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.4% · Benchmark +2.9% · Alpha -4.3%
+Winners: NHY.OL +0.1% | Losers: EQNR.OL -5.1%, SUBC.OL -2.4%, APA -1.3%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 67% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** With only Proposal A available, the synthesis leans on its strongest names while applying the learning rules and current holdings context: cut persistent laggard NHY.OL, keep proven winners SUBC.OL/EQNR.OL selectively, and stay concentrated in the still-leading energy complex despite medium rotation deceleration. The final set favors active movers over dead money, avoids adding filler just to raise beta, and accepts a lower-than-soft-target portfolio beta because rotation leadership and signal quality are stronger than broad-market beta right now.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **OXY** | 21.0% | Consensus core from the available proposal set and one of the strongest current energy leaders; despite medium risk from elevated RSI, it still has strong 5d momentum, low crowding, and fits the energy rotation better than lagging alternatives. |
+| 2 | **DOW** | 21.0% | Kept as a non-energy momentum name already in the book; medium-risk due to low beta, but 5d momentum is solid and it earns its slot ahead of weaker Nordic laggards in losing regional breadth. |
+| 3 | **LYB** | 22.0% | Best turnover candidate replacing NHY.OL, which should be cut given weak Norway sector backdrop and recent portfolio decay; LYB offers cleaner momentum/catalyst profile and aligns with the chem rotation, though deceleration keeps conviction below top tier. |
+| 4 | **APA** | 17.0% | Strong momentum/Sharpe leader and a top strategist pick, but conviction is explicitly reduced for HIGH risk: RSI 84 is stretched and the mandate requires cutting at least 3 points on such names. |
+| 5 | **SUBC.OL** | 19.0% | Keep the strong winner rather than forcing unnecessary turnover, especially since it has actually worked in this portfolio and still shows excellent 5d momentum with volume support; conviction is reduced for HIGH-risk overbought conditions. |
+
+**Changes from yesterday:**
+- ➕ Added **LYB** at 22.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ▲ **OXY**: 11.0% → 21.0% (+10.0%)
+- ▲ **DOW**: 13.0% → 21.0% (+8.0%)
+- ▲ **APA**: 14.0% → 17.0% (+3.0%)
+- ▼ **SUBC.OL**: 25.0% → 19.0% (-6.0%)
+
+---
+## 2026-04-01 14:43:14
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 24.5 · S&P 500 20d: -4.2%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.4% · Benchmark +2.9% · Alpha -4.3%
+Winners: NHY.OL +0.1% | Losers: EQNR.OL -5.1%, SUBC.OL -2.4%, APA -1.3%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the three triple-consensus names APA, DOW, and SUBC.OL, then added the best double-consensus extensions LYB and OXY while explicitly cutting persistent laggard NHY.OL and avoiding high-risk EQNR.OL, SATS, and VWS.CO. This keeps the portfolio concentrated in the still-leading energy/chemicals cluster, acknowledges recent alpha decay by removing weaker holdings, and accepts that beta remains a soft diagnostic rather than a target under the current rotation-risk override.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **APA** | 23.0% | Triple-consensus pick and still one of the strongest momentum leaders in the energy rotation; despite overbought/negative-beta caveats, it remains a core aggressive hold from current portfolio and NHY.OL is the clearer cut. |
+| 2 | **DOW** | 22.0% | Triple-consensus pick with solid 5d acceleration and supportive chemicals trend; lower beta is acceptable here because rotation-active conditions argue for keeping proven leaders rather than adding filler. |
+| 3 | **SUBC.OL** | 20.0% | Triple-consensus pick and current holding with strong breakout-style momentum and volume confirmation, but conviction is trimmed from max because RSI is very elevated near highs and Norway breadth is weak. |
+| 4 | **LYB** | 18.0% | Double-consensus pick with strong all-round momentum and a cleaner profile than weaker current laggards; earns a slot as the best non-triple-consensus add from the strategist/full-analyst overlap. |
+| 5 | **OXY** | 17.0% | Double-consensus energy name with strong relative strength and decent recent momentum, but below APA in quality and subject to medium rotation/crowding risk, so kept at slightly lower conviction. |
+
+**Changes from yesterday:**
+- ➕ Added **LYB** at 18.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ▲ **APA**: 14.0% → 23.0% (+9.0%)
+- ▲ **DOW**: 13.0% → 22.0% (+9.0%)
+- ▼ **SUBC.OL**: 25.0% → 20.0% (-5.0%)
+- ▲ **OXY**: 11.0% → 17.0% (+6.0%)
+
+---
+## 2026-04-01 14:56:13
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 24.6 · S&P 500 20d: -4.2%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.4% · Benchmark +2.9% · Alpha -4.3%
+Winners: NHY.OL +0.1% | Losers: EQNR.OL -5.1%, SUBC.OL -2.4%, APA -1.3%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 77% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I kept the only true consensus name, SUBC.OL, but reduced its score due to explicit high-risk overbought warnings; I also retained the strongest current winners in energy while cutting the persistent laggard NHY.OL and not carrying low-quality filler. To adapt after recent alpha decay and sector breadth warnings, I added one faster catalyst name from Proposal C (NKT.CO) at low conviction rather than broadening further; portfolio beta remains a soft diagnostic here because rotation risk is active and the mandate says not to add beta filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SUBC.OL** | 16.0% | Double-consensus pick and current holding with strong 5d momentum, but conviction is capped because Devil flagged HIGH risk: RSI 83 near highs and only modest volume confirmation (1.26), so it stays as a validated winner rather than a max-conviction add. |
+| 2 | **OXY** | 19.0% | Best retained energy winner from the current book: strong 5d momentum, under-the-radar crowding profile, and Proposal A high conviction in the leading sector, with only medium overbought risk. |
+| 3 | **APA** | 25.0% | Proposal A core energy leader with elite recent trend/Sharpe and still aligned with the dominant rotation, but recent strategy decay and medium risk/overbought conditions keep it below top conviction. |
+| 4 | **LYB** | 17.0% | Best non-energy unique replacement from Proposal A and a clear upgrade over NHY.OL under the slot-cost rule, offering stronger cyclical momentum without forcing beta filler. |
+| 5 | **DOW** | 16.0% | Retained from Proposal A as a still-acceptable cyclical momentum name, but yesterday's underperformance and only medium-strength participation make it the weakest included slot. |
+| 6 | **NKT.CO** | 7.0% | Catalyst-driven unique pick from Proposal C with a strong pre-market gap and acceleration, but HIGH risk from weak volume (0.76) and near-high stall setup forces a sharply reduced conviction. |
+
+**Changes from yesterday:**
+- ➕ Added **LYB** at 17.0%
+- ➕ Added **NKT.CO** at 7.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ▼ **SUBC.OL**: 25.0% → 16.0% (-9.0%)
+- ▲ **OXY**: 11.0% → 19.0% (+8.0%)
+- ▲ **APA**: 14.0% → 25.0% (+11.0%)
+- ▲ **DOW**: 13.0% → 16.0% (+3.0%)
+
+---
+## 2026-04-01 15:18:30
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 24.7 · S&P 500 20d: -4.2%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.4% · Benchmark +2.9% · Alpha -4.3%
+Winners: NHY.OL +0.1% | Losers: EQNR.OL -5.1%, SUBC.OL -2.4%, APA -1.3%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 83% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the two double-consensus names, kept the strongest existing winners, and explicitly rotated out weaker current holdings like NHY.OL while not giving dead-money slots to slower names such as DOW or low-confirmation catalyst ideas like VWS.CO and GN.CO. The final book stays concentrated at 5 names for competition upside, leans into energy/commodity leadership with one high-volume breakout diversifier, and accepts that portfolio beta may remain below the soft NEUTRAL range because rotation risk guidance says not to add beta filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **LYB** | 21.0% | Double-consensus pick across both proposals and the clearest upgrade from current laggard NHY.OL; chemicals still have strong 20d trend even with deceleration, and LYB adds independently validated momentum/catalyst support. |
+| 2 | **SUBC.OL** | 20.0% | Double-consensus hold and one of the few current winners worth keeping despite Baltic breadth weakness; strong 5d momentum and solid volume confirmation offset the overbought RSI, though conviction is capped slightly for overheating risk. |
+| 3 | **APA** | 23.0% | Best pure momentum/Sharpe energy name from the strategist and aligned with the dominant energy rotation; recent alpha decay argues for trimming weaker holdings, not abandoning the strongest commodity leaders. |
+| 4 | **OXY** | 19.0% | Another top-tier strategist energy pick with strong Sharpe and 5d momentum, plus low retail crowding; kept as a core rotation leader even though energy is decelerating from very strong levels. |
+| 5 | **TEL1L.VS** | 17.0% | Best unique catalyst name from the challenger because the breakout is confirmed by exceptional volume ratio, which is the most predictive signal in the current learning state; included as the aggressive non-energy alpha shot despite medium pullback risk. |
+
+**Changes from yesterday:**
+- ➕ Added **LYB** at 21.0%
+- ➕ Added **TEL1L.VS** at 17.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ▼ **SUBC.OL**: 25.0% → 20.0% (-5.0%)
+- ▲ **APA**: 14.0% → 23.0% (+9.0%)
+- ▲ **OXY**: 11.0% → 19.0% (+8.0%)
+
+---
+## 2026-04-01 15:29:54
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.7% · VIX: 25.3 · S&P 500 20d: -4.2%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.4% · Benchmark +2.9% · Alpha -4.4%
+Winners: NHY.OL +0.1% | Losers: EQNR.OL -5.1%, SUBC.OL -2.4%, APA -1.3%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 67% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** With Proposal B and C unavailable, the synthesis leans on Proposal A while applying the learning rules and current portfolio context: cut the persistent laggard NHY.OL, keep the strongest winners OXY and selectively SUBC.OL, and add LYB as the cleanest replacement. The final list stays concentrated, favors the still-leading energy/chem rotation without adding filler, and accepts a softer beta profile because rotation risk is active and the provided strategist beta is already far below the normal NEUTRAL guide.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **OXY** | 20.0% | Consensus core hold from the available proposal set and one of the strongest current winners; energy remains the leading 20d sector and OXY has the best near-term momentum among current holdings, with conviction trimmed slightly for elevated RSI and recent strategy-crowding risk. |
+| 2 | **DOW** | 21.0% | Kept as a higher-quality non-energy slot because Proposal A still ranks it strongly on trend quality and 5d momentum is solid; despite lower beta, it earns its slot better than the lagging Nordic materials exposure being replaced. |
+| 3 | **LYB** | 19.0% | Best replacement candidate for NHY.OL from the available proposals, improving on the weakest current holding while staying in a still-strong chemical tape; conviction is moderated by decelerating chem rotation and negative beta. |
+| 4 | **SUBC.OL** | 18.0% | Keep but not top-rank: it is a strong recent winner with the best 5d momentum and supportive volume confirmation, yet Baltic breadth is only 33% and RSI is extremely stretched, so it stays only as a lower-conviction momentum slot. |
+| 5 | **APA** | 22.0% | Retained only at medium conviction because it remains an energy leader in a still-leading sector, but the Devil HIGH-risk overlay requires a material conviction haircut for RSI 84 and possible exhaustion after the recent run. |
+
+**Changes from yesterday:**
+- ➕ Added **LYB** at 19.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ▲ **OXY**: 11.0% → 20.0% (+9.0%)
+- ▲ **DOW**: 13.0% → 21.0% (+8.0%)
+- ▼ **SUBC.OL**: 25.0% → 18.0% (-7.0%)
+- ▲ **APA**: 14.0% → 22.0% (+8.0%)
+
+---
+## 2026-04-01 15:37:02
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 25.2 · S&P 500 20d: -4.4%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.9% · Benchmark +0.6% · Alpha -2.5%
+Winners: NHY.OL +0.1% | Losers: EQNR.OL -5.1%, APA -3.4%, SUBC.OL -2.4%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 81% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the four double-consensus names as the core, but explicitly haircut DOW, LYB, and OXY because the task requires reducing HIGH-risk low-volume setups by at least 3 conviction points. Versus the current portfolio, this synthesis keeps the strongest winners (EQNR.OL, SUBC.OL), cuts persistent laggards/weak slot users like NHY.OL and APA, and rotates away from weaker breadth sectors without adding beta filler since rotation risk makes the NEUTRAL beta target secondary.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SUBC.OL** | 25.0% | Best non-consensus incumbent to keep because it has strong 5d acceleration and acceptable volume confirmation, while Baltic breadth is weak so this earns a slot only as a proven winner rather than adding weaker laggards. |
+| 2 | **LYB** | 21.0% | Double-consensus replacement candidate for weaker current holdings with solid momentum and chem exposure, but conviction is cut materially because the devil case is HIGH risk with extremely poor volume confirmation. |
+| 3 | **DOW** | 20.0% | Double-consensus and useful chem relative-strength expression, yet recent strategy decay and extremely low vol_ratio make this a lower-conviction inclusion than the raw consensus would normally justify. |
+| 4 | **OXY** | 21.0% | Double-consensus energy leader and still aligned with the dominant rotation, but HIGH-risk status from RSI 74 and near-absent volume confirmation forces a sharp conviction haircut rather than a full exit. |
+| 5 | **VWS.CO** | 13.0% | Replacement selected by slot-cost filter: stronger short-term acceleration or cleaner momentum than removed alternatives. |
+
+**Changes from yesterday:**
+- ➕ Added **LYB** at 21.0%
+- ➕ Added **VWS.CO** at 13.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ▲ **DOW**: 13.0% → 20.0% (+7.0%)
+- ▲ **OXY**: 11.0% → 21.0% (+10.0%)
+
+---
+## 2026-04-01 16:18:10
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.0% · VIX: 25.2 · S&P 500 20d: -4.3%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.4% · Benchmark +0.7% · Alpha -3.1%
+Winners: NHY.OL +0.1% | Losers: EQNR.OL -5.1%, OXY -4.9%, APA -4.0%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 78% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I centered the portfolio on the only true consensus name, SUBC.OL, then kept one strong existing winner in NHY.OL while cutting persistent laggards and weak-volume incumbents such as APA, OXY, and DOW after recent negative alpha. From the unique ideas, I favored NKT.CO and STX as the best slot-earning catalyst names, while avoiding low-volume/high-risk names like LITE, SATS, LYB, and TEL1L.VS; portfolio beta likely remains below the normal NEUTRAL soft target, but that is acceptable under the active rotation-risk override because I am prioritizing the strongest actual movers rather than adding beta filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SUBC.OL** | 25.0% | Double-consensus pick and current winner with exceptional momentum/volume confirmation; conviction capped below 10 because RSI >82 creates real near-term exhaustion risk. |
+| 2 | **NHY.OL** | 20.0% | Current holding with very strong 5d acceleration and intact trend near highs; kept as a winner despite lower beta/volume because recent signals are materially stronger than the laggard names being cut. |
+| 3 | **NKT.CO** | 25.0% | Best unique catalyst name from Proposal B with solid vol_ratio, strong 5d momentum, and less broken signal quality than the other squeeze candidates. |
+| 4 | **VWS.CO** | 17.0% | Fresh non-energy accelerator with elite recent momentum, but conviction is cut sharply because RSI is extreme and volume confirmation is weak. |
+| 5 | **YAR.OL** | 13.0% | Replacement selected by slot-cost filter: stronger short-term acceleration or cleaner momentum than removed alternatives. |
+
+**Changes from yesterday:**
+- ➕ Added **NKT.CO** at 25.0%
+- ➕ Added **VWS.CO** at 17.0%
+- ➕ Added **YAR.OL** at 13.0%
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ➖ Removed **OXY** (was 11.0%)
+- ▼ **NHY.OL**: 25.0% → 20.0% (-5.0%)
+
+---
+## 2026-04-01 16:18:35
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 25.1 · S&P 500 20d: -4.4%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.5% · Benchmark +0.6% · Alpha -3.1%
+Winners: NHY.OL +0.1% | Losers: EQNR.OL -5.1%, OXY -5.0%, DOW -3.9%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the strongest independently validated names from the proposals, prioritizing consensus picks: SUBC.OL (triple consensus), plus EQNR.OL and NKT.CO (double consensus). Given recent negative alpha and the rule to cut persistent laggards, I would rotate away from weak current names like DOW and lower-quality energy exposures such as APA/OXY into cleaner leaders and better slot-cost names, adding YAR.OL and AKRBP.OL as the best unique upgrades; portfolio remains concentrated with rotation-aware exposure and avoids adding beta filler despite the soft NEUTRAL beta guide.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **NKT.CO** | 25.0% | Double-consensus pick with strong 5d acceleration and acceptable volume confirmation; earns a top slot as a non-energy rotation leader despite medium breakout risk. |
+| 2 | **YAR.OL** | 20.0% | Best unique pick from the full analyst as a cleaner redeployment away from lagging current holdings, with solid momentum and a different driver than crowded oil names; conviction moderated by sub-1.0 volume and negative beta profile. |
+| 3 | **SUBC.OL** | 25.0% | Triple-consensus and current winner should be kept, but mandatory risk haircut applies because RSI 83 makes it a HIGH-RISK stretched setup; still included because momentum and cross-model agreement are too strong to ignore. |
+| 4 | **NHY.OL** | 15.0% | Replacement selected by slot-cost filter: stronger short-term acceleration or cleaner momentum than removed alternatives. |
+| 5 | **ORSTED.CO** | 15.0% | Replacement selected by slot-cost filter: stronger short-term acceleration or cleaner momentum than removed alternatives. |
+
+**Changes from yesterday:**
+- ➕ Added **NKT.CO** at 25.0%
+- ➕ Added **YAR.OL** at 20.0%
+- ➕ Added **ORSTED.CO** at 15.0%
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ➖ Removed **OXY** (was 11.0%)
+- ▼ **NHY.OL**: 25.0% → 15.0% (-10.0%)
+
+---
+## 2026-04-01 16:32:43
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.1% · VIX: 24.9 · S&P 500 20d: -4.4%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.9% · Benchmark +0.6% · Alpha -3.5%
+Winners: NHY.OL +0.1% | Losers: OXY -6.1%, APA -5.3%, EQNR.OL -5.1%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 81% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept SUBC.OL as the strongest current winner and cut the persistent laggards/slow energy complex in line with the recent negative alpha, weak breadth in Norway, and the explicit HIGH rotation-risk warning on Energy. Consensus existed only in VWS.CO, but its conviction is reduced due to poor volume confirmation; the rest of the portfolio favors cleaner rotation candidates from Proposal C plus YAR.OL from Proposal A. Portfolio construction intentionally deprioritizes beta targeting because rotation risk is active and the prior strategist beta was too defensive, but I still avoided adding weak high-beta filler like WDC.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SUBC.OL** | 25.0% | Strong existing winner to keep: best fresh momentum among current holdings with vol_ratio 1.26 confirming the move, and it fits the rule to retain strong performers while cutting laggards. |
+| 2 | **NKT.CO** | 24.0% | Best unique catalyst/momentum add from Proposal C: strong 5d acceleration, acceptable volume confirmation (0.85), and only low devil-risk, so it earns a slot as a cleaner rotation candidate than decelerating energy. |
+| 3 | **NSIS-B.CO** | 22.0% | High vol_ratio and solid short-term thrust make it a credible non-energy rotation name; conviction is tempered by distance from 52-week highs and lower beta participation. |
+| 4 | **YAR.OL** | 17.0% | A reasonable unique pick from Proposal A with positive 5d momentum and lower explicit bear-case risk, offering materials exposure without leaning back into crowded, decelerating energy. |
+| 5 | **VWS.CO** | 12.0% | Only double-consensus name, so it merits inclusion, but conviction is cut materially because the HIGH-risk overlay applies: RSI above 80 with very weak vol_ratio 0.49 makes the breakout vulnerable. |
+
+**Changes from yesterday:**
+- ➕ Added **NKT.CO** at 24.0%
+- ➕ Added **NSIS-B.CO** at 22.0%
+- ➕ Added **YAR.OL** at 17.0%
+- ➕ Added **VWS.CO** at 12.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ➖ Removed **OXY** (was 11.0%)
+
+---
+## 2026-04-01 16:48:24
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.0% · VIX: 24.6 · S&P 500 20d: -4.3%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.7% · Benchmark +0.7% · Alpha -3.4%
+Winners: NHY.OL +0.1% | Losers: OXY -5.4%, EQNR.OL -5.1%, DOW -4.3%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** There were no true cross-proposal consensus names, so the synthesis prioritizes the strongest incumbent keeps from Proposal A while rotating out persistent laggards and overexposed Energy/Chem names in line with the recent alpha decay and rotation-risk alert. APA, OXY, and DOW are effectively displaced by faster catalyst names TEL1L.VS, NKT.CO, and DANSKE.CO, while EQNR.OL is retained only as a reduced-conviction energy survivor and SUBC.OL remains the highest-quality current winner. Portfolio beta likely stays below the normal NEUTRAL soft target, but that is acceptable here because rotation risk is active and adding beta filler would dilute stronger leadership shifts.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SUBC.OL** | 25.0% | Keep from current holdings and Proposal A; despite overbought RSI, it still has the best combination of intact momentum, relative strength, and acceptable volume confirmation versus other incumbents. |
+| 2 | **TEL1L.VS** | 25.0% | Best catalyst-driven unique pick from Proposal B with standout volume confirmation and a relatively weak devil case, making it a strong rotation candidate away from crowded energy/chem exposure. |
+| 3 | **NKT.CO** | 19.0% | Strong unique breakout candidate from Proposal B with solid 5d acceleration; included as a higher-quality rotation name even though volume is only moderate. |
+| 4 | **YAR.OL** | 17.0% | Best non-energy/non-chem unique pick from Proposal A; balanced momentum profile and low bear-case severity make it a cleaner slot than slower incumbents like DOW. |
+| 5 | **DANSKE.CO** | 14.0% | Included as the best remaining catalyst name from Proposal B after stronger alternatives; momentum is decent, but low volume keeps conviction in the medium range. |
+
+**Changes from yesterday:**
+- ➕ Added **TEL1L.VS** at 25.0%
+- ➕ Added **NKT.CO** at 19.0%
+- ➕ Added **YAR.OL** at 17.0%
+- ➕ Added **DANSKE.CO** at 14.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ➖ Removed **OXY** (was 11.0%)
+
+---
+## 2026-04-01 17:12:06
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.8% · VIX: 24.6 · S&P 500 20d: -4.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.5% · Benchmark +0.9% · Alpha -3.4%
+Winners: NHY.OL +0.1% | Losers: OXY -5.3%, EQNR.OL -5.1%, APA -4.2%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** Consensus was strongest in SUBC.OL and VWS.CO, but VWS.CO was excluded because the HIGH-risk warning was confirmed by weak volume, while SUBC.OL remains the highest-conviction hold. I cut the weakest current laggards/excess energy exposure implied by recent negative alpha and the sector-action rule, keeping only EQNR.OL as the best energy survivor while adding faster catalyst names NKT.CO, DANSKE.CO, and TEL1L.VS; portfolio beta remains a secondary consideration under the active rotation-risk override.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **SUBC.OL** | 25.0% | Double-consensus pick and the clearest active winner among current holdings; strong 5d momentum and acceptable volume confirmation outweigh overbought risk in a competition portfolio. |
+| 2 | **NHY.OL** | 16.0% | Unique A pick that earns its slot on strong 5d acceleration near highs, though low volume keeps it below top-tier conviction. |
+| 3 | **NKT.CO** | 21.0% | Unique B pick with strong breakout-style catalyst profile and fast 5d momentum, offering rotation away from crowded energy without resorting to dead-money defensives. |
+| 4 | **DANSKE.CO** | 18.0% | Catalyst-driven unique pick with solid volume and momentum support; included as a cleaner active mover than low-volume chemical alternatives, though overbought risk keeps conviction moderate. |
+| 5 | **TEL1L.VS** | 20.0% | Exceptional volume spike makes this a legitimate catalyst name despite overbought conditions; included as an aggressive non-energy rotation candidate, but not scored higher due to binary reversal risk. |
+
+**Changes from yesterday:**
+- ➕ Added **NKT.CO** at 21.0%
+- ➕ Added **DANSKE.CO** at 18.0%
+- ➕ Added **TEL1L.VS** at 20.0%
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ➖ Removed **OXY** (was 11.0%)
+- ▼ **NHY.OL**: 25.0% → 16.0% (-9.0%)
+
+---
+## 2026-04-01 17:25:13
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.8% · VIX: 23.8 · S&P 500 20d: -4.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.8% · Benchmark +0.9% · Alpha -3.8%
+Winners: NHY.OL +0.1% | Losers: OXY -5.9%, EQNR.OL -5.1%, APA -4.8%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 87% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I prioritize the independently validated consensus cluster: VWS.CO as the only triple-consensus name, then NKT.CO, DANSKE.CO, and ISS.CO as double-consensus redeployments away from the current portfolio's overexposed Energy/Chem laggards that have recently hurt alpha. I keep SUBC.OL as the strongest incumbent winner while cutting weaker/high-rotation-risk holdings like APA, OXY, DOW, and likely NHY.OL; the resulting book stays concentrated in 6 names and accepts a likely moderate beta profile because rotation risk override makes signal leadership more important than forcing beta upward.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **VWS.CO** | 18.0% | Triple-consensus pick and the clearest rotation winner outside decelerating Energy/Chem, with strong 5d momentum and acceptable volume confirmation despite elevated RSI. |
+| 2 | **NKT.CO** | 19.0% | Double-consensus pick with strong breakout characteristics, solid volume support, and cleaner acceleration than most alternatives, earning a core slot. |
+| 3 | **DANSKE.CO** | 19.0% | Double-consensus pick with strong vol_ratio, positive 5d momentum, and low devil-risk, making it one of the better unique-to-consensus redeployments away from lagging current holdings. |
+| 4 | **ISS.CO** | 14.0% | Double-consensus pick and strong all-signal candidate, though conviction is capped by medium risk from very high RSI with only middling volume confirmation. |
+| 5 | **SUBC.OL** | 17.0% | Keep as one of the strongest existing winners rather than fully liquidating; momentum remains strong and it was the Strategist's top current-holding retention, though conviction is moderated by low cross-proposal support. |
+| 6 | **NSIS-B.CO** | 13.0% | Best remaining unique catalyst name from the full analyst with strong volume and momentum signals, but lower conviction due to lack of consensus and recovery-risk from being well below its 52-week high. |
+
+**Changes from yesterday:**
+- ➕ Added **VWS.CO** at 18.0%
+- ➕ Added **NKT.CO** at 19.0%
+- ➕ Added **DANSKE.CO** at 19.0%
+- ➕ Added **ISS.CO** at 14.0%
+- ➕ Added **NSIS-B.CO** at 13.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ➖ Removed **OXY** (was 11.0%)
+- ▼ **SUBC.OL**: 25.0% → 17.0% (-8.0%)
+
+---

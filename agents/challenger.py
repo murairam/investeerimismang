@@ -1,5 +1,5 @@
 """
-GeminiChallenger — Catalyst Hunter (OpenRouter primary).
+Challenger — Catalyst Hunter (OpenRouter primary).
 
 Independent second opinion focused on explosive near-term catalysts:
 short squeeze setups, premarket gap-ups, IV spikes, vol_ratio breakouts.
@@ -74,6 +74,8 @@ def _sanitize_positions(raw: list) -> list:
         w = p.get("conviction") or p.get("weight")
         if isinstance(w, str):
             w = _re.sub(r"[^\d.\-]", "", w)
+            if w == "":
+                continue  # skip empty numeric strings
             try:
                 w = float(w)
             except (ValueError, TypeError):
@@ -147,6 +149,7 @@ Every position must have a DIFFERENT conviction score.
 
 class GeminiChallenger(BaseAgent):
     MAX_RETRIES = 3
+    MAX_CANDIDATES = 200  # allow full candidate table when user prefers completeness
     MODEL = "gemini-2.5-flash"
 
     def __init__(self) -> None:
@@ -157,6 +160,7 @@ class GeminiChallenger(BaseAgent):
             base_url=config.OPENROUTER_BASE_URL,
         ) if or_key else None
         self._openrouter_fallback_available = self._openrouter_fallback is not None
+        self.model = config.OPENROUTER_CHALLENGER_MODEL if self._openrouter_fallback_available else self.MODEL
         self._openai = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     def propose(
@@ -209,7 +213,7 @@ class GeminiChallenger(BaseAgent):
                             return proposal
                     except Exception as repair_exc:
                         logger.warning("Gemini repair of truncated OpenRouter output failed: %s", repair_exc)
-            logger.warning("GeminiChallenger OpenRouter failed: %s", exc)
+            logger.warning("Challenger OpenRouter failed: %s", exc)
 
         # First fallback: Gemini
         logger.info("OpenRouter challenger unavailable — falling back to Gemini (%s)", self.MODEL)
@@ -224,9 +228,9 @@ class GeminiChallenger(BaseAgent):
                 )
                 return proposal
             except (json.JSONDecodeError, KeyError, ValueError) as exc:
-                logger.warning("GeminiChallenger Gemini fallback attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
+                logger.warning("Challenger Gemini fallback attempt %d/%d failed: %s", attempt, self.MAX_RETRIES, exc)
             except Exception as exc:
-                logger.warning("GeminiChallenger Gemini fallback attempt %d/%d API error: %s", attempt, self.MAX_RETRIES, exc)
+                logger.warning("Challenger Gemini fallback attempt %d/%d API error: %s", attempt, self.MAX_RETRIES, exc)
 
         # Final fallback: OpenAI nano
         logger.info("Gemini fallback unavailable — final fallback to OpenAI (%s)", config.OPENAI_FALLBACK_MODEL)
@@ -284,6 +288,14 @@ class GeminiChallenger(BaseAgent):
                     "cat_score": self._catalyst_score(c, si, pm, iv),
                 }
             )
+        # Optional truncation guard: only apply if MAX_CANDIDATES is set below full universe.
+        if self.MAX_CANDIDATES and len(preprocessed_rows) > self.MAX_CANDIDATES:
+            logger.info(
+                "Challenger truncating catalyst table: %d → %d rows",
+                len(preprocessed_rows),
+                self.MAX_CANDIDATES,
+            )
+            preprocessed_rows = preprocessed_rows[: self.MAX_CANDIDATES]
 
         show_short_interest = any(row["short_interest"] is not None for row in preprocessed_rows)
         show_premarket_gap = any(row["premarket_gap"] is not None for row in preprocessed_rows)
@@ -417,7 +429,13 @@ class GeminiChallenger(BaseAgent):
             lines += ["", snapshot["news_headlines"]]
 
         lines += ["", "Build your catalyst-driven portfolio. Return valid JSON only."]
-        return "\n".join(lines)
+        message = "\n".join(lines)
+        logger.info(
+            "Challenger prompt size: %d chars, %d candidates",
+            len(message),
+            len(preprocessed_rows),
+        )
+        return message
 
     @staticmethod
     def _catalyst_score(
@@ -488,7 +506,7 @@ class GeminiChallenger(BaseAgent):
                 )
                 usage = response.usage
                 cost = log_usage(
-                    agent_name="GeminiChallenger-OAIFallback",
+                    agent_name="Challenger-OAIFallback",
                     model=config.OPENAI_FALLBACK_MODEL,
                     input_tokens=usage.prompt_tokens,
                     output_tokens=usage.completion_tokens,
@@ -548,7 +566,9 @@ class GeminiChallenger(BaseAgent):
         system_prompt += (
             "\n\nCRITICAL OUTPUT FORMAT: Return exactly one valid JSON object and nothing else. "
             "No markdown, no code fences, no prose before or after JSON. "
-            "Required top-level keys: positions, reasoning, confidence, learning_reflection."
+            "Required top-level keys: positions, reasoning, confidence, learning_reflection. "
+            "For each position include a one-sentence RISK/EXIT trigger. "
+            "After the positions, add a 1–2 sentence cross-check vs current sector rotation (which sectors to overweight/avoid today)."
         )
 
         effective_user_message = (
@@ -589,11 +609,12 @@ class GeminiChallenger(BaseAgent):
 
         for attempt in range(1, 2):  # Single attempt only — truncation = fail fast to fallback
             try:
-                max_tokens_limit = 16000  # Nemotron uses thinking blocks that consume 8-10k tokens before JSON output
+                max_tokens_limit = 30000  # maximized per user request
                 request_kwargs = {
                     "model": config.OPENROUTER_CHALLENGER_MODEL,
-                    "temperature": 0.4,
-                    "timeout": config.API_TIMEOUT_SECONDS,
+                    "temperature": 0.45,  # slightly higher to avoid terse outputs
+                    # Allow long OR runs; orchestrator timeout raised separately.
+                    "timeout": max(config.API_TIMEOUT_SECONDS, 220),
                     "max_tokens": max_tokens_limit,
                     "response_format": _PROPOSAL_SCHEMA,
                     "messages": [
@@ -607,7 +628,7 @@ class GeminiChallenger(BaseAgent):
                 prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
                 completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
                 cost = log_usage(
-                    agent_name="GeminiChallenger-ORPrimary",
+                    agent_name="Challenger-ORPrimary",
                     model=config.OPENROUTER_CHALLENGER_MODEL,
                     input_tokens=prompt_tokens,
                     output_tokens=completion_tokens,
@@ -620,31 +641,24 @@ class GeminiChallenger(BaseAgent):
                 )
 
                 raw_text = response.choices[0].message.content or ""
-
-                # Detect truncation: if output_tokens >= max_tokens_limit, response may be incomplete.
-                # Try to parse anyway — _extract_json tolerates truncation. Only fail if parsing fails.
-                if completion_tokens >= max_tokens_limit:
-                    logger.warning(
-                        "OpenRouter challenger hit max_tokens limit (%d) — attempting to parse truncated output",
-                        max_tokens_limit,
-                    )
-                    try:
-                        data = _extract_json(raw_text)
-                        raw_positions = _sanitize_positions(data.get("positions", []))
-                        if raw_positions:
-                            logger.info("OpenRouter challenger: truncated output was parseable (%d positions)", len(raw_positions))
-                            # fall through to normal parsing below
-                        else:
-                            raise ValueError("No positions in truncated output")
-                    except (ValueError, Exception):
-                        raise ValueError("Model response truncated at max_tokens")
+                truncated = completion_tokens >= max_tokens_limit
                 try:
                     data = _extract_json(raw_text)
                 except ValueError:
-                    logger.warning("OpenRouter challenger returned non-JSON output — attempting JSON repair pass")
+                    logger.warning(
+                        "OpenRouter challenger returned non-JSON output%s — attempting JSON repair pass",
+                        " (truncated at max_tokens)" if truncated else "",
+                    )
                     data = self._repair_openrouter_json(raw_text)
                     if data is None:
-                        raise
+                        data = self._repair_with_openai_gpt54(raw_text)
+                    if data is None and truncated:
+                        # last-resort repair: ask gpt-5.4 to summarize into compact JSON (<=6 positions)
+                        data = self._repair_with_openai_gpt54(
+                            raw_text + "\n\nReturn ONLY JSON with keys positions, reasoning, confidence, learning_reflection. Max 6 positions."
+                        )
+                    if data is None:
+                        raise ValueError("Model response could not be repaired")
                 # Nemotron occasionally wraps the response in a JSON array
                 if isinstance(data, list):
                     if data and isinstance(data[0], dict) and "positions" in data[0]:
@@ -710,6 +724,35 @@ class GeminiChallenger(BaseAgent):
             return _extract_json(repaired)
         except Exception as exc:
             logger.warning("OpenAI JSON repair failed: %s", exc)
+            return None
+
+    def _repair_with_openai_gpt54(self, raw_text: str) -> Optional[dict]:
+        """Stronger repair using gpt-5.4 when nano fails."""
+        if not raw_text.strip():
+            return None
+        prompt_messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Convert the provided text to valid JSON with keys: "
+                    "positions (array of {ticker, conviction (int 1-10), rationale}), "
+                    "reasoning, confidence, learning_reflection. Return JSON only."
+                ),
+            },
+            {"role": "user", "content": raw_text[:16000]},
+        ]
+        try:
+            repair_response = self._openai.chat.completions.create(
+                model="gpt-5.4",
+                response_format={"type": "json_object"},
+                temperature=0.0,
+                timeout=config.API_TIMEOUT_SECONDS,
+                messages=prompt_messages,
+            )
+            repaired = repair_response.choices[0].message.content or ""
+            return _extract_json(repaired)
+        except Exception as exc:
+            logger.warning("OpenAI gpt-5.4 JSON repair failed: %s", exc)
             return None
 
     def _call_gemini(
@@ -864,7 +907,7 @@ class GeminiChallenger(BaseAgent):
                     raw = raw[4:]
             return json.loads(raw)
         except Exception as exc2:
-            logger.warning("GeminiChallenger cross_check fallback failed (non-fatal): %s", exc2)
+            logger.warning("Challenger cross_check fallback failed (non-fatal): %s", exc2)
 
         try:
             resp = self._openai.chat.completions.create(

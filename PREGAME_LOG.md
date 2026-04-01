@@ -1176,3 +1176,42 @@ Winners: SUBC.OL +2.9%, NHY.OL +1.0%, EQNR.OL +0.0% | Losers: APA -5.1%, OXY -4.
 
 ---
 
+## 2026-04-01 17:25:13
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.8% · VIX: 23.8 · S&P 500 20d: -4.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.8% · Benchmark +0.9% · Alpha -3.8%
+Winners: NHY.OL +0.1% | Losers: OXY -5.9%, EQNR.OL -5.1%, APA -4.8%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 87% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I prioritize the independently validated consensus cluster: VWS.CO as the only triple-consensus name, then NKT.CO, DANSKE.CO, and ISS.CO as double-consensus redeployments away from the current portfolio's overexposed Energy/Chem laggards that have recently hurt alpha. I keep SUBC.OL as the strongest incumbent winner while cutting weaker/high-rotation-risk holdings like APA, OXY, DOW, and likely NHY.OL; the resulting book stays concentrated in 6 names and accepts a likely moderate beta profile because rotation risk override makes signal leadership more important than forcing beta upward.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **VWS.CO** | 18.0% | Triple-consensus pick and the clearest rotation winner outside decelerating Energy/Chem, with strong 5d momentum and acceptable volume confirmation despite elevated RSI. |
+| 2 | **NKT.CO** | 19.0% | Double-consensus pick with strong breakout characteristics, solid volume support, and cleaner acceleration than most alternatives, earning a core slot. |
+| 3 | **DANSKE.CO** | 19.0% | Double-consensus pick with strong vol_ratio, positive 5d momentum, and low devil-risk, making it one of the better unique-to-consensus redeployments away from lagging current holdings. |
+| 4 | **ISS.CO** | 14.0% | Double-consensus pick and strong all-signal candidate, though conviction is capped by medium risk from very high RSI with only middling volume confirmation. |
+| 5 | **SUBC.OL** | 17.0% | Keep as one of the strongest existing winners rather than fully liquidating; momentum remains strong and it was the Strategist's top current-holding retention, though conviction is moderated by low cross-proposal support. |
+| 6 | **NSIS-B.CO** | 13.0% | Best remaining unique catalyst name from the full analyst with strong volume and momentum signals, but lower conviction due to lack of consensus and recovery-risk from being well below its 52-week high. |
+
+**Changes from yesterday:**
+- ➕ Added **VWS.CO** at 18.0%
+- ➕ Added **NKT.CO** at 19.0%
+- ➕ Added **DANSKE.CO** at 19.0%
+- ➕ Added **ISS.CO** at 14.0%
+- ➕ Added **NSIS-B.CO** at 13.0%
+- ➖ Removed **NHY.OL** (was 25.0%)
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ➖ Removed **OXY** (was 11.0%)
+- ▼ **SUBC.OL**: 25.0% → 17.0% (-8.0%)
+
+---
+

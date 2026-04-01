@@ -1,6 +1,6 @@
 {
-  "generated_from_days": 12,
-  "position_observations": 54,
+  "generated_from_days": 13,
+  "position_observations": 60,
   "minimums": {
     "strong_daily_observations": 7,
     "strong_ticker_observations": 8,
@@ -8,6 +8,9 @@
   },
   "hard_rules": [],
   "biases_to_avoid": [
+    "Avoid overusing momentum rationales until their hit rate recovers above 40%.",
+    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.",
+    "Avoid overusing consensus rationales until their hit rate recovers above 40%.",
     "Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%."
   ],
   "validated_winners": [
@@ -33,9 +36,9 @@
   "recurring_losers": [
     {
       "ticker": "EQNR.OL",
-      "observations": 8,
-      "avg_return_1d": -0.006843,
-      "hit_rate": 0.25
+      "observations": 10,
+      "avg_return_1d": -0.015608,
+      "hit_rate": 0.2
     }
   ],
   "weight_caps": [
@@ -55,103 +58,88 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.52,
+    "avg_turnover_estimate": 0.551,
     "observations": 0,
     "status": "insufficient_data"
   },
   "confidence_notes": [
     {
-      "tag": "momentum",
-      "instruction": "Prefer momentum setups when other signals are comparable.",
-      "observations": 39
-    },
-    {
-      "tag": "high_sharpe",
-      "instruction": "Prefer high_sharpe setups when other signals are comparable.",
-      "observations": 36
-    },
-    {
-      "tag": "consensus",
-      "instruction": "Prefer consensus setups when other signals are comparable.",
-      "observations": 32
-    },
-    {
       "tag": "catalyst",
       "instruction": "Prefer catalyst setups when other signals are comparable.",
-      "observations": 5
+      "observations": 6
     },
     {
-      "tag": "overbought",
-      "instruction": "Prefer overbought setups when other signals are comparable.",
-      "observations": 24
+      "tag": "at_52w_high",
+      "instruction": "Prefer at_52w_high setups when other signals are comparable.",
+      "observations": 36
     }
   ],
   "early_warning_notes": [
-    "EARLY WARNING: breakout has weak hit quality (50% over 6 obs)."
+    "EARLY WARNING: breakout has weak hit quality (43% over 7 obs)."
   ],
   "rationale_stats": {
     "momentum": {
-      "observations": 39,
-      "avg_return_1d": 0.002356,
-      "hit_rate": 0.5385
+      "observations": 45,
+      "avg_return_1d": -0.003269,
+      "hit_rate": 0.4667
     },
     "high_sharpe": {
-      "observations": 36,
-      "avg_return_1d": 0.001458,
-      "hit_rate": 0.5
+      "observations": 42,
+      "avg_return_1d": -0.00444,
+      "hit_rate": 0.4286
     },
     "breakout": {
-      "observations": 6,
-      "avg_return_1d": -0.005088,
-      "hit_rate": 0.5
+      "observations": 7,
+      "avg_return_1d": -0.007141,
+      "hit_rate": 0.4286
     },
     "consensus": {
-      "observations": 32,
-      "avg_return_1d": 0.003631,
-      "hit_rate": 0.5625
+      "observations": 38,
+      "avg_return_1d": -0.00323,
+      "hit_rate": 0.4737
     },
     "catalyst": {
-      "observations": 5,
-      "avg_return_1d": 0.013431,
-      "hit_rate": 0.8
+      "observations": 6,
+      "avg_return_1d": 0.004171,
+      "hit_rate": 0.6667
     },
     "diversifier": {
-      "observations": 2,
-      "avg_return_1d": 0.006287,
-      "hit_rate": 1.0
+      "observations": 3,
+      "avg_return_1d": -0.002295,
+      "hit_rate": 0.6667
     },
     "non_us_differentiator": {
-      "observations": 10,
-      "avg_return_1d": -0.007638,
-      "hit_rate": 0.4
+      "observations": 13,
+      "avg_return_1d": -0.013113,
+      "hit_rate": 0.3077
     },
     "overbought": {
-      "observations": 24,
-      "avg_return_1d": 0.002213,
-      "hit_rate": 0.5833
+      "observations": 28,
+      "avg_return_1d": -0.003008,
+      "hit_rate": 0.5
     },
     "at_52w_high": {
-      "observations": 31,
-      "avg_return_1d": 0.008196,
-      "hit_rate": 0.6129
+      "observations": 36,
+      "avg_return_1d": 0.00096,
+      "hit_rate": 0.5278
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.005096,
-    "tier2_avg_return_1d": 0.000887,
-    "tier3_avg_return_1d": -0.009282,
-    "tier1_observations": 19,
-    "tier2_observations": 28,
-    "tier3_observations": 7
+    "tier1_avg_return_1d": -0.000282,
+    "tier2_avg_return_1d": -0.002966,
+    "tier3_avg_return_1d": -0.010554,
+    "tier1_observations": 21,
+    "tier2_observations": 31,
+    "tier3_observations": 8
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
     "status": "actionable",
-    "observations": 14,
-    "high_risk_avg_return_1d": -0.003273,
-    "low_risk_avg_return_1d": 0.002563,
-    "high_risk_negative_rate": 0.4286,
-    "accuracy": 0.4286,
+    "observations": 16,
+    "high_risk_avg_return_1d": -0.006713,
+    "low_risk_avg_return_1d": -0.001702,
+    "high_risk_negative_rate": 0.5,
+    "accuracy": 0.5,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
@@ -177,18 +165,22 @@
       {
         "ticker": "CF",
         "flag_count": 2
+      },
+      {
+        "ticker": "DOW",
+        "flag_count": 2
       }
     ]
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.5455,
-      "mom_5d": 0.5455,
-      "sharpe_20d": 0.5455,
-      "rsi_14": 0.5455,
-      "vs_index": 0.5455,
-      "vol_ratio": 0.5455,
-      "beta": 0.4318
+      "momentum": 0.48,
+      "mom_5d": 0.48,
+      "sharpe_20d": 0.48,
+      "rsi_14": 0.48,
+      "vs_index": 0.48,
+      "vol_ratio": 0.5333,
+      "beta": 0.44
     },
     "per_regime": {
       "NEUTRAL": {
@@ -201,13 +193,13 @@
         "beta": 0.5
       },
       "BEAR": {
-        "momentum": 0.6667,
-        "mom_5d": 0.6667,
-        "sharpe_20d": 0.6667,
-        "rsi_14": 0.6667,
-        "vs_index": 0.6667,
-        "vol_ratio": 0.6667,
-        "beta": 0.3333
+        "momentum": 0.5,
+        "mom_5d": 0.5,
+        "sharpe_20d": 0.5,
+        "rsi_14": 0.5,
+        "vs_index": 0.5,
+        "vol_ratio": 0.6316,
+        "beta": 0.375
       }
     }
   },
@@ -232,106 +224,106 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-03-30",
-    "portfolio_return_1d": -0.0038,
-    "benchmark_return_1d": 0.0233,
-    "alpha_1d": -0.0271,
-    "winners": [
+    "date": "2026-03-31",
+    "portfolio_return_1d": -0.0281,
+    "benchmark_return_1d": 0.0095,
+    "alpha_1d": -0.0376,
+    "winners": [],
+    "losers": [
       {
-        "ticker": "SUBC.OL",
-        "return_1d": 0.0288,
-        "vs_benchmark": 0.0055,
+        "ticker": "LYB",
+        "return_1d": -0.0595,
+        "vs_benchmark": -0.069,
         "tags": [
           "momentum",
           "consensus",
           "non_us_differentiator",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick and one of the best slot earners in this tape: energy-linked leadership with v",
-        "rsi_at_entry": 74.999987,
-        "vol_ratio_at_entry": 1.188312
+        "rationale_snippet": "Double-consensus pick and the clearest upgrade over current holding NHY.OL as materials breadth is w",
+        "rsi_at_entry": 75.906113,
+        "vol_ratio_at_entry": null
       },
       {
-        "ticker": "NHY.OL",
-        "return_1d": 0.0103,
-        "vs_benchmark": -0.013,
+        "ticker": "EQNR.OL",
+        "return_1d": -0.0507,
+        "vs_benchmark": -0.0602,
         "tags": [
           "momentum",
           "consensus",
-          "catalyst",
           "non_us_differentiator",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick with the cleanest catalyst profile among leaders: strong 5d momentum, solid vo",
-        "rsi_at_entry": 66.904415,
-        "vol_ratio_at_entry": 1.476223
+        "rationale_snippet": "Double-consensus pick and existing winner that fits the energy leadership regime, but conviction is ",
+        "rsi_at_entry": 83.560709,
+        "vol_ratio_at_entry": null
       },
       {
-        "ticker": "EQNR.OL",
-        "return_1d": 0.0005,
-        "vs_benchmark": -0.0228,
+        "ticker": "DOW",
+        "return_1d": -0.0432,
+        "vs_benchmark": -0.0527,
         "tags": [
           "momentum",
           "high_sharpe",
           "consensus",
-          "non_us_differentiator",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick and a strong non-US energy leader that fits the rotation, but conviction is re",
-        "rsi_at_entry": 84.481646,
-        "vol_ratio_at_entry": 0.632994
-      }
-    ],
-    "losers": [
+        "rationale_snippet": "Triple-consensus pick across all three proposals and still one of the cleanest chemical rotation lea",
+        "rsi_at_entry": 76.297345,
+        "vol_ratio_at_entry": null
+      },
       {
-        "ticker": "APA",
-        "return_1d": -0.0505,
-        "vs_benchmark": -0.0739,
+        "ticker": "CF",
+        "return_1d": -0.0421,
+        "vs_benchmark": -0.0516,
         "tags": [
           "momentum",
           "high_sharpe",
           "breakout",
           "consensus",
-          "overbought",
+          "catalyst",
           "at_52w_high"
         ],
-        "rationale_snippet": "Triple-consensus pick and current holding in the strongest sector, but mandatory conviction haircut ",
-        "rsi_at_entry": 98.481902,
-        "vol_ratio_at_entry": 0.439422
+        "rationale_snippet": "Double-consensus catalyst/momentum name with strong 5d move and low retail crowding, but conviction ",
+        "rsi_at_entry": 65.083755,
+        "vol_ratio_at_entry": null
       },
       {
-        "ticker": "OXY",
-        "return_1d": -0.0396,
-        "vs_benchmark": -0.0629,
+        "ticker": "SUBC.OL",
+        "return_1d": -0.024,
+        "vs_benchmark": -0.0335,
         "tags": [
           "momentum",
           "high_sharpe",
           "consensus",
+          "non_us_differentiator",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus current winner with continued momentum, yet extreme overbought conditions and very ",
-        "rsi_at_entry": 90.704392,
-        "vol_ratio_at_entry": 0.322451
+        "rationale_snippet": "Double-consensus pick already in the portfolio and recent alpha supports keeping strong winners; des",
+        "rsi_at_entry": 79.720273,
+        "vol_ratio_at_entry": null
       },
       {
-        "ticker": "DOW",
-        "return_1d": -0.0169,
-        "vs_benchmark": -0.0402,
+        "ticker": "VWS.CO",
+        "return_1d": -0.0195,
+        "vs_benchmark": -0.029,
         "tags": [
           "momentum",
           "high_sharpe",
+          "breakout",
           "consensus",
-          "overbought",
-          "at_52w_high"
+          "diversifier",
+          "non_us_differentiator",
+          "overbought"
         ],
-        "rationale_snippet": "Double-consensus pick with excellent acceleration and relative strength, but conviction is cut mater",
-        "rsi_at_entry": 76.785723,
-        "vol_ratio_at_entry": 0.270339
+        "rationale_snippet": "Double-consensus breakout candidate and useful non-energy diversifier, but conviction is cut sharply",
+        "rsi_at_entry": 84.605908,
+        "vol_ratio_at_entry": 0.115369
       }
     ],
-    "lesson": "'high_sharpe' entries underperformed \u2014 review sizing for this thesis today; 'overbought' entries underperformed \u2014 review sizing for this thesis today"
+    "lesson": "'momentum' entries underperformed \u2014 review sizing for this thesis today; 'high_sharpe' entries underperformed \u2014 review sizing for this thesis today"
   }
 }
