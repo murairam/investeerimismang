@@ -1,14 +1,14 @@
 # Pre-Game Learning Report
 
-Generated: 2026-04-01
+Generated: 2026-04-02
 Target go-live date: 2026-04-06
-Days remaining: 5
+Days remaining: 4
 
 ## Scoreboard
 - Training days with measurable alpha: 12
 - Win days (alpha > 0): 8
 - Loss days (alpha < 0): 4
-- Average daily alpha: -0.07%
+- Average daily alpha: -0.02%
 - Paper account equity: €9,452.83 (from €10,000.00, return -5.47%)
 - Max drawdown (paper): 9.07%
 - Average turnover: 21.05%
@@ -16,11 +16,11 @@ Days remaining: 5
 ## Confidence note
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
-- Latest day is verified against the actual game portfolio.
+- Latest day is still experimental / unverified.
 
 ## Best and worst day
 - Best alpha day: 2026-03-23 (+1.42%)
-- Worst alpha day: 2026-03-31 (-3.76%)
+- Worst alpha day: 2026-03-31 (-3.22%)
 
 ## Structured learning state
 - Active hard rules: 0
@@ -36,8 +36,8 @@ Days remaining: 5
 | EQNR.OL | loser | 10 | -1.56% | 20% |
 
 ## Action plan until April 6
-- Avoid overusing momentum rationales until their hit rate recovers above 40%.
 - Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.
+- Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%.
 
 ## Daily routine
 - Run: `python main.py`

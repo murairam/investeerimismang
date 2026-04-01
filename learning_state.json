@@ -8,9 +8,7 @@
   },
   "hard_rules": [],
   "biases_to_avoid": [
-    "Avoid overusing momentum rationales until their hit rate recovers above 40%.",
     "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.",
-    "Avoid overusing consensus rationales until their hit rate recovers above 40%.",
     "Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%."
   ],
   "validated_winners": [
@@ -58,7 +56,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.551,
+    "avg_turnover_estimate": 0.542,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -80,12 +78,12 @@
   "rationale_stats": {
     "momentum": {
       "observations": 45,
-      "avg_return_1d": -0.003269,
+      "avg_return_1d": -0.002722,
       "hit_rate": 0.4667
     },
     "high_sharpe": {
       "observations": 42,
-      "avg_return_1d": -0.00444,
+      "avg_return_1d": -0.003855,
       "hit_rate": 0.4286
     },
     "breakout": {
@@ -95,12 +93,12 @@
     },
     "consensus": {
       "observations": 38,
-      "avg_return_1d": -0.00323,
+      "avg_return_1d": -0.002584,
       "hit_rate": 0.4737
     },
     "catalyst": {
       "observations": 6,
-      "avg_return_1d": 0.004171,
+      "avg_return_1d": 0.006853,
       "hit_rate": 0.6667
     },
     "diversifier": {
@@ -115,18 +113,18 @@
     },
     "overbought": {
       "observations": 28,
-      "avg_return_1d": -0.003008,
+      "avg_return_1d": -0.002705,
       "hit_rate": 0.5
     },
     "at_52w_high": {
       "observations": 36,
-      "avg_return_1d": 0.00096,
+      "avg_return_1d": 0.001643,
       "hit_rate": 0.5278
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": -0.000282,
-    "tier2_avg_return_1d": -0.002966,
+    "tier1_avg_return_1d": 0.000122,
+    "tier2_avg_return_1d": -0.002446,
     "tier3_avg_return_1d": -0.010554,
     "tier1_observations": 21,
     "tier2_observations": 31,
@@ -136,18 +134,22 @@
   "devil_accuracy": {
     "status": "actionable",
     "observations": 16,
-    "high_risk_avg_return_1d": -0.006713,
-    "low_risk_avg_return_1d": -0.001702,
+    "high_risk_avg_return_1d": -0.005707,
+    "low_risk_avg_return_1d": -0.001509,
     "high_risk_negative_rate": 0.5,
     "accuracy": 0.5,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
         "ticker": "APA",
-        "flag_count": 4
+        "flag_count": 5
       },
       {
         "ticker": "OXY",
+        "flag_count": 3
+      },
+      {
+        "ticker": "EQNR.OL",
         "flag_count": 3
       },
       {
@@ -159,15 +161,7 @@
         "flag_count": 2
       },
       {
-        "ticker": "EQNR.OL",
-        "flag_count": 2
-      },
-      {
         "ticker": "CF",
-        "flag_count": 2
-      },
-      {
-        "ticker": "DOW",
         "flag_count": 2
       }
     ]
@@ -225,19 +219,19 @@
   },
   "yesterday_postmortem": {
     "date": "2026-03-31",
-    "portfolio_return_1d": -0.0281,
-    "benchmark_return_1d": 0.0095,
-    "alpha_1d": -0.0376,
+    "portfolio_return_1d": -0.025,
+    "benchmark_return_1d": 0.0072,
+    "alpha_1d": -0.0322,
     "winners": [],
     "losers": [
       {
         "ticker": "LYB",
         "return_1d": -0.0595,
-        "vs_benchmark": -0.069,
+        "vs_benchmark": -0.0667,
         "tags": [
           "momentum",
+          "high_sharpe",
           "consensus",
-          "non_us_differentiator",
           "at_52w_high"
         ],
         "rationale_snippet": "Double-consensus pick and the clearest upgrade over current holding NHY.OL as materials breadth is w",
@@ -247,9 +241,10 @@
       {
         "ticker": "EQNR.OL",
         "return_1d": -0.0507,
-        "vs_benchmark": -0.0602,
+        "vs_benchmark": -0.0578,
         "tags": [
           "momentum",
+          "high_sharpe",
           "consensus",
           "non_us_differentiator",
           "overbought",
@@ -261,8 +256,8 @@
       },
       {
         "ticker": "DOW",
-        "return_1d": -0.0432,
-        "vs_benchmark": -0.0527,
+        "return_1d": -0.0348,
+        "vs_benchmark": -0.0419,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -276,12 +271,11 @@
       },
       {
         "ticker": "CF",
-        "return_1d": -0.0421,
-        "vs_benchmark": -0.0516,
+        "return_1d": -0.026,
+        "vs_benchmark": -0.0332,
         "tags": [
           "momentum",
           "high_sharpe",
-          "breakout",
           "consensus",
           "catalyst",
           "at_52w_high"
@@ -293,7 +287,7 @@
       {
         "ticker": "SUBC.OL",
         "return_1d": -0.024,
-        "vs_benchmark": -0.0335,
+        "vs_benchmark": -0.0311,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -309,7 +303,7 @@
       {
         "ticker": "VWS.CO",
         "return_1d": -0.0195,
-        "vs_benchmark": -0.029,
+        "vs_benchmark": -0.0266,
         "tags": [
           "momentum",
           "high_sharpe",

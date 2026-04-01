@@ -4711,7 +4711,39 @@
       "input_tokens": 19561,
       "output_tokens": 573,
       "cost_usd": 0.057497
+    },
+    {
+      "date": "2026-04-02",
+      "agent": "Challenger-ORPrimary",
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "input_tokens": 23754,
+      "output_tokens": 7454,
+      "cost_usd": 0.009362
+    },
+    {
+      "date": "2026-04-02",
+      "agent": "OpenAIFullAnalyst",
+      "model": "deepseek/deepseek-v3.2",
+      "input_tokens": 22752,
+      "output_tokens": 11996,
+      "cost_usd": 0.010474
+    },
+    {
+      "date": "2026-04-02",
+      "agent": "OpenAIDevil",
+      "model": "qwen/qwen3-235b-a22b",
+      "input_tokens": 1330,
+      "output_tokens": 599,
+      "cost_usd": 0.001695
+    },
+    {
+      "date": "2026-04-02",
+      "agent": "OpenAIRiskManager",
+      "model": "gpt-5.4",
+      "input_tokens": 4755,
+      "output_tokens": 587,
+      "cost_usd": 0.020693
     }
   ],
-  "total_cost": 11.679875
+  "total_cost": 11.722099
 }

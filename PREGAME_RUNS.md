@@ -2173,3 +2173,40 @@ Winners: NHY.OL +0.1% | Losers: OXY -5.9%, EQNR.OL -5.1%, APA -4.8%
 - ▼ **SUBC.OL**: 25.0% → 17.0% (-8.0%)
 
 ---
+## 2026-04-01 00:06:11
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -1.0% · VIX: 24.5 · S&P 500 20d: -4.3%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.5% · Benchmark +0.7% · Alpha -3.2%
+Winners: NHY.OL +0.1% | Losers: OXY -5.4%, EQNR.OL -5.1%, APA -3.7%
+
+**Paper account:** Equity €9,452.83 (start €10,000) · Today -6.94% · Since start -5.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** Consensus was strongest in VWS.CO, NKT.CO, SUBC.OL, and NHY.OL, but the current portfolio has been hurt by commodity concentration and the rotation alert explicitly calls for reducing Energy/Chem exposure. I therefore keep only the strongest validated incumbents at reduced conviction, cut persistent laggards/dead-money energy names in favor of VWS.CO and NKT.CO, and add the best unique rotation beneficiaries from Proposal C. Portfolio beta remains a secondary diagnostic today because rotation risk is HIGH; the synthesis prioritizes active leadership and avoids adding high-beta filler just to hit a target.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **VWS.CO** | 17.0% | Triple-consensus pick and the cleanest rotation target: strongest cross-model validation, high 5d momentum with acceptable volume confirmation, and it helps rotate out of the current lagging Energy/Chem book. |
+| 2 | **NKT.CO** | 18.0% | Double-consensus pick with strong acceleration and volume support; a high-quality industrial momentum name that fits the mandate to redeploy from decelerating Energy/Chem into active leadership. |
+| 3 | **SWED-A.ST** | 18.0% | Best unique non-crowded alternative from the full analyst view: solid momentum, decent volume, and useful diversification away from the current commodity-heavy holdings without becoming a filler position. |
+| 4 | **DANSKE.CO** | 21.0% | A reasonable unique add from Proposal C with supportive momentum/vs-index signals; included as a lower-conviction rotation beneficiary, though weaker than the top industrial leaders. |
+| 5 | **SUBC.OL** | 16.0% | Double-consensus and already a strong winner in the book, so it earns a reduced hold rather than a full exit; conviction is cut materially because RSI 83 makes it a flagged HIGH-RISK overbought name. |
+| 6 | **NHY.OL** | 10.0% | Double-consensus and a current holding, but only retained at low conviction because the rally is poorly volume-confirmed (vol_ratio 0.49) and Chem breadth/rotation risk is explicitly unfavorable. |
+
+**Changes from yesterday:**
+- ➕ Added **VWS.CO** at 17.0%
+- ➕ Added **NKT.CO** at 18.0%
+- ➕ Added **SWED-A.ST** at 18.0%
+- ➕ Added **DANSKE.CO** at 21.0%
+- ➖ Removed **APA** (was 14.0%)
+- ➖ Removed **DOW** (was 13.0%)
+- ➖ Removed **EQNR.OL** (was 7.0%)
+- ➖ Removed **OXY** (was 11.0%)
+- ▼ **SUBC.OL**: 25.0% → 16.0% (-9.0%)
+- ▼ **NHY.OL**: 25.0% → 10.0% (-15.0%)
+
+---
