@@ -1,8 +1,3 @@
 {
-  "tickers": {
-    "KSLAV.HE": {
-      "reason": "no_data",
-      "marked_on": "2026-03-23"
-    }
-  }
+  "tickers": {}
 }
