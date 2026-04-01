@@ -708,6 +708,10 @@ class AlphaSharkOrchestrator:
         # Round all weights to whole percentages (game UI has 1% precision)
         final_proposal = self.validator.round_to_whole_pct(final_proposal)
 
+        # Step 5c: enforce sector rotation cap AFTER all normalization/rounding
+        # so that normalize() and round_to_whole_pct() cannot re-inflate a capped sector.
+        final_proposal = self.risk_manager._enforce_sector_rotation_cap(final_proposal, snapshot)
+
         total = sum(p.weight for p in final_proposal.positions)
         logger.info(
             "Final portfolio: %d positions, total weight %.1f%%, confidence %.0f%%",

@@ -130,7 +130,6 @@ class OpenAIRiskManager(BaseAgent):
                 result = self._call_openai(user_message)
                 result = self._enforce_beta(result, snapshot, regime, beta_targets)
                 result = self._enforce_selection_quality(result, snapshot, bear_cases or {})
-                result = self._enforce_sector_rotation_cap(result, snapshot)
                 logger.info(
                     "Meta-analyst: synthesised %d positions from strategist(%d) + gemini(%d) + full(%d) (conf %.0f%%)",
                     len(result.positions),
@@ -182,11 +181,21 @@ class OpenAIRiskManager(BaseAgent):
         """
         Hard-cap sector concentration when rotation_risk signals exhaustion.
         Uses sector tags from candidate records (same source as fetcher signals).
+
+        Trimmed weight is redistributed to positions OUTSIDE the capped sector(s)
+        proportionally by headroom (max_weight - current_weight), so the capped
+        sector is never scaled back above its cap by renormalization.
         """
         rotation_risk: dict = snapshot.get("rotation_risk", {})
         candidate_map = {c["ticker"]: c for c in snapshot["candidates"]}
+        min_w = config.GAME_CONSTRAINTS["min_weight"]
+        max_w = config.GAME_CONSTRAINTS["max_weight"]
 
-        # Build sector → cap mapping from rotation risk levels
+        def _sector_of(ticker: str) -> str:
+            c = candidate_map.get(ticker, {})
+            return c.get("sector") or config.SECTOR_MAP.get(ticker, "?")
+
+        # Build sector → effective cap (lowest applicable cap wins)
         sector_caps: dict[str, float] = {}
         for sector, info in rotation_risk.items():
             level = info.get("level", "")
@@ -198,51 +207,48 @@ class OpenAIRiskManager(BaseAgent):
         # Compute current sector weights
         sector_weights: dict[str, float] = {}
         for pos in proposal.positions:
-            c = candidate_map.get(pos.ticker, {})
-            sector = c.get("sector", config.SECTOR_MAP.get(pos.ticker, "?"))
-            sector_weights[sector] = sector_weights.get(sector, 0.0) + pos.weight
+            s = _sector_of(pos.ticker)
+            sector_weights[s] = sector_weights.get(s, 0.0) + pos.weight
 
-        # Check unconditional cap first, then rotation-risk caps
+        # Determine which sectors need trimming and by how much
         effective_caps: dict[str, float] = {}
         for sector, weight in sector_weights.items():
             cap = config.SECTOR_CAP_UNCONDITIONAL
             if sector in sector_caps:
                 cap = min(cap, sector_caps[sector])
-            if weight > cap:
+            if weight > cap + 1e-9:
                 effective_caps[sector] = cap
 
         if not effective_caps:
             return proposal
 
         positions = list(proposal.positions)
+        total_freed: float = 0.0
+        capped_sectors = set(effective_caps.keys())
+
         for sector, cap in effective_caps.items():
-            current = sum(
-                p.weight for p in positions
-                if (candidate_map.get(p.ticker, {}).get("sector")
-                    or config.SECTOR_MAP.get(p.ticker, "?")) == sector
-            )
+            current = sum(p.weight for p in positions if _sector_of(p.ticker) == sector)
             if current <= cap + 1e-9:
                 continue
             excess = current - cap
             logger.warning(
-                "Sector rotation cap: %s at %.0f%% exceeds %s cap of %.0f%% — trimming",
+                "Sector rotation cap: %s at %.0f%% exceeds %s cap of %.0f%% — trimming %.0f%%",
                 sector, current * 100,
                 "rotation-risk" if sector in sector_caps else "unconditional",
-                cap * 100,
+                cap * 100, excess * 100,
             )
-            # Trim proportionally from the heaviest positions in this sector
-            sector_positions = sorted(
-                [(i, p) for i, p in enumerate(positions)
-                 if (candidate_map.get(p.ticker, {}).get("sector")
-                     or config.SECTOR_MAP.get(p.ticker, "?")) == sector],
-                key=lambda x: x[1].weight,
+            # Trim from heaviest positions in this sector first
+            sector_indices = sorted(
+                [i for i, p in enumerate(positions) if _sector_of(p.ticker) == sector],
+                key=lambda i: positions[i].weight,
                 reverse=True,
             )
-            remaining_excess = excess
-            for idx, pos in sector_positions:
-                if remaining_excess <= 1e-9:
+            remaining = excess
+            for idx in sector_indices:
+                if remaining <= 1e-9:
                     break
-                trim = min(remaining_excess, pos.weight - config.GAME_CONSTRAINTS["min_weight"])
+                pos = positions[idx]
+                trim = min(remaining, pos.weight - min_w)
                 if trim > 1e-9:
                     positions[idx] = Position(
                         ticker=pos.ticker,
@@ -250,15 +256,33 @@ class OpenAIRiskManager(BaseAgent):
                         rationale=pos.rationale,
                         conviction=pos.conviction,
                     )
-                    remaining_excess -= trim
+                    remaining -= trim
+            total_freed += excess - remaining  # actual amount trimmed (may be < excess if all at min_w)
 
-        # Renormalize to 100%
-        total = sum(p.weight for p in positions)
-        if total > 1e-9 and abs(total - 1.0) > 1e-6:
-            positions = [
-                Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale, conviction=p.conviction)
-                for p in positions
-            ]
+        # Redistribute freed weight to positions OUTSIDE all capped sectors,
+        # proportionally by headroom, so capped sectors are never scaled back up.
+        if total_freed > 1e-9:
+            uncapped = [i for i, p in enumerate(positions) if _sector_of(p.ticker) not in capped_sectors]
+            headroom = [max(0.0, max_w - positions[i].weight) for i in uncapped]
+            total_headroom = sum(headroom)
+            if total_headroom > 1e-9:
+                for list_idx, port_idx in enumerate(uncapped):
+                    share = headroom[list_idx] / total_headroom
+                    pos = positions[port_idx]
+                    positions[port_idx] = Position(
+                        ticker=pos.ticker,
+                        weight=min(max_w, pos.weight + total_freed * share),
+                        rationale=pos.rationale,
+                        conviction=pos.conviction,
+                    )
+            else:
+                # All uncapped positions are already at max_weight — leave as residual cash
+                logger.warning(
+                    "Sector cap freed %.0f%% but all non-capped positions are at max_weight — "
+                    "leaving as cash (%.0f%% total)",
+                    total_freed * 100,
+                    sum(p.weight for p in positions) * 100,
+                )
 
         return PortfolioProposal(
             positions=positions,
