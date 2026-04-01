@@ -496,6 +496,8 @@ class OpenAIFullAnalyst(BaseAgent):
                 logger.warning("OpenRouter FullAnalyst request failed (%s). Falling back to OpenAI.", exc)
                 self._switch_to_openai_fallback()
                 call_kwargs.pop("max_tokens", None)
+                call_kwargs.pop("extra_body", None)  # OpenRouter-specific; not valid for OpenAI
+                call_kwargs["timeout"] = API_TIMEOUT_SECONDS  # reset any DeepSeek-specific timeout override
                 call_kwargs["response_format"] = {"type": "json_object"}
                 response = self.client.chat.completions.create(model=self.model, **call_kwargs)
             else:
