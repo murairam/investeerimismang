@@ -676,7 +676,6 @@ class GeminiChallenger(BaseAgent):
                     else:
                         conviction = 5
                     positions.append(Position(ticker=p["ticker"], weight=conviction_to_weight(conviction), rationale=p.get("rationale", ""), conviction=conviction))
-                logger.info("OpenRouter challenger produced %d positions", len(positions))
                 return PortfolioProposal(
                     positions=positions,
                     reasoning=data.get("reasoning", ""),
