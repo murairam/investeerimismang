@@ -3,38 +3,20 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "SUBC.OL": 95.40204057,
-    "NHY.OL": 277.39836035,
-    "APA": 37.25712884,
-    "DOW": 36.00873399,
-    "EQNR.OL": 19.05675201,
-    "OXY": 19.29546718
+    "DANSKE.CO": 48.26408834,
+    "SWED-A.ST": 59.96560505,
+    "NKT.CO": 15.22998353,
+    "VWS.CO": 66.84701767,
+    "SUBC.OL": 60.09527341
   },
-  "pending_order": {
-    "submitted_date": "2026-04-01",
-    "positions": [
-      {
-        "ticker": "OXY",
-        "weight": 0.21
-      },
-      {
-        "ticker": "DOW",
-        "weight": 0.21
-      },
-      {
-        "ticker": "LYB",
-        "weight": 0.22
-      },
-      {
-        "ticker": "APA",
-        "weight": 0.17
-      },
-      {
-        "ticker": "SUBC.OL",
-        "weight": 0.19
-      }
-    ]
+  "verified_weights": {
+    "DANSKE.CO": 0.21,
+    "SWED-A.ST": 0.18,
+    "NKT.CO": 0.18,
+    "VWS.CO": 0.17,
+    "SUBC.OL": 0.16
   },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-03-17",
@@ -459,16 +441,25 @@
         ]
       },
       "executed_pending": false
+    },
+    {
+      "date": "2026-04-02",
+      "equity": 9811.0,
+      "cash": 0.0,
+      "daily_return": 0.03789,
+      "return_since_start": -0.0189,
+      "turnover": 0.0,
+      "positions": {
+        "DANSKE.CO": 48.26408834,
+        "SWED-A.ST": 59.96560505,
+        "NKT.CO": 15.22998353,
+        "VWS.CO": 66.84701767,
+        "SUBC.OL": 60.09527341
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-04-01",
-  "last_equity": 9452.82836054,
-  "verified_weights": {
-    "SUBC.OL": 0.25,
-    "NHY.OL": 0.25,
-    "APA": 0.14,
-    "DOW": 0.13,
-    "EQNR.OL": 0.07,
-    "OXY": 0.11
-  }
+  "last_rebalanced_date": "2026-04-02",
+  "last_equity": 9811.0
 }
