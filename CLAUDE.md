@@ -20,7 +20,8 @@ python scripts/verify.py   # confirm portfolio (LIVE mode after submission)
 python scripts/pregame_review.py  # refresh pre-game learning summary
 ```
 
-Required env vars: `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
+Required env vars: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
+Required to use OpenRouter primary routes (default when `USE_OPENROUTER_FOR_SECONDARY_AGENTS=True`): `OPENROUTER_API_KEY`.
 Optional: `DISCORD_USER_ID`.
 
 Challenger fallback chain: OpenRouter NVIDIA Nemotron (primary) → Gemini 2.5 Flash → OpenAI `gpt-5.4-nano`.
@@ -247,4 +248,5 @@ Auto-generated files (`PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`
 | `evening_review.yml` | Post-market | Optional evening review |
 
 GitHub secrets required: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
-Optional: `OPENROUTER_API_KEY`, `DISCORD_USER_ID`.
+Required for OpenRouter primary routes (default): `OPENROUTER_API_KEY`.
+Optional: `DISCORD_USER_ID`.
