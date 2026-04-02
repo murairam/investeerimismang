@@ -59,6 +59,6 @@ jobs:
           git add portfolio_history.json DAILY_LOG.md PREGAME_LOG.md PREGAME_RUNS.md paper_account.json PREGAME_LEARNING.md AI_SELF_CRITIQUE.md cost_log.json verification_tracker.json live_mode_lock.json LIVE_HANDOFF*.md learning_state.json || true
           TODAY=$(date +%Y-%m-%d)
           git diff --staged --quiet || git commit -m "chore: daily portfolio update $TODAY"
-          git restore . 2>/dev/null || true
+          git status --short && git restore . 2>/dev/null || true
           git pull --rebase origin main
           git push
