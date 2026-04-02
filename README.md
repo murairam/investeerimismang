@@ -40,7 +40,7 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 |-------|-----------|-----|
 | Language | Python 3.12+ | Type hints, dataclasses, async-compatible |
 | AI — Strategist + Risk Manager | OpenAI GPT-5.4 | Strongest instruction-following for structured JSON portfolio output |
-| AI — Challenger (primary) | OpenRouter NVIDIA Nemotron-Super-120B (free) | Free high-quality model; independent model family reduces correlated errors |
+| AI — Challenger (primary) | OpenRouter NVIDIA Nemotron-Super-120B | High-quality model; independent model family reduces correlated errors |
 | AI — Challenger fallback 1 | Google Gemini 2.5 Flash | Kicks in when OpenRouter/Nemotron is unavailable |
 | AI — Challenger fallback 2 | OpenAI GPT-5.4-nano | Final safety net when both OpenRouter and Gemini fail |
 | AI — Full Analyst | OpenRouter DeepSeek V3.2 | Strong all-signal reasoning at low token cost; GPT-5.4-nano fallback if needed |
