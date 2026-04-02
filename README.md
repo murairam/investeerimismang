@@ -1,7 +1,7 @@
 # AlphaShark
 
-![Python](https://img.shields.io/badge/python-3.11+-blue)
-![CI](https://github.com/marionstriz/investeerimismang/actions/workflows/alphashark.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.12+-blue)
+![CI](https://github.com/murairam/investeerimismang/actions/workflows/alphashark.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data across ~630 selectable tickers in 6 markets, scores the full universe, runs a multi-model adversarial AI ensemble, validates the final portfolio against competition rules, and posts the recommendation to Discord.
@@ -38,7 +38,7 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 
 | Layer | Technology | Why |
 |-------|-----------|-----|
-| Language | Python 3.11+ | Type hints, dataclasses, async-compatible |
+| Language | Python 3.12+ | Type hints, dataclasses, async-compatible |
 | AI — Strategist + Risk Manager | OpenAI GPT-5.4 | Strongest instruction-following for structured JSON portfolio output |
 | AI — Challenger (primary) | OpenRouter NVIDIA Nemotron-Super-120B (free) | Free high-quality model; independent model family reduces correlated errors |
 | AI — Challenger fallback 1 | Google Gemini 2.5 Flash | Kicks in when OpenRouter/Nemotron is unavailable |

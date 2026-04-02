@@ -20,10 +20,10 @@ python scripts/verify.py   # confirm portfolio (LIVE mode after submission)
 python scripts/pregame_review.py  # refresh pre-game learning summary
 ```
 
-Required env vars: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
-Optional: `OPENROUTER_API_KEY` (secondary-agent routing), `DISCORD_USER_ID`.
+Required env vars: `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
+Optional: `DISCORD_USER_ID`.
 
-Gemini fallback chain: OpenRouter `meta-llama/llama-4-maverick:free` first, then OpenAI `gpt-5.4-nano` as final fallback.
+Challenger fallback chain: OpenRouter NVIDIA Nemotron (primary) → Gemini 2.5 Flash → OpenAI `gpt-5.4-nano`.
 
 No formal test suite — validate changes with `python main.py` and `python scripts/status.py`.
 
@@ -35,7 +35,7 @@ yfinance primary market data + EODHD fallback for edge-case Nordic/Baltic symbol
 data/fetcher.py — 15 signals per stock + macro context (regime score 0-100, VIX, breadth)
     ↓ (parallel)
 agents/strategist.py (GPT-5.4)          ─┐ Proposal A: momentum strategist
-agents/challenger.py (Gemini 2.5 Flash)  ─┤ Proposal B: catalyst hunter
+agents/challenger.py (NVIDIA Nemotron via OpenRouter, fallback: Gemini 2.5 Flash → GPT-5.4-nano)  ─┤ Proposal B: catalyst hunter
 agents/full_analyst.py (DeepSeek V3.2 via OpenRouter, fallback GPT-5.4-nano) ─┘ Proposal C: full analyst (all signals)
     ↓
 agents/devil.py (Qwen3-235B-A22B via OpenRouter, fallback GPT-5.4-nano) — stress-tests top picks → bear cases
