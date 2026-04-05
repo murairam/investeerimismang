@@ -66,6 +66,8 @@ DEAD_MONEY_MOM_5D = 0.01
 DEVIL_ACCURACY_CAP_WEIGHT = 0.10
 BETA_CHECK_MIN_US_WEIGHT = 0.25
 NON_US_ASSUMED_BETA = 0.70
+VIX_STRESS_THRESHOLD = 22.0       # above this, apply elevated-volatility beta rules in NEUTRAL
+STRESS_INDIVIDUAL_BETA_CAP = 2.0  # any single stock with beta > this gets capped at OVERBOUGHT_WEIGHT_CAP under stress
 FALLBACK_REPLACEMENT_WEIGHT = 0.05
 MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
 # Sector concentration caps — enforced when rotation_risk signals sector exhaustion

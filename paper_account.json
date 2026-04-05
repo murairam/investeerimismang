@@ -1,465 +1,78 @@
 {
-  "start_date": "2026-03-17",
+  "start_date": "2026-04-06",
   "initial_capital": 10000.0,
-  "cash": 0.0,
-  "positions": {
-    "DANSKE.CO": 48.26408834,
-    "SWED-A.ST": 59.96560505,
-    "NKT.CO": 15.22998353,
-    "VWS.CO": 66.84701767,
-    "SUBC.OL": 60.09527341
+  "cash": 10000.0,
+  "positions": {},
+  "pending_order": {
+    "submitted_date": "2026-04-06",
+    "positions": [
+      {
+        "ticker": "LITE",
+        "weight": 0.17
+      },
+      {
+        "ticker": "FORTUM.HE",
+        "weight": 0.23
+      },
+      {
+        "ticker": "VWS.CO",
+        "weight": 0.07
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.17
+      },
+      {
+        "ticker": "ZEAL.CO",
+        "weight": 0.16
+      },
+      {
+        "ticker": "SATS",
+        "weight": 0.2
+      }
+    ]
   },
-  "verified_weights": {
-    "DANSKE.CO": 0.21,
-    "SWED-A.ST": 0.18,
-    "NKT.CO": 0.18,
-    "VWS.CO": 0.17,
-    "SUBC.OL": 0.16
-  },
-  "pending_order": null,
   "history": [
     {
-      "date": "2026-03-17",
+      "date": "2026-04-06",
       "equity": 10000.0,
-      "cash": 0.0,
+      "cash": 10000.0,
       "daily_return": 0.0,
       "return_since_start": 0.0,
-      "turnover": 1.0,
-      "positions": {
-        "FORTUM.HE": 108.59728319,
-        "MAERSK-B.CO": 0.10027855,
-        "NHY.OL": 23.52438066,
-        "TELIA.ST": 33.40989811,
-        "XOM": 8.11181857,
-        "TAL1T.TL": 1123.59545918
-      }
-    },
-    {
-      "date": "2026-03-18",
-      "equity": 9979.0,
-      "cash": 0.0,
-      "daily_return": 0.0,
-      "return_since_start": -0.0021,
-      "turnover": 1.0,
-      "positions": {
-        "MAERSK-B.CO": 0.96088457,
-        "CVX": 11.4914223,
-        "XOM": 8.67145788,
-        "DNB.OL": 44.88165398,
-        "SHB-A.ST": 75.93186023,
-        "TELIA.ST": 202.77257934,
-        "ERIC-B.ST": 78.25595315,
-        "ALFA.ST": 10.14631614
-      },
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-19",
-      "equity": 9978.0,
-      "cash": 0.0,
-      "daily_return": 0.0,
-      "return_since_start": -0.0022,
-      "turnover": 1.0,
-      "positions": {
-        "EQNR.OL": 68.79586489,
-        "AKRBP.OL": 65.78895613,
-        "APA": 60.72851359,
-        "NESTE.HE": 50.3939381,
-        "DVN": 23.68648562,
-        "MU": 2.08101143
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-20",
-      "equity": 9878.0,
-      "cash": 0.0,
-      "daily_return": -0.01002,
-      "return_since_start": -0.0122,
       "turnover": 0.0,
-      "positions": {
-        "EQNR.OL": 68.79586489,
-        "AKRBP.OL": 65.78895613,
-        "APA": 60.72851359,
-        "NESTE.HE": 50.3939381,
-        "DVN": 23.68648562,
-        "MU": 2.08101143
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-21",
-      "equity": 9861.0,
-      "cash": 0.0,
-      "daily_return": 0.0,
-      "return_since_start": -0.0139,
-      "turnover": 1.0,
-      "positions": {
-        "EQNR.OL": 69.07955928,
-        "AKRBP.OL": 68.27637946,
-        "APA": 58.37133925,
-        "NESTE.HE": 50.17469549,
-        "DVN": 23.4576975,
-        "MU": 2.15928413
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-22",
-      "equity": 9861.0,
-      "cash": 0.0,
-      "daily_return": -0.0,
-      "return_since_start": -0.0139,
-      "turnover": 0.0,
-      "positions": {
-        "EQNR.OL": 69.07955928,
-        "AKRBP.OL": 68.27637946,
-        "APA": 58.37133925,
-        "NESTE.HE": 50.17469549,
-        "DVN": 23.4576975,
-        "MU": 2.15928413
-      },
+      "positions": {},
       "pending_order": {
-        "submitted_date": "2026-03-22",
+        "submitted_date": "2026-04-06",
         "positions": [
           {
-            "ticker": "EQNR.OL",
+            "ticker": "LITE",
             "weight": 0.17
-          },
-          {
-            "ticker": "VLO",
-            "weight": 0.25
-          },
-          {
-            "ticker": "NESTE.HE",
-            "weight": 0.17
-          },
-          {
-            "ticker": "APA",
-            "weight": 0.12
-          },
-          {
-            "ticker": "AKRBP.OL",
-            "weight": 0.12
-          },
-          {
-            "ticker": "DVN",
-            "weight": 0.09
-          },
-          {
-            "ticker": "LYB",
-            "weight": 0.08
-          }
-        ]
-      },
-      "executed_pending": false
-    },
-    {
-      "date": "2026-03-21",
-      "equity": 9861.0,
-      "cash": 0.0,
-      "daily_return": 0.0,
-      "return_since_start": -0.0139,
-      "turnover": 0.0,
-      "positions": {
-        "EQNR.OL": 69.07955928,
-        "AKRBP.OL": 68.27637946,
-        "APA": 58.37133925,
-        "NESTE.HE": 50.17469549,
-        "DVN": 23.4576975,
-        "MU": 2.15928413
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-22",
-      "equity": 9861.0,
-      "cash": 0.0,
-      "daily_return": -0.0,
-      "return_since_start": -0.0139,
-      "turnover": 0.0,
-      "positions": {
-        "EQNR.OL": 69.07955928,
-        "AKRBP.OL": 68.27637946,
-        "APA": 58.37133925,
-        "NESTE.HE": 50.17469549,
-        "DVN": 23.4576975,
-        "MU": 2.15928413
-      },
-      "pending_order": {
-        "submitted_date": "2026-03-22",
-        "positions": [
-          {
-            "ticker": "APA",
-            "weight": 0.25
-          },
-          {
-            "ticker": "VLO",
-            "weight": 0.22
-          },
-          {
-            "ticker": "DELL",
-            "weight": 0.1
-          },
-          {
-            "ticker": "LYB",
-            "weight": 0.18
-          },
-          {
-            "ticker": "EQNR.OL",
-            "weight": 0.12
           },
           {
             "ticker": "FORTUM.HE",
-            "weight": 0.13
-          }
-        ]
-      },
-      "executed_pending": false
-    },
-    {
-      "date": "2026-03-21",
-      "equity": 9861.0,
-      "cash": 0.0,
-      "daily_return": 0.0,
-      "return_since_start": -0.0139,
-      "turnover": 0.0,
-      "positions": {
-        "EQNR.OL": 69.07955928,
-        "AKRBP.OL": 68.27637946,
-        "APA": 58.37133925,
-        "NESTE.HE": 50.17469549,
-        "DVN": 23.4576975,
-        "MU": 2.15928413
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-22",
-      "equity": 9861.0,
-      "cash": 0.0,
-      "daily_return": 0.0,
-      "return_since_start": -0.0139,
-      "turnover": 0.0,
-      "positions": {
-        "APA": 72.96417407,
-        "VLO": 9.51764824,
-        "DVN": 46.91539501,
-        "LYB": 23.35211869,
-        "AKAM": 10.33174803,
-        "EQNR.OL": 27.63182371
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-23",
-      "equity": 10059.0,
-      "cash": 0.0,
-      "daily_return": 0.020183,
-      "return_since_start": 0.0059,
-      "turnover": 0.0,
-      "positions": {
-        "APA": 75.46233094,
-        "VLO": 6.89267825,
-        "LYB": 29.21150683,
-        "AKAM": 15.39375898,
-        "XOM": 9.46433523,
-        "OXY": 15.54965966,
-        "DELL": 5.02091754
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-24",
-      "equity": 10202.0,
-      "cash": 0.0,
-      "daily_return": 0.014216,
-      "return_since_start": 0.0202,
-      "turnover": 0.0,
-      "positions": {
-        "XOM": 17.89444668,
-        "APA": 43.40782975,
-        "AKAM": 20.66822791,
-        "PLTR": 13.23285743,
-        "DELL": 7.10018479,
-        "CVX": 6.80600148
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-25",
-      "equity": 10396.0,
-      "cash": 0.0,
-      "daily_return": 0.019016,
-      "return_since_start": 0.0396,
-      "turnover": 0.0,
-      "positions": {
-        "AKAM": 16.1427128,
-        "HPE": 116.57560391,
-        "DELL": 11.10601099,
-        "APA": 49.45830195,
-        "VRSN": 11.94008417
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-26",
-      "equity": 10273.0,
-      "cash": 0.0,
-      "daily_return": -0.011831,
-      "return_since_start": 0.0273,
-      "turnover": 0.0,
-      "positions": {
-        "AKAM": 16.2337313,
-        "HPE": 118.16189281,
-        "DELL": 11.36174632,
-        "APA": 47.14034667,
-        "VRSN": 11.81618964
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-27",
-      "equity": 10254.0,
-      "cash": 0.0,
-      "daily_return": -0.00185,
-      "return_since_start": 0.0254,
-      "turnover": 0.0,
-      "positions": {
-        "VWS.CO": 97.71555011,
-        "DELL": 13.44111724,
-        "FANG": 9.35048144,
-        "HPE": 75.41180247,
-        "AKAM": 15.11652877,
-        "OXY": 20.19530018
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-29",
-      "equity": 10123.0,
-      "cash": 0.0,
-      "daily_return": -0.012776,
-      "return_since_start": 0.0123,
-      "turnover": 0.0,
-      "positions": {
-        "FANG": 14.46315344,
-        "XOM": 10.92645977,
-        "LYB": 23.22331245,
-        "OXY": 26.81484553,
-        "APA": 39.45811503,
-        "MPC": 6.02598648
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-30",
-      "equity": 10186.0,
-      "cash": 0.0,
-      "daily_return": 0.006223,
-      "return_since_start": 0.0186,
-      "turnover": 0.0,
-      "positions": {
-        "NHY.OL": 280.80990455,
-        "SUBC.OL": 97.56220534,
-        "APA": 36.63399398,
-        "DOW": 36.08395853,
-        "EQNR.OL": 32.54240434,
-        "OXY": 19.22226968
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-03-31",
-      "equity": 10158.0,
-      "cash": 0.0,
-      "daily_return": -0.002749,
-      "return_since_start": 0.0158,
-      "turnover": 0.0,
-      "positions": {
-        "SUBC.OL": 95.40204057,
-        "NHY.OL": 277.39836035,
-        "APA": 37.25712884,
-        "DOW": 36.00873399,
-        "EQNR.OL": 19.05675201,
-        "OXY": 19.29546718
-      },
-      "pending_order": null,
-      "source": "verified"
-    },
-    {
-      "date": "2026-04-01",
-      "equity": 9452.83,
-      "cash": 0.0,
-      "daily_return": -0.06942,
-      "return_since_start": -0.054717,
-      "turnover": 0.0,
-      "positions": {
-        "SUBC.OL": 95.40204057,
-        "NHY.OL": 277.39836035,
-        "APA": 37.25712884,
-        "DOW": 36.00873399,
-        "EQNR.OL": 19.05675201,
-        "OXY": 19.29546718
-      },
-      "pending_order": {
-        "submitted_date": "2026-04-01",
-        "positions": [
-          {
-            "ticker": "OXY",
-            "weight": 0.21
+            "weight": 0.23
           },
           {
-            "ticker": "DOW",
-            "weight": 0.21
+            "ticker": "VWS.CO",
+            "weight": 0.07
           },
           {
-            "ticker": "LYB",
-            "weight": 0.22
-          },
-          {
-            "ticker": "APA",
+            "ticker": "STX",
             "weight": 0.17
           },
           {
-            "ticker": "SUBC.OL",
-            "weight": 0.19
+            "ticker": "ZEAL.CO",
+            "weight": 0.16
+          },
+          {
+            "ticker": "SATS",
+            "weight": 0.2
           }
         ]
       },
       "executed_pending": false
-    },
-    {
-      "date": "2026-04-02",
-      "equity": 9811.0,
-      "cash": 0.0,
-      "daily_return": 0.03789,
-      "return_since_start": -0.0189,
-      "turnover": 0.0,
-      "positions": {
-        "DANSKE.CO": 48.26408834,
-        "SWED-A.ST": 59.96560505,
-        "NKT.CO": 15.22998353,
-        "VWS.CO": 66.84701767,
-        "SUBC.OL": 60.09527341
-      },
-      "pending_order": null,
-      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-04-02",
-  "last_equity": 9811.0
+  "last_rebalanced_date": "2026-04-06",
+  "last_equity": 10000.0
 }

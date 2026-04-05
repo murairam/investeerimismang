@@ -355,6 +355,28 @@ class OpenAIRiskManager(BaseAgent):
                     confidence=proposal.confidence,
                     learning_reflection=proposal.learning_reflection,
                 )
+
+            # VIX stress override: in NEUTRAL with elevated VIX, cap any individual stock
+            # with beta > STRESS_INDIVIDUAL_BETA_CAP at 15% to prevent ultra-high-beta
+            # concentration during genuine market stress (e.g. tariff shocks, VIX spikes).
+            vix = snapshot.get("vix_level", 0) or 0
+            if regime == "NEUTRAL" and vix >= config.VIX_STRESS_THRESHOLD:
+                stress_capped = False
+                positions = list(proposal.positions)
+                for i, p in enumerate(positions):
+                    stock_beta = beta_map.get(p.ticker, float("nan"))
+                    if not math.isnan(stock_beta) and stock_beta > config.STRESS_INDIVIDUAL_BETA_CAP and p.weight > config.OVERBOUGHT_WEIGHT_CAP:
+                        logger.warning(
+                            "VIX stress cap: %s beta %.2f → weight %.0f%% capped to %.0f%% (VIX %.1f)",
+                            p.ticker, stock_beta, p.weight * 100, config.OVERBOUGHT_WEIGHT_CAP * 100, vix,
+                        )
+                        positions[i] = Position(ticker=p.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=p.rationale, conviction=p.conviction)
+                        stress_capped = True
+                if stress_capped:
+                    total = sum(p.weight for p in positions)
+                    if total > 0:
+                        positions = [Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale, conviction=p.conviction) for p in positions]
+                    proposal = PortfolioProposal(positions=positions, reasoning=proposal.reasoning, confidence=proposal.confidence, learning_reflection=proposal.learning_reflection)
         return proposal
 
     def _enforce_selection_quality(
