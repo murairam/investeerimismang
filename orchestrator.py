@@ -907,9 +907,12 @@ class AlphaSharkOrchestrator:
             )
 
         # On/after live date, emit one-time handoff summary automatically
-        handoff_info = generate_live_handoff_if_due(snapshot["as_of_date"], game_start_date="2026-04-06")
-        if handoff_info and handoff_info.get("generated"):
-            logger.info("Live handoff generated: %s", handoff_info["path"])
+        try:
+            handoff_info = generate_live_handoff_if_due(snapshot["as_of_date"], game_start_date="2026-04-06")
+            if handoff_info and handoff_info.get("generated"):
+                logger.info("Live handoff generated: %s", handoff_info["path"])
+        except Exception as exc:
+            logger.warning("Live handoff generation failed (non-fatal): %s", exc)
 
         # Step 8: Send to Discord
         # Use the verified game portfolio as the diff baseline so "Changes from Yesterday"
