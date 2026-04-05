@@ -7,27 +7,23 @@
     "submitted_date": "2026-04-06",
     "positions": [
       {
-        "ticker": "LITE",
-        "weight": 0.17
-      },
-      {
         "ticker": "FORTUM.HE",
-        "weight": 0.23
+        "weight": 0.25
       },
       {
         "ticker": "VWS.CO",
-        "weight": 0.07
-      },
-      {
-        "ticker": "STX",
-        "weight": 0.17
+        "weight": 0.12
       },
       {
         "ticker": "ZEAL.CO",
-        "weight": 0.16
+        "weight": 0.24
       },
       {
-        "ticker": "SATS",
+        "ticker": "GLW",
+        "weight": 0.19
+      },
+      {
+        "ticker": "STX",
         "weight": 0.2
       }
     ]
@@ -45,27 +41,23 @@
         "submitted_date": "2026-04-06",
         "positions": [
           {
-            "ticker": "LITE",
-            "weight": 0.17
-          },
-          {
             "ticker": "FORTUM.HE",
-            "weight": 0.23
+            "weight": 0.25
           },
           {
             "ticker": "VWS.CO",
-            "weight": 0.07
-          },
-          {
-            "ticker": "STX",
-            "weight": 0.17
+            "weight": 0.12
           },
           {
             "ticker": "ZEAL.CO",
-            "weight": 0.16
+            "weight": 0.24
           },
           {
-            "ticker": "SATS",
+            "ticker": "GLW",
+            "weight": 0.19
+          },
+          {
+            "ticker": "STX",
             "weight": 0.2
           }
         ]

@@ -4,39 +4,36 @@ One canonical entry per live-game date. Verified entries reflect the actual subm
 
 ---
 
-## 2026-04-06 00:06:44
+## 2026-04-06 00:58:20
 
 **Market:** NEUTRAL regime · SPX vs 200d SMA: -0.9% · VIX: 23.9 · S&P 500 20d: -3.6%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
 **Yesterday's P&L:** Portfolio +0.0% · Benchmark +0.1% · Alpha -0.1%
+Winners: STX +0.2%
 
 **Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
 
-**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
 
-**Thesis:** I am cutting persistent laggards from the current portfolio—DANSKE.CO, SWED-A.ST, NKT.CO, and SUBC.OL—because recent alpha has been consistently negative and Energy now carries a HIGH rotation-risk warning; VWS.CO is the only incumbent retained as a still-valid winner. Consensus drove the core: LITE as triple-consensus anchor, then FORTUM.HE, VWS.CO, STX, and ZEAL.CO from double-consensus, with SATS added as the best unique accelerator while excluding low-beta dead-money and decelerating Energy/Chem names. Portfolio beta should remain above normal neutral levels due to LITE/STX/SATS, but that is acceptable because rotation leadership and slot quality take priority over forcing beta to a target under active rotation risk.
+**Thesis:** I kept the strongest validated current winners from the existing book—FORTUM.HE, VWS.CO, ZEAL.CO, and STX—while cutting persistent laggards like LITE and SATS and not adding filler names from weak sectors. Consensus was strongest in FORTUM.HE and ZEAL.CO, with VWS.CO, GLW, and STX also independently validated; I excluded energy/chem exposure due to explicit rotation-risk warnings and kept the portfolio concentrated at 5 names. Portfolio beta should land around the upper end of neutral but below the strategist proposal's 1.40, which is acceptable because rotation risk overrides strict beta targeting.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **LITE** | 17.0% | Triple-consensus pick and the clearest leadership name on momentum/Sharpe/5d acceleration; despite HIGH risk beta, the signals and low crowding support maximum conviction in a competition portfolio. |
-| 2 | **FORTUM.HE** | 23.0% | Double-consensus pick aligned with the strongest current rotation into Utilities (100% breadth), offering cleaner regime fit than Energy/Chem while still showing strong 5d momentum. |
-| 3 | **VWS.CO** | 7.0% | Double-consensus and an existing winner that still earns its slot with positive 5d momentum; kept despite overbought RSI because recent holdings context argues to retain strong performers rather than fully reset. |
-| 4 | **STX** | 17.0% | Double-consensus high-beta momentum name with strong acceleration and low crowding, but conviction is cut for explicit HIGH risk due to beta 2.44 in a cautious neutral tape. |
-| 5 | **ZEAL.CO** | 16.0% | Double-consensus with elite risk-adjusted momentum and low crowding, but conviction is reduced materially because the devil case flags it as still deep below highs without a fully proven recovery. |
-| 6 | **SATS** | 20.0% | Best unique catalyst pick from Proposal B with strong 5d momentum and acceptable medium risk, earning the final slot over low-beta CTY1S.HE and rotation-vulnerable APA/DOW. |
+| 1 | **FORTUM.HE** | 25.0% | Triple-consensus current winner we should keep: strongest regime fit in utilities with 100% sector breadth, 52-week-high leadership, strong 5d momentum, and low devil risk. |
+| 2 | **VWS.CO** | 12.0% | Double-consensus rotation leader and existing holding; despite overbought RSI and low beta, it remains in one of the strongest breadth-supported groups and earns a slot over weaker legacy names. |
+| 3 | **ZEAL.CO** | 24.0% | Triple-consensus and under-the-radar name with strong relative-strength signals, but conviction is cut materially because devil flagged it HIGH risk due to deep drawdown from highs and elevated beta. |
+| 4 | **GLW** | 19.0% | Double-consensus unique replacement for laggards LITE/SATS, offering strong relative strength and acceleration, but conviction is reduced for very high beta and cautious regime conditions. |
+| 5 | **STX** | 20.0% | Double-consensus and one of our current stronger winners with elite 5d momentum, yet conviction is trimmed sharply because it is HIGH risk, high-beta tech in a lagging sector under cautious market conditions. |
 
 **Changes from yesterday:**
-- ➕ Added **LITE** at 17.0%
-- ➕ Added **FORTUM.HE** at 23.0%
-- ➕ Added **STX** at 17.0%
-- ➕ Added **ZEAL.CO** at 16.0%
-- ➕ Added **SATS** at 20.0%
-- ➖ Removed **DANSKE.CO** (was 21.0%)
-- ➖ Removed **SWED-A.ST** (was 18.0%)
-- ➖ Removed **NKT.CO** (was 18.0%)
-- ➖ Removed **SUBC.OL** (was 16.0%)
-- ▼ **VWS.CO**: 17.0% → 7.0% (-10.0%)
+- ➕ Added **GLW** at 19.0%
+- ➖ Removed **LITE** (was 17.0%)
+- ➖ Removed **SATS** (was 20.0%)
+- ▲ **VWS.CO**: 7.0% → 12.0% (+5.0%)
+- ▲ **ZEAL.CO**: 16.0% → 24.0% (+8.0%)
+- ▲ **STX**: 17.0% → 20.0% (+3.0%)
 
 ---
+

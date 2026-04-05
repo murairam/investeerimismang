@@ -17,7 +17,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 
 ## What's Working ✅
 - 'catalyst' rationale is working: +0.5% avg, 62% hit rate
-- Conviction sizing is working: Tier 1 +0.1% > Tier 3 -0.8%
+- Conviction sizing is working: Tier 1 +0.2% > Tier 3 -0.8%
 
 ## Systematic Biases / Errors ⚠️
 - 'high_sharpe' rationale is weak: -0.2% avg, 39% hit rate
@@ -30,7 +30,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 | momentum | 66 | -0.04% | 45% |
 | high_sharpe | 59 | -0.16% | 39% |
 | breakout | 10 | +0.05% | 50% |
-| consensus | 52 | -0.04% | 44% |
+| consensus | 52 | -0.03% | 44% |
 | catalyst | 8 | +0.53% | 62% |
 | diversifier | 4 | -0.40% | 50% |
 | non_us_differentiator | 26 | -0.49% | 19% |

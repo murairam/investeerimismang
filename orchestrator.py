@@ -912,7 +912,7 @@ class AlphaSharkOrchestrator:
             if handoff_info and handoff_info.get("generated"):
                 logger.info("Live handoff generated: %s", handoff_info["path"])
         except Exception as exc:
-            logger.warning("Live handoff generation failed (non-fatal): %s", exc)
+            logger.warning("Live handoff generation failed (non-fatal): %s", exc, exc_info=True)
 
         # Step 8: Send to Discord
         # Use the verified game portfolio as the diff baseline so "Changes from Yesterday"
