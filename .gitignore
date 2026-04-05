@@ -163,3 +163,7 @@ learning_state.json
 portfolio_history.json
 verification_tracker.json
 GEMINI.md
+
+# Live mode auto-generated files (recreated on first LIVE run; never commit)
+live_mode_lock.json
+LIVE_HANDOFF_*.md

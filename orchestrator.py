@@ -723,6 +723,11 @@ class AlphaSharkOrchestrator:
         # so that normalize() and round_to_whole_pct() cannot re-inflate a capped sector.
         final_proposal = self.risk_manager._enforce_sector_rotation_cap(final_proposal, snapshot)
 
+        # Step 5d: enforce VIX stress cap AFTER all normalization/rounding — same
+        # rationale as 5c: normalize() would re-inflate capped positions if applied earlier.
+        # Any freed weight that cannot be redistributed stays as cash (game requires ≥75%).
+        final_proposal = self.risk_manager._enforce_vix_stress_cap(final_proposal, snapshot)
+
         total = sum(p.weight for p in final_proposal.positions)
         logger.info(
             "Final portfolio: %d positions, total weight %.1f%%, confidence %.0f%%",
@@ -907,9 +912,12 @@ class AlphaSharkOrchestrator:
             )
 
         # On/after live date, emit one-time handoff summary automatically
-        handoff_info = generate_live_handoff_if_due(snapshot["as_of_date"], game_start_date="2026-04-06")
-        if handoff_info and handoff_info.get("generated"):
-            logger.info("Live handoff generated: %s", handoff_info["path"])
+        try:
+            handoff_info = generate_live_handoff_if_due(snapshot["as_of_date"], game_start_date="2026-04-06")
+            if handoff_info and handoff_info.get("generated"):
+                logger.info("Live handoff generated: %s", handoff_info["path"])
+        except Exception as exc:
+            logger.warning("Live handoff generation failed (non-fatal): %s", exc, exc_info=True)
 
         # Step 8: Send to Discord
         # Use the verified game portfolio as the diff baseline so "Changes from Yesterday"

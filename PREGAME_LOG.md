@@ -1214,3 +1214,37 @@ Winners: NHY.OL +0.1% | Losers: OXY -5.4%, EQNR.OL -5.1%, APA -3.7%
 
 ---
 
+## 2026-04-05 23:43:34
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.9% · VIX: 23.9 · S&P 500 20d: -3.6%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.0% · Benchmark +0.1% · Alpha -0.1%
+
+**Paper account:** Equity €8,821.52 (start €10,000) · Today -10.09% · Since start -11.78% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I am making a decisive rotation out of the current lagging Nordic financials and NKT, while only keeping VWS.CO from the existing book because recent portfolio alpha has been persistently weak and the mandate says to keep winners but cut laggards. Consensus was strongest in LITE, FORTUM.HE, STX, and VWS.CO; I included those, then chose HPE as the best unique replacement over weaker or rotation-misaligned alternatives like DANSKE.CO, NKT.CO, SUBC.OL, SATS, and ZEAL.CO. Portfolio beta should remain above standard neutral levels due to LITE/STX/HPE, but with rotation-risk override active that is acceptable because the book is concentrated in the strongest validated movers rather than adding filler solely to target beta.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **FORTUM.HE** | 25.0% | Double-consensus pick and the cleanest regime-fit name: utilities have 100% breadth leadership, strong 5d momentum, and it helps rotate away from weakening Energy/Chem while replacing lagging current holdings. |
+| 2 | **VWS.CO** | 8.0% | Double-consensus current holding that still earns its slot on relative strength; despite RSI 81 overbought risk, it is one of the few existing names not clearly broken and fits the 'keep strong winners, cut laggards' rule. |
+| 3 | **LITE** | 22.0% | Triple-consensus gives maximum independent validation, but conviction is capped down by the mandatory high-risk adjustment for beta 2.33 in a cautious neutral tape; still included because it has the strongest breakout/momentum profile and low crowding. |
+| 4 | **STX** | 22.0% | Double-consensus momentum continuation candidate with strong 5d acceleration and low crowding, but reduced materially for HIGH-risk beta 2.44 and neutral-regime reversal risk. |
+| 5 | **HPE** | 23.0% | Best unique add from the full analyst: positive analyst upside, high beta without the extreme risk of LITE/STX, and a cleaner slot than retaining weak banks/NKT/SUBC as strategy decay argues for rotation. |
+
+**Changes from yesterday:**
+- ➕ Added **FORTUM.HE** at 25.0%
+- ➕ Added **LITE** at 22.0%
+- ➕ Added **STX** at 22.0%
+- ➕ Added **HPE** at 23.0%
+- ➖ Removed **DANSKE.CO** (was 21.0%)
+- ➖ Removed **SWED-A.ST** (was 18.0%)
+- ➖ Removed **NKT.CO** (was 18.0%)
+- ➖ Removed **SUBC.OL** (was 16.0%)
+- ▼ **VWS.CO**: 17.0% → 8.0% (-9.0%)
+
+---

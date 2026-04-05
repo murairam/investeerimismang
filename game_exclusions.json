@@ -3,6 +3,8 @@
     "OKEA.OL": "Not selectable in game UI",
     "CIEN": "Not selectable in game UI",
     "SNDK": "Not selectable in game UI",
-    "KSLAV.HE": "Delisted; no price data available"
+    "KSLAV.HE": "Delisted; no price data available",
+    "SATS": "Not selectable in game UI",
+    "LITE": "Not selectable in game UI"
   }
 }

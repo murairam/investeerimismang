@@ -66,6 +66,9 @@ DEAD_MONEY_MOM_5D = 0.01
 DEVIL_ACCURACY_CAP_WEIGHT = 0.10
 BETA_CHECK_MIN_US_WEIGHT = 0.25
 NON_US_ASSUMED_BETA = 0.70
+STRESS_INDIVIDUAL_BETA_CAP = 2.0  # any single stock with beta > this gets capped at OVERBOUGHT_WEIGHT_CAP under stress
+# VIX_STRESS_THRESHOLD intentionally reuses VIX_NEUTRAL_THRESHOLD so strategist VIX
+# guidance and risk-manager stress rules stay in sync; defined below alongside other VIX constants.
 FALLBACK_REPLACEMENT_WEIGHT = 0.05
 MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
 # Sector concentration caps — enforced when rotation_risk signals sector exhaustion
@@ -92,6 +95,7 @@ QUALITY_REBALANCE_DEAD_MONEY_PENALTY = 0.70
 VIX_HIGH_THRESHOLD = 30
 VIX_NEUTRAL_THRESHOLD = 22
 VIX_LOW_THRESHOLD = 15
+VIX_STRESS_THRESHOLD = VIX_NEUTRAL_THRESHOLD  # intentionally aligned: stress cap fires at same boundary as NEUTRAL regime
 
 # ── Signal parameters ────────────────────────────────────────────────────────
 MOMENTUM_WINDOW = 20        # trading days for momentum calculation
