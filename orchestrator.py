@@ -723,6 +723,11 @@ class AlphaSharkOrchestrator:
         # so that normalize() and round_to_whole_pct() cannot re-inflate a capped sector.
         final_proposal = self.risk_manager._enforce_sector_rotation_cap(final_proposal, snapshot)
 
+        # Step 5d: enforce VIX stress cap AFTER all normalization/rounding — same
+        # rationale as 5c: normalize() would re-inflate capped positions if applied earlier.
+        # Any freed weight that cannot be redistributed stays as cash (game requires ≥75%).
+        final_proposal = self.risk_manager._enforce_vix_stress_cap(final_proposal, snapshot)
+
         total = sum(p.weight for p in final_proposal.positions)
         logger.info(
             "Final portfolio: %d positions, total weight %.1f%%, confidence %.0f%%",

@@ -291,6 +291,102 @@ class OpenAIRiskManager(BaseAgent):
             learning_reflection=proposal.learning_reflection,
         )
 
+    def _enforce_vix_stress_cap(
+        self,
+        proposal: PortfolioProposal,
+        snapshot: MarketSnapshot,
+    ) -> PortfolioProposal:
+        """
+        Hard-cap individual positions with beta > STRESS_INDIVIDUAL_BETA_CAP at
+        OVERBOUGHT_WEIGHT_CAP when VIX >= VIX_STRESS_THRESHOLD in NEUTRAL regime.
+
+        Called AFTER all normalization and rounding in the orchestrator so that
+        normalize() / round_to_whole_pct() cannot re-inflate the capped weights.
+        Any freed weight that cannot be redistributed (because uncapped positions
+        are already at max_weight) remains as implicit cash — the game rule only
+        requires ≥75% invested, so this is always safe.
+        """
+        regime = snapshot.get("regime", "")
+        vix = snapshot.get("vix_level", 0) or 0
+        if regime != "NEUTRAL" or vix < config.VIX_STRESS_THRESHOLD:
+            return proposal
+
+        cap = config.OVERBOUGHT_WEIGHT_CAP
+        max_w = config.GAME_CONSTRAINTS["max_weight"]
+        beta_map = {
+            c["ticker"]: c["beta"]
+            for c in snapshot["candidates"]
+            if not math.isnan(c.get("beta", float("nan")))
+        }
+
+        positions = list(proposal.positions)
+        capped_indices: set[int] = set()
+        freed_weight = 0.0
+        for i, p in enumerate(positions):
+            stock_beta = beta_map.get(p.ticker, float("nan"))
+            if not math.isnan(stock_beta) and stock_beta > config.STRESS_INDIVIDUAL_BETA_CAP and p.weight > cap:
+                freed_weight += p.weight - cap
+                positions[i] = Position(ticker=p.ticker, weight=cap, rationale=p.rationale, conviction=p.conviction)
+                capped_indices.add(i)
+                logger.warning(
+                    "VIX stress cap (final): %s beta %.2f → weight %.0f%% capped to %.0f%% (VIX %.1f)",
+                    p.ticker, stock_beta, p.weight * 100, cap * 100, vix,
+                )
+
+        if not capped_indices:
+            return proposal
+
+        # Redistribute freed weight only to uncapped positions, bounded by max_weight.
+        remaining = freed_weight
+        for _ in range(len(positions)):
+            headroom = {
+                i: max_w - p.weight
+                for i, p in enumerate(positions)
+                if i not in capped_indices and max_w - p.weight > 1e-9
+            }
+            if not headroom or remaining < 1e-9:
+                break
+            total_headroom = sum(headroom.values())
+            new_positions = list(positions)
+            actually_added = 0.0
+            for i, avail in headroom.items():
+                add = min(avail, remaining * (avail / total_headroom))
+                new_positions[i] = Position(
+                    ticker=positions[i].ticker,
+                    weight=positions[i].weight + add,
+                    rationale=positions[i].rationale,
+                    conviction=positions[i].conviction,
+                )
+                actually_added += add
+            positions = new_positions
+            remaining -= actually_added
+            if remaining < 1e-9:
+                break
+
+        if remaining > 1e-9:
+            logger.info(
+                "VIX stress cap: %.1f%% freed weight could not be redistributed "
+                "(uncapped positions at max_weight) — retained as cash buffer",
+                remaining * 100,
+            )
+
+        # Re-apply cap as final guarantee after redistribution
+        positions = [
+            Position(
+                ticker=p.ticker,
+                weight=min(p.weight, cap) if i in capped_indices else p.weight,
+                rationale=p.rationale,
+                conviction=p.conviction,
+            )
+            for i, p in enumerate(positions)
+        ]
+        return PortfolioProposal(
+            positions=positions,
+            reasoning=proposal.reasoning,
+            confidence=proposal.confidence,
+            learning_reflection=proposal.learning_reflection,
+        )
+
     def _enforce_beta(
         self,
         proposal: PortfolioProposal,
@@ -377,18 +473,31 @@ class OpenAIRiskManager(BaseAgent):
                         p.ticker, stock_beta, p.weight * 100, cap * 100, vix,
                     )
             if capped_indices:
-                # Redistribute freed weight only among uncapped positions, proportionally
-                uncapped_total = sum(p.weight for i, p in enumerate(positions) if i not in capped_indices)
-                if uncapped_total > 1e-9:
-                    positions = [
-                        Position(
-                            ticker=p.ticker,
-                            weight=p.weight + freed_weight * (p.weight / uncapped_total) if i not in capped_indices else p.weight,
-                            rationale=p.rationale,
-                            conviction=p.conviction,
-                        )
-                        for i, p in enumerate(positions)
-                    ]
+                # Redistribute freed weight only among uncapped positions, bounded by max_weight
+                # so no uncapped position exceeds the game constraint (which would trigger
+                # validator.normalize() and risk re-inflating the stress-capped names).
+                max_w = config.GAME_CONSTRAINTS["max_weight"]
+                remaining = freed_weight
+                for _ in range(len(positions)):  # iterate until freed weight is fully absorbed
+                    headroom = {i: max_w - p.weight for i, p in enumerate(positions) if i not in capped_indices and max_w - p.weight > 1e-9}
+                    if not headroom or remaining < 1e-9:
+                        break
+                    total_headroom = sum(headroom.values())
+                    new_positions = list(positions)
+                    actually_added = 0.0
+                    for i, avail in headroom.items():
+                        add = min(avail, remaining * (avail / total_headroom))
+                        new_positions[i] = Position(ticker=positions[i].ticker, weight=positions[i].weight + add, rationale=positions[i].rationale, conviction=positions[i].conviction)
+                        actually_added += add
+                    positions = new_positions
+                    remaining -= actually_added
+                    if remaining < 1e-9:
+                        break
+                # Re-apply VIX cap after redistribution to guarantee hard ceiling
+                positions = [
+                    Position(ticker=p.ticker, weight=min(p.weight, cap) if i in capped_indices else p.weight, rationale=p.rationale, conviction=p.conviction)
+                    for i, p in enumerate(positions)
+                ]
                 proposal = PortfolioProposal(positions=positions, reasoning=proposal.reasoning, confidence=proposal.confidence, learning_reflection=proposal.learning_reflection)
         return proposal
 
