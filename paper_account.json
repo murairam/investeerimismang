@@ -11,20 +11,20 @@
         "weight": 0.25
       },
       {
+        "ticker": "STX",
+        "weight": 0.15
+      },
+      {
+        "ticker": "DOW",
+        "weight": 0.172
+      },
+      {
         "ticker": "VWS.CO",
-        "weight": 0.12
+        "weight": 0.178
       },
       {
         "ticker": "ZEAL.CO",
-        "weight": 0.24
-      },
-      {
-        "ticker": "GLW",
-        "weight": 0.19
-      },
-      {
-        "ticker": "STX",
-        "weight": 0.2
+        "weight": 0.25
       }
     ]
   },
@@ -45,20 +45,20 @@
             "weight": 0.25
           },
           {
+            "ticker": "STX",
+            "weight": 0.15
+          },
+          {
+            "ticker": "DOW",
+            "weight": 0.172
+          },
+          {
             "ticker": "VWS.CO",
-            "weight": 0.12
+            "weight": 0.178
           },
           {
             "ticker": "ZEAL.CO",
-            "weight": 0.24
-          },
-          {
-            "ticker": "GLW",
-            "weight": 0.19
-          },
-          {
-            "ticker": "STX",
-            "weight": 0.2
+            "weight": 0.25
           }
         ]
       },

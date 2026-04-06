@@ -93,7 +93,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.598571,
+    "avg_turnover_estimate": 0.584429,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -118,7 +118,7 @@
   "rationale_stats": {
     "momentum": {
       "observations": 66,
-      "avg_return_1d": -0.000419,
+      "avg_return_1d": -0.000444,
       "hit_rate": 0.4545
     },
     "high_sharpe": {
@@ -133,7 +133,7 @@
     },
     "consensus": {
       "observations": 52,
-      "avg_return_1d": -0.000346,
+      "avg_return_1d": -0.000362,
       "hit_rate": 0.4423
     },
     "catalyst": {
@@ -163,7 +163,7 @@
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.001521,
+    "tier1_avg_return_1d": 0.001472,
     "tier2_avg_return_1d": -0.000753,
     "tier3_avg_return_1d": -0.008444,
     "tier1_observations": 33,
@@ -174,23 +174,31 @@
   "devil_accuracy": {
     "status": "actionable",
     "observations": 25,
-    "high_risk_avg_return_1d": -0.000554,
-    "low_risk_avg_return_1d": -0.000875,
+    "high_risk_avg_return_1d": -0.000586,
+    "low_risk_avg_return_1d": -0.00089,
     "high_risk_negative_rate": 0.32,
     "accuracy": 0.32,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
+        "ticker": "SUBC.OL",
+        "flag_count": 4
+      },
+      {
         "ticker": "STX",
         "flag_count": 4
       },
       {
-        "ticker": "SUBC.OL",
+        "ticker": "LITE",
         "flag_count": 3
       },
       {
-        "ticker": "LITE",
+        "ticker": "VWS.CO",
         "flag_count": 3
+      },
+      {
+        "ticker": "APA",
+        "flag_count": 2
       },
       {
         "ticker": "WDC",
@@ -198,10 +206,6 @@
       },
       {
         "ticker": "NHY.OL",
-        "flag_count": 2
-      },
-      {
-        "ticker": "VWS.CO",
         "flag_count": 2
       },
       {
@@ -263,33 +267,10 @@
   },
   "yesterday_postmortem": {
     "date": "2026-04-05",
-    "portfolio_return_1d": 0.0003,
+    "portfolio_return_1d": 0.0004,
     "benchmark_return_1d": 0.0011,
-    "alpha_1d": -0.0008,
+    "alpha_1d": -0.0007,
     "winners": [
-      {
-        "ticker": "HPE",
-        "return_1d": 0.0021,
-        "vs_benchmark": 0.0009,
-        "tags": [
-          "momentum"
-        ],
-        "rationale_snippet": "Best unique add from the full analyst: positive analyst upside, high beta without the extreme risk o",
-        "rsi_at_entry": 63.512981,
-        "vol_ratio_at_entry": null
-      },
-      {
-        "ticker": "STX",
-        "return_1d": 0.0021,
-        "vs_benchmark": 0.0009,
-        "tags": [
-          "momentum",
-          "consensus"
-        ],
-        "rationale_snippet": "Double-consensus momentum continuation candidate with strong 5d acceleration and low crowding, but r",
-        "rsi_at_entry": 56.329364,
-        "vol_ratio_at_entry": null
-      },
       {
         "ticker": "LITE",
         "return_1d": 0.0015,
@@ -303,6 +284,29 @@
         ],
         "rationale_snippet": "Triple-consensus gives maximum independent validation, but conviction is capped down by the mandator",
         "rsi_at_entry": 65.402675,
+        "vol_ratio_at_entry": null
+      },
+      {
+        "ticker": "HPE",
+        "return_1d": 0.0012,
+        "vs_benchmark": 0.0001,
+        "tags": [
+          "momentum"
+        ],
+        "rationale_snippet": "Best unique add from the full analyst: positive analyst upside, high beta without the extreme risk o",
+        "rsi_at_entry": 63.512981,
+        "vol_ratio_at_entry": null
+      },
+      {
+        "ticker": "STX",
+        "return_1d": 0.0012,
+        "vs_benchmark": 0.0001,
+        "tags": [
+          "momentum",
+          "consensus"
+        ],
+        "rationale_snippet": "Double-consensus momentum continuation candidate with strong 5d acceleration and low crowding, but r",
+        "rsi_at_entry": 56.329364,
         "vol_ratio_at_entry": null
       },
       {
@@ -337,6 +341,6 @@
       }
     ],
     "losers": [],
-    "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'consensus' entries outperformed \u2014 continue favouring this setup"
+    "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'high_sharpe' entries outperformed \u2014 continue favouring this setup"
   }
 }
