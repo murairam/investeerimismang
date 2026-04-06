@@ -27,10 +27,10 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
 |---|---:|---:|---:|
-| momentum | 66 | -0.04% | 45% |
+| momentum | 66 | -0.05% | 42% |
 | high_sharpe | 59 | -0.16% | 39% |
 | breakout | 10 | +0.05% | 50% |
-| consensus | 52 | -0.04% | 44% |
+| consensus | 52 | -0.04% | 42% |
 | catalyst | 8 | +0.53% | 62% |
 | diversifier | 4 | -0.40% | 50% |
 | non_us_differentiator | 26 | -0.49% | 19% |
@@ -40,7 +40,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 33 | +0.15% |
+| Tier 1 (high conviction) | 20-25% | 33 | +0.14% |
 | Tier 2 (medium conviction) | 12-18% | 38 | -0.08% |
 | Tier 3 (low conviction) | 5-10% | 10 | -0.84% |
 

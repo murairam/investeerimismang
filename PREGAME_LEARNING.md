@@ -8,7 +8,7 @@ Days remaining: 0
 - Training days with measurable alpha: 16
 - Win days (alpha > 0): 8
 - Loss days (alpha < 0): 8
-- Average daily alpha: -0.08%
+- Average daily alpha: -0.09%
 - Paper account equity: €10,000.00 (from €10,000.00, return +0.00%)
 - Max drawdown (paper): 0.00%
 - Average turnover: 0.00%
