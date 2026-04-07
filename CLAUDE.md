@@ -73,7 +73,7 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 - **Enforced in:** All agent system prompts + Risk Manager synthesis rules
 
 ### Competition Context in Agent Prompts
-- **All 4 agents** now open with: "844 participants, only #1 wins — INTELLIGENT AGGRESSION required"
+- **All 4 agents** now open with: "{n_participants} participants, only #1 wins — INTELLIGENT AGGRESSION required" (count loaded dynamically from DB via `load_last_known_participant_count()` and injected into `snapshot["n_participants"]` by the orchestrator)
 - **Risk Manager** additionally: "15% drawdown acceptable for 40% upside potential — price for competition, not wealth management"
 
 ### Sector Rotation Indicator

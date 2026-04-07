@@ -6,9 +6,9 @@ Days remaining: 0
 
 ## Scoreboard
 - Training days with measurable alpha: 17
-- Win days (alpha > 0): 9
-- Loss days (alpha < 0): 8
-- Average daily alpha: -0.04%
+- Win days (alpha > 0): 8
+- Loss days (alpha < 0): 9
+- Average daily alpha: -0.10%
 - Paper account equity: €10,000.00 (from €10,000.00, return +0.00%)
 - Max drawdown (paper): 0.00%
 - Average turnover: 0.00%
@@ -16,7 +16,7 @@ Days remaining: 0
 ## Confidence note
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
-- Latest day is still experimental / unverified.
+- Latest day is verified against the actual game portfolio.
 
 ## Best and worst day
 - Best alpha day: 2026-03-23 (+1.42%)
@@ -25,7 +25,7 @@ Days remaining: 0
 ## Structured learning state
 - Active hard rules: 1
 - Changed hard rules since yesterday: 0
-- Confidence notes: 2
+- Confidence notes: 3
 
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
@@ -34,10 +34,10 @@ Days remaining: 0
 | APA | winner | 14 | +1.03% | 71% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
 | DOW | loser | 8 | -0.71% | 50% |
-| VWS.CO | loser | 12 | -0.32% | 17% |
+| VWS.CO | loser | 12 | -0.20% | 33% |
 
 ## Action plan until April 6
-- RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% — hit rate 17% over 29 observations (threshold: 30%).
+- RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% — hit rate 21% over 29 observations (threshold: 30%).
 - Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.
 - Avoid overusing consensus rationales until their hit rate recovers above 40%.
 

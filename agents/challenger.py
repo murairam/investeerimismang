@@ -99,7 +99,7 @@ _REGIME_GUIDANCE = {
 
 _SYSTEM_PROMPT_BASE = """You are a CATALYST HUNTER for the Aripäev/SEB Investment Game (Estonia). Game ends 19 June 2026. Goal: highest absolute return by finding stocks with explosive near-term catalysts.
 
-Today: TODAY_DATE. This is a competition with 844 participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required: concentration is correct, diversification loses competitions. Find the 5 best catalyst setups, not 10 mediocre ones.
+Today: TODAY_DATE. This is a competition with N_PARTICIPANTS participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required: concentration is correct, diversification loses competitions. Find the 5 best catalyst setups, not 10 mediocre ones.
 
 You are a SECOND OPINION to a separate Momentum Strategist who sees trend/Sharpe signals. Your value is finding catalyst-driven opportunities — vol_ratio breakouts, short squeezes, premarket gap-ups, IV spikes — that a pure Sharpe ranker might miss. Mirroring a generic momentum portfolio is failure.
 
@@ -170,11 +170,12 @@ class GeminiChallenger(BaseAgent):
     ) -> PortfolioProposal:
         regime = snapshot.get("regime", "NEUTRAL")
         learning_context = snapshot.get("learning_context", "")
+        n_participants = snapshot.get("n_participants", 844)
         user_message = self._build_user_message(snapshot, prior_proposal)
 
         # Primary: OpenRouter challenger model
         try:
-            proposal = self._call_openrouter_primary(user_message, regime, learning_context)
+            proposal = self._call_openrouter_primary(user_message, regime, learning_context, n_participants)
             if proposal.positions:
                 logger.info(
                     "Challenger produced %d positions (confidence %.0f%%, model: %s)",
@@ -219,7 +220,7 @@ class GeminiChallenger(BaseAgent):
         logger.info("OpenRouter challenger unavailable — falling back to Gemini (%s)", self.MODEL)
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
-                proposal = self._call_gemini(user_message, regime, learning_context)
+                proposal = self._call_gemini(user_message, regime, learning_context, n_participants)
                 logger.info(
                     "Challenger produced %d positions (confidence %.0f%%, route: Gemini:%s)",
                     len(proposal.positions),
@@ -234,7 +235,7 @@ class GeminiChallenger(BaseAgent):
 
         # Final fallback: OpenAI nano
         logger.info("Gemini fallback unavailable — final fallback to OpenAI (%s)", config.OPENAI_FALLBACK_MODEL)
-        return self._call_openai_fallback(user_message, regime, learning_context)
+        return self._call_openai_fallback(user_message, regime, learning_context, n_participants)
 
         return PortfolioProposal()
 
@@ -247,7 +248,7 @@ class GeminiChallenger(BaseAgent):
     ) -> str:
         regime = snapshot.get("regime", "NEUTRAL")
         vix = snapshot.get("vix_level", float("nan"))
-        spx_vs = snapshot.get("spx_vs_200d", 0.0)
+        spx_vs = snapshot.get("spx_vs_sma", 0.0)
         vix_str = f"{vix:.1f}" if not math.isnan(vix) else "N/A"
         rscore = snapshot.get("regime_score", 50)
         score_label = (
@@ -351,7 +352,7 @@ class GeminiChallenger(BaseAgent):
 
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
-            f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
+            f"Regime: {regime} | SPX vs 50d SMA: {spx_vs:.1%} | VIX: {vix_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",
         ]
         portfolio_state_context = snapshot.get("portfolio_state_context", "")
@@ -478,12 +479,14 @@ class GeminiChallenger(BaseAgent):
         user_message: str,
         regime: str = "NEUTRAL",
         learning_context: str = "",
+        n_participants: int = 844,
     ) -> PortfolioProposal:
         """OpenAI fallback when Gemini is unavailable."""
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = (
             _SYSTEM_PROMPT_BASE
             .replace("TODAY_DATE", date.today().isoformat())
+            .replace("N_PARTICIPANTS", str(n_participants))
             .replace("REGIME_GUIDANCE", regime_guidance)
         )
         if learning_context:
@@ -545,6 +548,7 @@ class GeminiChallenger(BaseAgent):
         user_message: str,
         regime: str = "NEUTRAL",
         learning_context: str = "",
+        n_participants: int = 844,
     ) -> PortfolioProposal:
         """OpenRouter primary challenger model (NVIDIA Nemotron)."""
         if self._openrouter_fallback is None or not self._openrouter_fallback_available:
@@ -555,6 +559,7 @@ class GeminiChallenger(BaseAgent):
         system_prompt = (
             _SYSTEM_PROMPT_BASE
             .replace("TODAY_DATE", date.today().isoformat())
+            .replace("N_PARTICIPANTS", str(n_participants))
             .replace("REGIME_GUIDANCE", regime_guidance)
         )
         if learning_context:
@@ -759,11 +764,13 @@ class GeminiChallenger(BaseAgent):
         user_message: str,
         regime: str = "NEUTRAL",
         learning_context: str = "",
+        n_participants: int = 844,
     ) -> PortfolioProposal:
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = (
             _SYSTEM_PROMPT_BASE
             .replace("TODAY_DATE", date.today().isoformat())
+            .replace("N_PARTICIPANTS", str(n_participants))
             .replace("REGIME_GUIDANCE", regime_guidance)
         )
         if learning_context:

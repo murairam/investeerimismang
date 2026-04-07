@@ -74,7 +74,7 @@ class MarketSnapshot(TypedDict):
     as_of_date: str
     regime: str           # "BULL" | "BEAR" | "NEUTRAL"
     regime_score: int     # composite 0-100: 0-30=defensive, 31-49=cautious, 50-69=neutral, 70+=bullish
-    spx_vs_200d: float    # % above/below 200-day SMA
+    spx_vs_sma: float    # % above/below SMA_REGIME_WINDOW-day SMA (currently 50d)
     vix_level: float      # VIX spot price
     vix_term_ratio: float # VIX3M/VIX: >1=contango (calm), <0.9=backwardation (fear)
     breadth_pct: float    # % of universe stocks above their 50d SMA
@@ -445,8 +445,8 @@ class DataFetcher:
                 with open(cache_path, "r") as f:
                     payload = json.load(f)
                 return payload.get("rows", [])
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("EODHD cache read failed for %s: %s", provider_symbol, exc)
 
         try:
             response = requests.get(
@@ -481,8 +481,8 @@ class DataFetcher:
                         os.remove(old_path)
                     except Exception:
                         pass
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("EODHD cache write failed for %s: %s", provider_symbol, exc)
         return rows
 
     def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
@@ -572,8 +572,9 @@ class DataFetcher:
 
     def compute_regime(self, bench_close: pd.Series) -> tuple[str, float]:
         """
-        Determine market regime from SPX vs its 200d SMA.
-        Returns (regime_str, pct_vs_200d).
+        Determine market regime from SPX vs its 50d SMA (SMA_REGIME_WINDOW).
+        50d is more responsive than 200d for a 75-day competition horizon.
+        Returns (regime_str, pct_vs_sma).
         """
         if len(bench_close) < SMA_REGIME_WINDOW:
             return "NEUTRAL", 0.0
@@ -805,7 +806,7 @@ class DataFetcher:
 
     @staticmethod
     def compute_regime_score(
-        spx_vs_200d: float,
+        spx_vs_sma: float,
         vix_term_ratio: float,
         breadth_pct: float,
         credit_change: float,
@@ -817,8 +818,8 @@ class DataFetcher:
         scores: list[float] = []
 
         # SPX vs 200d SMA: -10% → 0, 0% → 50, +10% → 100
-        if not math.isnan(spx_vs_200d):
-            scores.append(max(0.0, min(100.0, 50.0 + spx_vs_200d * 500.0)))
+        if not math.isnan(spx_vs_sma):
+            scores.append(max(0.0, min(100.0, 50.0 + spx_vs_sma * 500.0)))
 
         # VIX term ratio: 0.85 → 0, 1.00 → 50, 1.15 → 100
         if not math.isnan(vix_term_ratio):
@@ -1187,11 +1188,11 @@ class DataFetcher:
         bench_raw, *_ = self.fetch_ohlcv([BETA_BENCHMARK], period="1y")
         bench_close: pd.Series = bench_raw.iloc[:, 0]
 
-        regime, spx_vs_200d = self.compute_regime(bench_close)
+        regime, spx_vs_sma = self.compute_regime(bench_close)
         vix_level, vix_term_ratio = self.fetch_vix()
         logger.info(
-            "Regime: %s (SPX vs 200d: %.1f%%), VIX: %.1f, term ratio: %.2f",
-            regime, spx_vs_200d * 100,
+            "Regime: %s (SPX vs 50d: %.1f%%), VIX: %.1f, term ratio: %.2f",
+            regime, spx_vs_sma * 100,
             vix_level if not math.isnan(vix_level) else 0,
             vix_term_ratio if not math.isnan(vix_term_ratio) else 0,
         )
@@ -1225,7 +1226,7 @@ class DataFetcher:
 
         # Credit spread proxy and composite regime score
         credit_change = self.fetch_credit_spread()
-        regime_score = self.compute_regime_score(spx_vs_200d, vix_term_ratio, breadth_pct, credit_change)
+        regime_score = self.compute_regime_score(spx_vs_sma, vix_term_ratio, breadth_pct, credit_change)
         _score_label = (
             "DEFENSIVE" if regime_score < 30 else
             "CAUTIOUS"  if regime_score < 50 else
@@ -1421,7 +1422,7 @@ class DataFetcher:
             as_of_date=as_of,
             regime=regime,
             regime_score=regime_score,
-            spx_vs_200d=spx_vs_200d,
+            spx_vs_sma=spx_vs_sma,
             vix_level=vix_level,
             vix_term_ratio=vix_term_ratio,
             breadth_pct=breadth_pct,

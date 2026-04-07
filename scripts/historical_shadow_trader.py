@@ -145,10 +145,10 @@ def build_mock_snapshot(
     # Regime
     sma_200 = bench.iloc[-200:].mean()
     last_bench = float(bench.iloc[-1])
-    spx_vs_200d = last_bench / sma_200 - 1
-    if spx_vs_200d >= 0.02:
+    spx_vs_sma = last_bench / sma_200 - 1
+    if spx_vs_sma >= 0.02:
         regime = "BULL"
-    elif spx_vs_200d <= -0.02:
+    elif spx_vs_sma <= -0.02:
         regime = "BEAR"
     else:
         regime = "NEUTRAL"
@@ -256,7 +256,7 @@ def build_mock_snapshot(
         as_of_date=as_of_date.isoformat(),
         regime=regime,
         regime_score=50,
-        spx_vs_200d=spx_vs_200d,
+        spx_vs_sma=spx_vs_sma,
         vix_level=float("nan"),
         vix_term_ratio=float("nan"),
         breadth_pct=float("nan"),

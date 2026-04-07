@@ -32,17 +32,17 @@ logger = logging.getLogger(__name__)
 # ── Regime guidance ────────────────────────────────────────────────────────────
 _REGIME_GUIDANCE = {
     "BULL": (
-        "Market regime: BULL (SPX above 200d SMA by ≥2%). "
+        "Market regime: BULL (SPX above 50d SMA by ≥2%). "
         "TARGET 5 positions for maximum conviction — only add a 6th if genuinely high-conviction (score ≥ 8). "
         "Favour high-beta names (beta up to 2.0). This is the regime for big gains. Do NOT add filler to reach 7–8."
     ),
     "BEAR": (
-        "Market regime: BEAR (SPX below 200d SMA by ≥2%). "
+        "Market regime: BEAR (SPX below 50d SMA by ≥2%). "
         "Concentrate on 5–8 positions in whatever IS working — sectors/stocks with positive momentum regardless of regime. "
         "In a 75-day competition, the goal is to find the winners in any environment, not to fall less than others."
     ),
     "NEUTRAL": (
-        "Market regime: NEUTRAL (SPX near 200d SMA). "
+        "Market regime: NEUTRAL (SPX near 50d SMA). "
         "5–8 positions — concentrate in genuine strength and avoid weak filler names. "
         "Quality over quantity: do not pad with weak names, and keep the book tight unless conviction breadth is truly high."
     ),
@@ -76,7 +76,7 @@ _SYSTEM_PROMPT_TEMPLATE = """You are AlphaShark, an elite quantitative portfolio
 
 Today's date: {today}. The market snapshot provided below is your ONLY source of truth for current price action — do not rely on training-data knowledge of stock prices or recent news.
 
-## Competition context — 844 participants, only #1 wins
+## Competition context — {n_participants} participants, only #1 wins
 This is a competition, not wealth management. Only #1 wins — median returns = losing. Your job is INTELLIGENT AGGRESSION: concentration is correct, diversification loses competitions. Do not concentrate into low-conviction names, but 5–6 high-conviction bets have far higher expected return than 12 diluted ones.
 
 You are the Momentum Strategist — your signal table shows trend/momentum signals only (Sharpe, returns, vs_index, 52wH%, beta, MACD). A separate Catalyst agent evaluates RSI, vol_ratio, short interest, and IV. Focus on smooth, persistent uptrends with strong Sharpe and positive vs_index.
@@ -169,9 +169,10 @@ class OpenAIStrategist(BaseAgent):
         vix = snapshot.get("vix_level", float("nan"))
         learning_context = snapshot.get("learning_context", "")
 
+        n_participants = snapshot.get("n_participants", 844)
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
-                proposal = self._call_openai(user_message, regime, vix, learning_context)
+                proposal = self._call_openai(user_message, regime, vix, learning_context, n_participants)
                 logger.info(
                     "Strategist[%s] produced %d positions (confidence %.0f%%)",
                     self.MODEL,
@@ -201,7 +202,7 @@ class OpenAIStrategist(BaseAgent):
         prior_proposal: Optional[PortfolioProposal] = None,
     ) -> str:
         vix = snapshot.get("vix_level", float("nan"))
-        spx_vs = snapshot.get("spx_vs_200d", 0.0)
+        spx_vs = snapshot.get("spx_vs_sma", 0.0)
         regime = snapshot.get("regime", "NEUTRAL")
         vix_str = f"{vix:.1f}" if not math.isnan(vix) else "N/A"
 
@@ -259,7 +260,7 @@ class OpenAIStrategist(BaseAgent):
             f"Market snapshot as of {snapshot['as_of_date']}",
             f"Game account: €{game_equity:,.0f} ({game_ret:+.2%} since start, started €10,000)",
             f"Benchmark (S&P 500) {MOMENTUM_WINDOW}-day return: {snapshot['benchmark_return']:.1%}",
-            f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
+            f"Regime: {regime} | SPX vs 50d SMA: {spx_vs:.1%} | VIX: {vix_str}",
             f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} (>1=calm, <0.9=fear) | Credit spreads 20d: {credit_str} (positive=risk-on)",
             f"Composite regime score: {rscore}/100 — {score_label} (0–30=defensive, 31–49=cautious, 50–69=neutral, 70+=bullish)",
         ]
@@ -493,12 +494,14 @@ class OpenAIStrategist(BaseAgent):
         regime: str = "NEUTRAL",
         vix: float = float("nan"),
         learning_context: str = "",
+        n_participants: int = 844,
     ) -> PortfolioProposal:
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = _SYSTEM_PROMPT_TEMPLATE.format(
             today=date.today().isoformat(),
             regime_guidance=regime_guidance,
             vix_guidance=_vix_guidance(vix),
+            n_participants=n_participants,
         )
         # Inject learning context into the system prompt so it has mandatory-instruction weight.
         # Placed after the strategy rules so it acts as a live override, not a soft suggestion.

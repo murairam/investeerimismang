@@ -5,6 +5,7 @@ import logging
 import math
 from datetime import date, datetime, timedelta
 
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
@@ -165,7 +166,11 @@ def format_earnings_opportunity(candidates: list[dict], earnings: list[dict]) ->
             earn_date = date.fromisoformat(e["earnings_date"])
         except (ValueError, KeyError):
             continue
-        days_out = (earn_date - today).days
+        # Use weekday-based business days (Mon–Fri) so weekend gaps are handled sensibly:
+        # e.g. a Monday earnings date is 3 calendar days from Friday but only 1 business
+        # day away. Note: np.busday_count ignores exchange holidays unless a holiday
+        # calendar is explicitly provided.
+        days_out = int(np.busday_count(today.isoformat(), earn_date.isoformat()))
         if not (2 <= days_out <= 6):
             continue
         c = candidate_map.get(ticker, {})
