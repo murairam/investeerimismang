@@ -1191,7 +1191,7 @@ class DataFetcher:
         regime, spx_vs_200d = self.compute_regime(bench_close)
         vix_level, vix_term_ratio = self.fetch_vix()
         logger.info(
-            "Regime: %s (SPX vs 200d: %.1f%%), VIX: %.1f, term ratio: %.2f",
+            "Regime: %s (SPX vs 50d: %.1f%%), VIX: %.1f, term ratio: %.2f",
             regime, spx_vs_200d * 100,
             vix_level if not math.isnan(vix_level) else 0,
             vix_term_ratio if not math.isnan(vix_term_ratio) else 0,
