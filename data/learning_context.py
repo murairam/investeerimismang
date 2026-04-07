@@ -74,8 +74,9 @@ def get_learning_context(current_regime: str = "NEUTRAL") -> str:
     sanitized = _sanitize_learning_text(raw)
 
     # Prepend evening observations so agents see yesterday's review first (before budget truncation).
+    # Sanitize separately — ai_recommendation is LLM-generated and must go through injection filter.
     if evening_obs:
-        sanitized = evening_obs + "\n\n" + sanitized
+        sanitized = _sanitize_learning_text(evening_obs) + "\n\n" + sanitized
 
     # Enforce total character budget — truncate at a clean line boundary
     if len(sanitized) > _MAX_CONTEXT_CHARS:
@@ -183,19 +184,30 @@ def _extract_evening_observations() -> str:
         logger.debug("Invalid date in evening_observations.json: %s", exc)
         return ""
 
-    if abs((date.today() - obs_date).days) > 1:
-        logger.debug("evening_observations.json is stale (%s) — skipping injection", obs_date)
+    days_since_obs = (date.today() - obs_date).days
+    if not 0 <= days_since_obs <= 1:
+        logger.debug("evening_observations.json is stale or future-dated (%s) — skipping injection", obs_date)
         return ""
 
     port_ret = obs.get("portfolio_return", 0.0)
     bench_ret = obs.get("benchmark_return", 0.0)
     alpha = obs.get("alpha", 0.0)
-    pos_list = obs.get("position_returns", [])
+    raw_pos_list = obs.get("position_returns", [])
+    pos_list = list(raw_pos_list) if isinstance(raw_pos_list, (list, tuple)) else []
     ai_note = obs.get("ai_recommendation", "")
 
-    moves = ", ".join(
-        f"{p['ticker']} {p['return']:+.1%}" for p in pos_list if "ticker" in p and "return" in p
-    )
+    formatted_moves = []
+    for p in pos_list:
+        if not isinstance(p, dict):
+            continue
+        ticker = p.get("ticker")
+        position_return = p.get("return")
+        if not isinstance(ticker, str) or not ticker:
+            continue
+        if isinstance(position_return, bool) or not isinstance(position_return, (int, float)):
+            continue
+        formatted_moves.append(f"{ticker} {position_return:+.1%}")
+    moves = ", ".join(formatted_moves)
     lines = [
         f"Last night's review ({obs_date}): portfolio {port_ret:+.1%} vs benchmark {bench_ret:+.1%} (alpha {alpha:+.1%}).",
     ]

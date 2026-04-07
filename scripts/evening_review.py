@@ -247,11 +247,11 @@ def main() -> None:
         f"**{alpha:+.2%} alpha** {alpha_emoji}"
     )
 
-    # US intraday warning
+    # US market status note — script runs at 20:30 UTC, 30 min after US close (20:00 UTC)
     us_tickers = [t for t, *_ in pos_returns if "." not in t]
     us_note = ""
     if us_tickers:
-        us_note = f"\n_US positions ({', '.join(us_tickers)}) are intraday — markets still open._"
+        us_note = f"\n_US positions ({', '.join(us_tickers)}) — prices are final (post-market close)._"
 
     action_note = (
         "1. Review the weakest names below.\n"
