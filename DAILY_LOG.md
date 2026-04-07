@@ -38,34 +38,33 @@ Losers: STX -0.1%, DOW -0.1%
 
 ---
 
-## 2026-04-07 06:30:58
+## 2026-04-07 06:54:32
 
 **Market:** NEUTRAL regime · SPX vs 200d SMA: -0.5% · VIX: 24.2 · S&P 500 20d: -1.9%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio +0.1% · Benchmark +0.4% · Alpha -0.4%
-Winners: STX +5.3% | Losers: AKAM -3.1%, DELL -0.9%
+**Yesterday's P&L:** Portfolio +1.2% · Benchmark +0.4% · Alpha +0.8%
+Winners: STX +5.3%, WDC +2.8%
 
 **Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
 
-**Confidence:** 82% · **Positions:** 6 · **Total weight:** 100.0%
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
 
-**Thesis:** I prioritized the two double-consensus names ISS.CO and VWS.CO, kept FORTUM.HE as a strong current winner in a still-leading utility rotation, and cut the persistent laggard AKAM while avoiding weaker low-volume or decelerating alternatives like BF-B and SUBC.OL. The final set stays concentrated for competition purposes, reduces exposure to the weakest existing tech hold, and keeps portfolio beta likely near the strategist's 1.38 area but treated as secondary because rotation risk is active and adding beta filler would dilute stronger leaders.
+**Thesis:** I prioritized the independently validated consensus names FORTUM.HE, STX, WDC, and ISS.CO, then added NKT.CO as the best unique catalyst replacement rather than keeping slower or weak-volume names like CTY1S.HE, DELL, or STT. Given the cautious neutral regime and explicit rotation-risk warning, I cut laggard/slow holdings and avoided Energy/Chem exposure; the resulting book stays concentrated with a moderate-to-high beta profile without adding filler solely to hit the soft beta target.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **ISS.CO** | 20.0% | Consensus pick across both proposals and a current holding; despite overbought risk, its +2.1% 5d momentum and continued relative strength make it a validated leader worth keeping at high but not max conviction. |
-| 2 | **VWS.CO** | 9.0% | Consensus pick with strong trend persistence and sector support, but the HIGH-risk overbought warning and lack of explicit volume confirmation argue for a tempered conviction rather than top-tier. |
-| 3 | **FORTUM.HE** | 24.0% | Unique but strong incumbent hold in a leading utilities rotation with 100% breadth, positive 5d momentum, low crowding, and better regime fit than fading tech/energy alternatives. |
-| 4 | **WDC** | 15.0% | Best aggressive replacement for lagging AKAM: very strong 5d acceleration, low retail crowding, and superior momentum profile, though extreme beta and volatility keep conviction below the top tier. |
-| 5 | **CTY1S.HE** | 17.0% | Catalyst-driven unique pick with strong RSI and event support, fitting the need to rotate away from persistent laggards, but overbought conditions and lack of cross-proposal confirmation cap conviction. |
-| 6 | **STX** | 15.0% | Current holding with the strongest raw breakout and best acceleration in the set, but the explicit HIGH-risk flag, very high beta, and strategy-decay backdrop require a substantial conviction haircut rather than a full exit. |
+| 1 | **FORTUM.HE** | 25.0% | Consensus pick (2/3) and current holding with solid +8.1% 5d momentum in a still-leading utility rotation; lower-volatility profile fits the cautious neutral regime while keeping a recent winner. |
+| 2 | **STX** | 15.0% | Consensus pick (2/3) with the strongest acceleration in the set (+24.3% 5d, vol_ratio 1.36) and low crowding, but conviction is capped by explicit HIGH-risk volatility warning and beta 2.48. |
+| 3 | **WDC** | 15.0% | Consensus pick (2/3) and one of the fastest movers (+20.1% 5d) with contrarian low search interest, but reduced for HIGH-risk beta 2.93 and only middling volume confirmation (0.92). |
+| 4 | **ISS.CO** | 20.0% | Consensus pick (2/3) and existing winner with strong prior Sharpe/relative strength, but conviction is cut materially because RSI 78 is stretched, 5d momentum is only moderate, and beta 0.17 limits upside in a winner-take-all game. |
+| 5 | **NKT.CO** | 25.0% | Best unique catalyst pick: fresh gap-up leadership, RSI 70.7, and sector alignment with Nordic industrial/electrification strength make it a better slot than slower low-volume alternatives. |
 
 **Changes from yesterday:**
-- ➕ Added **WDC** at 15.0%
-- ➕ Added **CTY1S.HE** at 17.0%
-- ➖ Removed **AKAM** (was 19.0%)
-- ➖ Removed **DELL** (was 14.0%)
+- ➕ Added **NKT.CO** at 25.0%
+- ➖ Removed **CTY1S.HE** (was 17.0%)
+- ➖ Removed **VWS.CO** (was 9.0%)
 
 ---
+

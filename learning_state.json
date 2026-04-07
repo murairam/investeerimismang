@@ -82,7 +82,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.594,
+    "avg_turnover_estimate": 0.588,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -102,27 +102,27 @@
   "rationale_stats": {
     "momentum": {
       "observations": 72,
-      "avg_return_1d": -0.000283,
+      "avg_return_1d": -0.000312,
       "hit_rate": 0.4028
     },
     "high_sharpe": {
       "observations": 64,
-      "avg_return_1d": -0.002064,
+      "avg_return_1d": -0.002086,
       "hit_rate": 0.3594
     },
     "breakout": {
       "observations": 11,
-      "avg_return_1d": -0.002384,
+      "avg_return_1d": -0.002447,
       "hit_rate": 0.4545
     },
     "consensus": {
       "observations": 58,
-      "avg_return_1d": -0.000137,
+      "avg_return_1d": -0.000173,
       "hit_rate": 0.3966
     },
     "catalyst": {
       "observations": 9,
-      "avg_return_1d": 0.001261,
+      "avg_return_1d": 0.001184,
       "hit_rate": 0.5556
     },
     "diversifier": {
@@ -142,13 +142,13 @@
     },
     "at_52w_high": {
       "observations": 51,
-      "avg_return_1d": 0.001531,
+      "avg_return_1d": 0.001517,
       "hit_rate": 0.4706
     }
   },
   "conviction_tiers": {
     "tier1_avg_return_1d": 0.001276,
-    "tier2_avg_return_1d": -0.000385,
+    "tier2_avg_return_1d": -0.000436,
     "tier3_avg_return_1d": -0.007676,
     "tier1_observations": 35,
     "tier2_observations": 41,
@@ -158,8 +158,8 @@
   "devil_accuracy": {
     "status": "actionable",
     "observations": 27,
-    "high_risk_avg_return_1d": 0.001017,
-    "low_risk_avg_return_1d": -0.001384,
+    "high_risk_avg_return_1d": 0.000965,
+    "low_risk_avg_return_1d": -0.001395,
     "high_risk_negative_rate": 0.3704,
     "accuracy": 0.3704,
     "devil_is_accurate": false,
@@ -181,11 +181,11 @@
         "flag_count": 3
       },
       {
-        "ticker": "SUBC.OL",
-        "flag_count": 3
+        "ticker": "WDC",
+        "flag_count": 2
       },
       {
-        "ticker": "WDC",
+        "ticker": "SUBC.OL",
         "flag_count": 2
       }
     ]
@@ -243,14 +243,14 @@
   },
   "yesterday_postmortem": {
     "date": "2026-04-06",
-    "portfolio_return_1d": 0.0008,
+    "portfolio_return_1d": 0.0121,
     "benchmark_return_1d": 0.0044,
-    "alpha_1d": -0.0037,
+    "alpha_1d": 0.0077,
     "winners": [
       {
         "ticker": "STX",
-        "return_1d": 0.0533,
-        "vs_benchmark": 0.0489,
+        "return_1d": 0.0526,
+        "vs_benchmark": 0.0482,
         "tags": [
           "momentum",
           "consensus"
@@ -307,8 +307,8 @@
     "losers": [
       {
         "ticker": "AKAM",
-        "return_1d": -0.0312,
-        "vs_benchmark": -0.0357,
+        "return_1d": -0.0319,
+        "vs_benchmark": -0.0364,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -323,8 +323,8 @@
       },
       {
         "ticker": "DELL",
-        "return_1d": -0.0093,
-        "vs_benchmark": -0.0137,
+        "return_1d": -0.01,
+        "vs_benchmark": -0.0144,
         "tags": [
           "momentum",
           "high_sharpe",

@@ -22,7 +22,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - 'high_sharpe' rationale is weak: -0.2% avg, 36% hit rate
 - 'consensus' rationale is weak: -0.0% avg, 40% hit rate
 - 'non_us_differentiator' rationale is weak: -0.4% avg, 17% hit rate
-- Alpha hit rate is low: 47%.
+- Alpha hit rate is low: 53%.
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
@@ -30,8 +30,8 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 | momentum | 72 | -0.03% | 40% |
 | high_sharpe | 64 | -0.21% | 36% |
 | breakout | 11 | -0.24% | 45% |
-| consensus | 58 | -0.01% | 40% |
-| catalyst | 9 | +0.13% | 56% |
+| consensus | 58 | -0.02% | 40% |
+| catalyst | 9 | +0.12% | 56% |
 | diversifier | 4 | -0.40% | 50% |
 | non_us_differentiator | 29 | -0.44% | 17% |
 | overbought | 36 | -0.23% | 42% |

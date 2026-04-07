@@ -7,28 +7,24 @@
     "submitted_date": "2026-04-07",
     "positions": [
       {
-        "ticker": "ISS.CO",
-        "weight": 0.2
-      },
-      {
-        "ticker": "VWS.CO",
-        "weight": 0.09
-      },
-      {
         "ticker": "FORTUM.HE",
-        "weight": 0.24
+        "weight": 0.25
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.15
       },
       {
         "ticker": "WDC",
         "weight": 0.15
       },
       {
-        "ticker": "CTY1S.HE",
-        "weight": 0.17
+        "ticker": "ISS.CO",
+        "weight": 0.2
       },
       {
-        "ticker": "STX",
-        "weight": 0.15
+        "ticker": "NKT.CO",
+        "weight": 0.25
       }
     ]
   },
@@ -45,28 +41,24 @@
         "submitted_date": "2026-04-07",
         "positions": [
           {
-            "ticker": "ISS.CO",
-            "weight": 0.2
-          },
-          {
-            "ticker": "VWS.CO",
-            "weight": 0.09
-          },
-          {
             "ticker": "FORTUM.HE",
-            "weight": 0.24
+            "weight": 0.25
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.15
           },
           {
             "ticker": "WDC",
             "weight": 0.15
           },
           {
-            "ticker": "CTY1S.HE",
-            "weight": 0.17
+            "ticker": "ISS.CO",
+            "weight": 0.2
           },
           {
-            "ticker": "STX",
-            "weight": 0.15
+            "ticker": "NKT.CO",
+            "weight": 0.25
           }
         ]
       },
