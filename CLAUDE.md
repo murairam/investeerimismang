@@ -73,7 +73,7 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 - **Enforced in:** All agent system prompts + Risk Manager synthesis rules
 
 ### Competition Context in Agent Prompts
-- **All 4 agents** now open with: "844 participants, only #1 wins — INTELLIGENT AGGRESSION required"
+- **All 4 agents** now open with: "{n_participants} participants, only #1 wins — INTELLIGENT AGGRESSION required" (count loaded dynamically from DB via `load_last_known_participant_count()` and injected into `snapshot["n_participants"]` by the orchestrator)
 - **Risk Manager** additionally: "15% drawdown acceptable for 40% upside potential — price for competition, not wealth management"
 
 ### Sector Rotation Indicator
@@ -213,7 +213,7 @@ Note: `verify.py` in interactive mode requires manual input — use `--show` fla
 
 ## Auto-generated Files (do not edit manually)
 
-These are updated automatically by the pipeline: `portfolio_history.json`, `paper_account.json`, `cost_log.json`, `verification_tracker.json`, `live_mode_lock.json`, `PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`, `AI_SELF_CRITIQUE.md`, `learning_state.json`.
+These are updated automatically by the pipeline: `portfolio_history.json`, `paper_account.json`, `cost_log.json`, `verification_tracker.json`, `live_mode_lock.json`, `PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`, `AI_SELF_CRITIQUE.md`, `learning_state.json`, `evening_observations.json`.
 
 ## Common Tasks
 

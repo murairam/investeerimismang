@@ -70,7 +70,7 @@ def _build_entry(
     date = snapshot["as_of_date"]
     run_time_str = datetime.now().strftime("%H:%M:%S")
     regime = snapshot.get("regime", "N/A")
-    spx_vs = snapshot.get("spx_vs_200d", 0.0)
+    spx_vs = snapshot.get("spx_vs_sma", 0.0)
     vix = snapshot.get("vix_level", float("nan"))
     bench = snapshot["benchmark_return"]
     total_weight = sum(p.weight for p in final.positions)
@@ -80,7 +80,7 @@ def _build_entry(
     lines = [
         f"## {date} {run_time_str}",
         "",
-        f"**Market:** {regime} regime · SPX vs 200d SMA: {spx_vs:+.1%} · "
+        f"**Market:** {regime} regime · SPX vs 50d SMA: {spx_vs:+.1%} · "
         f"VIX: {vix_str} · "
         f"S&P 500 20d: {bench:+.1%}",
         "",

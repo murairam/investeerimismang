@@ -1,7 +1,7 @@
 # AlphaShark
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
-![CI](https://github.com/marionstriz/investeerimismang/actions/workflows/alphashark.yml/badge.svg)
+![CI](https://github.com/murairam/investeerimismang/actions/workflows/alphashark.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data across ~630 selectable tickers in 6 markets, scores the full universe, runs a multi-model adversarial AI ensemble, validates the final portfolio against competition rules, and posts the recommendation to Discord.

@@ -38,33 +38,40 @@ Losers: STX -0.1%, DOW -0.1%
 
 ---
 
-## 2026-04-07 06:54:32
+## 2026-04-07 13:33:26
 
-**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.5% · VIX: 24.2 · S&P 500 20d: -1.9%
+**Market:** BEAR regime · SPX vs 200d SMA: -2.4% · VIX: 25.5 · S&P 500 20d: -1.9%
 
 **Verification:** Verified against actual game holdings at 18:32:06.
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio +1.2% · Benchmark +0.4% · Alpha +0.8%
-Winners: STX +5.3%, WDC +2.8%
+**Yesterday's P&L:** Portfolio +0.1% · Benchmark +0.4% · Alpha -0.4%
+Winners: NKT.CO +1.4% | Losers: ISS.CO -0.7%, STX -0.4%, WDC -0.4%
 
 **Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
 
-**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
+**Confidence:** 79% · **Positions:** 6 · **Total weight:** 100.0%
 
-**Thesis:** I prioritized the independently validated consensus names FORTUM.HE, STX, WDC, and ISS.CO, then added NKT.CO as the best unique catalyst replacement rather than keeping slower or weak-volume names like CTY1S.HE, DELL, or STT. Given the cautious neutral regime and explicit rotation-risk warning, I cut laggard/slow holdings and avoided Energy/Chem exposure; the resulting book stays concentrated with a moderate-to-high beta profile without adding filler solely to hit the soft beta target.
+**Thesis:** I kept the strongest validated winners from the current book where consensus existed—STX and WDC clearly survive, while FORTUM.HE stays only at low conviction because its volume is too weak. I cut persistent laggards NKT.CO and ISS.CO, avoided rotating into flagged Energy/Chem despite the broader strategy bias, and added NHY.OL, YAR.OL, and MPWR as the best non-filler upside names from the proposals. Portfolio remains concentrated in 6 names for competition aggression, but with less exposure to low-breadth sectors and fewer dead-money holdings than the current portfolio.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **FORTUM.HE** | 25.0% | Consensus pick (2/3) and current holding with solid +8.1% 5d momentum in a still-leading utility rotation; lower-volatility profile fits the cautious neutral regime while keeping a recent winner. |
-| 2 | **STX** | 15.0% | Consensus pick (2/3) with the strongest acceleration in the set (+24.3% 5d, vol_ratio 1.36) and low crowding, but conviction is capped by explicit HIGH-risk volatility warning and beta 2.48. |
-| 3 | **WDC** | 15.0% | Consensus pick (2/3) and one of the fastest movers (+20.1% 5d) with contrarian low search interest, but reduced for HIGH-risk beta 2.93 and only middling volume confirmation (0.92). |
-| 4 | **ISS.CO** | 20.0% | Consensus pick (2/3) and existing winner with strong prior Sharpe/relative strength, but conviction is cut materially because RSI 78 is stretched, 5d momentum is only moderate, and beta 0.17 limits upside in a winner-take-all game. |
-| 5 | **NKT.CO** | 25.0% | Best unique catalyst pick: fresh gap-up leadership, RSI 70.7, and sector alignment with Nordic industrial/electrification strength make it a better slot than slower low-volume alternatives. |
+| 1 | **STX** | 21.0% | Double-consensus current holding and one of the strongest active movers, so it earns a slot despite HIGH-risk status; conviction is trimmed for very high beta and sharp 5d run-up. |
+| 2 | **WDC** | 21.0% | Double-consensus hold with strong acceleration and competition-grade upside, but conviction is reduced from top tier because the devil case flags extreme beta and extension risk. |
+| 3 | **NHY.OL** | 12.0% | Double-consensus breakout and one of the best fresh replacements for laggards NKT.CO and ISS.CO, yet RSI 80.7 and weak volume confirmation force a meaningful conviction haircut. |
+| 4 | **YAR.OL** | 14.0% | Best unique Nordic rotation candidate from Proposal A and fits the move away from weak current laggards, but low volume and the flagged beta anomaly keep it only medium conviction. |
+| 5 | **MPWR** | 21.0% | Aggressive unique pick with high beta and positive momentum that can deliver right-tail upside in a competition, though conviction is capped by bear-regime pullback risk and lack of consensus. |
+| 6 | **FORTUM.HE** | 11.0% | Double-consensus and a current winner, but the vol_ratio of 0.19 is a major participation warning; keep only as a lower-conviction residual winner rather than a core idea. |
 
 **Changes from yesterday:**
-- ➕ Added **NKT.CO** at 25.0%
-- ➖ Removed **CTY1S.HE** (was 17.0%)
-- ➖ Removed **VWS.CO** (was 9.0%)
+- ➕ Added **NHY.OL** at 12.0%
+- ➕ Added **YAR.OL** at 14.0%
+- ➕ Added **MPWR** at 21.0%
+- ➖ Removed **NKT.CO** (was 25.0%)
+- ➖ Removed **ISS.CO** (was 20.0%)
+- ▲ **STX**: 15.0% → 21.0% (+6.0%)
+- ▲ **WDC**: 15.0% → 21.0% (+6.0%)
+- ▼ **FORTUM.HE**: 25.0% → 11.0% (-14.0%)
 
 ---
 

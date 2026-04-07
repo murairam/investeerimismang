@@ -3,10 +3,11 @@ name: AlphaShark Daily Run
 
 on:
   schedule:
-    # 05:00 UTC = 08:00 EEST (UTC+3, summer / game period)
-    # Runs Mon–Fri, ~120 min before the 10:00 EEST submission cutoff
+    # 04:00 UTC = 07:00 EEST (UTC+3, summer / game period)
+    # Runs Mon–Fri, ~180 min before the 10:00 EEST submission cutoff
     # Buffer needed: GitHub queue delay typically 30-60 min + pipeline ~20 min = ~80 min total
-    - cron: '0 5 * * 1-5'
+    # Extra hour vs prior 05:00 UTC schedule gives margin on slow GitHub queue days.
+    - cron: '0 4 * * 1-5'
   workflow_dispatch:   # allow manual trigger for testing
 
 jobs:
@@ -56,7 +57,7 @@ jobs:
         run: |
           git config user.name "AlphaShark Bot"
           git config user.email "alphashark@noreply"
-          git add portfolio_history.json DAILY_LOG.md PREGAME_LOG.md PREGAME_RUNS.md paper_account.json PREGAME_LEARNING.md AI_SELF_CRITIQUE.md cost_log.json verification_tracker.json live_mode_lock.json LIVE_HANDOFF*.md learning_state.json || true
+          git add portfolio_history.json DAILY_LOG.md PREGAME_LOG.md PREGAME_RUNS.md paper_account.json PREGAME_LEARNING.md AI_SELF_CRITIQUE.md cost_log.json verification_tracker.json live_mode_lock.json LIVE_HANDOFF*.md learning_state.json evening_observations.json || true
           TODAY=$(date +%Y-%m-%d)
           git diff --staged --quiet || git commit -m "chore: daily portfolio update $TODAY"
           git status --short && git restore . 2>/dev/null || true

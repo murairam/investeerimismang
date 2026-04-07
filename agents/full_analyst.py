@@ -68,7 +68,7 @@ _REGIME_GUIDANCE = {
 
 _SYSTEM_PROMPT = """You are an INDEPENDENT FULL-SIGNAL ANALYST for the Äripäev/SEB Investment Game (Estonia). Game ends 19 June 2026. Goal: highest absolute return.
 
-Today: {today}. This is a competition with 844 participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required: concentration is correct, diversification loses competitions. Find the 5 best picks across all signals, not a safe diversified 10-stock portfolio.
+Today: {today}. This is a competition with {n_participants} participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required: concentration is correct, diversification loses competitions. Find the 5 best picks across all signals, not a safe diversified 10-stock portfolio.
 
 You provide a completely fresh second opinion — you see ALL signals (momentum, catalyst, and everything in between). Your job is to find the best portfolio across every signal dimension, not just momentum OR catalysts.
 
@@ -193,11 +193,12 @@ class OpenAIFullAnalyst(BaseAgent):
         user_message = self._build_user_message(snapshot, prior_proposal)
         regime = snapshot.get("regime", "NEUTRAL")
         learning_context = snapshot.get("learning_context", "")
+        n_participants = snapshot.get("n_participants", 844)
 
         # Attempt 1: OpenRouter/DeepSeek with reasoning
         start_time = time.perf_counter()
         try:
-            proposal = self._call_openai(user_message, regime, learning_context, fast_mode=False)
+            proposal = self._call_openai(user_message, regime, learning_context, fast_mode=False, n_participants=n_participants)
             logger.info(
                 "FullAnalyst produced %d positions (confidence %.0f%%, model: %s)",
                 len(proposal.positions),
@@ -218,7 +219,7 @@ class OpenAIFullAnalyst(BaseAgent):
 
         # Attempt 2: Fast OpenAI fallback (no reasoning mode, smaller token/timeout)
         try:
-            proposal = self._call_openai(user_message, regime, learning_context, fast_mode=True)
+            proposal = self._call_openai(user_message, regime, learning_context, fast_mode=True, n_participants=n_participants)
             logger.info(
                 "FullAnalyst produced %d positions (confidence %.0f%%, model: %s, fast_fallback=True)",
                 len(proposal.positions),
@@ -239,7 +240,7 @@ class OpenAIFullAnalyst(BaseAgent):
         prior_proposal: Optional[PortfolioProposal] = None,
     ) -> str:
         vix = snapshot.get("vix_level", float("nan"))
-        spx_vs = snapshot.get("spx_vs_200d", 0.0)
+        spx_vs = snapshot.get("spx_vs_sma", 0.0)
         regime = snapshot.get("regime", "NEUTRAL")
         vix_str = f"{vix:.1f}" if not math.isnan(vix) else "N/A"
         rscore = snapshot.get("regime_score", 50)
@@ -347,7 +348,7 @@ class OpenAIFullAnalyst(BaseAgent):
         lines = [
             f"Market snapshot as of {snapshot['as_of_date']}",
             f"Benchmark (S&P 500) {MOMENTUM_WINDOW}-day return: {snapshot['benchmark_return']:.1%}",
-            f"Regime: {regime} | SPX vs 200d SMA: {spx_vs:.1%} | VIX: {vix_str}",
+            f"Regime: {regime} | SPX vs 50d SMA: {spx_vs:.1%} | VIX: {vix_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",
         ]
         portfolio_state_context = snapshot.get("portfolio_state_context", "")
@@ -450,11 +451,13 @@ class OpenAIFullAnalyst(BaseAgent):
         regime: str = "NEUTRAL",
         learning_context: str = "",
         fast_mode: bool = False,
+        n_participants: int = 844,
     ) -> PortfolioProposal:
         regime_guidance = _REGIME_GUIDANCE.get(regime, _REGIME_GUIDANCE["NEUTRAL"])
         system_prompt = _SYSTEM_PROMPT.format(
             today=date.today().isoformat(),
             regime_guidance=regime_guidance,
+            n_participants=n_participants,
         )
         if learning_context:
             system_prompt += (

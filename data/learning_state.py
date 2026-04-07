@@ -569,9 +569,9 @@ def derive_competition_posture(standings: list[dict]) -> dict:
         posture = "CHASE"
         instruction = (
             f"You are at rank {rank}/{total} (bottom {100 - percentile:.1f}%). "
-            "Median rank = losing by design with 844 participants. "
+            f"Median rank = losing by design with {total} participants. "
             "You MUST take concentrated, differentiated, high-beta picks. "
-            "A well-diversified portfolio at this rank will finish near rank {rank}. "
+            f"A well-diversified portfolio at this rank will finish near rank {rank}. "
             "Be aggressive — safe picks guarantee you lose."
         )
 
