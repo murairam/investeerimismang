@@ -38,3 +38,34 @@ Losers: STX -0.1%, DOW -0.1%
 
 ---
 
+## 2026-04-07 06:30:58
+
+**Market:** NEUTRAL regime · SPX vs 200d SMA: -0.5% · VIX: 24.2 · S&P 500 20d: -1.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.1% · Benchmark +0.4% · Alpha -0.4%
+Winners: STX +5.3% | Losers: AKAM -3.1%, DELL -0.9%
+
+**Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
+
+**Confidence:** 82% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the two double-consensus names ISS.CO and VWS.CO, kept FORTUM.HE as a strong current winner in a still-leading utility rotation, and cut the persistent laggard AKAM while avoiding weaker low-volume or decelerating alternatives like BF-B and SUBC.OL. The final set stays concentrated for competition purposes, reduces exposure to the weakest existing tech hold, and keeps portfolio beta likely near the strategist's 1.38 area but treated as secondary because rotation risk is active and adding beta filler would dilute stronger leaders.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **ISS.CO** | 20.0% | Consensus pick across both proposals and a current holding; despite overbought risk, its +2.1% 5d momentum and continued relative strength make it a validated leader worth keeping at high but not max conviction. |
+| 2 | **VWS.CO** | 9.0% | Consensus pick with strong trend persistence and sector support, but the HIGH-risk overbought warning and lack of explicit volume confirmation argue for a tempered conviction rather than top-tier. |
+| 3 | **FORTUM.HE** | 24.0% | Unique but strong incumbent hold in a leading utilities rotation with 100% breadth, positive 5d momentum, low crowding, and better regime fit than fading tech/energy alternatives. |
+| 4 | **WDC** | 15.0% | Best aggressive replacement for lagging AKAM: very strong 5d acceleration, low retail crowding, and superior momentum profile, though extreme beta and volatility keep conviction below the top tier. |
+| 5 | **CTY1S.HE** | 17.0% | Catalyst-driven unique pick with strong RSI and event support, fitting the need to rotate away from persistent laggards, but overbought conditions and lack of cross-proposal confirmation cap conviction. |
+| 6 | **STX** | 15.0% | Current holding with the strongest raw breakout and best acceleration in the set, but the explicit HIGH-risk flag, very high beta, and strategy-decay backdrop require a substantial conviction haircut rather than a full exit. |
+
+**Changes from yesterday:**
+- ➕ Added **WDC** at 15.0%
+- ➕ Added **CTY1S.HE** at 17.0%
+- ➖ Removed **AKAM** (was 19.0%)
+- ➖ Removed **DELL** (was 14.0%)
+
+---

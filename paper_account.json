@@ -1,44 +1,78 @@
 {
-  "start_date": "2026-04-06",
+  "start_date": "2026-04-07",
   "initial_capital": 10000.0,
-  "cash": 0.0,
-  "positions": {
-    "FORTUM.HE": 101.63500156,
-    "ISS.CO": 68.78555783,
-    "AKAM": 18.59532846,
-    "STX": 4.03461364,
-    "DELL": 9.27232276,
-    "VWS.CO": 28.05486242
+  "cash": 10000.0,
+  "positions": {},
+  "pending_order": {
+    "submitted_date": "2026-04-07",
+    "positions": [
+      {
+        "ticker": "ISS.CO",
+        "weight": 0.2
+      },
+      {
+        "ticker": "VWS.CO",
+        "weight": 0.09
+      },
+      {
+        "ticker": "FORTUM.HE",
+        "weight": 0.24
+      },
+      {
+        "ticker": "WDC",
+        "weight": 0.15
+      },
+      {
+        "ticker": "CTY1S.HE",
+        "weight": 0.17
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.15
+      }
+    ]
   },
-  "verified_weights": {
-    "FORTUM.HE": 0.23,
-    "ISS.CO": 0.22,
-    "AKAM": 0.19,
-    "STX": 0.15,
-    "DELL": 0.14,
-    "VWS.CO": 0.07
-  },
-  "pending_order": null,
   "history": [
     {
-      "date": "2026-04-06",
+      "date": "2026-04-07",
       "equity": 10000.0,
-      "cash": 0.0,
+      "cash": 10000.0,
       "daily_return": 0.0,
       "return_since_start": 0.0,
       "turnover": 0.0,
-      "positions": {
-        "FORTUM.HE": 101.63500156,
-        "ISS.CO": 68.78555783,
-        "AKAM": 18.59532846,
-        "STX": 4.03461364,
-        "DELL": 9.27232276,
-        "VWS.CO": 28.05486242
+      "positions": {},
+      "pending_order": {
+        "submitted_date": "2026-04-07",
+        "positions": [
+          {
+            "ticker": "ISS.CO",
+            "weight": 0.2
+          },
+          {
+            "ticker": "VWS.CO",
+            "weight": 0.09
+          },
+          {
+            "ticker": "FORTUM.HE",
+            "weight": 0.24
+          },
+          {
+            "ticker": "WDC",
+            "weight": 0.15
+          },
+          {
+            "ticker": "CTY1S.HE",
+            "weight": 0.17
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.15
+          }
+        ]
       },
-      "pending_order": null,
-      "source": "verified"
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-06",
+  "last_rebalanced_date": "2026-04-07",
   "last_equity": 10000.0
 }
