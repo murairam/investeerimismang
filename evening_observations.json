@@ -1,22 +1,40 @@
 {
   "date": "2026-04-07",
-  "timestamp": "2026-04-07T20:30:00+00:00",
-  "portfolio_return": 0.021,
-  "benchmark_return": 0.008,
-  "alpha": 0.013,
+  "timestamp": "2026-04-07T23:06:34+00:00",
+  "portfolio_return": 0.01963791736980337,
+  "benchmark_return": 0.0007592481161695641,
+  "alpha": 0.018878669253633806,
   "position_returns": [
     {
+      "ticker": "FORTUM.HE",
+      "weight": 0.25,
+      "return": 0.05353815842821685,
+      "price": 22.6299991607666
+    },
+    {
       "ticker": "STX",
-      "weight": 0.21,
-      "return": 0.048,
-      "price": 94.2
+      "weight": 0.15,
+      "return": 0.034017237685823654,
+      "price": 468.7200012207031
     },
     {
       "ticker": "WDC",
-      "weight": 0.18,
-      "return": 0.021,
-      "price": 52.3
+      "weight": 0.15,
+      "return": 0.02567811183731883,
+      "price": 311.9599914550781
+    },
+    {
+      "ticker": "NKT.CO",
+      "weight": 0.25,
+      "return": 0.0005770340450086398,
+      "price": 867.0
+    },
+    {
+      "ticker": "ISS.CO",
+      "weight": 0.2,
+      "return": -0.014225915884871876,
+      "price": 235.60000610351562
     }
   ],
-  "ai_recommendation": "Consider trimming STX after the strong run; WDC still has momentum."
+  "ai_recommendation": "Yes\u2014keep FORTUM.HE, STX, and WDC (they\u2019re driving the outperformance), and consider dropping NKT.CO if it stays flat/lagging while trimming ISS.CO (down -1.4%) unless you have a strong thesis for a rebound. Reallocate that freed risk into the current leaders (FORTUM.HE/STX/WDC) to maintain positive alpha."
 }
