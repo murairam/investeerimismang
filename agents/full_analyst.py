@@ -240,7 +240,7 @@ class OpenAIFullAnalyst(BaseAgent):
         prior_proposal: Optional[PortfolioProposal] = None,
     ) -> str:
         vix = snapshot.get("vix_level", float("nan"))
-        spx_vs = snapshot.get("spx_vs_200d", 0.0)
+        spx_vs = snapshot.get("spx_vs_sma", 0.0)
         regime = snapshot.get("regime", "NEUTRAL")
         vix_str = f"{vix:.1f}" if not math.isnan(vix) else "N/A"
         rscore = snapshot.get("regime_score", 50)

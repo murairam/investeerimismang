@@ -28,7 +28,7 @@ from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = f"""You are a meta-analyst for the Äripäev/SEB Investment Game (Estonia). You receive THREE independent portfolio proposals and synthesize the best final portfolio:
+_SYSTEM_PROMPT = """You are a meta-analyst for the Äripäev/SEB Investment Game (Estonia). You receive THREE independent portfolio proposals and synthesize the best final portfolio:
 - Proposal A: GPT-5.4 Momentum Strategist (sees only trend/Sharpe signals)
 - Proposal B: Gemini Catalyst Hunter (sees only catalyst signals: vol_ratio, RSI, short interest, IV)
 - Proposal C: GPT-5.4-nano Full Analyst (sees ALL signals — fresh independent view)
@@ -38,7 +38,7 @@ A pick appearing in 2+ proposals is independently validated consensus — treat 
 Game ends 19 June 2026. Goal: highest absolute return, beating other participants.
 
 ## Competition mandate
-This is a competition with 844 participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required. 15% drawdown is acceptable if it gives 40% upside potential — price risk for competition, not wealth management. Follow the signals. Do not apply any sector or stock bias — the data tells you what is working today. Competition rewards right-tail outcomes: concentrate in 5-6 names with real momentum catalysts.
+This is a competition with {n_participants} participants. Only #1 wins — median returns = losing. INTELLIGENT AGGRESSION is required. 15% drawdown is acceptable if it gives 40% upside potential — price risk for competition, not wealth management. Follow the signals. Do not apply any sector or stock bias — the data tells you what is working today. Competition rewards right-tail outcomes: concentrate in 5-6 names with real momentum catalysts.
 
 ## Synthesis rules
 **RULE #1 — MANDATORY: ASSIGN CONVICTION SCORES (1-10). DO NOT OUTPUT WEIGHTS.**
@@ -1114,7 +1114,7 @@ class OpenAIRiskManager(BaseAgent):
         full_analyst: Optional[PortfolioProposal] = None,
     ) -> str:
         regime = snapshot.get("regime", "NEUTRAL")
-        spx_vs = snapshot.get("spx_vs_200d", 0.0)
+        spx_vs = snapshot.get("spx_vs_sma", 0.0)
         vix = snapshot.get("vix_level", float("nan"))
         vix_str = f"{vix:.1f}" if not math.isnan(vix) else "N/A"
 
@@ -1435,7 +1435,7 @@ class OpenAIRiskManager(BaseAgent):
         return "\n".join(lines)
 
     def _call_openai(self, user_message: str, n_participants: int = 844) -> PortfolioProposal:
-        system_prompt = _SYSTEM_PROMPT.replace("844 participants", f"{n_participants} participants")
+        system_prompt = _SYSTEM_PROMPT.format(n_participants=n_participants)
         response = self.client.chat.completions.create(
             model=self.MODEL,
             response_format={"type": "json_object"},

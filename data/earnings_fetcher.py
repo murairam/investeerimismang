@@ -166,8 +166,10 @@ def format_earnings_opportunity(candidates: list[dict], earnings: list[dict]) ->
             earn_date = date.fromisoformat(e["earnings_date"])
         except (ValueError, KeyError):
             continue
-        # Use trading days (Mon–Fri) so that a Friday earnings date is 1 trading day
-        # away on Thursday, not 1 calendar day — aligns with actual pre-earnings drift window.
+        # Use weekday-based business days (Mon–Fri) so weekend gaps are handled sensibly:
+        # e.g. a Monday earnings date is 3 calendar days from Friday but only 1 business
+        # day away. Note: np.busday_count ignores exchange holidays unless a holiday
+        # calendar is explicitly provided.
         days_out = int(np.busday_count(today.isoformat(), earn_date.isoformat()))
         if not (2 <= days_out <= 6):
             continue
