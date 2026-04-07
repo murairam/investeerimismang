@@ -42,7 +42,7 @@ Losers: STX -0.1%, DOW -0.1%
 
 **Market:** NEUTRAL regime · SPX vs 200d SMA: -0.5% · VIX: 24.2 · S&P 500 20d: -1.9%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 11:44:42.
 
 **Yesterday's P&L:** Portfolio +1.2% · Benchmark +0.4% · Alpha +0.8%
 Winners: STX +5.3%, WDC +2.8%

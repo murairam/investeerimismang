@@ -1,70 +1,41 @@
 {
   "start_date": "2026-04-07",
   "initial_capital": 10000.0,
-  "cash": 10000.0,
-  "positions": {},
-  "pending_order": {
-    "submitted_date": "2026-04-07",
-    "positions": [
-      {
-        "ticker": "FORTUM.HE",
-        "weight": 0.25
-      },
-      {
-        "ticker": "STX",
-        "weight": 0.15
-      },
-      {
-        "ticker": "WDC",
-        "weight": 0.15
-      },
-      {
-        "ticker": "ISS.CO",
-        "weight": 0.2
-      },
-      {
-        "ticker": "NKT.CO",
-        "weight": 0.25
-      }
-    ]
+  "cash": 0.0,
+  "positions": {
+    "FORTUM.HE": 110.24373955,
+    "NKT.CO": 21.21960008,
+    "ISS.CO": 62.63147242,
+    "STX": 3.84475134,
+    "WDC": 5.73015213
   },
+  "verified_weights": {
+    "FORTUM.HE": 0.25,
+    "NKT.CO": 0.25,
+    "ISS.CO": 0.2,
+    "STX": 0.15,
+    "WDC": 0.15
+  },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-07",
-      "equity": 10000.0,
-      "cash": 10000.0,
-      "daily_return": 0.0,
-      "return_since_start": 0.0,
+      "equity": 10041.0,
+      "cash": 0.0,
+      "daily_return": 0.0041,
+      "return_since_start": 0.0041,
       "turnover": 0.0,
-      "positions": {},
-      "pending_order": {
-        "submitted_date": "2026-04-07",
-        "positions": [
-          {
-            "ticker": "FORTUM.HE",
-            "weight": 0.25
-          },
-          {
-            "ticker": "STX",
-            "weight": 0.15
-          },
-          {
-            "ticker": "WDC",
-            "weight": 0.15
-          },
-          {
-            "ticker": "ISS.CO",
-            "weight": 0.2
-          },
-          {
-            "ticker": "NKT.CO",
-            "weight": 0.25
-          }
-        ]
+      "positions": {
+        "FORTUM.HE": 110.24373955,
+        "NKT.CO": 21.21960008,
+        "ISS.CO": 62.63147242,
+        "STX": 3.84475134,
+        "WDC": 5.73015213
       },
-      "executed_pending": false
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-04-07",
-  "last_equity": 10000.0
+  "last_equity": 10041.0
 }
