@@ -65,6 +65,7 @@ from data.paper_account import rebalance_to_proposal, reset_for_live, load_verif
 from data.portfolio_store import (
     build_signal_snapshot,
     load_last,
+    load_last_known_participant_count,
     load_performance_history,
     load_yesterday_prices,
     save as save_portfolio,
@@ -112,6 +113,9 @@ class AlphaSharkOrchestrator:
             breadth * 100 if not math.isnan(breadth) else 0,
             term if not math.isnan(term) else 0,
         )
+
+        # Inject live participant count so agent prompts stay accurate as the game progresses.
+        snapshot["n_participants"] = load_last_known_participant_count() or 844
 
         # Step 1a: commodity prices (Brent, WTI, NatGas) — energy thesis validation
         snapshot["commodity_context"] = self.fetcher.fetch_commodity_context()

@@ -5,6 +5,7 @@ import logging
 import math
 from datetime import date, datetime, timedelta
 
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
@@ -165,7 +166,9 @@ def format_earnings_opportunity(candidates: list[dict], earnings: list[dict]) ->
             earn_date = date.fromisoformat(e["earnings_date"])
         except (ValueError, KeyError):
             continue
-        days_out = (earn_date - today).days
+        # Use trading days (Mon–Fri) so that a Friday earnings date is 1 trading day
+        # away on Thursday, not 1 calendar day — aligns with actual pre-earnings drift window.
+        days_out = int(np.busday_count(today.isoformat(), earn_date.isoformat()))
         if not (2 <= days_out <= 6):
             continue
         c = candidate_map.get(ticker, {})

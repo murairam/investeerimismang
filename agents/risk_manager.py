@@ -124,10 +124,11 @@ class OpenAIRiskManager(BaseAgent):
             "BEAR": (None, 0.90),
         }
 
+        n_participants = snapshot.get("n_participants", 844)
         last_error: Optional[Exception] = None
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
-                result = self._call_openai(user_message)
+                result = self._call_openai(user_message, n_participants)
                 result = self._enforce_beta(result, snapshot, regime, beta_targets)
                 result = self._enforce_selection_quality(result, snapshot, bear_cases or {})
                 logger.info(
@@ -1203,7 +1204,7 @@ class OpenAIRiskManager(BaseAgent):
         lines = [
             f"## Synthesis task — {date.today().isoformat()}",
             f"Game account: €{game_equity:,.0f} ({game_ret:+.2%} since start) — competition mindset required.",
-            f"Regime: {regime} | SPX vs 200d: {spx_vs:+.1%} | VIX: {vix_str} | S&P 500 20d: {snapshot['benchmark_return']:+.1%}",
+            f"Regime: {regime} | SPX vs 50d: {spx_vs:+.1%} | VIX: {vix_str} | S&P 500 20d: {snapshot['benchmark_return']:+.1%}",
             f"Breadth: {breadth_str} above 50d SMA | VIX term: {term_str} | Credit spreads 20d: {credit_str}",
             f"Composite regime score: {rscore}/100 — {score_label}",
             f"Strategist proposal portfolio beta: {strat_beta_str} ({beta_target_str} for {regime} regime)",
@@ -1433,14 +1434,15 @@ class OpenAIRiskManager(BaseAgent):
         ]
         return "\n".join(lines)
 
-    def _call_openai(self, user_message: str) -> PortfolioProposal:
+    def _call_openai(self, user_message: str, n_participants: int = 844) -> PortfolioProposal:
+        system_prompt = _SYSTEM_PROMPT.replace("844 participants", f"{n_participants} participants")
         response = self.client.chat.completions.create(
             model=self.MODEL,
             response_format={"type": "json_object"},
             temperature=0.15,
             timeout=config.API_TIMEOUT_SECONDS,
             messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message},
             ],
         )

@@ -445,8 +445,8 @@ class DataFetcher:
                 with open(cache_path, "r") as f:
                     payload = json.load(f)
                 return payload.get("rows", [])
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("EODHD cache read failed for %s: %s", provider_symbol, exc)
 
         try:
             response = requests.get(
@@ -481,8 +481,8 @@ class DataFetcher:
                         os.remove(old_path)
                     except Exception:
                         pass
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("EODHD cache write failed for %s: %s", provider_symbol, exc)
         return rows
 
     def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
@@ -572,8 +572,9 @@ class DataFetcher:
 
     def compute_regime(self, bench_close: pd.Series) -> tuple[str, float]:
         """
-        Determine market regime from SPX vs its 200d SMA.
-        Returns (regime_str, pct_vs_200d).
+        Determine market regime from SPX vs its 50d SMA (SMA_REGIME_WINDOW).
+        50d is more responsive than 200d for a 75-day competition horizon.
+        Returns (regime_str, pct_vs_sma).
         """
         if len(bench_close) < SMA_REGIME_WINDOW:
             return "NEUTRAL", 0.0
