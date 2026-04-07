@@ -1,0 +1,22 @@
+{
+  "date": "2026-04-07",
+  "timestamp": "2026-04-07T20:30:00+00:00",
+  "portfolio_return": 0.021,
+  "benchmark_return": 0.008,
+  "alpha": 0.013,
+  "position_returns": [
+    {
+      "ticker": "STX",
+      "weight": 0.21,
+      "return": 0.048,
+      "price": 94.2
+    },
+    {
+      "ticker": "WDC",
+      "weight": 0.18,
+      "return": 0.021,
+      "price": 52.3
+    }
+  ],
+  "ai_recommendation": "Consider trimming STX after the strong run; WDC still has momentum."
+}

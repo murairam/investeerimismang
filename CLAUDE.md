@@ -213,7 +213,7 @@ Note: `verify.py` in interactive mode requires manual input — use `--show` fla
 
 ## Auto-generated Files (do not edit manually)
 
-These are updated automatically by the pipeline: `portfolio_history.json`, `paper_account.json`, `cost_log.json`, `verification_tracker.json`, `live_mode_lock.json`, `PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`, `AI_SELF_CRITIQUE.md`, `learning_state.json`.
+These are updated automatically by the pipeline: `portfolio_history.json`, `paper_account.json`, `cost_log.json`, `verification_tracker.json`, `live_mode_lock.json`, `PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`, `AI_SELF_CRITIQUE.md`, `learning_state.json`, `evening_observations.json`.
 
 ## Common Tasks
 
