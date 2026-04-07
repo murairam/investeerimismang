@@ -1,3 +1,8 @@
 {
-  "tickers": {}
+  "tickers": {
+    "KOJAMO.HE": {
+      "reason": "yahoo_no_data",
+      "marked_on": "2026-04-07"
+    }
+  }
 }
