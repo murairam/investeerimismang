@@ -3,11 +3,11 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "FORTUM.HE": 110.24373955,
-    "NKT.CO": 21.21960008,
-    "ISS.CO": 62.63147242,
-    "STX": 3.84475134,
-    "WDC": 5.73015213
+    "FORTUM.HE": 112.66277272,
+    "NKT.CO": 21.624897,
+    "ISS.CO": 63.66310769,
+    "STX": 3.78291706,
+    "WDC": 5.6265716
   },
   "verified_weights": {
     "FORTUM.HE": 0.25,
@@ -20,22 +20,22 @@
   "history": [
     {
       "date": "2026-04-07",
-      "equity": 10041.0,
+      "equity": 10036.0,
       "cash": 0.0,
-      "daily_return": 0.0041,
-      "return_since_start": 0.0041,
+      "daily_return": -0.000498,
+      "return_since_start": 0.0036,
       "turnover": 0.0,
       "positions": {
-        "FORTUM.HE": 110.24373955,
-        "NKT.CO": 21.21960008,
-        "ISS.CO": 62.63147242,
-        "STX": 3.84475134,
-        "WDC": 5.73015213
+        "FORTUM.HE": 112.66277272,
+        "NKT.CO": 21.624897,
+        "ISS.CO": 63.66310769,
+        "STX": 3.78291706,
+        "WDC": 5.6265716
       },
       "pending_order": null,
       "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-04-07",
-  "last_equity": 10041.0
+  "last_equity": 10036.0
 }
