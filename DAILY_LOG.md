@@ -42,7 +42,7 @@ Losers: STX -0.1%, DOW -0.1%
 
 **Market:** BEAR regime · SPX vs 200d SMA: -2.4% · VIX: 25.5 · S&P 500 20d: -1.9%
 
-**Verification:** Verified against actual game holdings at 18:32:06.
+**Verification:** Verified against actual game holdings at 18:36:13.
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
 **Yesterday's P&L:** Portfolio +0.1% · Benchmark +0.4% · Alpha -0.4%
