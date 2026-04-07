@@ -6,7 +6,7 @@ today's return vs benchmark, and sends a Discord summary with an AI recommendati
 
 By 23:30 EEST:
   - Baltic / Scandinavian markets: closed → final prices
-  - US markets: closed (since 23:00 EEST / 20:00 UTC) → final prices
+  - US market status / price finality should not be assumed solely from ticker format or run time
 """
 from __future__ import annotations
 
