@@ -2,9 +2,11 @@
 Build prompt-ready learning context from structured learning state first,
 with markdown summaries as a backward-compatible fallback.
 """
+import json
 import logging
 import os
 import re
+from datetime import date
 
 from data.learning_state import build_prompt_learning_context
 
@@ -40,9 +42,11 @@ _LEARNING_PATH = os.path.join(os.path.dirname(__file__), "..", "PREGAME_LEARNING
 _CRITIQUE_PATH = os.path.join(os.path.dirname(__file__), "..", "AI_SELF_CRITIQUE.md")
 _STRATEGY_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "strategy_principles.md")
 _COMPETITOR_INTEL_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "competitor_intel.md")
+_EVENING_OBS_PATH = os.path.join(os.path.dirname(__file__), "..", "evening_observations.json")
 
 
 def get_learning_context(current_regime: str = "NEUTRAL") -> str:
+    evening_obs = _extract_evening_observations()
     strategy = _read_file(_STRATEGY_PATH)
     fallback_sections = []
 
@@ -68,6 +72,10 @@ def get_learning_context(current_regime: str = "NEUTRAL") -> str:
         raw += "\n\n=== COMPETITOR INTELLIGENCE (manual watchlist) ===\n" + competitor_intel
 
     sanitized = _sanitize_learning_text(raw)
+
+    # Prepend evening observations so agents see yesterday's review first (before budget truncation).
+    if evening_obs:
+        sanitized = evening_obs + "\n\n" + sanitized
 
     # Enforce total character budget — truncate at a clean line boundary
     if len(sanitized) > _MAX_CONTEXT_CHARS:
@@ -156,3 +164,44 @@ def _extract_competitor_intel_summary() -> str:
         sections.append("Competitor intelligence snapshot:\n" + "\n".join(lines[:28]))
 
     return "\n\n".join(sections) if sections else ""
+
+
+def _extract_evening_observations() -> str:
+    """Return a formatted summary of last night's evening review, if fresh (today or yesterday)."""
+    raw = _read_file(_EVENING_OBS_PATH)
+    if not raw:
+        return ""
+    try:
+        obs = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        logger.debug("Could not parse evening_observations.json: %s", exc)
+        return ""
+
+    try:
+        obs_date = date.fromisoformat(obs["date"])
+    except (KeyError, ValueError) as exc:
+        logger.debug("Invalid date in evening_observations.json: %s", exc)
+        return ""
+
+    if abs((date.today() - obs_date).days) > 1:
+        logger.debug("evening_observations.json is stale (%s) — skipping injection", obs_date)
+        return ""
+
+    port_ret = obs.get("portfolio_return", 0.0)
+    bench_ret = obs.get("benchmark_return", 0.0)
+    alpha = obs.get("alpha", 0.0)
+    pos_list = obs.get("position_returns", [])
+    ai_note = obs.get("ai_recommendation", "")
+
+    moves = ", ".join(
+        f"{p['ticker']} {p['return']:+.1%}" for p in pos_list if "ticker" in p and "return" in p
+    )
+    lines = [
+        f"Last night's review ({obs_date}): portfolio {port_ret:+.1%} vs benchmark {bench_ret:+.1%} (alpha {alpha:+.1%}).",
+    ]
+    if moves:
+        lines.append(f"Position moves: {moves}")
+    if ai_note:
+        lines.append(f"AI note: {ai_note}")
+
+    return "\n".join(lines)

@@ -1,12 +1,12 @@
 """
 Evening portfolio review.
 
-Runs at 21:00 EET Mon-Fri. Fetches current prices, computes today's
-return vs benchmark, and sends a Discord summary with an AI recommendation.
+Runs at 23:30 EEST Mon-Fri (20:30 UTC). Fetches current prices, computes
+today's return vs benchmark, and sends a Discord summary with an AI recommendation.
 
-By 21:00 EET:
+By 23:30 EEST:
   - Baltic / Scandinavian markets: closed → final prices
-  - US markets: still open (close 23:00 EET / 22:00 EEST) → intraday prices
+  - US markets: closed (since 23:00 EEST / 20:00 UTC) → final prices
 """
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ import json
 import logging
 import os
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from dotenv import load_dotenv
 
@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 _PORTFOLIO_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
 _PAPER_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "..", "paper_account.json")
+_OBSERVATIONS_PATH = os.path.join(os.path.dirname(__file__), "..", "evening_observations.json")
 _BENCHMARK = "^GSPC"
 _EMBED_COLOUR = 0x3498DB  # Blue
 
@@ -310,6 +311,27 @@ def main() -> None:
     }
 
     _send(embed, webhook_url)
+
+    # Persist observations so next morning's agents can read yesterday's evening review.
+    try:
+        observations = {
+            "date": today,
+            "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            "portfolio_return": portfolio_ret,
+            "benchmark_return": benchmark_ret,
+            "alpha": alpha,
+            "position_returns": [
+                {"ticker": t, "weight": w, "return": r, "price": p}
+                for t, w, r, p in pos_returns
+            ],
+            "ai_recommendation": recommendation,
+        }
+        obs_path = os.path.abspath(_OBSERVATIONS_PATH)
+        with open(obs_path, "w") as f:
+            json.dump(observations, f, indent=2)
+        logger.info("Evening observations written to evening_observations.json")
+    except Exception as exc:
+        logger.warning("Could not write evening_observations.json: %s", exc)
 
 
 if __name__ == "__main__":

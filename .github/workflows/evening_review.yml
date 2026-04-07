@@ -2,8 +2,8 @@ name: AlphaShark Evening Review
 
 on:
   schedule:
-    # 19:00 UTC = 21:00 EET (UTC+2, winter) / 22:00 EEST (UTC+3, summer)
-    - cron: '0 19 * * 1-5'
+    # 20:30 UTC = 23:30 EEST (UTC+3, summer / game period) — 30 min after US close (20:00 UTC)
+    - cron: '30 20 * * 1-5'
   workflow_dispatch:   # manual trigger from GitHub mobile app
 
 jobs:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
@@ -32,3 +32,12 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           SUPABASE_CONNECTION_STRING: ${{ secrets.SUPABASE_CONNECTION_STRING }}
         run: python scripts/evening_review.py
+
+      - name: Commit evening observations
+        run: |
+          git config user.name "AlphaShark Bot"
+          git config user.email "alphashark@noreply"
+          git add evening_observations.json || true
+          git diff --staged --quiet || git commit -m "chore: evening observations $(date +%Y-%m-%d)"
+          git pull --rebase origin main
+          git push
