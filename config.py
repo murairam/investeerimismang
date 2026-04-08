@@ -1,6 +1,16 @@
 """
 Global configuration: game constraints, ticker universe, signal parameters.
 """
+import datetime as _dt
+
+# ── Game schedule ─────────────────────────────────────────────────────────────
+GAME_START_DATE: _dt.date = _dt.date(2026, 4, 6)   # First trading day
+GAME_END_DATE: _dt.date = _dt.date(2026, 6, 19)    # Last trading day
+
+# Late-game thresholds (days remaining ≤ this triggers aggression/protection logic)
+LATE_GAME_DAYS_THRESHOLD: int = 21
+LATE_GAME_RECOUP_RETURN: float = -0.05   # down >5% → swing harder
+LATE_GAME_LOCK_IN_RETURN: float = 0.10  # up >10% → protect gains
 
 # ── Game constraints ─────────────────────────────────────────────────────────
 GAME_CONSTRAINTS = {

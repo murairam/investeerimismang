@@ -1482,4 +1482,6 @@ class DataFetcher:
             earnings=[],
             pead_signals=[],
             commodity_context={},
+            late_game_mode="NORMAL",
+            groupthink_risk=False,
         )

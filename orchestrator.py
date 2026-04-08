@@ -17,6 +17,7 @@ Pipeline:
 """
 import logging
 import math
+import datetime as _dt
 import sys
 import time
 from concurrent.futures import (
@@ -172,15 +173,14 @@ class AlphaSharkOrchestrator:
             snapshot["game_return_pct"] = 0.0
 
         # Late-game mode: adapt sizing aggression in final 3 weeks based on standing
-        import datetime as _dt
-        _today = _dt.date.today()
-        _game_end = _dt.date(2026, 6, 19)
-        _days_remaining = max(0, (_game_end - _today).days)
+        _as_of_str = snapshot.get("as_of_date") or _dt.date.today().isoformat()
+        _as_of = _dt.date.fromisoformat(_as_of_str)
+        _days_remaining = max(0, (config.GAME_END_DATE - _as_of).days)
         _game_return = snapshot.get("game_return_pct", 0.0)
-        if _days_remaining <= 21:
-            if not math.isnan(_game_return) and _game_return < -0.05:
+        if _days_remaining <= config.LATE_GAME_DAYS_THRESHOLD:
+            if not math.isnan(_game_return) and _game_return < config.LATE_GAME_RECOUP_RETURN:
                 snapshot["late_game_mode"] = "RECOUP"   # down >5%, need to swing harder
-            elif not math.isnan(_game_return) and _game_return > 0.10:
+            elif not math.isnan(_game_return) and _game_return > config.LATE_GAME_LOCK_IN_RETURN:
                 snapshot["late_game_mode"] = "LOCK_IN"  # up >10%, protect gains
             else:
                 snapshot["late_game_mode"] = "NORMAL"

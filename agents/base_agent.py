@@ -61,14 +61,17 @@ def validate_conviction_variance(proposal: PortfolioProposal, agent_name: str) -
         agent_name, n, base_conv,
     )
     new_positions = []
+    # n >= 2 is guaranteed by the guard at the top of the function, so n-1 >= 1 always.
+    spread = min(2, n - 1)
+    step = (2.0 * spread) / (n - 1)  # float step avoids integer-division zero for n >= 6
     for i, pos in enumerate(proposal.positions):
-        # Spread: top pick gets base+2, bottom gets base-2 (or narrower if few positions)
-        spread = min(2, (n - 1))
-        adj = max(1, min(10, base_conv + spread - i * (2 * spread // max(1, n - 1))))
+        # Spread: top pick gets base+spread, bottom gets base-spread (clamped 1-10)
+        adj = max(1, min(10, round(base_conv + spread - i * step)))
+        new_weight = conviction_to_weight(adj)
         new_positions.append(
             Position(
                 ticker=pos.ticker,
-                weight=pos.weight,
+                weight=new_weight,
                 rationale=pos.rationale,
                 conviction=adj,
             )

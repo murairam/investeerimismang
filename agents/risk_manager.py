@@ -601,6 +601,7 @@ class OpenAIRiskManager(BaseAgent):
         # per-position cap so that multiple overbought stocks in the same exhausted sector
         # cannot aggregate past the sector rotation cap.
         overbought_capped_indices: set[int] = set()
+        ob_cap_by_index: dict[int, float] = {}  # track per-position effective cap for re-enforcement
         rotation_risk = snapshot.get("rotation_risk", {})
         for i, pos in enumerate(kept):
             c = candidate_map.get(pos.ticker, {})
@@ -628,6 +629,7 @@ class OpenAIRiskManager(BaseAgent):
                 if pos.weight > effective_ob_cap:
                     kept[i] = Position(ticker=pos.ticker, weight=effective_ob_cap, rationale=pos.rationale, conviction=pos.conviction)
                     overbought_capped_indices.add(i)
+                    ob_cap_by_index[i] = effective_ob_cap
                     logger.info(
                         "Overbought-peak cap: %s → %.0f%% (RSI %.0f, 52wH %+.1f%%, sector=%s rot=%s)",
                         pos.ticker, effective_ob_cap * 100, rsi, pct_high * 100,
@@ -771,11 +773,15 @@ class OpenAIRiskManager(BaseAgent):
             return updated
 
         # Re-enforce overbought cap after normalization — normalization inflates capped weights.
+        # Use per-position effective cap (which may be tighter than OVERBOUGHT_WEIGHT_CAP
+        # when sector rotation risk is HIGH or MEDIUM).
         ob_excess = 0.0
         for i, pos in enumerate(kept):
-            if i in overbought_capped_indices and pos.weight > config.OVERBOUGHT_WEIGHT_CAP:
-                ob_excess += pos.weight - config.OVERBOUGHT_WEIGHT_CAP
-                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale, conviction=pos.conviction)
+            if i in overbought_capped_indices:
+                cap_val = ob_cap_by_index.get(i, config.OVERBOUGHT_WEIGHT_CAP)
+                if pos.weight > cap_val:
+                    ob_excess += pos.weight - cap_val
+                    kept[i] = Position(ticker=pos.ticker, weight=cap_val, rationale=pos.rationale, conviction=pos.conviction)
         if ob_excess > 1e-9:
             kept = _redistribute_excess(kept, ob_excess, overbought_capped_indices)
 
