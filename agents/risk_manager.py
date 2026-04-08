@@ -56,18 +56,20 @@ Position sizing is computed downstream by Kelly math.
 1. **Consensus picks** (appear in 2+ of the 3 proposals): independently validated across different signal lenses. Give them higher conviction scores (8–10) unless there is a specific risk reason not to.
 2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, vol_ratio, regime fit. Include the best ones.
 3. **Ignore weak unique picks**: if only one model picked something and its signals are mediocre, skip it.
-4. **Score by conviction** (see RULE #1 above): consensus 8–10, strong single-model 6–8, diversifiers 3–6.
-5. **Check market concentration**: if >65% ends up in one market, redistribute unless signal concentration is clearly superior.
-6. **Check regime fit and portfolio beta**:
+4. **Consensus conviction floor (MANDATORY)**: ticker in exactly 2 of 3 proposals → minimum conviction 8 (unless Devil flags HIGH risk). Ticker in all 3 proposals → minimum conviction 9 (unless Devil flags HIGH risk). Do not assign below these floors — ensemble agreement IS the signal.
+5. **Score by conviction** (see RULE #1 above): consensus 8–10, strong single-model 6–8, diversifiers 3–6.
+   Conviction → weight mapping (Python-computed): 10→~25% | 9→~22% | 8→~20% | 7→~18% | 6→~16% | 5→~13% | 4→~11% | 3→~9% | 2→~7% | 1→~5%
+6. **Check market concentration**: if >65% ends up in one market, redistribute unless signal concentration is clearly superior.
+7. **Check regime fit and portfolio beta**:
    - You will be given the portfolio-weighted beta computed from the proposals.
    - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
    - BULL regime: TARGET portfolio beta 1.6–2.0. Concentrate on high-beta names — sub-1.4 beta in BULL is underperforming the mandate.
     - NEUTRAL: soft target portfolio beta between 0.95 and 1.30 in normal conditions.
     - If the user context includes a ROTATION RISK ALERT (HIGH/MEDIUM) or clear sector-rotation leadership, treat NEUTRAL beta as a SOFT diagnostic, not a hard objective. Do NOT add high-beta filler names solely to raise beta if that dilutes the strongest rotation leaders.
-7. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
-8. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists.
-9. **Earnings timing rule**: pre-earnings setups can be high conviction; earnings in <=1 day should be low conviction due to binary gap risk.
-10. **Risk overlays**: respect Devil HIGH/MEDIUM risk assessments and learning-state constraints.
+8. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
+9. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists.
+10. **Earnings timing rule**: pre-earnings setups can be high conviction; earnings in <=1 day should be low conviction due to binary gap risk.
+11. **Risk overlays**: respect Devil HIGH/MEDIUM risk assessments and learning-state constraints.
 
 ## Guardrail ownership
 Hard game constraints and final weight bounds are enforced by Python validator logic. Focus this synthesis on ranking and conviction quality, not on re-deriving hard bounds.
@@ -595,7 +597,12 @@ class OpenAIRiskManager(BaseAgent):
         kept = self._rebalance_for_competition_edge(kept, candidate_map, bear_cases, regime_score)
 
         # Pass A — Overbought-at-peak cap (Rule 18): code-enforced hard cap
+        # When a stock is overbought AND its sector has HIGH rotation risk, apply a tighter
+        # per-position cap so that multiple overbought stocks in the same exhausted sector
+        # cannot aggregate past the sector rotation cap.
         overbought_capped_indices: set[int] = set()
+        ob_cap_by_index: dict[int, float] = {}  # track per-position effective cap for re-enforcement
+        rotation_risk = snapshot.get("rotation_risk", {})
         for i, pos in enumerate(kept):
             c = candidate_map.get(pos.ticker, {})
             rsi = c.get("rsi_14", float("nan"))
@@ -606,27 +613,53 @@ class OpenAIRiskManager(BaseAgent):
                 and not math.isnan(pct_high) and pct_high >= -config.OVERBOUGHT_HIGH_PCT
                 and (math.isnan(vol_ratio) or vol_ratio <= config.OVERBOUGHT_VOLUME_EXCEPTION)
             )
-            if overbought and pos.weight > config.OVERBOUGHT_WEIGHT_CAP:
-                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale, conviction=pos.conviction)
-                overbought_capped_indices.add(i)
-                logger.info(
-                    "Overbought-peak cap: %s → 15%% (RSI %.0f, 52wH %+.1f%%)",
-                    pos.ticker, rsi, pct_high * 100,
-                )
+            if overbought:
+                # Check sector rotation risk to determine effective cap
+                sector = c.get("sector") or config.SECTOR_MAP.get(pos.ticker, "")
+                sector_rot_level = (rotation_risk.get(sector) or {}).get("level", "")
+                if sector_rot_level == "HIGH":
+                    # Tighter cap: HIGH rotation + overbought → cap at 1/3 of sector rotation cap
+                    effective_ob_cap = min(config.OVERBOUGHT_WEIGHT_CAP,
+                                          config.SECTOR_ROTATION_CAP_HIGH / 3)
+                elif sector_rot_level == "MEDIUM":
+                    effective_ob_cap = min(config.OVERBOUGHT_WEIGHT_CAP,
+                                          config.SECTOR_ROTATION_CAP_MEDIUM / 3)
+                else:
+                    effective_ob_cap = config.OVERBOUGHT_WEIGHT_CAP
+                if pos.weight > effective_ob_cap:
+                    kept[i] = Position(ticker=pos.ticker, weight=effective_ob_cap, rationale=pos.rationale, conviction=pos.conviction)
+                    overbought_capped_indices.add(i)
+                    ob_cap_by_index[i] = effective_ob_cap
+                    logger.info(
+                        "Overbought-peak cap: %s → %.0f%% (RSI %.0f, 52wH %+.1f%%, sector=%s rot=%s)",
+                        pos.ticker, effective_ob_cap * 100, rsi, pct_high * 100,
+                        sector or "?", sector_rot_level or "none",
+                    )
 
-        # Pass B — Devil accuracy cap (Rule 19): code-enforced hard cap
+        # Pass B — Devil accuracy cap (Rule 19): code-enforced tiered cap
         devil_capped_indices: set[int] = set()
+        devil_cap_by_index: dict[int, float] = {}  # track per-position cap for re-enforcement
         learning_state = load_learning_state()
         devil = learning_state.get("devil_accuracy", {})
         if devil.get("devil_is_accurate"):
             for i, pos in enumerate(kept):
                 bear = bear_cases.get(pos.ticker, {})
-                if bear.get("risk") == "HIGH" and pos.weight > config.DEVIL_ACCURACY_CAP_WEIGHT:
-                    kept[i] = Position(ticker=pos.ticker, weight=config.DEVIL_ACCURACY_CAP_WEIGHT, rationale=pos.rationale, conviction=pos.conviction)
+                risk_level = bear.get("risk", "")
+                if risk_level == "HIGH" and pos.weight > config.DEVIL_CAP_HIGH:
+                    kept[i] = Position(ticker=pos.ticker, weight=config.DEVIL_CAP_HIGH, rationale=pos.rationale, conviction=pos.conviction)
                     devil_capped_indices.add(i)
+                    devil_cap_by_index[i] = config.DEVIL_CAP_HIGH
                     logger.info(
-                        "Devil accuracy cap: %s → 10%% (Devil accuracy active, HIGH flag)",
-                        pos.ticker,
+                        "Devil accuracy cap: %s → %.0f%% (Devil accuracy active, HIGH flag)",
+                        pos.ticker, config.DEVIL_CAP_HIGH * 100,
+                    )
+                elif risk_level == "MEDIUM" and pos.weight > config.DEVIL_CAP_MEDIUM:
+                    kept[i] = Position(ticker=pos.ticker, weight=config.DEVIL_CAP_MEDIUM, rationale=pos.rationale, conviction=pos.conviction)
+                    devil_capped_indices.add(i)
+                    devil_cap_by_index[i] = config.DEVIL_CAP_MEDIUM
+                    logger.info(
+                        "Devil accuracy cap: %s → %.0f%% (Devil accuracy active, MEDIUM flag)",
+                        pos.ticker, config.DEVIL_CAP_MEDIUM * 100,
                     )
         raw_caps = learning_state.get("weight_caps", [])
         ticker_caps: dict[str, tuple[float, str]] = {}
@@ -740,20 +773,26 @@ class OpenAIRiskManager(BaseAgent):
             return updated
 
         # Re-enforce overbought cap after normalization — normalization inflates capped weights.
+        # Use per-position effective cap (which may be tighter than OVERBOUGHT_WEIGHT_CAP
+        # when sector rotation risk is HIGH or MEDIUM).
         ob_excess = 0.0
         for i, pos in enumerate(kept):
-            if i in overbought_capped_indices and pos.weight > config.OVERBOUGHT_WEIGHT_CAP:
-                ob_excess += pos.weight - config.OVERBOUGHT_WEIGHT_CAP
-                kept[i] = Position(ticker=pos.ticker, weight=config.OVERBOUGHT_WEIGHT_CAP, rationale=pos.rationale, conviction=pos.conviction)
+            if i in overbought_capped_indices:
+                cap_val = ob_cap_by_index.get(i, config.OVERBOUGHT_WEIGHT_CAP)
+                if pos.weight > cap_val:
+                    ob_excess += pos.weight - cap_val
+                    kept[i] = Position(ticker=pos.ticker, weight=cap_val, rationale=pos.rationale, conviction=pos.conviction)
         if ob_excess > 1e-9:
             kept = _redistribute_excess(kept, ob_excess, overbought_capped_indices)
 
-        # Re-enforce devil accuracy cap after normalization — same pattern as overbought.
+        # Re-enforce devil accuracy caps after normalization — use per-index cap value.
         devil_excess = 0.0
         for i, pos in enumerate(kept):
-            if i in devil_capped_indices and pos.weight > config.DEVIL_ACCURACY_CAP_WEIGHT:
-                devil_excess += pos.weight - config.DEVIL_ACCURACY_CAP_WEIGHT
-                kept[i] = Position(ticker=pos.ticker, weight=config.DEVIL_ACCURACY_CAP_WEIGHT, rationale=pos.rationale, conviction=pos.conviction)
+            if i in devil_capped_indices:
+                cap_val = devil_cap_by_index.get(i, config.DEVIL_CAP_HIGH)
+                if pos.weight > cap_val:
+                    devil_excess += pos.weight - cap_val
+                    kept[i] = Position(ticker=pos.ticker, weight=cap_val, rationale=pos.rationale, conviction=pos.conviction)
         if devil_excess > 1e-9:
             kept = _redistribute_excess(kept, devil_excess, devil_capped_indices | overbought_capped_indices)
 
@@ -895,6 +934,10 @@ class OpenAIRiskManager(BaseAgent):
                 and momentum_5d <= config.DEAD_MONEY_MOM_5D
             ):
                 multiplier *= config.QUALITY_REBALANCE_DEAD_MONEY_PENALTY
+
+            # Clamp multiplier to prevent extreme compounding
+            multiplier = max(config.QUALITY_REBALANCE_MULTIPLIER_MIN,
+                             min(config.QUALITY_REBALANCE_MULTIPLIER_MAX, multiplier))
 
             weighted.append(
                 Position(
@@ -1421,6 +1464,15 @@ class OpenAIRiskManager(BaseAgent):
                     rsi_str = f"{rsi:.0f}" if not math.isnan(rsi) else "n/a"
                     lines.append(f"  {sanitize_ticker(ticker)} [{v['risk']}]: {v['bear_case']}")
                     lines.append(f"    [ACTUAL SIGNALS: vol_ratio={vr_str}, mom_5d={m5_str}, rsi={rsi_str}]")
+
+        # Late-game mode and groupthink alerts for Risk Manager
+        late_game_mode = snapshot.get("late_game_mode", "NORMAL")
+        if late_game_mode == "RECOUP":
+            lines += ["", "LATE-GAME MODE: RECOUP — portfolio underperforming with <3 weeks left. Weight toward higher-beta/catalyst names. Accept slightly more risk for upside."]
+        elif late_game_mode == "LOCK_IN":
+            lines += ["", "LATE-GAME MODE: LOCK_IN — portfolio outperforming with <3 weeks left. Prefer beta 1.0-1.4 with confirmed momentum over high-beta concentration. Protect gains."]
+        if snapshot.get("groupthink_risk"):
+            lines += ["", "⚠ GROUPTHINK ALERT: >60% of proposals share the same consensus picks. Evaluate whether any non-consensus pick from the candidate table offers asymmetric alpha not yet in the obvious names."]
 
         lines += [
             "",

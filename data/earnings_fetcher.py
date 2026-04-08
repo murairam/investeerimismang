@@ -80,7 +80,7 @@ def fetch_upcoming_earnings(tickers: list[str]) -> list[dict]:
         try:
             dates = _extract_earnings_dates(yf.Ticker(ticker).calendar)
             for earnings_date in dates:
-                if today <= earnings_date <= cutoff:
+                if today < earnings_date <= cutoff:
                     results.append({"ticker": ticker, "earnings_date": earnings_date.isoformat()})
                     break
         except Exception as exc:

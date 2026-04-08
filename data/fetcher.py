@@ -65,6 +65,9 @@ class CandidateInfo(TypedDict):
     analyst_rating: float # analyst consensus 1.0=Strong Buy → 5.0=Strong Sell (NaN if unavailable)
     analyst_upside: float # (target_mean_price / last_price) - 1; NaN if no coverage
     competition_score: float  # Z-score weighted competition rank (regime-specific: BULL favours momentum×beta)
+    mom_aligned: int      # 1 = all three timeframes (5d, 20d, 60d) are positive — confirmed multi-timeframe uptrend
+    breakout_score: int   # 1 = vol_ratio>1.5 AND mom_5d>3% AND price>SMA50 AND RSI 55-75 (quality breakout filter)
+    rel_sector: float     # stock 20d return minus sector median 20d return (positive = true sector leader)
 
 
 class MarketSnapshot(TypedDict):
@@ -90,6 +93,8 @@ class MarketSnapshot(TypedDict):
     sector_momentum: dict # {sector: {avg_mom_20d, avg_mom_5d, avg_rsi, breadth, count}}
     rotation_risk: dict  # {sector: {"level": "HIGH"|"MEDIUM", "reason": str}} for exhausted leading sectors
     commodity_context: dict  # {brent_price, brent_20d_return, ...} or empty dict if fetch fails
+    late_game_mode: str  # "NORMAL" | "RECOUP" (down >5%, final 3 wks) | "LOCK_IN" (up >10%, final 3 wks)
+    groupthink_risk: bool  # True when >60% of agent picks are consensus — may signal crowded trades
 
 
 def sanitize_ticker(ticker: str) -> str:
@@ -142,17 +147,25 @@ def _compute_competition_scores(records: list[dict], regime: str) -> None:
             s[feat] = (mean, var ** 0.5 if var > 0 else 1.0)
         return s
 
-    us_records = [r for r in records if r.get("market") == "SP500"]
-    non_us_records = [r for r in records if r.get("market") != "SP500"]
-    # Require at least 5 records per group for meaningful Z-scores; fall back to global stats otherwise.
+    # Per-market Z-score groupings: benchmark each market against its own peer group.
+    # Previously binary US/non-US grouping caused Nordic large-caps to be benchmarked
+    # against Baltic micro-caps, suppressing their Z-scores unfairly.
+    _KNOWN_MARKETS = ["SP500", "OMXHLCPI", "OMXS30", "OBX", "OMXC25", "BALTIC"]
     _all_stats = _group_stats(records)
-    stats_us = _group_stats(us_records) if len(us_records) >= 5 else _all_stats
-    stats_non_us = _group_stats(non_us_records) if len(non_us_records) >= 5 else _all_stats
+    market_groups: dict[str, list[dict]] = {m: [] for m in _KNOWN_MARKETS}
+    market_groups["OTHER"] = []
+    for r in records:
+        m = r.get("market", "OTHER")
+        market_groups.setdefault(m, []).append(r)
+    # Compute stats per market; fall back to global if fewer than 5 records in group.
+    market_stats: dict[str, dict[str, tuple[float, float]]] = {}
+    for m, grp in market_groups.items():
+        market_stats[m] = _group_stats(grp) if len(grp) >= 5 else _all_stats
 
     # Score each record
     for r in records:
         score = 0.0
-        _stats = stats_us if r.get("market") == "SP500" else stats_non_us
+        _stats = market_stats.get(r.get("market", "OTHER"), _all_stats)
         for feat, w in weights.items():
             field = _field.get(feat, feat)
             val = r.get(field, float("nan"))
@@ -759,9 +772,10 @@ class DataFetcher:
             "eurusd_1d": float("nan"),
             "eurusd_5d": float("nan"),
             "eurusd_20d": float("nan"),
+            "eurusd_60d": float("nan"),
         }
         try:
-            data, *_ = self.fetch_ohlcv(["EURUSD=X"], period="3mo")
+            data, *_ = self.fetch_ohlcv(["EURUSD=X"], period="6mo")
             if "EURUSD=X" not in data.columns:
                 return result
             col = data["EURUSD=X"].dropna()
@@ -773,12 +787,15 @@ class DataFetcher:
                 result["eurusd_5d"] = float(col.iloc[-1] / col.iloc[-6] - 1)
             if len(col) > 21:
                 result["eurusd_20d"] = float(col.iloc[-1] / col.iloc[-22] - 1)
+            if len(col) > 60:
+                result["eurusd_60d"] = float(col.iloc[-1] / col.iloc[-61] - 1)
             logger.info(
-                "FX: EUR/USD %.4f (1d %+.2f%%, 5d %+.2f%%, 20d %+.2f%%)",
+                "FX: EUR/USD %.4f (1d %+.2f%%, 5d %+.2f%%, 20d %+.2f%%, 60d %+.2f%%)",
                 result["eurusd_price"],
                 result["eurusd_1d"] * 100,
                 result["eurusd_5d"] * 100 if not math.isnan(result["eurusd_5d"]) else 0.0,
                 result["eurusd_20d"] * 100 if not math.isnan(result["eurusd_20d"]) else 0.0,
+                result["eurusd_60d"] * 100 if not math.isnan(result["eurusd_60d"]) else 0.0,
             )
         except Exception as exc:
             logger.warning("FX context fetch failed (non-fatal): %s", exc)
@@ -1293,6 +1310,19 @@ class DataFetcher:
                 "analyst_rating": float("nan"),   # filled in after top-N filtering via _fetch_analyst_consensus_targeted
                 "analyst_upside": float("nan"),   # filled in after top-N filtering via _fetch_analyst_consensus_targeted
                 "competition_score": 0.0,         # filled in by _compute_competition_scores below
+                # Novel signals — computed inline from already-available data
+                "mom_aligned": int(
+                    mom > 0
+                    and (not math.isnan(float(momentum_5d.get(ticker, np.nan) if ticker in momentum_5d.index else float("nan"))) and float(momentum_5d.get(ticker, np.nan)) > 0)
+                    and (not math.isnan(float(momentum_60d.get(ticker, np.nan) if ticker in momentum_60d.index else float("nan"))) and float(momentum_60d.get(ticker, np.nan)) > 0)
+                ) if not math.isnan(mom) else 0,
+                "breakout_score": int(
+                    not math.isnan(vr) and vr > 1.5
+                    and (not math.isnan(float(momentum_5d.get(ticker, np.nan) if ticker in momentum_5d.index else float("nan"))) and float(momentum_5d.get(ticker, np.nan)) > 0.03)
+                    and (ticker in sma_50.index and not math.isnan(float(sma_50.get(ticker, float("nan")))) and last_price > float(sma_50.get(ticker, float("nan"))))
+                    and not math.isnan(rsi_val) and 55 <= rsi_val <= 75
+                ),
+                "rel_sector": float("nan"),  # filled in after sector_momentum is computed below
             })
 
         for record in records:
@@ -1322,6 +1352,20 @@ class DataFetcher:
         if rotation_risk:
             logger.info("Rotation risk detected: %s", rotation_risk)
 
+        # Compute rel_sector: stock 20d return minus sector median 20d return.
+        # Positive = true sector leader; negative in rising sector = rotation laggard.
+        sector_median_mom: dict[str, float] = {}
+        for sector, srecs in sector_records.items():
+            vals = sorted(r["momentum"] for r in srecs if not math.isnan(r.get("momentum", float("nan"))))
+            if vals:
+                mid = len(vals) // 2
+                sector_median_mom[sector] = vals[mid] if len(vals) % 2 else (vals[mid - 1] + vals[mid]) / 2
+        for record in records:
+            sec = record.get("sector", "")
+            med = sector_median_mom.get(sec, float("nan"))
+            mom_val = record.get("momentum", float("nan"))
+            record["rel_sector"] = (mom_val - med) if (not math.isnan(mom_val) and not math.isnan(med)) else float("nan")
+
         # Compute competition scores (Z-score normalised, regime-specific weights).
         # Separate from selection_score: selection_score filters quality, competition_score ranks for display.
         _compute_competition_scores(records, regime)
@@ -1349,7 +1393,7 @@ class DataFetcher:
         logger.info("Ranked candidates prepared: %d tickers", len(ranked_candidates))
         top = records[:TOP_N_CANDIDATES]
 
-        # Targeted dividend yield fetch — only for the ~40 candidates, not the full 111-ticker universe.
+        # Targeted dividend yield fetch — for all TOP_N_CANDIDATES, not just top 40.
         # Separate call with auto_adjust=False avoids the NaN issue seen with auto_adjust+actions on large batches.
         top_tickers = [r["ticker"] for r in top]
         div_yield = self._fetch_dividend_yields_targeted(top_tickers, close)
@@ -1438,4 +1482,6 @@ class DataFetcher:
             earnings=[],
             pead_signals=[],
             commodity_context={},
+            late_game_mode="NORMAL",
+            groupthink_risk=False,
         )

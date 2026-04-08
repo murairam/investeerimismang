@@ -1,6 +1,16 @@
 """
 Global configuration: game constraints, ticker universe, signal parameters.
 """
+import datetime as _dt
+
+# ── Game schedule ─────────────────────────────────────────────────────────────
+GAME_START_DATE: _dt.date = _dt.date(2026, 4, 6)   # First trading day
+GAME_END_DATE: _dt.date = _dt.date(2026, 6, 19)    # Last trading day
+
+# Late-game thresholds (days remaining ≤ this triggers aggression/protection logic)
+LATE_GAME_DAYS_THRESHOLD: int = 21
+LATE_GAME_RECOUP_RETURN: float = -0.05   # down >5% → swing harder
+LATE_GAME_LOCK_IN_RETURN: float = 0.10  # up >10% → protect gains
 
 # ── Game constraints ─────────────────────────────────────────────────────────
 GAME_CONSTRAINTS = {
@@ -63,7 +73,9 @@ OVERBOUGHT_VOLUME_EXCEPTION = 1.8  # vol_ratio above this bypasses cap
 OVERBOUGHT_WEIGHT_CAP = 0.15
 DEAD_MONEY_VOL_RATIO = 0.90
 DEAD_MONEY_MOM_5D = 0.01
-DEVIL_ACCURACY_CAP_WEIGHT = 0.10
+DEVIL_ACCURACY_CAP_WEIGHT = 0.10  # kept for backward compat; use DEVIL_CAP_HIGH below
+DEVIL_CAP_HIGH = 0.10    # Devil accuracy active + HIGH-risk flag → hard cap at 10%
+DEVIL_CAP_MEDIUM = 0.15  # Devil accuracy active + MEDIUM-risk flag → soft cap at 15%
 BETA_CHECK_MIN_US_WEIGHT = 0.25
 NON_US_ASSUMED_BETA = 0.70
 STRESS_INDIVIDUAL_BETA_CAP = 2.0  # any single stock with beta > this gets capped at OVERBOUGHT_WEIGHT_CAP under stress
@@ -90,6 +102,11 @@ QUALITY_REBALANCE_MEDIUM_RISK_PENALTY = 0.90
 QUALITY_REBALANCE_HIGH_RISK_PENALTY = 0.76
 QUALITY_REBALANCE_OVERBOUGHT_PENALTY = 0.86
 QUALITY_REBALANCE_DEAD_MONEY_PENALTY = 0.70
+# Multiplier ceiling/floor — prevents compounding extreme boosts or penalties
+QUALITY_REBALANCE_MULTIPLIER_MIN = 0.50   # never penalize below 50% of original weight
+QUALITY_REBALANCE_MULTIPLIER_MAX = 1.50   # never boost above 150% of original weight
+# Signal importance: minimum observations before promoting a signal as actionable
+SIGNAL_IMPORTANCE_MIN_OBS = 20
 
 # Regime thresholds
 VIX_HIGH_THRESHOLD = 30

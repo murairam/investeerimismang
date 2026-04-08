@@ -19,6 +19,7 @@ from data.portfolio_store import (
     save_learning_state_to_db,
     load_learning_state_from_db,
 )
+import config as config_module
 
 logger = logging.getLogger(__name__)
 
@@ -55,9 +56,13 @@ def compute_signal_importance(rows: list[dict]) -> dict:
                 hits_global[s].append(hit)
                 if regime in hits_regime:
                     hits_regime[regime][s].append(hit)
-    global_imp = {s: round(sum(v) / len(v), 4) for s, v in hits_global.items() if len(v) >= 5}
+    # Require a minimum number of observations before promoting a signal as important.
+    # With only 5 obs (1 trading week), directional accuracy is pure noise — a signal
+    # hitting 4/5 times is easily explained by coincidence, not edge.
+    _MIN_SIGNAL_OBS = config_module.SIGNAL_IMPORTANCE_MIN_OBS
+    global_imp = {s: round(sum(v) / len(v), 4) for s, v in hits_global.items() if len(v) >= _MIN_SIGNAL_OBS}
     per_regime = {
-        regime: {s: round(sum(v) / len(v), 4) for s, v in sig_hits.items() if len(v) >= 5}
+        regime: {s: round(sum(v) / len(v), 4) for s, v in sig_hits.items() if len(v) >= _MIN_SIGNAL_OBS}
         for regime, sig_hits in hits_regime.items()
     }
     per_regime = {r: imp for r, imp in per_regime.items() if imp}
