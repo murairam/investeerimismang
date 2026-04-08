@@ -1,11 +1,14 @@
 """
 Abstract base class that all LLM agents must implement.
 """
+import logging
 from abc import ABC, abstractmethod
 from typing import Optional
 
 from data.fetcher import MarketSnapshot
-from portfolio.models import PortfolioProposal
+from portfolio.models import PortfolioProposal, Position
+
+logger = logging.getLogger(__name__)
 
 
 def conviction_to_weight(conviction: int) -> float:
@@ -33,6 +36,49 @@ def conviction_to_weight(conviction: int) -> float:
     # Linear interpolation: conviction 1 → 0.05, conviction 10 → 0.25
     weight = 0.05 + (conviction - 1) * (0.20 / 9)
     return round(weight, 4)
+
+
+def validate_conviction_variance(proposal: PortfolioProposal, agent_name: str) -> PortfolioProposal:
+    """Ensure positions have differentiated conviction scores.
+
+    If all convictions are identical, spread them linearly by position order
+    (first position gets +2, last gets -2, clamped to 1-10) so the Risk Manager
+    receives differentiated inputs for weighting decisions.
+    Logs a WARNING when triggered so LLM conviction drift can be monitored.
+    """
+    if not proposal.positions:
+        return proposal
+    convictions = [p.conviction for p in proposal.positions if p.conviction is not None]
+    if len(convictions) < 2:
+        return proposal
+    if len(set(convictions)) > 1:
+        return proposal  # already differentiated — no action needed
+
+    base_conv = convictions[0]
+    n = len(proposal.positions)
+    logger.warning(
+        "%s: all %d positions have identical conviction=%s — spreading linearly",
+        agent_name, n, base_conv,
+    )
+    new_positions = []
+    for i, pos in enumerate(proposal.positions):
+        # Spread: top pick gets base+2, bottom gets base-2 (or narrower if few positions)
+        spread = min(2, (n - 1))
+        adj = max(1, min(10, base_conv + spread - i * (2 * spread // max(1, n - 1))))
+        new_positions.append(
+            Position(
+                ticker=pos.ticker,
+                weight=pos.weight,
+                rationale=pos.rationale,
+                conviction=adj,
+            )
+        )
+    return PortfolioProposal(
+        positions=new_positions,
+        reasoning=proposal.reasoning,
+        confidence=proposal.confidence,
+        learning_reflection=proposal.learning_reflection,
+    )
 
 
 class BaseAgent(ABC):

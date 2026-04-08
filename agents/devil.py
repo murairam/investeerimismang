@@ -93,9 +93,9 @@ Output ONLY valid JSON, no other text:
 class OpenAIDevil:
     MODEL = "gpt-5.4-nano"
     MAX_RETRIES = 2
-    OPENROUTER_MAX_TICKERS = 10
-    OPENAI_MAX_TICKERS = 12
-    OPENROUTER_MAX_TOKENS = 2600
+    OPENROUTER_MAX_TICKERS = 15   # expanded from 10 to cover mid-ranked positions
+    OPENAI_MAX_TICKERS = 20       # expanded from 12 for full top-20 coverage
+    OPENROUTER_MAX_TOKENS = 3500  # increased from 2600 to handle larger candidate set
 
     def __init__(self) -> None:
         self._openrouter_enabled = config.USE_OPENROUTER_FOR_SECONDARY_AGENTS and bool(os.environ.get("OPENROUTER_API_KEY"))

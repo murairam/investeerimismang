@@ -120,6 +120,7 @@ Output `conviction` (integer 1–10), NOT a weight. Python converts conviction t
 - 5–7 = medium conviction (solid signals, worth a slot)
 - 1–4 = low conviction / speculative (include only if genuinely additive)
 Every position must have a DIFFERENT conviction score — equal scoring across all positions is not acceptable.
+Conviction → weight mapping (Python-computed): 10→~25% | 9→~22% | 8→~20% | 7→~18% | 6→~16% | 5→~13% | 4→~11% | 3→~9% | 2→~7% | 1→~5%
 
 ## Market regime
 {regime_guidance}
@@ -305,6 +306,18 @@ class OpenAIStrategist(BaseAgent):
                 alert_lines.append(f"  Action: Reduce or exit {', '.join(s for s, _ in high)} before rotation completes.")
             lines += [""] + alert_lines
 
+        late_game_mode = snapshot.get("late_game_mode", "NORMAL")
+        if late_game_mode != "NORMAL":
+            _lgm_msg = {
+                "RECOUP": "LATE-GAME MODE: RECOUP — portfolio is underperforming, final 3 weeks. Favour higher-beta/catalyst names to close the gap. Avoid defensive low-beta filler.",
+                "LOCK_IN": "LATE-GAME MODE: LOCK_IN — portfolio is outperforming, final 3 weeks. Favour beta 1.0-1.4 names with positive momentum to preserve gains. Avoid high-beta concentration.",
+            }.get(late_game_mode, "")
+            if _lgm_msg:
+                lines += ["", _lgm_msg]
+
+        if snapshot.get("groupthink_risk"):
+            lines += ["", "⚠ GROUPTHINK ALERT: >60% of picks are consensus across agents — the obvious momentum names may already be crowded. Actively consider non-consensus picks from the signal table."]
+
         lines += [
             "",
             "Top candidates (sorted by competition score) — MOMENTUM signals only:",
@@ -468,6 +481,26 @@ class OpenAIStrategist(BaseAgent):
                 delta = last_bret - first_bret
                 trend = "improving" if delta > 0.005 else ("deteriorating" if delta < -0.005 else "flat")
                 lines.append(f"  Trend: benchmark momentum is {trend} ({delta:+.1%} over {len(perf_history)} days).")
+
+        # New signals — supplement line after table for stocks with notable values
+        _new_signal_lines = []
+        for c in snapshot["candidates"]:
+            parts = []
+            if c.get("mom_aligned") == 1:
+                parts.append("MOM_ALIGNED")
+            if c.get("breakout_score") == 1:
+                parts.append("BREAKOUT")
+            rel = c.get("rel_sector", float("nan"))
+            if not math.isnan(rel):
+                if rel > 0.03:
+                    parts.append(f"SECTOR_LEADER(+{rel:.1%})")
+                elif rel < -0.03:
+                    parts.append(f"SECTOR_LAGGARD({rel:.1%})")
+            if parts:
+                _new_signal_lines.append(f"  {sanitize_ticker(c['ticker'])}: {', '.join(parts)}")
+        if _new_signal_lines:
+            lines += ["", "Signal flags (MOM_ALIGNED=all 3 timeframes up, BREAKOUT=volume+momentum+SMA+RSI, SECTOR_LEADER/LAGGARD=vs sector median):"]
+            lines += _new_signal_lines
 
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]

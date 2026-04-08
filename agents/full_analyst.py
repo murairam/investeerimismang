@@ -113,6 +113,7 @@ Output `conviction` (integer 1–10), NOT a weight. Python converts conviction t
 - 5–7 = medium conviction (solid signals, worth a slot)
 - 1–4 = speculative / diversifier
 Every position must have a DIFFERENT conviction score.
+Conviction → weight mapping (Python-computed): 10→~25% | 9→~22% | 8→~20% | 7→~18% | 6→~16% | 5→~13% | 4→~11% | 3→~9% | 2→~7% | 1→~5%
 
 ## Macro context
 Follow the signals — no hardcoded sector or stock bias. Whatever has the strongest combined signal today is your focus.
@@ -423,6 +424,37 @@ class OpenAIFullAnalyst(BaseAgent):
             lines += ["", "Yesterday's holdings (for continuity reference):"]
             for pos in prior_proposal.positions:
                 lines.append(f"{sanitize_ticker(pos.ticker)},{pos.weight:.1%}")
+
+        # Late-game mode and groupthink alerts
+        late_game_mode = snapshot.get("late_game_mode", "NORMAL")
+        if late_game_mode == "RECOUP":
+            lines += ["", "LATE-GAME MODE: RECOUP — portfolio underperforming, final 3 weeks. Favour higher-beta/catalyst names."]
+        elif late_game_mode == "LOCK_IN":
+            lines += ["", "LATE-GAME MODE: LOCK_IN — portfolio outperforming, final 3 weeks. Favour beta 1.0-1.4 with confirmed momentum."]
+        if snapshot.get("groupthink_risk"):
+            lines += ["", "⚠ GROUPTHINK ALERT: >60% consensus across agents — look for overlooked high-signal picks not in the obvious consensus."]
+
+        # Signal flags for novel signals
+        _new_signal_lines = []
+        for c in snapshot.get("candidates", []):
+            parts = []
+            if c.get("mom_aligned") == 1:
+                parts.append("MOM_ALIGNED")
+            if c.get("breakout_score") == 1:
+                parts.append("BREAKOUT")
+            rel = c.get("rel_sector", float("nan"))
+            if not isinstance(rel, float):
+                rel = float("nan")
+            if not math.isnan(rel):
+                if rel > 0.03:
+                    parts.append(f"SECTOR_LEADER(+{rel:.1%})")
+                elif rel < -0.03:
+                    parts.append(f"SECTOR_LAGGARD({rel:.1%})")
+            if parts:
+                _new_signal_lines.append(f"  {sanitize_ticker(c['ticker'])}: {', '.join(parts)}")
+        if _new_signal_lines:
+            lines += ["", "Signal flags (MOM_ALIGNED=all timeframes up, BREAKOUT=quality breakout, SECTOR_LEADER/LAGGARD=vs sector median):"]
+            lines += _new_signal_lines
 
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]

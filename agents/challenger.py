@@ -118,6 +118,7 @@ You are a SECOND OPINION to a separate Momentum Strategist who sees trend/Sharpe
 
 ## Signal guidance
 - RSI > 75 with vol_ratio > 1.5 = confirmed breakout (bullish). RSI > 82 AND pct_from_52w_high ≥ -2% AND vol_ratio < 1.8 = exhaustion risk, not a fresh breakout — lower conviction (score ≤ 5).
+- vol_ratio > 1.5 is BULLISH only when combined with positive momentum (mom_5d > 2% OR RSI > 60). High volume on negative momentum (mom_5d < 0) = distribution or capitulation, NOT a breakout — treat as neutral-to-bearish.
 - vol_ratio > 1.5: move confirmed by volume — strong buy signal. vol_ratio > 1.8 overrides the exhaustion warning.
 - pct_from_52w_high is ALWAYS <= 0%. 0.0% = AT 52-week high. Bullish only when vol_ratio confirms. Without volume, at-peak = no pullback cushion.
 - ShortInt = short % of float when available.
@@ -136,6 +137,7 @@ Output `conviction` (integer 1–10), NOT a weight. Python converts conviction t
 - 5–7 = medium conviction (good signals but not perfect setup)
 - 1–4 = speculative / weak setup
 Every position must have a DIFFERENT conviction score.
+Conviction → weight mapping (Python-computed): 10→~25% | 9→~22% | 8→~20% | 7→~18% | 6→~16% | 5→~13% | 4→~11% | 3→~9% | 2→~7% | 1→~5%
 
 ## What to AVOID
 - Do NOT fill the portfolio with US mega-cap names just because they are large.
@@ -422,6 +424,35 @@ class GeminiChallenger(BaseAgent):
             lines += ["", "Yesterday's holdings (for continuity reference):"]
             for pos in prior_proposal.positions:
                 lines.append(f"  {sanitize_ticker(pos.ticker):<12} {pos.weight:.1%}")
+
+        # Late-game mode and groupthink alerts
+        late_game_mode = snapshot.get("late_game_mode", "NORMAL")
+        if late_game_mode == "RECOUP":
+            lines += ["", "LATE-GAME MODE: RECOUP — portfolio underperforming, final 3 weeks. Favour high-beta catalyst setups."]
+        elif late_game_mode == "LOCK_IN":
+            lines += ["", "LATE-GAME MODE: LOCK_IN — portfolio outperforming, final 3 weeks. Favour lower-beta with confirmed momentum."]
+        if snapshot.get("groupthink_risk"):
+            lines += ["", "⚠ GROUPTHINK ALERT: >60% consensus across agents — look for overlooked catalyst setups not in the obvious consensus."]
+
+        # Signal flags for new novel signals
+        _new_signal_lines = []
+        for c in snapshot.get("candidates", []):
+            parts = []
+            if c.get("mom_aligned") == 1:
+                parts.append("MOM_ALIGNED")
+            if c.get("breakout_score") == 1:
+                parts.append("BREAKOUT")
+            rel = c.get("rel_sector", float("nan"))
+            if not math.isnan(rel) and isinstance(rel, float):
+                if rel > 0.03:
+                    parts.append(f"SECTOR_LEADER(+{rel:.1%})")
+                elif rel < -0.03:
+                    parts.append(f"SECTOR_LAGGARD({rel:.1%})")
+            if parts:
+                _new_signal_lines.append(f"  {sanitize_ticker(c['ticker'])}: {', '.join(parts)}")
+        if _new_signal_lines:
+            lines += ["", "Signal flags (MOM_ALIGNED=all timeframes up, BREAKOUT=quality breakout, SECTOR_LEADER/LAGGARD=vs sector median):"]
+            lines += _new_signal_lines
 
         if snapshot.get("earnings_warning"):
             lines += ["", snapshot["earnings_warning"]]

@@ -26,6 +26,7 @@ from concurrent.futures import (
 )
 from typing import Optional
 
+from agents.base_agent import validate_conviction_variance
 from agents.challenger import GeminiChallenger
 from agents.full_analyst import OpenAIFullAnalyst
 from agents.devil import OpenAIDevil
@@ -135,6 +136,7 @@ class AlphaSharkOrchestrator:
         snapshot["fx_context"] = fx_ctx
         eurusd_20d = fx_ctx.get("eurusd_20d", float("nan"))
         eurusd_5d = fx_ctx.get("eurusd_5d", float("nan"))
+        eurusd_60d = fx_ctx.get("eurusd_60d", float("nan"))
         eurusd_1d = fx_ctx.get("eurusd_1d", float("nan"))
         if not math.isnan(eurusd_20d):
             n_adjusted = 0
@@ -143,6 +145,8 @@ class AlphaSharkOrchestrator:
                     c["momentum"] -= eurusd_20d
                     if not math.isnan(c.get("mom_5d", float("nan"))) and not math.isnan(eurusd_5d):
                         c["mom_5d"] -= eurusd_5d
+                    if not math.isnan(c.get("mom_60d", float("nan"))) and not math.isnan(eurusd_60d):
+                        c["mom_60d"] -= eurusd_60d
                     vol = c.get("vol_20d", float("nan"))
                     c["sharpe_20d"] = c["momentum"] / vol if (not math.isnan(vol) and vol > 0) else 0.0
                     c["vs_index"] = c["momentum"] - snapshot["benchmark_return"]
@@ -166,6 +170,27 @@ class AlphaSharkOrchestrator:
         else:
             snapshot["game_equity"] = 10000.0
             snapshot["game_return_pct"] = 0.0
+
+        # Late-game mode: adapt sizing aggression in final 3 weeks based on standing
+        import datetime as _dt
+        _today = _dt.date.today()
+        _game_end = _dt.date(2026, 6, 19)
+        _days_remaining = max(0, (_game_end - _today).days)
+        _game_return = snapshot.get("game_return_pct", 0.0)
+        if _days_remaining <= 21:
+            if not math.isnan(_game_return) and _game_return < -0.05:
+                snapshot["late_game_mode"] = "RECOUP"   # down >5%, need to swing harder
+            elif not math.isnan(_game_return) and _game_return > 0.10:
+                snapshot["late_game_mode"] = "LOCK_IN"  # up >10%, protect gains
+            else:
+                snapshot["late_game_mode"] = "NORMAL"
+        else:
+            snapshot["late_game_mode"] = "NORMAL"
+        logger.info(
+            "Late-game mode: %s (days remaining: %d, game return: %+.1f%%)",
+            snapshot["late_game_mode"], _days_remaining,
+            _game_return * 100 if not math.isnan(_game_return) else 0.0,
+        )
 
         # Step 1b-i: refresh competitor intelligence from manual watchlist (rate-limited)
         if ENABLE_COMPETITOR_INTEL and COMPETITOR_INTEL_URLS:
@@ -525,6 +550,15 @@ class AlphaSharkOrchestrator:
         finally:
             executor.shutdown(wait=False, cancel_futures=True)
 
+        # Enforce conviction variance: if all positions have identical conviction scores,
+        # spread them linearly so the Risk Manager receives differentiated inputs.
+        if strategist_proposal is not None:
+            strategist_proposal = validate_conviction_variance(strategist_proposal, "Strategist")
+        if challenger_proposal is not None:
+            challenger_proposal = validate_conviction_variance(challenger_proposal, "Challenger")
+        if full_analyst_proposal is not None:
+            full_analyst_proposal = validate_conviction_variance(full_analyst_proposal, "FullAnalyst")
+
         # Fail-safe: need at least one proposal
         active_proposals = [p for p in [strategist_proposal, challenger_proposal, full_analyst_proposal] if p is not None]
         if not active_proposals:
@@ -586,6 +620,26 @@ class AlphaSharkOrchestrator:
             logger.info("Triple consensus (all 3 agents): %s", ", ".join(sorted(triple)))
         if consensus - triple:
             logger.info("Double consensus (2/3 agents): %s", ", ".join(sorted(consensus - triple)))
+
+        # Groupthink detection: if >60% of picks are consensus across agents, the obvious
+        # momentum names may be crowded — warn Risk Manager to consider asymmetric picks.
+        _n_active_proposals = sum(1 for s in [strat_set, chall_set, full_set] if s)
+        if _n_active_proposals >= 2 and all_tickers:
+            _consensus_rate = len(consensus) / len(all_tickers)
+            snapshot["groupthink_risk"] = _consensus_rate > 0.60
+            if _consensus_rate > 0.60:
+                _gt_warning = (
+                    f"\nGROUPTHINK ALERT: {_consensus_rate:.0%} of picks ({len(consensus)}/{len(all_tickers)}) "
+                    "are consensus across agents. The obvious momentum names may be crowded/priced-in. "
+                    "Consider whether any overlooked asymmetric picks exist among non-consensus candidates."
+                )
+                snapshot["learning_context"] = snapshot.get("learning_context", "") + _gt_warning
+                logger.warning(
+                    "GROUPTHINK RISK: %.0f%% consensus rate — %d/%d picks shared across %d agents",
+                    _consensus_rate * 100, len(consensus), len(all_tickers), _n_active_proposals,
+                )
+        else:
+            snapshot["groupthink_risk"] = False
 
         # Step 3d: Optional cross-agent debate (deprecated; keep behind flag for shadow comparison)
         if ENABLE_CROSS_CHECK:
