@@ -1,40 +1,40 @@
 {
-  "date": "2026-04-07",
-  "timestamp": "2026-04-07T23:06:34+00:00",
-  "portfolio_return": 0.01963791736980337,
-  "benchmark_return": 0.0007592481161695641,
-  "alpha": 0.018878669253633806,
+  "date": "2026-04-08",
+  "timestamp": "2026-04-08T21:09:56+00:00",
+  "portfolio_return": -0.006550821504333644,
+  "benchmark_return": 0.025081414644149813,
+  "alpha": -0.031632236148483456,
   "position_returns": [
     {
-      "ticker": "FORTUM.HE",
-      "weight": 0.25,
-      "return": 0.05353815842821685,
-      "price": 22.6299991607666
+      "ticker": "WDC",
+      "weight": 0.13,
+      "return": 0.0859725864176426,
+      "price": 338.7799987792969
     },
     {
       "ticker": "STX",
-      "weight": 0.15,
-      "return": 0.034017237685823654,
-      "price": 468.7200012207031
+      "weight": 0.19,
+      "return": 0.05884107036277131,
+      "price": 496.29998779296875
     },
     {
-      "ticker": "WDC",
-      "weight": 0.15,
-      "return": 0.02567811183731883,
-      "price": 311.9599914550781
+      "ticker": "VRSN",
+      "weight": 0.24,
+      "return": -0.014012761068300739,
+      "price": 270.8999938964844
     },
     {
-      "ticker": "NKT.CO",
-      "weight": 0.25,
-      "return": 0.0005770340450086398,
-      "price": 867.0
+      "ticker": "FORTUM.HE",
+      "weight": 0.22,
+      "return": -0.01590802988747153,
+      "price": 22.270000457763672
     },
     {
-      "ticker": "ISS.CO",
-      "weight": 0.2,
-      "return": -0.014225915884871876,
-      "price": 235.60000610351562
+      "ticker": "YAR.OL",
+      "weight": 0.22,
+      "return": -0.10020105398144463,
+      "price": 537.0
     }
   ],
-  "ai_recommendation": "Yes\u2014keep FORTUM.HE, STX, and WDC (they\u2019re driving the outperformance), and consider dropping NKT.CO if it stays flat/lagging while trimming ISS.CO (down -1.4%) unless you have a strong thesis for a rebound. Reallocate that freed risk into the current leaders (FORTUM.HE/STX/WDC) to maintain positive alpha."
+  "ai_recommendation": "Yes\u2014rebalance: drop **YAR.OL (-10.0%)** and **VRSN (-1.4%)** (weak relative performance), and keep **WDC (+8.6%)** and **STX (+5.9%)** as core winners; **FORTUM.HE (-1.6%)** is neutral\u2014either trim or hold only if it\u2019s your intended sector exposure."
 }
