@@ -79,7 +79,7 @@ Winners: NKT.CO +1.4% | Losers: ISS.CO -0.7%, STX -0.4%, WDC -0.4%
 
 **Market:** BEAR regime · SPX vs 50d SMA: -2.4% · VIX: 24.2 · S&P 500 20d: -1.9%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 13:13:59.
 
 **Yesterday's P&L:** Portfolio -1.1% · Benchmark +0.4% · Alpha -1.5%
 Winners: NKT.CO +0.1% | Losers: FORTUM.HE -1.6%, ISS.CO -1.4%, STX -1.4%
