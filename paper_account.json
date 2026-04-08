@@ -1,41 +1,70 @@
 {
   "start_date": "2026-04-08",
   "initial_capital": 10000.0,
-  "cash": 0.0,
-  "positions": {
-    "VRSN": 10.10235807,
-    "YAR.OL": 45.74159636,
-    "FORTUM.HE": 100.8877576,
-    "STX": 4.68801866,
-    "WDC": 4.81940773
+  "cash": 10000.0,
+  "positions": {},
+  "pending_order": {
+    "submitted_date": "2026-04-08",
+    "positions": [
+      {
+        "ticker": "INTC",
+        "weight": 0.25
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.13
+      },
+      {
+        "ticker": "WDC",
+        "weight": 0.21
+      },
+      {
+        "ticker": "MPWR",
+        "weight": 0.22
+      },
+      {
+        "ticker": "TER",
+        "weight": 0.14
+      }
+    ]
   },
-  "verified_weights": {
-    "VRSN": 0.24,
-    "YAR.OL": 0.22,
-    "FORTUM.HE": 0.22,
-    "STX": 0.19,
-    "WDC": 0.13
-  },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-08",
-      "equity": 9887.0,
-      "cash": 0.0,
-      "daily_return": -0.0113,
-      "return_since_start": -0.0113,
+      "equity": 10000.0,
+      "cash": 10000.0,
+      "daily_return": 0.0,
+      "return_since_start": 0.0,
       "turnover": 0.0,
-      "positions": {
-        "VRSN": 10.10235807,
-        "YAR.OL": 45.74159636,
-        "FORTUM.HE": 100.8877576,
-        "STX": 4.68801866,
-        "WDC": 4.81940773
+      "positions": {},
+      "pending_order": {
+        "submitted_date": "2026-04-08",
+        "positions": [
+          {
+            "ticker": "INTC",
+            "weight": 0.25
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.13
+          },
+          {
+            "ticker": "WDC",
+            "weight": 0.21
+          },
+          {
+            "ticker": "MPWR",
+            "weight": 0.22
+          },
+          {
+            "ticker": "TER",
+            "weight": 0.14
+          }
+        ]
       },
-      "pending_order": null,
-      "source": "verified"
+      "executed_pending": false
     }
   ],
   "last_rebalanced_date": "2026-04-08",
-  "last_equity": 9887.0
+  "last_equity": 10000.0
 }

@@ -75,35 +75,38 @@ Winners: NKT.CO +1.4% | Losers: ISS.CO -0.7%, STX -0.4%, WDC -0.4%
 
 ---
 
-## 2026-04-08 05:55:46
+## 2026-04-08 21:54:54
 
-**Market:** BEAR regime · SPX vs 50d SMA: -2.4% · VIX: 24.2 · S&P 500 20d: -1.9%
+**Market:** NEUTRAL regime · SPX vs 50d SMA: +0.2% · VIX: 21.0 · S&P 500 20d: +0.0%
 
-**Verification:** Verified against actual game holdings at 13:13:59.
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio -1.1% · Benchmark +0.4% · Alpha -1.5%
-Winners: NKT.CO +0.1% | Losers: FORTUM.HE -1.6%, ISS.CO -1.4%, STX -1.4%
+**Yesterday's P&L:** Portfolio -0.9% · Benchmark +2.5% · Alpha -3.4%
+Winners: WDC +7.5%, STX +4.8% | Losers: YAR.OL -10.0%, VRSN -2.5%
 
 **Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
 
-**Confidence:** 85% · **Positions:** 5 · **Total weight:** 100.0%
+**Confidence:** 89% · **Positions:** 5 · **Total weight:** 95.0%
 
-**Thesis:** I cut the persistent laggards NKT.CO and ISS.CO and keep the actual winners FORTUM.HE, STX, and WDC, consistent with the recent learning review. Consensus was strongest in STX, VRSN, and WDC, with FORTUM.HE and YAR.OL also independently validated; I excluded weaker unique names and avoided Energy/Chem rotation-risk candidates like SUBC.OL. Portfolio remains concentrated at 5 names for competition upside, with beta likely still above classic bear targets, but that is acceptable here because BEAR beta is informational only and the selected names have the clearest momentum/catalyst edge.
+**Thesis:** I am explicitly cutting the persistent laggards YAR.OL and VRSN and also rotating out FORTUM.HE as utilities decelerate, while keeping the verified winners STX and WDC as core holdings per the learning note. The portfolio is built around the four triple-consensus tech names (INTC, MPWR, STX, WDC) and adds only one earned-slot catalyst name, TER, instead of weaker uniques like DELL/GLW/CRH/SBAC; this accepts US/tech concentration because the strongest validated signals are clustered there, and beta will remain above normal NEUTRAL soft targets but that is acceptable under the active rotation-risk override and competition mandate.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **VRSN** | 24.0% | Triple-consensus pick with strong momentum/Sharpe and solid volume confirmation; overbought RSI tempers it slightly, but it clearly beats other fresh-entry alternatives on slot cost. |
-| 2 | **FORTUM.HE** | 22.0% | Double-consensus current winner that directly fits the learning context to keep strong performers running; utilities have healthier breadth than Energy/Chem and its lower-risk profile is useful in a cautious bear tape. |
-| 3 | **STX** | 19.0% | Triple-consensus and a proven recent alpha driver, so it stays, but conviction is cut materially because Devil flagged HIGH risk and volume confirmation is only modest versus its very high beta. |
-| 4 | **WDC** | 13.0% | Triple-consensus and another current winner worth retaining, yet conviction is reduced due to HIGH-risk warning from weak volume ratio despite strong recent momentum. |
-| 5 | **YAR.OL** | 22.0% | Double-consensus replacement for laggards NKT.CO and ISS.CO, with strong relative strength and cleaner rotation fit than Energy/Chem names; medium risk only, so it earns the fifth slot. |
+| 1 | **INTC** | 25.0% | Triple-consensus pick with the strongest acceleration set in the book (+21.9% 5d, vol_ratio 1.97, RSI 72); despite HIGH risk, all-model agreement and breakout confirmation keep it at high conviction. |
+| 2 | **STX** | 13.0% | Triple-consensus and an existing winner we should keep after recent outperformance; strong 5d momentum (+16.5%) and solid volume support justify staying concentrated even with elevated beta. |
+| 3 | **WDC** | 21.0% | Triple-consensus existing core winner with low crowding and strong recent gain (+8.6% yesterday, +13.0% 5d); beta is extreme, but competition mandate and consensus support a high score. |
+| 4 | **MPWR** | 22.0% | Triple-consensus semiconductor leader with near-best momentum/volume combo (vol_ratio 1.96, +16.5% 5d) and clean cross-model validation; RSI is hot but still acceptable for an aggressive game portfolio. |
+| 5 | **TER** | 14.0% | Best unique catalyst pick after the consensus core: strong breakout stats (+14.0% 5d, vol_ratio 2.02, RSI 66), but Devil flags very high beta and search-interest crowding, so conviction is intentionally capped. |
 
 **Changes from yesterday:**
-- ➕ Added **VRSN** at 24.0%
-- ➕ Added **YAR.OL** at 22.0%
-- ➖ Removed **NKT.CO** (was 25.0%)
-- ➖ Removed **ISS.CO** (was 20.0%)
-- ▼ **FORTUM.HE**: 25.0% → 22.0% (-3.0%)
-- ▲ **STX**: 15.0% → 19.0% (+4.0%)
+- ➕ Added **INTC** at 25.0%
+- ➕ Added **MPWR** at 22.0%
+- ➕ Added **TER** at 14.0%
+- ➖ Removed **VRSN** (was 24.0%)
+- ➖ Removed **YAR.OL** (was 22.0%)
+- ➖ Removed **FORTUM.HE** (was 22.0%)
+- ▼ **STX**: 19.0% → 13.0% (-6.0%)
+- ▲ **WDC**: 13.0% → 21.0% (+8.0%)
 
 ---
+

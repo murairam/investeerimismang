@@ -7,14 +7,18 @@
     "strong_rationale_observations": 5
   },
   "hard_rules": [
-    "RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% \u2014 hit rate 22% over 32 observations (threshold: 30%)."
+    "RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% \u2014 hit rate 25% over 32 observations (threshold: 30%)."
   ],
   "biases_to_avoid": [
-    "Avoid overusing momentum rationales until their hit rate recovers above 40%.",
-    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%.",
-    "Avoid overusing consensus rationales until their hit rate recovers above 40%."
+    "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%."
   ],
   "validated_winners": [
+    {
+      "ticker": "STX",
+      "observations": 8,
+      "avg_return_1d": 0.015521,
+      "hit_rate": 0.5
+    },
     {
       "ticker": "XOM",
       "observations": 8,
@@ -53,7 +57,7 @@
       "scope": "rationale_tag",
       "tag": "non_us_differentiator",
       "max_weight": 0.15,
-      "reason": "non_us_differentiator_hit_rate_22%_over_32_obs"
+      "reason": "non_us_differentiator_hit_rate_25%_over_32_obs"
     },
     {
       "scope": "ticker",
@@ -89,9 +93,19 @@
   },
   "confidence_notes": [
     {
+      "tag": "momentum",
+      "instruction": "Prefer momentum setups when other signals are comparable.",
+      "observations": 77
+    },
+    {
       "tag": "breakout",
       "instruction": "Prefer breakout setups when other signals are comparable.",
       "observations": 11
+    },
+    {
+      "tag": "consensus",
+      "instruction": "Prefer consensus setups when other signals are comparable.",
+      "observations": 62
     },
     {
       "tag": "catalyst",
@@ -108,13 +122,13 @@
   "rationale_stats": {
     "momentum": {
       "observations": 77,
-      "avg_return_1d": -0.001335,
-      "hit_rate": 0.3896
+      "avg_return_1d": 0.001926,
+      "hit_rate": 0.4286
     },
     "high_sharpe": {
       "observations": 67,
-      "avg_return_1d": -0.001938,
-      "hit_rate": 0.3731
+      "avg_return_1d": -0.000432,
+      "hit_rate": 0.3881
     },
     "breakout": {
       "observations": 11,
@@ -123,12 +137,12 @@
     },
     "consensus": {
       "observations": 62,
-      "avg_return_1d": -0.001467,
-      "hit_rate": 0.371
+      "avg_return_1d": 0.001839,
+      "hit_rate": 0.4194
     },
     "catalyst": {
       "observations": 10,
-      "avg_return_1d": 0.003912,
+      "avg_return_1d": 0.008525,
       "hit_rate": 0.6
     },
     "diversifier": {
@@ -138,23 +152,23 @@
     },
     "non_us_differentiator": {
       "observations": 32,
-      "avg_return_1d": -0.004886,
-      "hit_rate": 0.2188
+      "avg_return_1d": -0.001734,
+      "hit_rate": 0.25
     },
     "overbought": {
       "observations": 38,
-      "avg_return_1d": -0.002374,
-      "hit_rate": 0.4474
+      "avg_return_1d": -0.000138,
+      "hit_rate": 0.4737
     },
     "at_52w_high": {
       "observations": 54,
-      "avg_return_1d": 0.001396,
-      "hit_rate": 0.463
+      "avg_return_1d": 0.003685,
+      "hit_rate": 0.4815
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.000198,
-    "tier2_avg_return_1d": -0.001583,
+    "tier1_avg_return_1d": 0.002853,
+    "tier2_avg_return_1d": 0.001911,
     "tier3_avg_return_1d": -0.007042,
     "tier1_observations": 38,
     "tier2_observations": 43,
@@ -164,10 +178,10 @@
   "devil_accuracy": {
     "status": "actionable",
     "observations": 30,
-    "high_risk_avg_return_1d": -0.002208,
-    "low_risk_avg_return_1d": -0.001158,
-    "high_risk_negative_rate": 0.4667,
-    "accuracy": 0.4667,
+    "high_risk_avg_return_1d": 0.004096,
+    "low_risk_avg_return_1d": -0.000157,
+    "high_risk_negative_rate": 0.3667,
+    "accuracy": 0.3667,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
@@ -198,23 +212,23 @@
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.4024,
-      "mom_5d": 0.4024,
-      "sharpe_20d": 0.4024,
-      "rsi_14": 0.4024,
-      "vs_index": 0.4024,
-      "vol_ratio": 0.4828,
-      "beta": 0.378
+      "momentum": 0.439,
+      "mom_5d": 0.439,
+      "sharpe_20d": 0.439,
+      "rsi_14": 0.439,
+      "vs_index": 0.439,
+      "vol_ratio": 0.5172,
+      "beta": 0.4146
     },
     "per_regime": {
       "NEUTRAL": {
-        "momentum": 0.3621,
-        "mom_5d": 0.3621,
-        "sharpe_20d": 0.3621,
-        "rsi_14": 0.3621,
-        "vs_index": 0.3621,
-        "vol_ratio": 0.4103,
-        "beta": 0.3793
+        "momentum": 0.4138,
+        "mom_5d": 0.4138,
+        "sharpe_20d": 0.4138,
+        "rsi_14": 0.4138,
+        "vs_index": 0.4138,
+        "vol_ratio": 0.4615,
+        "beta": 0.431
       },
       "BEAR": {
         "momentum": 0.5,
@@ -222,7 +236,6 @@
         "sharpe_20d": 0.5,
         "rsi_14": 0.5,
         "vs_index": 0.5,
-        "vol_ratio": 0.6316,
         "beta": 0.375
       }
     }
@@ -249,14 +262,39 @@
   },
   "yesterday_postmortem": {
     "date": "2026-04-07",
-    "portfolio_return_1d": -0.0108,
-    "benchmark_return_1d": 0.0044,
-    "alpha_1d": -0.0152,
+    "portfolio_return_1d": -0.0092,
+    "benchmark_return_1d": 0.0251,
+    "alpha_1d": -0.0342,
     "winners": [
       {
+        "ticker": "WDC",
+        "return_1d": 0.0751,
+        "vs_benchmark": 0.05,
+        "tags": [
+          "momentum",
+          "consensus"
+        ],
+        "rationale_snippet": "Consensus pick (2/3) and one of the fastest movers (+20.1% 5d) with contrarian low search interest, ",
+        "rsi_at_entry": 47.056312,
+        "vol_ratio_at_entry": 0.920585
+      },
+      {
+        "ticker": "STX",
+        "return_1d": 0.0479,
+        "vs_benchmark": 0.0228,
+        "tags": [
+          "momentum",
+          "consensus",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Consensus pick (2/3) with the strongest acceleration in the set (+24.3% 5d, vol_ratio 1.36) and low ",
+        "rsi_at_entry": 56.622376,
+        "vol_ratio_at_entry": 1.364883
+      },
+      {
         "ticker": "NKT.CO",
-        "return_1d": 0.0006,
-        "vs_benchmark": -0.0038,
+        "return_1d": 0.0467,
+        "vs_benchmark": 0.0216,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -268,28 +306,11 @@
         "rationale_snippet": "Best unique catalyst pick: fresh gap-up leadership, RSI 70.7, and sector alignment with Nordic indus",
         "rsi_at_entry": 70.716511,
         "vol_ratio_at_entry": null
-      }
-    ],
-    "losers": [
-      {
-        "ticker": "FORTUM.HE",
-        "return_1d": -0.0159,
-        "vs_benchmark": -0.0203,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "non_us_differentiator",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Consensus pick (2/3) and current holding with solid +8.1% 5d momentum in a still-leading utility rot",
-        "rsi_at_entry": 62.203736,
-        "vol_ratio_at_entry": null
       },
       {
         "ticker": "ISS.CO",
-        "return_1d": -0.0142,
-        "vs_benchmark": -0.0187,
+        "return_1d": 0.0246,
+        "vs_benchmark": -0.0005,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -302,31 +323,22 @@
         "vol_ratio_at_entry": null
       },
       {
-        "ticker": "WDC",
-        "return_1d": -0.0136,
-        "vs_benchmark": -0.0181,
+        "ticker": "FORTUM.HE",
+        "return_1d": 0.0,
+        "vs_benchmark": -0.0251,
         "tags": [
           "momentum",
-          "consensus"
-        ],
-        "rationale_snippet": "Consensus pick (2/3) and one of the fastest movers (+20.1% 5d) with contrarian low search interest, ",
-        "rsi_at_entry": 47.056312,
-        "vol_ratio_at_entry": 0.920585
-      },
-      {
-        "ticker": "STX",
-        "return_1d": -0.0136,
-        "vs_benchmark": -0.0181,
-        "tags": [
-          "momentum",
+          "high_sharpe",
           "consensus",
+          "non_us_differentiator",
           "at_52w_high"
         ],
-        "rationale_snippet": "Consensus pick (2/3) with the strongest acceleration in the set (+24.3% 5d, vol_ratio 1.36) and low ",
-        "rsi_at_entry": 56.622376,
-        "vol_ratio_at_entry": 1.364883
+        "rationale_snippet": "Consensus pick (2/3) and current holding with solid +8.1% 5d momentum in a still-leading utility rot",
+        "rsi_at_entry": 62.203736,
+        "vol_ratio_at_entry": null
       }
     ],
-    "lesson": "'momentum' entries underperformed \u2014 review sizing for this thesis today; 'high_sharpe' entries underperformed \u2014 review sizing for this thesis today"
+    "losers": [],
+    "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'consensus' entries outperformed \u2014 continue favouring this setup"
   }
 }
