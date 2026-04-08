@@ -75,3 +75,35 @@ Winners: NKT.CO +1.4% | Losers: ISS.CO -0.7%, STX -0.4%, WDC -0.4%
 
 ---
 
+## 2026-04-08 05:55:46
+
+**Market:** BEAR regime · SPX vs 50d SMA: -2.4% · VIX: 24.2 · S&P 500 20d: -1.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.1% · Benchmark +0.4% · Alpha -1.5%
+Winners: NKT.CO +0.1% | Losers: FORTUM.HE -1.6%, ISS.CO -1.4%, STX -1.4%
+
+**Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
+
+**Confidence:** 85% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I cut the persistent laggards NKT.CO and ISS.CO and keep the actual winners FORTUM.HE, STX, and WDC, consistent with the recent learning review. Consensus was strongest in STX, VRSN, and WDC, with FORTUM.HE and YAR.OL also independently validated; I excluded weaker unique names and avoided Energy/Chem rotation-risk candidates like SUBC.OL. Portfolio remains concentrated at 5 names for competition upside, with beta likely still above classic bear targets, but that is acceptable here because BEAR beta is informational only and the selected names have the clearest momentum/catalyst edge.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **VRSN** | 24.0% | Triple-consensus pick with strong momentum/Sharpe and solid volume confirmation; overbought RSI tempers it slightly, but it clearly beats other fresh-entry alternatives on slot cost. |
+| 2 | **FORTUM.HE** | 22.0% | Double-consensus current winner that directly fits the learning context to keep strong performers running; utilities have healthier breadth than Energy/Chem and its lower-risk profile is useful in a cautious bear tape. |
+| 3 | **STX** | 19.0% | Triple-consensus and a proven recent alpha driver, so it stays, but conviction is cut materially because Devil flagged HIGH risk and volume confirmation is only modest versus its very high beta. |
+| 4 | **WDC** | 13.0% | Triple-consensus and another current winner worth retaining, yet conviction is reduced due to HIGH-risk warning from weak volume ratio despite strong recent momentum. |
+| 5 | **YAR.OL** | 22.0% | Double-consensus replacement for laggards NKT.CO and ISS.CO, with strong relative strength and cleaner rotation fit than Energy/Chem names; medium risk only, so it earns the fifth slot. |
+
+**Changes from yesterday:**
+- ➕ Added **VRSN** at 24.0%
+- ➕ Added **YAR.OL** at 22.0%
+- ➖ Removed **NKT.CO** (was 25.0%)
+- ➖ Removed **ISS.CO** (was 20.0%)
+- ▼ **FORTUM.HE**: 25.0% → 22.0% (-3.0%)
+- ▲ **STX**: 15.0% → 19.0% (+4.0%)
+
+---
