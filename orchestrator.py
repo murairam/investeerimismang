@@ -39,6 +39,10 @@ from config import (
     ENABLE_COMPETITOR_INTEL,
     ENABLE_CROSS_CHECK,
     COMPETITOR_INTEL_URLS,
+    GAME_END_DATE,
+    LATE_GAME_DAYS_THRESHOLD,
+    LATE_GAME_RECOUP_RETURN,
+    LATE_GAME_LOCK_IN_RETURN,
     OPENAI_FALLBACK_MODEL,
     OPENROUTER_ANALYST_MODEL,
     OPENROUTER_CHALLENGER_MODEL,
@@ -175,12 +179,12 @@ class AlphaSharkOrchestrator:
         # Late-game mode: adapt sizing aggression in final 3 weeks based on standing
         _as_of_str = snapshot.get("as_of_date") or _dt.date.today().isoformat()
         _as_of = _dt.date.fromisoformat(_as_of_str)
-        _days_remaining = max(0, (config.GAME_END_DATE - _as_of).days)
+        _days_remaining = max(0, (GAME_END_DATE - _as_of).days)
         _game_return = snapshot.get("game_return_pct", 0.0)
-        if _days_remaining <= config.LATE_GAME_DAYS_THRESHOLD:
-            if not math.isnan(_game_return) and _game_return < config.LATE_GAME_RECOUP_RETURN:
+        if _days_remaining <= LATE_GAME_DAYS_THRESHOLD:
+            if not math.isnan(_game_return) and _game_return < LATE_GAME_RECOUP_RETURN:
                 snapshot["late_game_mode"] = "RECOUP"   # down >5%, need to swing harder
-            elif not math.isnan(_game_return) and _game_return > config.LATE_GAME_LOCK_IN_RETURN:
+            elif not math.isnan(_game_return) and _game_return > LATE_GAME_LOCK_IN_RETURN:
                 snapshot["late_game_mode"] = "LOCK_IN"  # up >10%, protect gains
             else:
                 snapshot["late_game_mode"] = "NORMAL"
