@@ -110,3 +110,36 @@ Winners: WDC +7.5%, STX +4.8% | Losers: YAR.OL -10.0%, VRSN -2.5%
 
 ---
 
+## 2026-04-09 05:54:58
+
+**Market:** BEAR regime · SPX vs 50d SMA: -2.3% · VIX: 25.8 · S&P 500 20d: -2.6%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.6% · Benchmark +0.1% · Alpha -2.7%
+Winners: WDC +0.2%, VRSN +0.2%, STX +0.2% | Losers: YAR.OL -10.0%, FORTUM.HE -2.2%
+
+**Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I followed the learning rule by cutting the persistent laggards YAR.OL and VRSN, not carrying forward neutral/slow FORTUM.HE, and keeping the verified winners STX and WDC. Consensus was strongest in STX and WDC (triple) plus NOKIA.HE and SBAC (double), and I added SDRL.OL as the best unique rotation name while excluding several HIGH-risk overbought uniques like CASY and SUBC.OL. Portfolio remains concentrated for competition, but with less dead money and somewhat less US-tech concentration than the prior state; beta likely stays above classic BEAR targets, which is acceptable under the learning context because beta is informational only and the mandate is right-tail upside.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **STX** | 18.0% | Triple-consensus core holding and one of the few verified current winners; despite HIGH risk from beta, the strong vol_ratio and +10.1% 5d momentum keep it as a top-conviction aggressive name. |
+| 2 | **WDC** | 17.0% | Triple-consensus and explicitly identified as a keep from recent learning; conviction stays high on ensemble agreement and prior outperformance, though weaker volume and HIGH beta prevent a 10. |
+| 3 | **NOKIA.HE** | 21.0% | Double-consensus pick with strong breakout confirmation from vol_ratio 1.80, +12.8% 5d momentum, and alignment with stronger Nordic rotation; cleaner than retaining lagging FORTUM.HE. |
+| 4 | **SBAC** | 22.0% | Double-consensus pick with the best catalyst profile among uniques/consensus names: vol_ratio 2.36 and +19.4% 5d momentum; lower beta is acceptable here because the move is active and independently validated. |
+| 5 | **SDRL.OL** | 22.0% | Best unique energy/Norway rotation add from the catalyst set, with solid volume and +9.0% 5d momentum; preferred over more overbought SUBC.OL and less consensus-backed APA. |
+
+**Changes from yesterday:**
+- ➕ Added **NOKIA.HE** at 21.0%
+- ➕ Added **SBAC** at 22.0%
+- ➕ Added **SDRL.OL** at 22.0%
+- ➖ Removed **YAR.OL** (was 22.0%)
+- ➖ Removed **VRSN** (was 24.0%)
+- ➖ Removed **FORTUM.HE** (was 22.0%)
+- ▲ **WDC**: 13.0% → 17.0% (+4.0%)
+
+---
