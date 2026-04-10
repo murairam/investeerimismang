@@ -1,36 +1,36 @@
 {
-  "start_date": "2026-04-09",
+  "start_date": "2026-04-10",
   "initial_capital": 10000.0,
   "cash": 10000.0,
   "positions": {},
   "pending_order": {
-    "submitted_date": "2026-04-09",
+    "submitted_date": "2026-04-10",
     "positions": [
       {
         "ticker": "STX",
         "weight": 0.18
       },
       {
-        "ticker": "WDC",
+        "ticker": "NOKIA.HE",
+        "weight": 0.25
+      },
+      {
+        "ticker": "WAB",
+        "weight": 0.14
+      },
+      {
+        "ticker": "GLW",
         "weight": 0.17
       },
       {
-        "ticker": "NOKIA.HE",
+        "ticker": "FOXA",
         "weight": 0.21
-      },
-      {
-        "ticker": "SBAC",
-        "weight": 0.22
-      },
-      {
-        "ticker": "SDRL.OL",
-        "weight": 0.22
       }
     ]
   },
   "history": [
     {
-      "date": "2026-04-09",
+      "date": "2026-04-10",
       "equity": 10000.0,
       "cash": 10000.0,
       "daily_return": 0.0,
@@ -38,33 +38,33 @@
       "turnover": 0.0,
       "positions": {},
       "pending_order": {
-        "submitted_date": "2026-04-09",
+        "submitted_date": "2026-04-10",
         "positions": [
           {
             "ticker": "STX",
             "weight": 0.18
           },
           {
-            "ticker": "WDC",
+            "ticker": "NOKIA.HE",
+            "weight": 0.25
+          },
+          {
+            "ticker": "WAB",
+            "weight": 0.14
+          },
+          {
+            "ticker": "GLW",
             "weight": 0.17
           },
           {
-            "ticker": "NOKIA.HE",
+            "ticker": "FOXA",
             "weight": 0.21
-          },
-          {
-            "ticker": "SBAC",
-            "weight": 0.22
-          },
-          {
-            "ticker": "SDRL.OL",
-            "weight": 0.22
           }
         ]
       },
       "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-09",
+  "last_rebalanced_date": "2026-04-10",
   "last_equity": 10000.0
 }

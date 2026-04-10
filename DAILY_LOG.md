@@ -143,3 +143,36 @@ Winners: WDC +0.2%, VRSN +0.2%, STX +0.2% | Losers: YAR.OL -10.0%, FORTUM.HE -2.
 - ▲ **WDC**: 13.0% → 17.0% (+4.0%)
 
 ---
+## 2026-04-10 06:05:03
+
+**Market:** NEUTRAL regime · SPX vs 50d SMA: +0.9% · VIX: 19.5 · S&P 500 20d: +0.7%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.3% · Benchmark +0.6% · Alpha -0.9%
+Winners: STX +0.6%, NOKIA.HE +0.4% | Losers: SDRL.OL -1.4%, WDC -0.6%, SBAC -0.4%
+
+**Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
+
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 95.0%
+
+**Thesis:** I keep the strongest validated hold STX and the double-consensus NOKIA.HE, while cutting persistent laggards from the current book—especially energy exposure given the explicit HIGH rotation-risk alert and the recent alpha decay. I excluded INTC despite double consensus because the instruction says HIGH-risk names should be cut by at least 3 conviction points or excluded, and its RSI/beta combination is the clearest reversal setup; instead I added WAB plus two cleaner unique catalysts to maintain concentration without leaning further into crowded high-beta semis. This should bring effective portfolio beta down materially from the strategist's 2.41 while still staying aggressive enough for a leaderboard chase under rotation-active NEUTRAL conditions.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **STX** | 18.0% | Triple-consensus pick and an existing winner we should keep/add despite high beta; 5d momentum remains strong and low search interest suggests the move is not yet overly crowded. |
+| 2 | **NOKIA.HE** | 25.0% | Double-consensus pick with mandatory conviction floor met; volume-backed breakout and acceptable beta make it a better hold than recent laggards, even if upside is less explosive than semis. |
+| 3 | **WAB** | 14.0% | Best non-consensus catalyst name for rotation diversification: Industrials breadth is strong, volume confirmation is solid, and its beta is more balanced than the extreme semiconductor alternatives. |
+| 4 | **GLW** | 17.0% | Unique momentum pick from the strategist with strong relative strength and low retail crowding, but conviction is capped because volume confirmation is only borderline and devil risk flagged reversal vulnerability. |
+| 5 | **FOXA** | 21.0% | Catalyst-driven unique pick with strong vol_ratio and squeeze potential that earns a slot in a competition portfolio, though sector laggard status and distance from 52-week highs keep conviction moderate. |
+
+**Changes from yesterday:**
+- ➕ Added **WAB** at 14.0%
+- ➕ Added **GLW** at 17.0%
+- ➕ Added **FOXA** at 21.0%
+- ➖ Removed **WDC** (was 17.0%)
+- ➖ Removed **SBAC** (was 22.0%)
+- ➖ Removed **SDRL.OL** (was 22.0%)
+- ▲ **NOKIA.HE**: 21.0% → 25.0% (+4.0%)
+
+---
