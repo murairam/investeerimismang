@@ -147,7 +147,7 @@ Winners: WDC +0.2%, VRSN +0.2%, STX +0.2% | Losers: YAR.OL -10.0%, FORTUM.HE -2.
 
 **Market:** NEUTRAL regime · SPX vs 50d SMA: +0.9% · VIX: 19.5 · S&P 500 20d: +0.7%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 15:05:50.
 
 **Yesterday's P&L:** Portfolio -0.3% · Benchmark +0.6% · Alpha -0.9%
 Winners: STX +0.6%, NOKIA.HE +0.4% | Losers: SDRL.OL -1.4%, WDC -0.6%, SBAC -0.4%

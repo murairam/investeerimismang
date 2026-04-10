@@ -1,70 +1,44 @@
 {
   "start_date": "2026-04-10",
   "initial_capital": 10000.0,
-  "cash": 10000.0,
-  "positions": {},
-  "pending_order": {
-    "submitted_date": "2026-04-10",
-    "positions": [
-      {
-        "ticker": "STX",
-        "weight": 0.18
-      },
-      {
-        "ticker": "NOKIA.HE",
-        "weight": 0.25
-      },
-      {
-        "ticker": "WAB",
-        "weight": 0.14
-      },
-      {
-        "ticker": "GLW",
-        "weight": 0.17
-      },
-      {
-        "ticker": "FOXA",
-        "weight": 0.21
-      }
-    ]
+  "cash": 0.0,
+  "positions": {
+    "NOKIA.HE": 314.59098071,
+    "FOX": 45.33733647,
+    "STX": 4.34336408,
+    "GLW": 12.09771228,
+    "WAB": 6.24377046,
+    "TER": 1.65886167
   },
+  "verified_weights": {
+    "NOKIA.HE": 0.25,
+    "FOX": 0.21,
+    "STX": 0.18,
+    "GLW": 0.17,
+    "WAB": 0.14,
+    "TER": 0.05
+  },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-10",
-      "equity": 10000.0,
-      "cash": 10000.0,
-      "daily_return": 0.0,
-      "return_since_start": 0.0,
+      "equity": 10306.0,
+      "cash": 0.0,
+      "daily_return": 0.0306,
+      "return_since_start": 0.0306,
       "turnover": 0.0,
-      "positions": {},
-      "pending_order": {
-        "submitted_date": "2026-04-10",
-        "positions": [
-          {
-            "ticker": "STX",
-            "weight": 0.18
-          },
-          {
-            "ticker": "NOKIA.HE",
-            "weight": 0.25
-          },
-          {
-            "ticker": "WAB",
-            "weight": 0.14
-          },
-          {
-            "ticker": "GLW",
-            "weight": 0.17
-          },
-          {
-            "ticker": "FOXA",
-            "weight": 0.21
-          }
-        ]
+      "positions": {
+        "NOKIA.HE": 314.59098071,
+        "FOX": 45.33733647,
+        "STX": 4.34336408,
+        "GLW": 12.09771228,
+        "WAB": 6.24377046,
+        "TER": 1.65886167
       },
-      "executed_pending": false
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-04-10",
-  "last_equity": 10000.0
+  "last_equity": 10306.0
 }
