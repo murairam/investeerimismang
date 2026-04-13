@@ -176,3 +176,36 @@ Winners: STX +0.6%, NOKIA.HE +0.4% | Losers: SDRL.OL -1.4%, WDC -0.6%, SBAC -0.4
 - ▲ **NOKIA.HE**: 21.0% → 25.0% (+4.0%)
 
 ---
+## 2026-04-13 06:24:20
+
+**Market:** NEUTRAL regime · SPX vs 50d SMA: +0.8% · VIX: 19.2 · S&P 500 20d: +2.2%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.4% · Benchmark -0.1% · Alpha -0.3%
+Winners: TER +1.0%, GLW +0.8%, STX +0.5% | Losers: FOX -1.9%, WAB -1.4%, NOKIA.HE -0.3%
+
+**Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 95.0%
+
+**Thesis:** I cut persistent laggards NOKIA.HE and FOX and also remove WAB despite breakout volume because its 5d momentum is too weak versus better alternatives; recent negative alpha argues for decisive turnover into faster leaders. The core is the double-consensus trio STX/TER/GLW, then AMD and LRCX as the best unique upgrades; this keeps concentration high, leans into active tech/industrial leadership, and accepts elevated beta as intentional under the rotation-risk override rather than adding low-conviction diversifiers.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **STX** | 13.0% | Double-consensus pick and existing winner; strong 5d momentum with acceptable volume confirmation makes it a high-conviction keep despite medium pullback risk. |
+| 2 | **TER** | 20.0% | Double-consensus pick with elite acceleration and breakout profile; conviction stays high per consensus floor, but capped versus max due to HIGH risk flag and crowded search interest. |
+| 3 | **GLW** | 18.0% | Double-consensus pick and current holding that has worked; retained on strong recent momentum, though HIGH risk from weak volume confirmation prevents a higher score. |
+| 4 | **AMD** | 25.0% | Best unique catalyst/momentum replacement from Proposal C; strong all-round signals and better volume support than several overbought alternatives, suitable for aggressive rotation into tech leadership. |
+| 5 | **LRCX** | 19.0% | Strong unique momentum name from Proposal A with fast 5d acceleration and lower overbought risk than INTC/MPWR; earns the final slot over slower incumbents and weaker laggards. |
+
+**Changes from yesterday:**
+- ➕ Added **AMD** at 25.0%
+- ➕ Added **LRCX** at 19.0%
+- ➖ Removed **NOKIA.HE** (was 25.0%)
+- ➖ Removed **FOX** (was 21.0%)
+- ➖ Removed **WAB** (was 14.0%)
+- ▼ **STX**: 18.0% → 13.0% (-5.0%)
+- ▲ **TER**: 5.0% → 20.0% (+15.0%)
+
+---

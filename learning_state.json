@@ -1,13 +1,13 @@
 {
-  "generated_from_days": 21,
-  "position_observations": 102,
+  "generated_from_days": 22,
+  "position_observations": 107,
   "minimums": {
     "strong_daily_observations": 7,
     "strong_ticker_observations": 8,
     "strong_rationale_observations": 5
   },
   "hard_rules": [
-    "RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% \u2014 hit rate 25% over 36 observations (threshold: 30%)."
+    "RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% \u2014 hit rate 24% over 37 observations (threshold: 30%)."
   ],
   "biases_to_avoid": [
     "Avoid overusing high_sharpe rationales until their hit rate recovers above 40%."
@@ -21,9 +21,9 @@
     },
     {
       "ticker": "STX",
-      "observations": 12,
-      "avg_return_1d": 0.011661,
-      "hit_rate": 0.6667
+      "observations": 14,
+      "avg_return_1d": 0.010645,
+      "hit_rate": 0.7143
     },
     {
       "ticker": "APA",
@@ -57,7 +57,7 @@
       "scope": "rationale_tag",
       "tag": "non_us_differentiator",
       "max_weight": 0.15,
-      "reason": "non_us_differentiator_hit_rate_25%_over_36_obs"
+      "reason": "non_us_differentiator_hit_rate_24%_over_37_obs"
     },
     {
       "scope": "ticker",
@@ -87,101 +87,93 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.59,
+    "avg_turnover_estimate": 0.593158,
     "observations": 0,
     "status": "insufficient_data"
   },
   "confidence_notes": [
     {
-      "tag": "momentum",
-      "instruction": "Prefer momentum setups when other signals are comparable.",
-      "observations": 87
-    },
-    {
-      "tag": "breakout",
-      "instruction": "Prefer breakout setups when other signals are comparable.",
-      "observations": 12
-    },
-    {
       "tag": "catalyst",
       "instruction": "Prefer catalyst setups when other signals are comparable.",
-      "observations": 13
+      "observations": 15
     },
     {
       "tag": "at_52w_high",
       "instruction": "Prefer at_52w_high setups when other signals are comparable.",
-      "observations": 61
+      "observations": 66
     }
   ],
-  "early_warning_notes": [],
+  "early_warning_notes": [
+    "EARLY WARNING: diversifier has weak hit quality (40% over 5 obs)."
+  ],
   "rationale_stats": {
     "momentum": {
-      "observations": 87,
-      "avg_return_1d": 0.000211,
-      "hit_rate": 0.4368
+      "observations": 92,
+      "avg_return_1d": -0.000142,
+      "hit_rate": 0.4348
     },
     "high_sharpe": {
-      "observations": 72,
-      "avg_return_1d": -0.002207,
-      "hit_rate": 0.3889
+      "observations": 77,
+      "avg_return_1d": -0.002471,
+      "hit_rate": 0.3896
     },
     "breakout": {
-      "observations": 12,
-      "avg_return_1d": 0.000455,
-      "hit_rate": 0.5
+      "observations": 15,
+      "avg_return_1d": -0.002589,
+      "hit_rate": 0.4
     },
     "consensus": {
-      "observations": 72,
-      "avg_return_1d": -0.000221,
-      "hit_rate": 0.4306
+      "observations": 75,
+      "avg_return_1d": -0.00037,
+      "hit_rate": 0.4267
     },
     "catalyst": {
-      "observations": 13,
-      "avg_return_1d": 0.004718,
-      "hit_rate": 0.4615
+      "observations": 15,
+      "avg_return_1d": 0.001319,
+      "hit_rate": 0.4
     },
     "diversifier": {
-      "observations": 4,
-      "avg_return_1d": -0.004038,
-      "hit_rate": 0.5
+      "observations": 5,
+      "avg_return_1d": -0.005965,
+      "hit_rate": 0.4
     },
     "non_us_differentiator": {
-      "observations": 36,
-      "avg_return_1d": -0.005202,
-      "hit_rate": 0.25
+      "observations": 37,
+      "avg_return_1d": -0.005135,
+      "hit_rate": 0.2432
     },
     "overbought": {
-      "observations": 40,
-      "avg_return_1d": -0.000435,
-      "hit_rate": 0.475
+      "observations": 42,
+      "avg_return_1d": -0.001404,
+      "hit_rate": 0.4524
     },
     "at_52w_high": {
-      "observations": 61,
-      "avg_return_1d": 0.001138,
-      "hit_rate": 0.4754
+      "observations": 66,
+      "avg_return_1d": 0.000576,
+      "hit_rate": 0.4697
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": -0.000583,
-    "tier2_avg_return_1d": 0.001836,
+    "tier1_avg_return_1d": -0.001223,
+    "tier2_avg_return_1d": 0.00171,
     "tier3_avg_return_1d": -0.007042,
-    "tier1_observations": 44,
-    "tier2_observations": 47,
+    "tier1_observations": 46,
+    "tier2_observations": 50,
     "tier3_observations": 11
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
     "status": "actionable",
-    "observations": 34,
-    "high_risk_avg_return_1d": 0.003734,
-    "low_risk_avg_return_1d": -0.002115,
-    "high_risk_negative_rate": 0.3529,
-    "accuracy": 0.3529,
+    "observations": 36,
+    "high_risk_avg_return_1d": 0.003884,
+    "low_risk_avg_return_1d": -0.002649,
+    "high_risk_negative_rate": 0.3333,
+    "accuracy": 0.3333,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
         "ticker": "STX",
-        "flag_count": 5
+        "flag_count": 4
       },
       {
         "ticker": "WDC",
@@ -189,41 +181,45 @@
       },
       {
         "ticker": "MPWR",
-        "flag_count": 3
+        "flag_count": 4
       },
       {
         "ticker": "INTC",
-        "flag_count": 3
-      },
-      {
-        "ticker": "DELL",
-        "flag_count": 2
+        "flag_count": 4
       },
       {
         "ticker": "SUBC.OL",
+        "flag_count": 2
+      },
+      {
+        "ticker": "GLW",
+        "flag_count": 2
+      },
+      {
+        "ticker": "TER",
         "flag_count": 2
       }
     ]
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.4457,
-      "mom_5d": 0.4457,
-      "sharpe_20d": 0.4457,
-      "rsi_14": 0.4457,
-      "vs_index": 0.4457,
-      "vol_ratio": 0.5147,
-      "beta": 0.4239
+      "momentum": 0.4433,
+      "mom_5d": 0.4433,
+      "sharpe_20d": 0.4433,
+      "rsi_14": 0.4433,
+      "vs_index": 0.4433,
+      "vol_ratio": 0.5068,
+      "beta": 0.4227
     },
     "per_regime": {
       "NEUTRAL": {
-        "momentum": 0.4138,
-        "mom_5d": 0.4138,
-        "sharpe_20d": 0.4138,
-        "rsi_14": 0.4138,
-        "vs_index": 0.4138,
-        "vol_ratio": 0.4615,
-        "beta": 0.431
+        "momentum": 0.4127,
+        "mom_5d": 0.4127,
+        "sharpe_20d": 0.4127,
+        "rsi_14": 0.4127,
+        "vs_index": 0.4127,
+        "vol_ratio": 0.4545,
+        "beta": 0.4286
       },
       "BEAR": {
         "momentum": 0.5,
@@ -257,28 +253,78 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-04-09",
-    "portfolio_return_1d": -0.003,
-    "benchmark_return_1d": 0.0062,
-    "alpha_1d": -0.0091,
+    "date": "2026-04-10",
+    "portfolio_return_1d": -0.0038,
+    "benchmark_return_1d": -0.0011,
+    "alpha_1d": -0.0027,
     "winners": [
       {
-        "ticker": "STX",
-        "return_1d": 0.006,
-        "vs_benchmark": -0.0002,
+        "ticker": "GLW",
+        "return_1d": 0.0083,
+        "vs_benchmark": 0.0095,
         "tags": [
           "momentum",
+          "high_sharpe",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Unique momentum pick from the strategist with strong relative strength and low retail crowding, but ",
+        "rsi_at_entry": 76.096497,
+        "vol_ratio_at_entry": 0.987689
+      },
+      {
+        "ticker": "STX",
+        "return_1d": 0.0045,
+        "vs_benchmark": 0.0057,
+        "tags": [
+          "momentum",
+          "high_sharpe",
           "consensus",
           "at_52w_high"
         ],
-        "rationale_snippet": "Triple-consensus core holding and one of the few verified current winners; despite HIGH risk from be",
-        "rsi_at_entry": 57.852647,
-        "vol_ratio_at_entry": 1.454986
+        "rationale_snippet": "Triple-consensus pick and an existing winner we should keep/add despite high beta; 5d momentum remai",
+        "rsi_at_entry": 69.553634,
+        "vol_ratio_at_entry": 0.7918
+      }
+    ],
+    "losers": [
+      {
+        "ticker": "FOXA",
+        "return_1d": -0.0279,
+        "vs_benchmark": -0.0267,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "breakout",
+          "catalyst",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Catalyst-driven unique pick with strong vol_ratio and squeeze potential that earns a slot in a compe",
+        "rsi_at_entry": 80.798024,
+        "vol_ratio_at_entry": 1.864128
+      },
+      {
+        "ticker": "WAB",
+        "return_1d": -0.0137,
+        "vs_benchmark": -0.0125,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "breakout",
+          "consensus",
+          "catalyst",
+          "diversifier",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Best non-consensus catalyst name for rotation diversification: Industrials breadth is strong, volume",
+        "rsi_at_entry": 78.580788,
+        "vol_ratio_at_entry": 1.639154
       },
       {
         "ticker": "NOKIA.HE",
-        "return_1d": 0.0045,
-        "vs_benchmark": -0.0017,
+        "return_1d": -0.0027,
+        "vs_benchmark": -0.0016,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -287,57 +333,11 @@
           "non_us_differentiator",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick with strong breakout confirmation from vol_ratio 1.80, +12.8% 5d momentum, and",
-        "rsi_at_entry": 68.608421,
-        "vol_ratio_at_entry": 1.803749
+        "rationale_snippet": "Double-consensus pick with mandatory conviction floor met; volume-backed breakout and acceptable bet",
+        "rsi_at_entry": 74.526677,
+        "vol_ratio_at_entry": 1.588413
       }
     ],
-    "losers": [
-      {
-        "ticker": "SDRL.OL",
-        "return_1d": -0.0141,
-        "vs_benchmark": -0.0202,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "catalyst",
-          "non_us_differentiator",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Best unique energy/Norway rotation add from the catalyst set, with solid volume and +9.0% 5d momentu",
-        "rsi_at_entry": 69.606823,
-        "vol_ratio_at_entry": 1.316993
-      },
-      {
-        "ticker": "WDC",
-        "return_1d": -0.0057,
-        "vs_benchmark": -0.0118,
-        "tags": [
-          "momentum",
-          "consensus",
-          "catalyst",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Triple-consensus and explicitly identified as a keep from recent learning; conviction stays high on ",
-        "rsi_at_entry": 48.353759,
-        "vol_ratio_at_entry": 1.019758
-      },
-      {
-        "ticker": "SBAC",
-        "return_1d": -0.0042,
-        "vs_benchmark": -0.0103,
-        "tags": [
-          "momentum",
-          "consensus",
-          "catalyst"
-        ],
-        "rationale_snippet": "Double-consensus pick with the best catalyst profile among uniques/consensus names: vol_ratio 2.36 a",
-        "rsi_at_entry": 66.361364,
-        "vol_ratio_at_entry": 2.364545
-      }
-    ],
-    "lesson": "'momentum' entries underperformed \u2014 review sizing for this thesis today; 'consensus' entries underperformed \u2014 review sizing for this thesis today"
+    "lesson": "'momentum' entries underperformed \u2014 review sizing for this thesis today; 'high_sharpe' entries underperformed \u2014 review sizing for this thesis today"
   }
 }
