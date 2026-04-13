@@ -1,78 +1,44 @@
 {
   "start_date": "2026-04-13",
   "initial_capital": 10000.0,
-  "cash": 10000.0,
-  "positions": {},
-  "pending_order": {
-    "submitted_date": "2026-04-13",
-    "positions": [
-      {
-        "ticker": "TER",
-        "weight": 0.19
-      },
-      {
-        "ticker": "AMD",
-        "weight": 0.18
-      },
-      {
-        "ticker": "GLW",
-        "weight": 0.17
-      },
-      {
-        "ticker": "LRCX",
-        "weight": 0.17
-      },
-      {
-        "ticker": "STX",
-        "weight": 0.17
-      },
-      {
-        "ticker": "INTC",
-        "weight": 0.12
-      }
-    ]
+  "cash": 0.0,
+  "positions": {
+    "TER": 6.29245135,
+    "AMD": 8.9391272,
+    "STX": 4.05989791,
+    "LRCX": 7.79539302,
+    "GLW": 11.89624102,
+    "INTC": 22.56770762
   },
+  "verified_weights": {
+    "TER": 0.19,
+    "AMD": 0.18,
+    "STX": 0.17,
+    "LRCX": 0.17,
+    "GLW": 0.17,
+    "INTC": 0.12
+  },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
-      "equity": 10000.0,
-      "cash": 10000.0,
-      "daily_return": 0.0,
-      "return_since_start": 0.0,
+      "equity": 10423.0,
+      "cash": 0.0,
+      "daily_return": 0.0423,
+      "return_since_start": 0.0423,
       "turnover": 0.0,
-      "positions": {},
-      "pending_order": {
-        "submitted_date": "2026-04-13",
-        "positions": [
-          {
-            "ticker": "TER",
-            "weight": 0.19
-          },
-          {
-            "ticker": "AMD",
-            "weight": 0.18
-          },
-          {
-            "ticker": "GLW",
-            "weight": 0.17
-          },
-          {
-            "ticker": "LRCX",
-            "weight": 0.17
-          },
-          {
-            "ticker": "STX",
-            "weight": 0.17
-          },
-          {
-            "ticker": "INTC",
-            "weight": 0.12
-          }
-        ]
+      "positions": {
+        "TER": 6.29245135,
+        "AMD": 8.9391272,
+        "STX": 4.05989791,
+        "LRCX": 7.79539302,
+        "GLW": 11.89624102,
+        "INTC": 22.56770762
       },
-      "executed_pending": false
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-04-13",
-  "last_equity": 10000.0
+  "last_equity": 10423.0
 }
