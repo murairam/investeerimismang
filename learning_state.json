@@ -22,7 +22,7 @@
     {
       "ticker": "STX",
       "observations": 14,
-      "avg_return_1d": 0.010645,
+      "avg_return_1d": 0.010712,
       "hit_rate": 0.7143
     },
     {
@@ -87,7 +87,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.593158,
+    "avg_turnover_estimate": 0.567368,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -109,32 +109,32 @@
   "rationale_stats": {
     "momentum": {
       "observations": 92,
-      "avg_return_1d": -0.000142,
+      "avg_return_1d": -0.000122,
       "hit_rate": 0.4348
     },
     "high_sharpe": {
       "observations": 77,
-      "avg_return_1d": -0.002471,
+      "avg_return_1d": -0.002447,
       "hit_rate": 0.3896
     },
     "breakout": {
       "observations": 15,
-      "avg_return_1d": -0.002589,
+      "avg_return_1d": -0.002527,
       "hit_rate": 0.4
     },
     "consensus": {
       "observations": 75,
-      "avg_return_1d": -0.00037,
+      "avg_return_1d": -0.000358,
       "hit_rate": 0.4267
     },
     "catalyst": {
       "observations": 15,
-      "avg_return_1d": 0.001319,
+      "avg_return_1d": 0.001381,
       "hit_rate": 0.4
     },
     "diversifier": {
       "observations": 5,
-      "avg_return_1d": -0.005965,
+      "avg_return_1d": -0.005871,
       "hit_rate": 0.4
     },
     "non_us_differentiator": {
@@ -144,18 +144,18 @@
     },
     "overbought": {
       "observations": 42,
-      "avg_return_1d": -0.001404,
+      "avg_return_1d": -0.001382,
       "hit_rate": 0.4524
     },
     "at_52w_high": {
       "observations": 66,
-      "avg_return_1d": 0.000576,
+      "avg_return_1d": 0.000604,
       "hit_rate": 0.4697
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": -0.001223,
-    "tier2_avg_return_1d": 0.00171,
+    "tier1_avg_return_1d": -0.001213,
+    "tier2_avg_return_1d": 0.001738,
     "tier3_avg_return_1d": -0.007042,
     "tier1_observations": 46,
     "tier2_observations": 50,
@@ -165,22 +165,18 @@
   "devil_accuracy": {
     "status": "actionable",
     "observations": 36,
-    "high_risk_avg_return_1d": 0.003884,
-    "low_risk_avg_return_1d": -0.002649,
+    "high_risk_avg_return_1d": 0.00391,
+    "low_risk_avg_return_1d": -0.002636,
     "high_risk_negative_rate": 0.3333,
     "accuracy": 0.3333,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
         "ticker": "STX",
-        "flag_count": 4
+        "flag_count": 5
       },
       {
         "ticker": "WDC",
-        "flag_count": 4
-      },
-      {
-        "ticker": "MPWR",
         "flag_count": 4
       },
       {
@@ -188,7 +184,19 @@
         "flag_count": 4
       },
       {
+        "ticker": "MPWR",
+        "flag_count": 3
+      },
+      {
         "ticker": "SUBC.OL",
+        "flag_count": 3
+      },
+      {
+        "ticker": "STT",
+        "flag_count": 2
+      },
+      {
+        "ticker": "ISS.CO",
         "flag_count": 2
       },
       {
@@ -254,14 +262,14 @@
   },
   "yesterday_postmortem": {
     "date": "2026-04-10",
-    "portfolio_return_1d": -0.0038,
+    "portfolio_return_1d": 0.017,
     "benchmark_return_1d": -0.0011,
-    "alpha_1d": -0.0027,
+    "alpha_1d": 0.0181,
     "winners": [
       {
         "ticker": "GLW",
-        "return_1d": 0.0083,
-        "vs_benchmark": 0.0095,
+        "return_1d": 0.0088,
+        "vs_benchmark": 0.0099,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -273,8 +281,8 @@
       },
       {
         "ticker": "STX",
-        "return_1d": 0.0045,
-        "vs_benchmark": 0.0057,
+        "return_1d": 0.005,
+        "vs_benchmark": 0.0062,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -289,8 +297,8 @@
     "losers": [
       {
         "ticker": "FOXA",
-        "return_1d": -0.0279,
-        "vs_benchmark": -0.0267,
+        "return_1d": -0.0274,
+        "vs_benchmark": -0.0263,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -305,8 +313,8 @@
       },
       {
         "ticker": "WAB",
-        "return_1d": -0.0137,
-        "vs_benchmark": -0.0125,
+        "return_1d": -0.0132,
+        "vs_benchmark": -0.0121,
         "tags": [
           "momentum",
           "high_sharpe",

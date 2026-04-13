@@ -7,24 +7,28 @@
     "submitted_date": "2026-04-13",
     "positions": [
       {
-        "ticker": "STX",
-        "weight": 0.13
-      },
-      {
         "ticker": "TER",
-        "weight": 0.2
-      },
-      {
-        "ticker": "GLW",
-        "weight": 0.18
+        "weight": 0.19
       },
       {
         "ticker": "AMD",
-        "weight": 0.25
+        "weight": 0.18
+      },
+      {
+        "ticker": "GLW",
+        "weight": 0.17
       },
       {
         "ticker": "LRCX",
-        "weight": 0.19
+        "weight": 0.17
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.17
+      },
+      {
+        "ticker": "INTC",
+        "weight": 0.12
       }
     ]
   },
@@ -41,24 +45,28 @@
         "submitted_date": "2026-04-13",
         "positions": [
           {
-            "ticker": "STX",
-            "weight": 0.13
-          },
-          {
             "ticker": "TER",
-            "weight": 0.2
-          },
-          {
-            "ticker": "GLW",
-            "weight": 0.18
+            "weight": 0.19
           },
           {
             "ticker": "AMD",
-            "weight": 0.25
+            "weight": 0.18
+          },
+          {
+            "ticker": "GLW",
+            "weight": 0.17
           },
           {
             "ticker": "LRCX",
-            "weight": 0.19
+            "weight": 0.17
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.17
+          },
+          {
+            "ticker": "INTC",
+            "weight": 0.12
           }
         ]
       },

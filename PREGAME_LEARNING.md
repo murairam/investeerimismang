@@ -6,9 +6,9 @@ Days remaining: 0
 
 ## Scoreboard
 - Training days with measurable alpha: 21
-- Win days (alpha > 0): 8
-- Loss days (alpha < 0): 13
-- Average daily alpha: -0.43%
+- Win days (alpha > 0): 9
+- Loss days (alpha < 0): 12
+- Average daily alpha: -0.33%
 - Paper account equity: €10,000.00 (from €10,000.00, return +0.00%)
 - Max drawdown (paper): 0.00%
 - Average turnover: 0.00%
@@ -19,7 +19,7 @@ Days remaining: 0
 - Latest day is still experimental / unverified.
 
 ## Best and worst day
-- Best alpha day: 2026-03-23 (+1.42%)
+- Best alpha day: 2026-04-10 (+1.81%)
 - Worst alpha day: 2026-04-07 (-3.42%)
 
 ## Structured learning state
@@ -31,7 +31,7 @@ Days remaining: 0
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
 | XOM | winner | 8 | +1.50% | 75% |
-| STX | winner | 14 | +1.06% | 71% |
+| STX | winner | 14 | +1.07% | 71% |
 | APA | winner | 14 | +1.03% | 71% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
 | DOW | loser | 8 | -0.71% | 50% |

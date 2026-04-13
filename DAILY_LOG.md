@@ -176,36 +176,34 @@ Winners: STX +0.6%, NOKIA.HE +0.4% | Losers: SDRL.OL -1.4%, WDC -0.6%, SBAC -0.4
 - ▲ **NOKIA.HE**: 21.0% → 25.0% (+4.0%)
 
 ---
-## 2026-04-13 06:24:20
+## 2026-04-13 06:44:20
 
 **Market:** NEUTRAL regime · SPX vs 50d SMA: +0.8% · VIX: 19.2 · S&P 500 20d: +2.2%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio -0.4% · Benchmark -0.1% · Alpha -0.3%
-Winners: TER +1.0%, GLW +0.8%, STX +0.5% | Losers: FOX -1.9%, WAB -1.4%, NOKIA.HE -0.3%
+**Yesterday's P&L:** Portfolio +1.7% · Benchmark -0.1% · Alpha +1.8%
+Winners: AMD +3.6%, LRCX +1.9%, TER +1.1%
 
 **Paper account:** Equity €10,000.00 (start €10,000) · Today +0.00% · Since start +0.00% · Turnover 0.0% · Cash €10,000.00
 
-**Confidence:** 84% · **Positions:** 5 · **Total weight:** 95.0%
+**Confidence:** 87% · **Positions:** 6 · **Total weight:** 100.0%
 
-**Thesis:** I cut persistent laggards NOKIA.HE and FOX and also remove WAB despite breakout volume because its 5d momentum is too weak versus better alternatives; recent negative alpha argues for decisive turnover into faster leaders. The core is the double-consensus trio STX/TER/GLW, then AMD and LRCX as the best unique upgrades; this keeps concentration high, leans into active tech/industrial leadership, and accepts elevated beta as intentional under the rotation-risk override rather than adding low-conviction diversifiers.
+**Thesis:** The synthesis is dominated by consensus and turnover discipline: TER is triple-consensus, while AMD, GLW, LRCX, and STX are all double-consensus, so they form the core and preserve well above the required 50% carryover from verified holdings. I rejected proposed removals of STX/LRCX because the prompt does not show a >5% one-day drop or a sufficiently stronger replacement case under the stated Sharpe/5d-momentum thresholds; the only add is INTC as the best acceleration-based unique pick. Portfolio beta likely stays above the normal NEUTRAL soft range, but rotation-risk guidance explicitly makes beta secondary and argues against adding low-beta filler like ISS.CO or SUBC.OL just to dilute risk.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **STX** | 13.0% | Double-consensus pick and existing winner; strong 5d momentum with acceptable volume confirmation makes it a high-conviction keep despite medium pullback risk. |
-| 2 | **TER** | 20.0% | Double-consensus pick with elite acceleration and breakout profile; conviction stays high per consensus floor, but capped versus max due to HIGH risk flag and crowded search interest. |
-| 3 | **GLW** | 18.0% | Double-consensus pick and current holding that has worked; retained on strong recent momentum, though HIGH risk from weak volume confirmation prevents a higher score. |
-| 4 | **AMD** | 25.0% | Best unique catalyst/momentum replacement from Proposal C; strong all-round signals and better volume support than several overbought alternatives, suitable for aggressive rotation into tech leadership. |
-| 5 | **LRCX** | 19.0% | Strong unique momentum name from Proposal A with fast 5d acceleration and lower overbought risk than INTC/MPWR; earns the final slot over slower incumbents and weaker laggards. |
+| 1 | **TER** | 19.0% | Triple-consensus carryover and strongest ensemble validation; despite HIGH risk beta/crowding, Rule #4 sets a 9 floor for 3/3 consensus and its 5d momentum remains elite. |
+| 2 | **AMD** | 18.0% | Double-consensus incumbent with solid vol confirmation and strong 5d momentum; kept to satisfy turnover and because no valid removal trigger is shown. |
+| 3 | **GLW** | 17.0% | Double-consensus carryover with strong recent momentum and zero retail crowding; HIGH risk stretch is noted, but consensus floor keeps conviction at 8. |
+| 4 | **LRCX** | 17.0% | Double-consensus semiconductor leader with the best 5d momentum among current semi holdings; no >5% breakdown and replacement case is not strong enough under turnover rules. |
+| 5 | **STX** | 17.0% | Double-consensus incumbent and low-crowding momentum name; vol_ratio is softer, but turnover rule favors holding because no clear negative consensus or breakdown is present. |
+| 6 | **INTC** | 12.0% | Best unique add from the proposals on acceleration grounds with standout 5d momentum, but overbought HIGH-risk profile and lack of consensus keep conviction only medium. |
 
 **Changes from yesterday:**
-- ➕ Added **AMD** at 25.0%
-- ➕ Added **LRCX** at 19.0%
-- ➖ Removed **NOKIA.HE** (was 25.0%)
-- ➖ Removed **FOX** (was 21.0%)
-- ➖ Removed **WAB** (was 14.0%)
-- ▼ **STX**: 18.0% → 13.0% (-5.0%)
-- ▲ **TER**: 5.0% → 20.0% (+15.0%)
+- ➕ Added **INTC** at 12.0%
+- ▼ **AMD**: 25.0% → 18.0% (-7.0%)
+- ▲ **STX**: 13.0% → 17.0% (+4.0%)
 
 ---
+
