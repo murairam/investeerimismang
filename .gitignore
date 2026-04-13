@@ -164,6 +164,7 @@ portfolio_history.json
 verification_tracker.json
 GEMINI.md
 
-# Live mode auto-generated files (recreated on first LIVE run; never commit)
-live_mode_lock.json
+# Live mode handoff (auto-generated, no need to track)
 LIVE_HANDOFF_*.md
+# live_mode_lock.json is intentionally tracked — it must persist across CI runs
+# so mode_guard only resets the paper account once (on the true first LIVE run).
