@@ -1053,7 +1053,11 @@ class AlphaSharkOrchestrator:
                 )
 
         lines += [
-            "Use this context explicitly: keep strong winners, cut persistent laggards, and justify turnover/size changes against this state.",
+            "TURNOVER RULE (hard constraint): At least 50% of total portfolio weight MUST carry over from today's "
+            "verified holdings. Only replace a position if it has dropped >5% in a single day OR agent consensus "
+            "has turned negative. A marginally better alternative is NOT sufficient justification — the replacement "
+            "must show a materially stronger signal (Sharpe delta ≥0.20 OR 5d-momentum delta ≥5 pp). "
+            "Justify every ADD and REMOVE explicitly against this rule in your reasoning.",
         ]
         return "\n".join(lines)
 

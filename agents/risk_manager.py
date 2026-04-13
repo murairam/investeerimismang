@@ -836,6 +836,40 @@ class OpenAIRiskManager(BaseAgent):
             # Overbought-capped positions must not receive excess — their cap would be violated again
             kept = _redistribute_excess(kept, low_vol_excess, low_vol_indices | overbought_capped_indices)
 
+        # Pass E — Tier-1 RSI gate (high momentum, unconfirmed by volume).
+        # Positions with RSI in the "hot but not yet overbought" band (HIGH_MOMENTUM_RSI_GATE to
+        # OVERBOUGHT_RSI_THRESHOLD) that lack genuine breakout volume (vol_ratio < OVERBOUGHT_VOLUME_EXCEPTION)
+        # are capped at HIGH_MOMENTUM_CAP_WITHOUT_VOLUME (18%).  This addresses the observed pattern of
+        # max-sizing exhausted momentum names that then underperform — volume confirmation is required
+        # before a position earns full Tier-1 (20–25%) weight.
+        hot_rsi_excess = 0.0
+        hot_rsi_indices: set[int] = set()
+        for i, pos in enumerate(kept):
+            # Skip positions already capped by earlier passes
+            if i in overbought_capped_indices or i in low_vol_indices:
+                continue
+            c = candidate_map.get(pos.ticker, {})
+            rsi = c.get("rsi_14", float("nan"))
+            vol_ratio = c.get("vol_ratio", float("nan"))
+            cap = config.HIGH_MOMENTUM_CAP_WITHOUT_VOLUME
+            if (
+                not math.isnan(rsi)
+                and config.HIGH_MOMENTUM_RSI_GATE < rsi < config.OVERBOUGHT_RSI_THRESHOLD
+                and (math.isnan(vol_ratio) or vol_ratio < config.OVERBOUGHT_VOLUME_EXCEPTION)
+                and pos.weight > cap
+            ):
+                hot_rsi_excess += pos.weight - cap
+                kept[i] = Position(ticker=pos.ticker, weight=cap, rationale=pos.rationale, conviction=pos.conviction)
+                hot_rsi_indices.add(i)
+                logger.info(
+                    "Hot-RSI gate (Pass E): %s → %.0f%% (RSI %.1f in gate band, vol_ratio %.2f < %.1f)",
+                    pos.ticker, cap * 100, rsi,
+                    vol_ratio if not math.isnan(vol_ratio) else 0.0,
+                    config.OVERBOUGHT_VOLUME_EXCEPTION,
+                )
+        if hot_rsi_indices:
+            kept = _redistribute_excess(kept, hot_rsi_excess, hot_rsi_indices | overbought_capped_indices | low_vol_indices)
+
         # No sector caps are applied. Rotation risk remains an informational input for sizing quality,
         # but legal concentration is preserved if the strongest alpha clusters in one sector.
 

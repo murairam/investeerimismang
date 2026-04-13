@@ -69,8 +69,13 @@ OPENROUTER_CHALLENGER_MODEL = "nvidia/nemotron-3-super-120b-a12b"  # paid model 
 # Risk control thresholds
 OVERBOUGHT_RSI_THRESHOLD = 79   # was 82; lowered to catch RSI 79-82 exhaustion before full overbought
 OVERBOUGHT_HIGH_PCT = 0.02      # within 2% of 52w high
-OVERBOUGHT_VOLUME_EXCEPTION = 1.8  # vol_ratio above this bypasses cap
+OVERBOUGHT_VOLUME_EXCEPTION = 1.8  # vol_ratio above this bypasses cap (genuine breakout volume)
 OVERBOUGHT_WEIGHT_CAP = 0.15
+# Tier-1 RSI gate: positions with RSI above this but below OVERBOUGHT_RSI_THRESHOLD are
+# "hot but unconfirmed" — cap at HIGH_MOMENTUM_CAP unless vol_ratio >= OVERBOUGHT_VOLUME_EXCEPTION.
+# Prevents the observed pattern of max-sizing exhausted momentum without volume backing.
+HIGH_MOMENTUM_RSI_GATE = 72          # RSI threshold for the soft Tier-1 gate
+HIGH_MOMENTUM_CAP_WITHOUT_VOLUME = 0.18  # cap hot-but-unconfirmed positions just below Tier-1 (18%)
 DEAD_MONEY_VOL_RATIO = 0.90
 DEAD_MONEY_MOM_5D = 0.01
 DEVIL_ACCURACY_CAP_WEIGHT = 0.10  # kept for backward compat; use DEVIL_CAP_HIGH below

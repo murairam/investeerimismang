@@ -759,6 +759,7 @@ def build_prompt_learning_context(
                 for item in losers[:5]
             )
         devil = state.get("devil_accuracy", {})
+        devil_repeat_flag_suppressed = False
         if devil.get("status") in ("actionable", "early_data") and devil.get("observations", 0) > 0:
             da = devil
             if da.get("devil_is_accurate"):
@@ -768,13 +769,35 @@ def build_prompt_learning_context(
                     f"LOW-risk {da['low_risk_avg_return_1d']:+.2%}/day. TREAT HIGH-RISK FLAGS AS A 10% WEIGHT CAP TODAY."
                 )
             else:
+                accuracy_rate = da.get("high_risk_negative_rate", 0)
                 lines.append(
-                    f"Devil's advocate accuracy so far: {da.get('high_risk_negative_rate', 0):.0%} of HIGH-risk flags went negative "
+                    f"Devil's advocate accuracy so far: {accuracy_rate:.0%} of HIGH-risk flags went negative "
                     f"({da['observations']} obs, threshold for action: 60%). Use your own judgement on flagged picks."
                 )
-        # Recent repeat flags shown regardless of accuracy status (Change 3)
+                # When Devil is clearly WRONG (accuracy < 40%), repeat flags are ANTI-signals —
+                # explicitly tell agents NOT to penalise momentum picks the Devil has been flagging.
+                if accuracy_rate < 0.40:
+                    recent_flags = devil.get("high_flagged_tickers_recent", [])
+                    if recent_flags:
+                        flagged_str = ", ".join(f"{f['ticker']} (x{f['flag_count']})" for f in recent_flags[:5])
+                        lines.append(
+                            f"DEVIL OVERRIDE — accuracy {accuracy_rate:.0%} (<40%): the Devil has been WRONG on "
+                            f"HIGH-risk flags. Repeat-flagged tickers {flagged_str} have been OUTPERFORMING — "
+                            "do NOT cut conviction or reduce weight based on Devil HIGH flags for these names. "
+                            "Size them by momentum and consensus signals alone."
+                        )
+                    devil_repeat_flag_suppressed = True
+                else:
+                    devil_repeat_flag_suppressed = False
+
+        # Recent repeat flags shown when Devil accuracy is neutral (not clearly wrong)
         recent_flags = devil.get("high_flagged_tickers_recent", [])
-        if recent_flags and devil.get("status") in ("actionable", "early_data") and devil.get("observations", 0) > 0:
+        if (
+            recent_flags
+            and devil.get("status") in ("actionable", "early_data")
+            and devil.get("observations", 0) > 0
+            and not devil_repeat_flag_suppressed
+        ):
             flagged_str = ", ".join(f"{f['ticker']} (x{f['flag_count']})" for f in recent_flags[:5])
             lines.append(
                 f"Repeat HIGH-risk flags (last 5 days): {flagged_str}. "
