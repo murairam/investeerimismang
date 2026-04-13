@@ -852,10 +852,18 @@ class OpenAIRiskManager(BaseAgent):
             rsi = c.get("rsi_14", float("nan"))
             vol_ratio = c.get("vol_ratio", float("nan"))
             cap = config.HIGH_MOMENTUM_CAP_WITHOUT_VOLUME
-            if (
+            if math.isnan(vol_ratio) and not math.isnan(rsi) and config.HIGH_MOMENTUM_RSI_GATE < rsi < config.OVERBOUGHT_RSI_THRESHOLD:
+                # vol_ratio unavailable (common for Baltic/Nordic tickers) — cannot assess volume
+                # confirmation, so skip the cap rather than penalising a data gap.
+                logger.warning(
+                    "Pass E skipped for %s: RSI %.1f in gate band but vol_ratio is NaN (no volume data)",
+                    pos.ticker, rsi,
+                )
+            elif (
                 not math.isnan(rsi)
                 and config.HIGH_MOMENTUM_RSI_GATE < rsi < config.OVERBOUGHT_RSI_THRESHOLD
-                and (math.isnan(vol_ratio) or vol_ratio < config.OVERBOUGHT_VOLUME_EXCEPTION)
+                and not math.isnan(vol_ratio)
+                and vol_ratio < config.OVERBOUGHT_VOLUME_EXCEPTION
                 and pos.weight > cap
             ):
                 hot_rsi_excess += pos.weight - cap
@@ -863,8 +871,7 @@ class OpenAIRiskManager(BaseAgent):
                 hot_rsi_indices.add(i)
                 logger.info(
                     "Hot-RSI gate (Pass E): %s → %.0f%% (RSI %.1f in gate band, vol_ratio %.2f < %.1f)",
-                    pos.ticker, cap * 100, rsi,
-                    vol_ratio if not math.isnan(vol_ratio) else 0.0,
+                    pos.ticker, cap * 100, rsi, vol_ratio,
                     config.OVERBOUGHT_VOLUME_EXCEPTION,
                 )
         if hot_rsi_indices:
