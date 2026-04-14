@@ -129,7 +129,9 @@ RSI_WINDOW = 14             # RSI lookback period
 MOM_SHORT = 5               # short-term momentum window (days)
 MOM_LONG = 60               # long-term momentum window (days)
 SMA_REGIME_WINDOW = 50      # days for market regime SMA — 50d is better suited to a 75-day competition than 200d (too lagged)
-REGIME_THRESHOLD = 0.01     # 1% band: enter BULL earlier — 2% was too slow for a 10-week competition
+REGIME_THRESHOLD = 0.01     # kept for backward compat — use REGIME_BULL_THRESHOLD / REGIME_BEAR_THRESHOLD below
+REGIME_BULL_THRESHOLD = 0.01   # enter BULL at +1% above 50d SMA — catch rallies earlier
+REGIME_BEAR_THRESHOLD = 0.03   # only enter BEAR at -3% below 50d SMA — prevents flip-flopping on minor dips
 CORR_WINDOW = 60            # days for correlation filter
 CORR_THRESHOLD = 0.93       # correlation above this → keep higher Sharpe; 0.93 catches near-identical series (dual-class shares, same-commodity pure plays) without filtering distinct large-caps that merely co-move in bull markets
 
