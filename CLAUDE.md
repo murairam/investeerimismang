@@ -96,13 +96,13 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 - **Sort key changed:** candidates now sorted by `competition_score` (was `selection_score + sharpe_20d`)
 - **BEAR note:** `inv_beta = 1 - beta` is computed BEFORE Z-scoring
 
-## Risk Control Features (Added March 2026)
+## Risk Control Features (Added March 2026, updated April 2026)
 
 ### Overbought Weight Cap
-- **When triggered:** RSI > 79 AND position within 2% of 52-week high
+- **When triggered:** RSI > 85 AND position within 2% of 52-week high (raised from 79 — in competition momentum markets RSI 79-84 = leader, not topper)
 - **Action:** Cap position weight at 15% — **code-enforced in `_enforce_selection_quality()` (Pass A)**
 - **Exception:** If volume_ratio > 1.8 (strong breakout volume), full 25% is allowed
-- **Rationale:** Prevents max-sizing obvious exhaustion patterns while allowing genuine volume breakouts
+- **Rationale:** Prevents max-sizing exhausted patterns while allowing momentum leaders at RSI 79-84
 
 ### Devil's Accuracy Feedback Loop
 - **What it measures:** Devil's advocate flagged picks as HIGH-risk — tracked against 1-day returns

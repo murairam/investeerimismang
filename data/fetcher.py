@@ -23,7 +23,8 @@ from config import (
     MOMENTUM_WINDOW,
     MOM_LONG,
     MOM_SHORT,
-    REGIME_THRESHOLD,
+    REGIME_BEAR_THRESHOLD,
+    REGIME_BULL_THRESHOLD,
     RSI_WINDOW,
     SECTOR_MAP,
     SMA_REGIME_WINDOW,
@@ -341,7 +342,7 @@ class DataFetcher:
         if not math.isnan(rsi):
             if 55 <= rsi <= 78:
                 score += 0.25
-            elif rsi > 88 and regime_score < 50:
+            elif rsi > 93 and regime_score < 50:  # raised from 88: restore ~8pt gap above OVERBOUGHT_RSI_THRESHOLD=85
                 score -= 0.45
 
         atr_pct = record.get("atr_pct", float("nan"))
@@ -588,15 +589,20 @@ class DataFetcher:
         Determine market regime from SPX vs its 50d SMA (SMA_REGIME_WINDOW).
         50d is more responsive than 200d for a 75-day competition horizon.
         Returns (regime_str, pct_vs_sma).
+
+        Asymmetric thresholds prevent BEAR flip-flopping on minor dips:
+          BULL    if SPX >= +REGIME_BULL_THRESHOLD (+1%)
+          BEAR    if SPX <= -REGIME_BEAR_THRESHOLD (-3%)
+          NEUTRAL otherwise (between -3% and +1%, exclusive)
         """
         if len(bench_close) < SMA_REGIME_WINDOW:
             return "NEUTRAL", 0.0
-        sma_200 = bench_close.iloc[-SMA_REGIME_WINDOW:].mean()
+        sma_regime = bench_close.iloc[-SMA_REGIME_WINDOW:].mean()
         last = bench_close.iloc[-1]
-        pct = (last / sma_200) - 1
-        if pct >= REGIME_THRESHOLD:
+        pct = (last / sma_regime) - 1
+        if pct >= REGIME_BULL_THRESHOLD:
             regime = "BULL"
-        elif pct <= -REGIME_THRESHOLD:
+        elif pct <= -REGIME_BEAR_THRESHOLD:
             regime = "BEAR"
         else:
             regime = "NEUTRAL"

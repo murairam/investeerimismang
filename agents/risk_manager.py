@@ -1468,20 +1468,57 @@ class OpenAIRiskManager(BaseAgent):
         if snapshot.get("trends_context"):
             lines += ["", snapshot["trends_context"]]
 
+        # Load devil accuracy once — used in bear cases section and synthesis instruction.
+        # Uses the module-level load_learning_state import (no redundant local import).
+        _load_ls = load_learning_state
+        _devil_acc = _load_ls().get("devil_accuracy", {})
+        # Tri-state: accurate / inaccurate / unknown (no data yet)
+        _devil_accurate: bool | None = (
+            _devil_acc.get("devil_is_accurate")  # True or False if data present
+            if "devil_is_accurate" in _devil_acc
+            else None  # unknown — not enough observations
+        )
+        _devil_acc_pct = _devil_acc.get("accuracy", float("nan"))
+        if _devil_accurate is False and not math.isnan(_devil_acc_pct):
+            # Known inaccurate: suppress HIGH-risk penalty and override conflicting system prompt clause
+            _devil_note = (
+                f"⚠️ Devil accuracy: {_devil_acc_pct:.0%} — BELOW threshold (empirically unreliable). "
+                "HIGH-risk flags are frequently wrong. "
+                "SYSTEM PROMPT OVERRIDE: ignore the 'unless Devil flags HIGH risk' clause in the consensus floor rule. "
+                "Treat all HIGH flags as MEDIUM for today's synthesis — do NOT apply the 3-point conviction reduction."
+            )
+        elif _devil_accurate is True and not math.isnan(_devil_acc_pct):
+            _devil_note = f"Devil accuracy: {_devil_acc_pct:.0%} — reliable. Apply conviction reductions as instructed."
+        else:
+            _devil_note = ""  # unknown accuracy: no override, apply system prompt defaults
+
         if bear_cases:
             high_risk = [(t, v) for t, v in bear_cases.items() if v["risk"] == "HIGH"]
             other_risk = [(t, v) for t, v in bear_cases.items() if v["risk"] != "HIGH"]
             # Build signal lookup for fact-checking devil's narrative claims
             _signal_lookup = {c["ticker"]: c for c in snapshot.get("candidates", [])}
             lines += ["", "### ⚠️ Devil's Advocate — Bear Cases"]
+            if _devil_note:
+                lines.append(_devil_note)
+            _high_action = (
+                "HIGH-risk flags shown below are LOW-RELIABILITY (see accuracy note above) — treat as informational, "
+                "trust the actual signals."
+                if _devil_accurate is False
+                else "HIGH risk picks should be sized down or cut."
+            )
             lines.append(
                 "These are the strongest arguments AGAINST each pick. "
-                "Factor them into your weight decisions — HIGH risk picks should be sized down or cut. "
+                f"Factor them into your weight decisions — {_high_action} "
                 "ACTUAL SIGNALS are appended for fact-checking — if the devil's narrative contradicts the signals, trust the signals."
             )
             if high_risk:
                 lines.append("")
-                lines.append("**HIGH RISK (reduce weight or exclude):**")
+                _high_label = (
+                    "**HIGH FLAG — LOW RELIABILITY (see accuracy note; treat as MEDIUM):**"
+                    if _devil_accurate is False
+                    else "**HIGH RISK (reduce weight or exclude):**"
+                )
+                lines.append(_high_label)
                 for ticker, v in high_risk:
                     sigs = _signal_lookup.get(ticker, {})
                     vr = sigs.get("vol_ratio", float("nan"))
@@ -1522,8 +1559,12 @@ class OpenAIRiskManager(BaseAgent):
             "CAUTIOUS regime-score handling: remain concentrated, but cut slow or dead-money names rather than padding with soft holdings.",
             "",
             "Synthesise the final portfolio. Score consensus picks higher (conviction), not weights. "
-            "For HIGH-RISK picks flagged above: reduce conviction by at least 3 points or exclude. "
-            "Apply regime and concentration rules. Respond ONLY with the JSON object.",
+            + (
+                "For HIGH-RISK picks flagged above: reduce conviction by at least 3 points or exclude. "
+                if _devil_accurate
+                else "Devil accuracy is below threshold — HIGH-risk flags are informational only; use your own judgment on sizing. "
+            )
+            + "Apply regime and concentration rules. Respond ONLY with the JSON object.",
         ]
         return "\n".join(lines)
 
