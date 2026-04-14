@@ -207,3 +207,33 @@ Winners: INTC +3.4%, GLW +1.2%, STX +0.1% | Losers: TER -1.2%, LRCX -0.7%, AMD -
 
 ---
 
+## 2026-04-14 06:15:43
+
+**Market:** NEUTRAL regime · SPX vs 50d SMA: +1.9% · VIX: 19.1 · S&P 500 20d: +3.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.9% · Benchmark +1.0% · Alpha -0.1%
+Winners: INTC +3.7%, GLW +1.5%, STX +1.2% | Losers: TER -0.2%, AMD -0.1%
+
+**Paper account:** Equity €10,423.00 (start €10,000) · Today +0.00% · Since start +4.23% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I kept all six current holdings because the hard turnover rule requires at least 50% carryover and only TER had a proposed replacement; MPWR does not have enough documented edge here to justify a forced swap under the stated remove/add threshold, while none of the incumbents dropped >5% or saw clear negative consensus. Consensus support was strongest for AMD, GLW, INTC, LRCX, and STX, but I cut conviction on the devil-flagged high-risk names rather than removing them; this keeps concentration in the active tech rotation leaders despite crowdedness, and accepts a portfolio beta above soft neutral guidance because rotation-active conditions override beta as a hard target.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **LRCX** | 20.0% | Double-consensus core hold and explicitly supported by recent learning; strongest blend of carryover compliance, solid 5d momentum, and only medium devil risk. |
+| 2 | **STX** | 18.0% | Double-consensus core hold with positive recent contribution and acceptable medium risk; earns its slot as a continuing storage/tech momentum leader while preserving required carryover. |
+| 3 | **AMD** | 18.0% | Double-consensus pick so conviction floor applies despite elevated topping risk; kept as a reduced-confidence momentum name because consensus has not turned negative enough to justify a full exit under turnover rules. |
+| 4 | **INTC** | 16.0% | Consensus and one of yesterday’s leaders, but devil flagged HIGH risk with RSI 82 and beta 2.98; kept due to learning-state support and turnover constraints, but conviction is trimmed for crowding/overbought risk. |
+| 5 | **GLW** | 16.0% | Consensus hold and recent alpha contributor, yet weak volume confirmation and HIGH-risk devil flag reduce conviction; retained because consensus remains positive and no stronger replacement clearly beats it on the turnover test. |
+| 6 | **TER** | 12.0% | Single-proposal hold only, with high beta and weak volume support; included mainly to satisfy the 50% carryover rule since it has not broken enough to force removal, but it is the weakest incumbent and lowest-conviction slot. |
+
+**Changes from yesterday:**
+- ▲ **LRCX**: 17.0% → 20.0% (+3.0%)
+- ▲ **INTC**: 12.0% → 16.0% (+4.0%)
+- ▼ **TER**: 19.0% → 12.0% (-7.0%)
+
+---
