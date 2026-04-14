@@ -25,7 +25,6 @@ from config import (
     MOM_SHORT,
     REGIME_BEAR_THRESHOLD,
     REGIME_BULL_THRESHOLD,
-    REGIME_THRESHOLD,
     RSI_WINDOW,
     SECTOR_MAP,
     SMA_REGIME_WINDOW,
@@ -343,7 +342,7 @@ class DataFetcher:
         if not math.isnan(rsi):
             if 55 <= rsi <= 78:
                 score += 0.25
-            elif rsi > 88 and regime_score < 50:
+            elif rsi > 93 and regime_score < 50:  # raised from 88: restore ~8pt gap above OVERBOUGHT_RSI_THRESHOLD=85
                 score -= 0.45
 
         atr_pct = record.get("atr_pct", float("nan"))

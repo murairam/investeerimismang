@@ -1468,19 +1468,22 @@ class OpenAIRiskManager(BaseAgent):
         if snapshot.get("trends_context"):
             lines += ["", snapshot["trends_context"]]
 
-        # Load devil accuracy once — used both in bear cases section and synthesis instruction
-        from data.learning_state import load_learning_state as _load_ls
+        # Load devil accuracy once — used in bear cases section and synthesis instruction.
+        # Uses the module-level load_learning_state import (no redundant local import).
+        _load_ls = load_learning_state
         _devil_acc = _load_ls().get("devil_accuracy", {})
         _devil_accurate = _devil_acc.get("devil_is_accurate", False)
         _devil_acc_pct = _devil_acc.get("accuracy", float("nan"))
         if not math.isnan(_devil_acc_pct):
-            _devil_note = (
-                f"⚠️ Devil accuracy: {_devil_acc_pct:.0%} — BELOW threshold. "
-                "HIGH-risk flags are frequently wrong. Treat HIGH flags as MEDIUM; "
-                "do NOT apply the 3-point conviction reduction for HIGH-risk today."
-                if not _devil_accurate
-                else f"Devil accuracy: {_devil_acc_pct:.0%} — reliable. Apply conviction reductions as instructed."
-            )
+            if not _devil_accurate:
+                _devil_note = (
+                    f"⚠️ Devil accuracy: {_devil_acc_pct:.0%} — BELOW threshold. "
+                    "HIGH-risk flags are frequently wrong. "
+                    "SYSTEM PROMPT OVERRIDE: ignore the 'unless Devil flags HIGH risk' clause in the consensus floor rule. "
+                    "Treat all HIGH flags as MEDIUM for today's synthesis — do NOT apply the 3-point conviction reduction."
+                )
+            else:
+                _devil_note = f"Devil accuracy: {_devil_acc_pct:.0%} — reliable. Apply conviction reductions as instructed."
         else:
             _devil_note = ""
 

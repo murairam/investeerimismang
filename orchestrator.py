@@ -1055,7 +1055,8 @@ class AlphaSharkOrchestrator:
         lines += [
             "COMPETITION ROTATION MANDATE: This is a 10-week competition — winning requires rotating into the "
             "strongest momentum leaders every day. You MAY replace any current holding if a candidate shows "
-            "materially stronger 5d momentum (delta ≥3 pp) OR higher competition_score. Prefer to keep "
+            "materially stronger 5d momentum (delta ≥4 pp) OR meaningfully higher competition_score (not marginal — "
+            "the replacement must be a clearly better stock, not just 0.01 Z-score ahead). Prefer to keep "
             "validated winners (those with positive contribution in recent days) and exit dead-money holdings "
             "(flat or negative 5d momentum, vol_ratio < 1.0). Do NOT hold a position just because it was "
             "recommended yesterday — every slot must earn its place today. Justify removals briefly.",
