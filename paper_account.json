@@ -3,20 +3,20 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "INTC": 22.58098586,
-    "TER": 6.29615367,
-    "AMD": 8.94438675,
-    "STX": 4.06228665,
-    "GLW": 11.90324046,
-    "LRCX": 7.79997962
+    "TER": 6.46158616,
+    "AMD": 8.77198589,
+    "STX": 3.96139506,
+    "GLW": 12.22755757,
+    "LRCX": 7.75730171,
+    "INTC": 23.37638256
   },
   "verified_weights": {
-    "INTC": 0.12,
     "TER": 0.19,
     "AMD": 0.18,
     "STX": 0.17,
     "GLW": 0.17,
-    "LRCX": 0.17
+    "LRCX": 0.17,
+    "INTC": 0.12
   },
   "pending_order": null,
   "history": [
@@ -40,23 +40,23 @@
     },
     {
       "date": "2026-04-14",
-      "equity": 10423.0,
+      "equity": 10536.0,
       "cash": 0.0,
-      "daily_return": 0.0,
-      "return_since_start": 0.0423,
+      "daily_return": 0.010841,
+      "return_since_start": 0.0536,
       "turnover": 0.0,
       "positions": {
-        "INTC": 22.58098586,
-        "TER": 6.29615367,
-        "AMD": 8.94438675,
-        "STX": 4.06228665,
-        "GLW": 11.90324046,
-        "LRCX": 7.79997962
+        "TER": 6.46158616,
+        "AMD": 8.77198589,
+        "STX": 3.96139506,
+        "GLW": 12.22755757,
+        "LRCX": 7.75730171,
+        "INTC": 23.37638256
       },
       "pending_order": null,
       "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-04-14",
-  "last_equity": 10423.0
+  "last_equity": 10536.0
 }
