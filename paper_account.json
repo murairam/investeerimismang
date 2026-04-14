@@ -3,20 +3,20 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "TER": 6.46158616,
-    "AMD": 8.77198589,
-    "STX": 3.96139506,
-    "GLW": 12.22755757,
+    "INTC": 23.37638256,
     "LRCX": 7.75730171,
-    "INTC": 23.37638256
+    "GLW": 12.22755757,
+    "STX": 3.96139506,
+    "AMD": 8.77198589,
+    "TER": 6.46158616
   },
   "verified_weights": {
-    "TER": 0.19,
-    "AMD": 0.18,
-    "STX": 0.17,
-    "GLW": 0.17,
+    "INTC": 0.12,
     "LRCX": 0.17,
-    "INTC": 0.12
+    "GLW": 0.17,
+    "STX": 0.17,
+    "AMD": 0.18,
+    "TER": 0.19
   },
   "pending_order": null,
   "history": [
@@ -46,12 +46,12 @@
       "return_since_start": 0.0536,
       "turnover": 0.0,
       "positions": {
-        "TER": 6.46158616,
-        "AMD": 8.77198589,
-        "STX": 3.96139506,
-        "GLW": 12.22755757,
+        "INTC": 23.37638256,
         "LRCX": 7.75730171,
-        "INTC": 23.37638256
+        "GLW": 12.22755757,
+        "STX": 3.96139506,
+        "AMD": 8.77198589,
+        "TER": 6.46158616
       },
       "pending_order": null,
       "source": "verified"

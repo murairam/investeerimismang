@@ -211,7 +211,7 @@ Winners: INTC +3.4%, GLW +1.2%, STX +0.1% | Losers: TER -1.2%, LRCX -0.7%, AMD -
 
 **Market:** NEUTRAL regime · SPX vs 50d SMA: +1.9% · VIX: 19.1 · S&P 500 20d: +3.8%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 22:19:11.
 
 **Yesterday's P&L:** Portfolio +0.9% · Benchmark +1.0% · Alpha -0.1%
 Winners: INTC +3.7%, GLW +1.5%, STX +1.2% | Losers: TER -0.2%, AMD -0.1%
