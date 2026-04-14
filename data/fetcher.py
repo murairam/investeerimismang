@@ -591,15 +591,15 @@ class DataFetcher:
         Returns (regime_str, pct_vs_sma).
 
         Asymmetric thresholds prevent BEAR flip-flopping on minor dips:
-          BULL  if SPX > +REGIME_BULL_THRESHOLD (+1%)
-          BEAR  if SPX < -REGIME_BEAR_THRESHOLD (-3%)
-          NEUTRAL otherwise (-3% to +1%)
+          BULL    if SPX >= +REGIME_BULL_THRESHOLD (+1%)
+          BEAR    if SPX <= -REGIME_BEAR_THRESHOLD (-3%)
+          NEUTRAL otherwise (between -3% and +1%, exclusive)
         """
         if len(bench_close) < SMA_REGIME_WINDOW:
             return "NEUTRAL", 0.0
-        sma_200 = bench_close.iloc[-SMA_REGIME_WINDOW:].mean()
+        sma_regime = bench_close.iloc[-SMA_REGIME_WINDOW:].mean()
         last = bench_close.iloc[-1]
-        pct = (last / sma_200) - 1
+        pct = (last / sma_regime) - 1
         if pct >= REGIME_BULL_THRESHOLD:
             regime = "BULL"
         elif pct <= -REGIME_BEAR_THRESHOLD:
