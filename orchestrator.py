@@ -1053,11 +1053,12 @@ class AlphaSharkOrchestrator:
                 )
 
         lines += [
-            "TURNOVER RULE (hard constraint): At least 50% of total portfolio weight MUST carry over from today's "
-            "verified holdings. Only replace a position if it has dropped >5% in a single day OR agent consensus "
-            "has turned negative. A marginally better alternative is NOT sufficient justification — the replacement "
-            "must show a materially stronger signal (Sharpe delta ≥0.20 OR 5d-momentum delta ≥5 pp). "
-            "Justify every ADD and REMOVE explicitly against this rule in your reasoning.",
+            "COMPETITION ROTATION MANDATE: This is a 10-week competition — winning requires rotating into the "
+            "strongest momentum leaders every day. You MAY replace any current holding if a candidate shows "
+            "materially stronger 5d momentum (delta ≥3 pp) OR higher competition_score. Prefer to keep "
+            "validated winners (those with positive contribution in recent days) and exit dead-money holdings "
+            "(flat or negative 5d momentum, vol_ratio < 1.0). Do NOT hold a position just because it was "
+            "recommended yesterday — every slot must earn its place today. Justify removals briefly.",
         ]
         return "\n".join(lines)
 

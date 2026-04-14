@@ -67,7 +67,7 @@ OPENROUTER_ANALYST_MODEL = "deepseek/deepseek-v3.2"
 OPENROUTER_CHALLENGER_MODEL = "nvidia/nemotron-3-super-120b-a12b"  # paid model (was free nemotron-3-super-120b-a12:free)
 
 # Risk control thresholds
-OVERBOUGHT_RSI_THRESHOLD = 79   # was 82; lowered to catch RSI 79-82 exhaustion before full overbought
+OVERBOUGHT_RSI_THRESHOLD = 85   # raised from 79: in competition momentum markets RSI 79-84 = leader, not topper
 OVERBOUGHT_HIGH_PCT = 0.02      # within 2% of 52w high
 OVERBOUGHT_VOLUME_EXCEPTION = 1.8  # vol_ratio above this bypasses cap (genuine breakout volume)
 OVERBOUGHT_WEIGHT_CAP = 0.15
@@ -129,7 +129,7 @@ RSI_WINDOW = 14             # RSI lookback period
 MOM_SHORT = 5               # short-term momentum window (days)
 MOM_LONG = 60               # long-term momentum window (days)
 SMA_REGIME_WINDOW = 50      # days for market regime SMA — 50d is better suited to a 75-day competition than 200d (too lagged)
-REGIME_THRESHOLD = 0.02     # 2% band for BULL/BEAR classification
+REGIME_THRESHOLD = 0.01     # 1% band: enter BULL earlier — 2% was too slow for a 10-week competition
 CORR_WINDOW = 60            # days for correlation filter
 CORR_THRESHOLD = 0.93       # correlation above this → keep higher Sharpe; 0.93 catches near-identical series (dual-class shares, same-commodity pure plays) without filtering distinct large-caps that merely co-move in bull markets
 
@@ -140,7 +140,7 @@ CORR_THRESHOLD = 0.93       # correlation above this → keep higher Sharpe; 0.9
 # inv_beta = (1 − beta): computed BEFORE Z-scoring in BEAR regime.
 COMPETITION_SORT_WEIGHTS: dict[str, dict[str, float]] = {
     "BULL":    {"mom_20d": 0.35, "mom_5d": 0.25, "sharpe_20d": 0.20, "beta": 0.20},
-    "NEUTRAL": {"sharpe_20d": 0.40, "vs_index": 0.30, "mom_20d": 0.20, "beta": 0.10},
+    "NEUTRAL": {"sharpe_20d": 0.30, "vs_index": 0.25, "mom_20d": 0.25, "mom_5d": 0.20},
     "BEAR":    {"sharpe_20d": 0.50, "vs_index": 0.30, "inv_beta": 0.20},
 }
 
