@@ -1,5 +1,5 @@
 {
-  "generated_from_days": 23,
+  "generated_from_days": 24,
   "position_observations": 113,
   "minimums": {
     "strong_daily_observations": 7,
@@ -85,7 +85,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.568947,
+    "avg_turnover_estimate": 0.5665,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -193,15 +193,11 @@
         "flag_count": 4
       },
       {
-        "ticker": "WDC",
-        "flag_count": 3
-      },
-      {
         "ticker": "MPWR",
         "flag_count": 3
       },
       {
-        "ticker": "SUBC.OL",
+        "ticker": "WDC",
         "flag_count": 2
       },
       {
@@ -210,6 +206,14 @@
       },
       {
         "ticker": "TER",
+        "flag_count": 2
+      },
+      {
+        "ticker": "CPA1T.TL",
+        "flag_count": 2
+      },
+      {
+        "ticker": "LRCX",
         "flag_count": 2
       }
     ]

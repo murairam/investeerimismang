@@ -1,7 +1,7 @@
 # AI Self-Critique Report
 
-Generated: 2026-04-14
-Training days analyzed: 22
+Generated: 2026-04-15
+Training days analyzed: 23
 Days until live mode: 0
 
 ## Meta-Learning Question
@@ -13,7 +13,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
 - Minimum rationale observations for bias claims: 5
-- Latest day status: verified
+- Latest day status: experimental / unverified
 
 ## What's Working ✅
 - Conviction sizing is working: Tier 1 +0.1% > Tier 3 -0.7%
@@ -21,7 +21,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 ## Systematic Biases / Errors ⚠️
 - 'diversifier' rationale is weak: -0.4% avg, 40% hit rate
 - 'non_us_differentiator' rationale is weak: -0.3% avg, 27% hit rate
-- Alpha hit rate is low: 41%.
+- Alpha hit rate is low: 39%.
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |

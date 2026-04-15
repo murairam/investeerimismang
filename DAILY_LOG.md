@@ -237,3 +237,37 @@ Winners: INTC +3.7%, GLW +1.5%, STX +1.2% | Losers: TER -0.2%, AMD -0.1%
 - ▼ **TER**: 19.0% → 12.0% (-7.0%)
 
 ---
+## 2026-04-15 09:33:25
+
+**Market:** BULL regime · SPX vs 50d SMA: +3.1% · VIX: 18.1 · S&P 500 20d: +4.0%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.2% · Benchmark +1.2% · Alpha -1.4%
+Losers: INTC -0.2%, LRCX -0.2%, GLW -0.2%
+
+**Paper account:** Equity €10,545.94 (start €10,000) · Today +0.09% · Since start +5.46% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 85% · **Positions:** 5 · **Total weight:** 95.0%
+
+**Thesis:** The core synthesis starts with the strongest consensus: AMD and STX are triple-consensus and therefore highest conviction, while LRCX is retained as a validated winner from both proposal logic and recent live-performance learning. I excluded weak/slow current holdings (GLW, TER, and INTC) and skipped low-beta Baltic names and low-volume Nokia because they fail the slot-cost test for a win-only competition; COHR and CVNA are the best unique accelerators to keep the portfolio aggressive. Portfolio beta should remain firmly in the bull-regime target zone and likely above neutral soft targets, which is appropriate given the competition mandate and rotation into active leaders.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **AMD** | 25.0% | Triple-consensus pick across all three proposals and still one of the strongest active leaders with +9.1% 5d momentum, very high beta, and clear fit for an aggressive bull-regime competition portfolio. |
+| 2 | **STX** | 15.0% | Triple-consensus pick with recent verified outperformance in the live portfolio, +6.6% 5d momentum, and strong continuation evidence; despite overbought RSI, ensemble agreement and acceleration justify max conviction. |
+| 3 | **LRCX** | 15.0% | Double validation from current holdings/learning context and Proposal B, with strong recent performance, +9.6% 5d momentum, and clear semiconductor leadership; earns a consensus-floor high conviction. |
+| 4 | **COHR** | 20.0% | Best unique high-beta momentum add from Proposal C with elite +10.3% 5d momentum and strong upside torque; included because every slot must favor faster movers over legacy laggards. |
+| 5 | **CVNA** | 20.0% | Unique but compelling right-tail competition pick from Proposal C with +9.6% 5d momentum and very high beta, offering differentiated upside versus crowded semi exposure. |
+
+**Changes from yesterday:**
+- ➕ Added **COHR** at 20.0%
+- ➕ Added **CVNA** at 20.0%
+- ➖ Removed **INTC** (was 12.0%)
+- ➖ Removed **GLW** (was 17.0%)
+- ➖ Removed **TER** (was 19.0%)
+- ▲ **AMD**: 18.0% → 25.0% (+7.0%)
+- ▼ **STX**: 17.0% → 15.0% (-2.0%)
+- ▼ **LRCX**: 17.0% → 15.0% (-2.0%)
+
+---
