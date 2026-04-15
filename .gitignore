@@ -168,3 +168,6 @@ GEMINI.md
 LIVE_HANDOFF_*.md
 # live_mode_lock.json is intentionally tracked — it must persist across CI runs
 # so mode_guard only resets the paper account once (on the true first LIVE run).
+
+# Claude Code temporary worktrees (created by agent isolation mode, never track these)
+.claude/worktrees/

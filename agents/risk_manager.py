@@ -853,9 +853,9 @@ class OpenAIRiskManager(BaseAgent):
             vol_ratio = c.get("vol_ratio", float("nan"))
             cap = config.HIGH_MOMENTUM_CAP_WITHOUT_VOLUME
             if math.isnan(vol_ratio) and not math.isnan(rsi) and config.HIGH_MOMENTUM_RSI_GATE < rsi < config.OVERBOUGHT_RSI_THRESHOLD:
-                # vol_ratio unavailable (common for Baltic/Nordic tickers) — cannot assess volume
-                # confirmation, so skip the cap rather than penalising a data gap.
-                logger.warning(
+                # vol_ratio unavailable (common for Baltic/Nordic tickers, occasional yfinance gaps)
+                # — cannot assess volume confirmation, so skip the cap rather than penalising a data gap.
+                logger.info(
                     "Pass E skipped for %s: RSI %.1f in gate band but vol_ratio is NaN (no volume data)",
                     pos.ticker, rsi,
                 )
