@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _CACHE_DIR = os.path.join(_ROOT, ".cache")
 _CACHE_PATH = os.path.join(_CACHE_DIR, "game_universe.json")
-_CACHE_MAX_AGE = timedelta(days=7)
+_CACHE_MAX_AGE = timedelta(days=30)  # OBX composition changes quarterly; monthly refresh is sufficient
 
 _SOURCE_URLS = {
     "SP500": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
@@ -188,8 +188,12 @@ def _load_euronext_obx() -> list[str]:
     try:
         tables = pd.read_html(StringIO(html))
     except ValueError as exc:
-        # pandas raises ValueError("No tables found") if the page structure changed
-        logger.warning("No tables found when parsing OBX constituents: %s. Check if the source page structure has changed.", exc)
+        # live.euronext.com renders the index composition table via JavaScript — pd.read_html()
+        # only parses static HTML and will always fail here.  The hardcoded fallback list is
+        # updated manually each quarter when OBX composition changes.
+        logger.info(
+            "OBX page returned no static HTML tables (JavaScript-rendered — expected): %s. Using fallback universe.", exc
+        )
         return _FALLBACK_UNIVERSE["OBX"][:]
     except Exception as exc:
         logger.warning("Failed to parse OBX constituents (unexpected error): %s", exc)
