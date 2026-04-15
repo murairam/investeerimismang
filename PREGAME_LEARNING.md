@@ -8,15 +8,15 @@ Days remaining: 0
 - Training days with measurable alpha: 23
 - Win days (alpha > 0): 9
 - Loss days (alpha < 0): 14
-- Average daily alpha: -0.43%
-- Paper account equity: €10,545.94 (from €10,000.00, return +5.46%)
-- Max drawdown (paper): 0.00%
+- Average daily alpha: -0.46%
+- Paper account equity: €10,537.00 (from €10,000.00, return +5.37%)
+- Max drawdown (paper): 0.08%
 - Average turnover: 0.00%
 
 ## Confidence note
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
-- Latest day is still experimental / unverified.
+- Latest day is verified against the actual game portfolio.
 
 ## Best and worst day
 - Best alpha day: 2026-03-23 (+1.42%)

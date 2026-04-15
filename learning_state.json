@@ -1,5 +1,5 @@
 {
-  "generated_from_days": 24,
+  "generated_from_days": 25,
   "position_observations": 113,
   "minimums": {
     "strong_daily_observations": 7,
@@ -85,7 +85,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.5665,
+    "avg_turnover_estimate": 0.5775,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -185,23 +185,11 @@
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
-        "ticker": "STX",
-        "flag_count": 4
-      },
-      {
-        "ticker": "INTC",
-        "flag_count": 4
-      },
-      {
-        "ticker": "MPWR",
-        "flag_count": 3
-      },
-      {
-        "ticker": "WDC",
+        "ticker": "GLW",
         "flag_count": 2
       },
       {
-        "ticker": "GLW",
+        "ticker": "STX",
         "flag_count": 2
       },
       {
@@ -209,11 +197,11 @@
         "flag_count": 2
       },
       {
-        "ticker": "CPA1T.TL",
+        "ticker": "INTC",
         "flag_count": 2
       },
       {
-        "ticker": "LRCX",
+        "ticker": "MPWR",
         "flag_count": 2
       }
     ]

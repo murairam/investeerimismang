@@ -10,15 +10,35 @@
     "GLW": 12.56679452,
     "LRCX": 7.97486249
   },
-  "verified_weights": {
-    "INTC": 0.12,
-    "TER": 0.19,
-    "AMD": 0.18,
-    "STX": 0.17,
-    "GLW": 0.17,
-    "LRCX": 0.17
+  "pending_order": {
+    "submitted_date": "2026-04-15",
+    "positions": [
+      {
+        "ticker": "AVGO",
+        "weight": 0.08
+      },
+      {
+        "ticker": "HOOD",
+        "weight": 0.23
+      },
+      {
+        "ticker": "INTC",
+        "weight": 0.15
+      },
+      {
+        "ticker": "AMD",
+        "weight": 0.14
+      },
+      {
+        "ticker": "ORCL",
+        "weight": 0.18
+      },
+      {
+        "ticker": "CVNA",
+        "weight": 0.22
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -115,8 +135,62 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-15",
+      "equity": 10537.0,
+      "cash": 0.0,
+      "daily_return": 0.0,
+      "return_since_start": 0.0537,
+      "turnover": 0.0,
+      "positions": {
+        "INTC": 22.98535649,
+        "TER": 6.47575846,
+        "AMD": 8.67427438,
+        "STX": 4.0696972,
+        "GLW": 12.56679452,
+        "LRCX": 7.97486249
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-15",
+        "positions": [
+          {
+            "ticker": "AVGO",
+            "weight": 0.08
+          },
+          {
+            "ticker": "HOOD",
+            "weight": 0.23
+          },
+          {
+            "ticker": "INTC",
+            "weight": 0.15
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.14
+          },
+          {
+            "ticker": "ORCL",
+            "weight": 0.18
+          },
+          {
+            "ticker": "CVNA",
+            "weight": 0.22
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-16",
-  "last_equity": 10537.0
+  "last_rebalanced_date": "2026-04-15",
+  "last_equity": 10537.00000009,
+  "verified_weights": {
+    "INTC": 0.12,
+    "TER": 0.19,
+    "AMD": 0.18,
+    "STX": 0.17,
+    "GLW": 0.17,
+    "LRCX": 0.17
+  }
 }
