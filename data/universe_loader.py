@@ -29,7 +29,7 @@ _SOURCE_URLS = {
     "OMXHLCPI": "https://indexes.nasdaqomx.com/Index/Weighting/OMXHLCPI",
     "OMXS30": "https://indexes.nasdaqomx.com/Index/Weighting/OMXS30",
     "OMXC25": "https://indexes.nasdaqomx.com/Index/Weighting/OMXC25",
-    "OBX": "https://live.euronext.com/en/product/indices/NO0000000021-XOSL#index-composition",
+    "OBX": "https://en.wikipedia.org/wiki/OBX_Index",
     "BALTIC": "https://nasdaqbaltic.com/statistics/et/shares#BAMT",
 }
 
@@ -52,10 +52,12 @@ _FALLBACK_UNIVERSE: dict[str, list[str]] = {
         "SWED-A.ST", "TEL2-B.ST", "TELIA.ST", "VOLV-B.ST", "VOLCAR-B.ST",
     ],
     "OBX": [
+        # OBX 25 as of September 2025 rebalancing (effective 22 Sep 2025).
+        # Update after each March/September Euronext review.
         "AKRBP.OL", "AUTO.OL", "BAKKA.OL", "BWLPG.OL", "DNB.OL",
-        "EQNR.OL", "FRO.OL", "GJF.OL", "GOGL.OL", "HAUTO.OL",
-        "KOG.OL", "MOWI.OL", "NAS.OL", "NEL.OL", "NHY.OL",
-        "OKEA.OL", "ORK.OL", "PGS.OL", "SALM.OL", "SCHA.OL",
+        "DOF.OL", "EQNR.OL", "FRO.OL", "GJF.OL", "GOGL.OL",
+        "HAFNI.OL", "HAUTO.OL", "KOG.OL", "MOWI.OL", "NAS.OL",
+        "NHY.OL", "ORK.OL", "PGS.OL", "SALM.OL", "SCHA.OL",
         "SDRL.OL", "SUBC.OL", "TEL.OL", "TOM.OL", "YAR.OL",
     ],
     "OMXC25": [
@@ -180,48 +182,57 @@ def _load_nasdaq_index(index_key: str, suffix: str) -> list[str]:
     return _FALLBACK_UNIVERSE[index_key][:]
 
 
-def _load_euronext_obx() -> list[str]:
-    html = _fetch_html(_SOURCE_URLS["OBX"])
-    if not html:
-        logger.warning("OBX HTML fetch failed, using fallback universe.")
-        return _FALLBACK_UNIVERSE["OBX"][:]
-    try:
-        tables = pd.read_html(StringIO(html))
-    except ValueError as exc:
-        # live.euronext.com renders the index composition table via JavaScript — pd.read_html()
-        # only parses static HTML and will always fail here.  The hardcoded fallback list is
-        # updated manually each quarter when OBX composition changes.
-        logger.info(
-            "OBX page returned no static HTML tables (JavaScript-rendered — expected): %s. Using fallback universe.", exc
-        )
-        return _FALLBACK_UNIVERSE["OBX"][:]
-    except Exception as exc:
-        logger.warning("Failed to parse OBX constituents (unexpected error): %s", exc)
-        return _FALLBACK_UNIVERSE["OBX"][:]
-
+def _parse_obx_tables(tables: list, source: str) -> list[str] | None:
+    """Try to extract .OL ticker symbols from a list of HTML tables. Returns None if not found."""
     for table in tables:
         cols = {str(col).strip().lower(): col for col in table.columns}
         symbol_col = None
-        for key in ("symbol", "ticker", "mnemo", "instrument symbol", "isin"):
+        for key in ("ticker", "symbol", "mnemo", "instrument symbol"):
             if key in cols:
                 symbol_col = cols[key]
                 break
         if symbol_col is not None:
-            symbols = [
-                _to_yahoo_symbol(str(value).strip().upper(), ".OL")
-                for value in table[symbol_col].tolist()
-                if str(value).strip()
-            ]
+            raw = [str(v).strip().upper() for v in table[symbol_col].tolist() if str(v).strip()]
+            symbols = [_to_yahoo_symbol(v, ".OL") for v in raw if v and v != "NAN"]
             if len(symbols) >= 10:
+                logger.info("OBX: loaded %d tickers from %s", len(symbols), source)
                 return symbols
-        # Fallback: try to extract OBX-like tickers from any column if not found
+        # Last resort: scan all columns for .OL-like values
         for col in table.columns:
             values = table[col].astype(str).str.upper().str.strip()
-            obx_like = [v for v in values if v.endswith('.OL') or v.endswith('-OL') or v.endswith(' OL')]
+            obx_like = [v for v in values if v.endswith(".OL") or v.endswith("-OL")]
             if len(obx_like) >= 10:
-                symbols = [_to_yahoo_symbol(v.replace(' ', '').replace('-', ''), ".OL") for v in obx_like]
+                symbols = [_to_yahoo_symbol(v.replace("-", ""), ".OL") for v in obx_like]
+                logger.info("OBX: loaded %d tickers from %s (column scan)", len(symbols), source)
                 return symbols
-    logger.warning("OBX table(s) found but no valid symbol column detected. Using fallback universe.")
+    return None
+
+
+def _load_euronext_obx() -> list[str]:
+    # Primary: Wikipedia static HTML table — same approach used for S&P 500.
+    # Tickers are bare Oslo symbols (e.g. "EQNR"); _to_yahoo_symbol appends ".OL".
+    wiki_html = _fetch_html(_SOURCE_URLS["OBX"])
+    if wiki_html:
+        try:
+            result = _parse_obx_tables(pd.read_html(StringIO(wiki_html)), "Wikipedia")
+            if result:
+                return result
+        except Exception as exc:
+            logger.debug("Wikipedia OBX parse failed: %s", exc)
+
+    # Secondary: Euronext popout widget — static HTML (not JS-rendered), contains MNEMO column.
+    popout_html = _fetch_html(
+        "https://live.euronext.com/en/popout-page/getIndexComposition/NO0000000021-XOSL"
+    )
+    if popout_html:
+        try:
+            result = _parse_obx_tables(pd.read_html(StringIO(popout_html)), "Euronext popout")
+            if result:
+                return result
+        except Exception as exc:
+            logger.debug("Euronext popout OBX parse failed: %s", exc)
+
+    logger.info("OBX live sources unavailable — using hardcoded fallback universe.")
     return _FALLBACK_UNIVERSE["OBX"][:]
 
 
