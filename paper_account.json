@@ -3,38 +3,22 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "INTC": 23.37638256,
-    "LRCX": 7.75730171,
-    "GLW": 12.22755757,
-    "STX": 3.96139506,
-    "AMD": 8.77198589,
-    "TER": 6.46158616
+    "INTC": 22.98535649,
+    "TER": 6.47575846,
+    "AMD": 8.67427438,
+    "STX": 4.0696972,
+    "GLW": 12.56679452,
+    "LRCX": 7.97486249
   },
-  "pending_order": {
-    "submitted_date": "2026-04-15",
-    "positions": [
-      {
-        "ticker": "AMD",
-        "weight": 0.25
-      },
-      {
-        "ticker": "STX",
-        "weight": 0.15
-      },
-      {
-        "ticker": "LRCX",
-        "weight": 0.15
-      },
-      {
-        "ticker": "COHR",
-        "weight": 0.2
-      },
-      {
-        "ticker": "CVNA",
-        "weight": 0.2
-      }
-    ]
+  "verified_weights": {
+    "INTC": 0.12,
+    "TER": 0.19,
+    "AMD": 0.18,
+    "STX": 0.17,
+    "GLW": 0.17,
+    "LRCX": 0.17
   },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -113,16 +97,26 @@
         ]
       },
       "executed_pending": false
+    },
+    {
+      "date": "2026-04-16",
+      "equity": 10537.0,
+      "cash": 0.0,
+      "daily_return": -0.000848,
+      "return_since_start": 0.0537,
+      "turnover": 0.0,
+      "positions": {
+        "INTC": 22.98535649,
+        "TER": 6.47575846,
+        "AMD": 8.67427438,
+        "STX": 4.0696972,
+        "GLW": 12.56679452,
+        "LRCX": 7.97486249
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-04-15",
-  "last_equity": 10545.9443144,
-  "verified_weights": {
-    "INTC": 0.12,
-    "LRCX": 0.17,
-    "GLW": 0.17,
-    "STX": 0.17,
-    "AMD": 0.18,
-    "TER": 0.19
-  }
+  "last_rebalanced_date": "2026-04-16",
+  "last_equity": 10537.0
 }
