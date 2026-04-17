@@ -332,11 +332,20 @@ class AlphaSharkOrchestrator:
 
         def _fetch_trends():
             try:
+                requested_trends_count = len(all_candidate_tickers[:15])
                 trends = fetch_search_interest(all_candidate_tickers)
                 if trends:
-                    crowded = [t["ticker"] for t in trends if t["signal"] == "crowded"]
-                    radar   = [t["ticker"] for t in trends if t["signal"] == "radar"]
-                    logger.info("Trends: crowded=%s, under-radar=%s", crowded or "none", radar or "none")
+                    crowded = [f"{t['ticker']}({int(t['avg_interest'])})" for t in trends if t["signal"] == "crowded"]
+                    radar   = [f"{t['ticker']}({int(t['avg_interest'])})" for t in trends if t["signal"] == "radar"]
+                    neutral_count = sum(1 for t in trends if t["signal"] == "neutral")
+                    logger.info(
+                        "Trends: crowded=%s, under-radar=%s, neutral=%d of %d requested tickers (returned=%d)",
+                        crowded or "none",
+                        radar or "none",
+                        neutral_count,
+                        requested_trends_count,
+                        len(trends),
+                    )
                 else:
                     logger.info("Trends: no data (throttled or failed)")
                 return "trends_context", format_trends_context(trends)
