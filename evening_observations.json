@@ -1,46 +1,46 @@
 {
-  "date": "2026-04-16",
-  "timestamp": "2026-04-16T21:09:27+00:00",
-  "portfolio_return": 0.020212379857654863,
-  "benchmark_return": 0.0026099558353673835,
-  "alpha": 0.01760242402228748,
+  "date": "2026-04-17",
+  "timestamp": "2026-04-17T21:09:29+00:00",
+  "portfolio_return": 0.015273175314842263,
+  "benchmark_return": 0.012040463669150903,
+  "alpha": 0.0032327116456913607,
   "position_returns": [
     {
-      "ticker": "AMD",
-      "weight": 0.18,
-      "return": 0.07802578269573357,
-      "price": 278.260009765625
-    },
-    {
-      "ticker": "INTC",
-      "weight": 0.12,
-      "return": 0.05481979403690107,
-      "price": 68.5
+      "ticker": "TER",
+      "weight": 0.19,
+      "return": 0.03951680947873015,
+      "price": 380.3800048828125
     },
     {
       "ticker": "STX",
       "weight": 0.17,
-      "return": 0.023498888657351058,
-      "price": 531.8099975585938
-    },
-    {
-      "ticker": "TER",
-      "weight": 0.19,
-      "return": 0.002630485519326875,
-      "price": 365.9200134277344
-    },
-    {
-      "ticker": "GLW",
-      "weight": 0.17,
-      "return": -0.013014811825048933,
-      "price": 166.0800018310547
+      "return": 0.02997311542577763,
+      "price": 547.75
     },
     {
       "ticker": "LRCX",
       "weight": 0.17,
-      "return": -0.015839538953933974,
-      "price": 260.9599914550781
+      "return": 0.025444569535022055,
+      "price": 267.6000061035156
+    },
+    {
+      "ticker": "AMD",
+      "weight": 0.18,
+      "return": 0.0004672064912309981,
+      "price": 278.3900146484375
+    },
+    {
+      "ticker": "INTC",
+      "weight": 0.12,
+      "return": 0.0,
+      "price": 68.5
+    },
+    {
+      "ticker": "GLW",
+      "weight": 0.17,
+      "return": -0.010236012340435252,
+      "price": 164.3800048828125
     }
   ],
-  "ai_recommendation": "Update the portfolio: keep AMD and INTC (they\u2019re driving the outperformance), keep STX as a smaller stabilizer, and drop/trim GLW and LRCX (both negative today) to free risk for higher-conviction momentum. Since the leaderboard snapshot is Monday 09:00 EET and you\u2019re clearly ahead of benchmark, tilt toward higher-upside names (add back into AMD/INTC or similar momentum) rather than adding more low/negative-return exposure."
+  "ai_recommendation": "Update the portfolio: keep TER, STX, and LRCX (they\u2019re outperforming and driving your +0.32% alpha), and drop GLW (it\u2019s the only laggard at -1.0%). For tomorrow, reallocate the freed weight into higher-conviction momentum names (lean further into TER/STX) since the leaderboard snapshot is Monday 09:00 EET and you want to climb rather than protect."
 }
