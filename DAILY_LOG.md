@@ -275,3 +275,37 @@ Winners: INTC +1.5%, AMD +0.9% | Losers: LRCX -3.0%, GLW -2.9%, STX -2.9%
 
 ---
 
+## 2026-04-17 23:50:04
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.3% · VIX: 17.5 · S&P 500 20d: +7.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.9% · Benchmark +1.2% · Alpha +0.7%
+Winners: TER +4.3%, STX +3.4%, LRCX +2.9% | Losers: GLW -0.7%
+
+**Paper account:** Equity €10,946.75 (start €10,000) · Today +3.89% · Since start +9.47% · Turnover 33.5% · Cash €4,926.04
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** Consensus was strongest in ON, with STX and ALB also independently validated across proposals, so they anchor the portfolio at the highest conviction levels. I excluded slower current holdings like GLW, TER, and LRCX because their 5d momentum/volume confirmation is weaker and they fail the slot-cost test versus faster alternatives such as AMD, INTC, and ORCL. This remains intentionally US- and tech-heavy because that is where the strongest signals cluster, and in this bull regime I accept a likely above-target beta rather than dilute the book with weaker rotation-risk names.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **ON** | 20.0% | Triple-consensus pick across all three proposals with the strongest active breakout profile today: exceptional 5d momentum, vol_ratio 1.92, and clear bull-regime fit despite crowding/overbought risk. |
+| 2 | **STX** | 15.0% | Double-consensus pick and current winner that still earns its slot on strong 5d momentum and recent alpha contribution, though vol_ratio 0.88 keeps conviction at the consensus floor rather than higher. |
+| 3 | **ALB** | 20.0% | Double-consensus pick with powerful volume-confirmed momentum (vol_ratio 2.00, mom_5d +13.2%) and a differentiated catalyst profile, but materials rotation risk caps conviction at the floor. |
+| 4 | **AMD** | 16.0% | Best unique momentum pick from the strategist with elite trend strength and strong 5d acceleration (+13.0%); kept as an aggressive high-beta tech leader even without consensus. |
+| 5 | **INTC** | 12.0% | Strong unique continuation candidate with positive volume support, very strong 5d momentum (+9.2%), and low retail crowding, making it a better slot than slower current holdings. |
+| 6 | **ORCL** | 17.0% | Unique catalyst standout from Proposal B with the fastest 5d move in the set (+26.1%) and strong volume confirmation (1.62), earning the sixth slot as a genuine acceleration play rather than filler. |
+
+**Changes from yesterday:**
+- ➕ Added **ON** at 20.0%
+- ➕ Added **ALB** at 20.0%
+- ➕ Added **ORCL** at 17.0%
+- ➖ Removed **TER** (was 19.0%)
+- ➖ Removed **GLW** (was 17.0%)
+- ➖ Removed **LRCX** (was 17.0%)
+- ▼ **STX**: 17.0% → 15.0% (-2.0%)
+
+---
