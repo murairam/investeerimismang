@@ -1146,7 +1146,14 @@ class DataFetcher:
             resolved_aliases = auto_resolve_aliases(missing_game_tickers, market_map, use_eodhd=False)
             if resolved_aliases:
                 for game_ticker, yahoo_ticker in resolved_aliases.items():
+                    previous_yahoo_ticker = game_to_yahoo.get(game_ticker, game_ticker)
                     game_to_yahoo[game_ticker] = yahoo_ticker
+                    if previous_yahoo_ticker != yahoo_ticker:
+                        yahoo_to_game.pop(previous_yahoo_ticker, None)
+                        close  = close.drop(columns=[previous_yahoo_ticker], errors="ignore")
+                        volume = volume.drop(columns=[previous_yahoo_ticker], errors="ignore")
+                        high   = high.drop(columns=[previous_yahoo_ticker], errors="ignore")
+                        low    = low.drop(columns=[previous_yahoo_ticker], errors="ignore")
                     yahoo_to_game[yahoo_ticker] = game_ticker
                 missing = [game_to_yahoo.get(game_ticker, game_ticker) for game_ticker in missing_game_tickers]
                 logger.info(
