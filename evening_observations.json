@@ -1,46 +1,40 @@
 {
-  "date": "2026-04-17",
-  "timestamp": "2026-04-17T21:09:29+00:00",
-  "portfolio_return": 0.015273175314842263,
-  "benchmark_return": 0.012040463669150903,
-  "alpha": 0.0032327116456913607,
+  "date": "2026-04-20",
+  "timestamp": "2026-04-20T21:09:49+00:00",
+  "portfolio_return": -0.007211938260402232,
+  "benchmark_return": -0.002374372617670484,
+  "alpha": -0.004837565642731748,
   "position_returns": [
     {
-      "ticker": "TER",
-      "weight": 0.19,
-      "return": 0.03951680947873015,
-      "price": 380.3800048828125
-    },
-    {
-      "ticker": "STX",
-      "weight": 0.17,
-      "return": 0.02997311542577763,
-      "price": 547.75
-    },
-    {
-      "ticker": "LRCX",
-      "weight": 0.17,
-      "return": 0.025444569535022055,
-      "price": 267.6000061035156
+      "ticker": "ON",
+      "weight": 0.24,
+      "return": 0.03071913452283015,
+      "price": 85.55999755859375
     },
     {
       "ticker": "AMD",
-      "weight": 0.18,
-      "return": 0.0004672064912309981,
-      "price": 278.3900146484375
+      "weight": 0.22,
+      "return": -0.012356773807962962,
+      "price": 274.95001220703125
+    },
+    {
+      "ticker": "STX",
+      "weight": 0.15,
+      "return": -0.01460520310360569,
+      "price": 539.75
+    },
+    {
+      "ticker": "ALB",
+      "weight": 0.24,
+      "return": -0.014766109577473152,
+      "price": 194.8300018310547
     },
     {
       "ticker": "INTC",
-      "weight": 0.12,
-      "return": 0.0,
-      "price": 68.5
-    },
-    {
-      "ticker": "GLW",
-      "weight": 0.17,
-      "return": -0.010236012340435252,
-      "price": 164.3800048828125
+      "weight": 0.15,
+      "return": -0.04087595695996804,
+      "price": 65.69999694824219
     }
   ],
-  "ai_recommendation": "Update the portfolio: keep TER, STX, and LRCX (they\u2019re outperforming and driving your +0.32% alpha), and drop GLW (it\u2019s the only laggard at -1.0%). For tomorrow, reallocate the freed weight into higher-conviction momentum names (lean further into TER/STX) since the leaderboard snapshot is Monday 09:00 EET and you want to climb rather than protect."
+  "ai_recommendation": "Yes\u2014update: keep ON (it\u2019s the only strong winner at +3.1%) and consider dropping INTC (worst at -4.1%) while trimming one of the laggards (STX or ALB, both -1.5%) to reduce drag. Keep AMD for now since it\u2019s only slightly down (-1.2%) versus the others."
 }
