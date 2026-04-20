@@ -313,7 +313,7 @@ Winners: TER +4.3%, STX +3.4%, LRCX +2.9% | Losers: GLW -0.7%
 
 **Market:** BULL regime · SPX vs 50d SMA: +5.3% · VIX: 17.5 · S&P 500 20d: +7.9%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 09:54:36.
 
 **Yesterday's P&L:** Portfolio +1.8% · Benchmark +1.2% · Alpha +0.6%
 Winners: TER +4.2%, STX +3.2%, LRCX +2.8% | Losers: GLW -0.8%
