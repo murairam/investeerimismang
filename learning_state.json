@@ -1,6 +1,6 @@
 {
-  "generated_from_days": 27,
-  "position_observations": 119,
+  "generated_from_days": 28,
+  "position_observations": 124,
   "minimums": {
     "strong_daily_observations": 7,
     "strong_ticker_observations": 8,
@@ -21,9 +21,9 @@
     },
     {
       "ticker": "STX",
-      "observations": 18,
-      "avg_return_1d": 0.012893,
-      "hit_rate": 0.7778
+      "observations": 20,
+      "avg_return_1d": 0.014836,
+      "hit_rate": 0.8
     },
     {
       "ticker": "APA",
@@ -87,7 +87,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.575909,
+    "avg_turnover_estimate": 0.574783,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -95,17 +95,17 @@
     {
       "tag": "momentum",
       "instruction": "Prefer momentum setups when other signals are comparable.",
-      "observations": 104
+      "observations": 109
     },
     {
       "tag": "high_sharpe",
       "instruction": "Prefer high_sharpe setups when other signals are comparable.",
-      "observations": 85
+      "observations": 89
     },
     {
       "tag": "breakout",
       "instruction": "Prefer breakout setups when other signals are comparable.",
-      "observations": 16
+      "observations": 18
     },
     {
       "tag": "consensus",
@@ -115,7 +115,7 @@
     {
       "tag": "overbought",
       "instruction": "Prefer overbought setups when other signals are comparable.",
-      "observations": 46
+      "observations": 50
     }
   ],
   "early_warning_notes": [
@@ -123,19 +123,19 @@
   ],
   "rationale_stats": {
     "momentum": {
-      "observations": 104,
-      "avg_return_1d": 0.001763,
-      "hit_rate": 0.4904
+      "observations": 109,
+      "avg_return_1d": 0.001662,
+      "hit_rate": 0.5046
     },
     "high_sharpe": {
-      "observations": 85,
-      "avg_return_1d": 0.000971,
-      "hit_rate": 0.4588
+      "observations": 89,
+      "avg_return_1d": 0.001808,
+      "hit_rate": 0.4831
     },
     "breakout": {
-      "observations": 16,
-      "avg_return_1d": 0.008572,
-      "hit_rate": 0.5625
+      "observations": 18,
+      "avg_return_1d": 0.005418,
+      "hit_rate": 0.5556
     },
     "consensus": {
       "observations": 84,
@@ -143,9 +143,9 @@
       "hit_rate": 0.4762
     },
     "catalyst": {
-      "observations": 18,
-      "avg_return_1d": -0.000931,
-      "hit_rate": 0.3889
+      "observations": 19,
+      "avg_return_1d": -0.00512,
+      "hit_rate": 0.3684
     },
     "diversifier": {
       "observations": 5,
@@ -158,61 +158,65 @@
       "hit_rate": 0.2703
     },
     "overbought": {
-      "observations": 46,
-      "avg_return_1d": 0.002508,
-      "hit_rate": 0.5217
+      "observations": 50,
+      "avg_return_1d": 0.002208,
+      "hit_rate": 0.54
     },
     "at_52w_high": {
-      "observations": 75,
-      "avg_return_1d": 0.004392,
-      "hit_rate": 0.56
+      "observations": 79,
+      "avg_return_1d": 0.005162,
+      "hit_rate": 0.5823
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.000654,
-    "tier2_avg_return_1d": 0.003237,
+    "tier1_avg_return_1d": 0.000698,
+    "tier2_avg_return_1d": 0.002957,
     "tier3_avg_return_1d": -0.007042,
-    "tier1_observations": 48,
-    "tier2_observations": 60,
+    "tier1_observations": 49,
+    "tier2_observations": 64,
     "tier3_observations": 11
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
     "status": "actionable",
-    "observations": 44,
-    "high_risk_avg_return_1d": 0.006666,
-    "low_risk_avg_return_1d": -0.001936,
-    "high_risk_negative_rate": 0.2727,
-    "accuracy": 0.2727,
+    "observations": 47,
+    "high_risk_avg_return_1d": 0.007849,
+    "low_risk_avg_return_1d": -0.002895,
+    "high_risk_negative_rate": 0.2553,
+    "accuracy": 0.2553,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
-        "ticker": "CVNA",
-        "flag_count": 2
-      },
-      {
         "ticker": "ON",
-        "flag_count": 2
+        "flag_count": 3
       },
       {
         "ticker": "STX",
-        "flag_count": 2
+        "flag_count": 3
       },
       {
         "ticker": "INTC",
+        "flag_count": 3
+      },
+      {
+        "ticker": "AMD",
+        "flag_count": 2
+      },
+      {
+        "ticker": "CVNA",
         "flag_count": 2
       }
     ]
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.4954,
-      "mom_5d": 0.4954,
-      "sharpe_20d": 0.4954,
-      "rsi_14": 0.4907,
-      "vs_index": 0.4954,
-      "vol_ratio": 0.5647,
-      "beta": 0.4771
+      "momentum": 0.5088,
+      "mom_5d": 0.5088,
+      "sharpe_20d": 0.5088,
+      "rsi_14": 0.5,
+      "vs_index": 0.5088,
+      "vol_ratio": 0.5778,
+      "beta": 0.4912
     },
     "per_regime": {
       "NEUTRAL": {
@@ -256,98 +260,84 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-04-17",
-    "portfolio_return_1d": 0.0188,
+    "date": "2026-04-18",
+    "portfolio_return_1d": 0.0176,
     "benchmark_return_1d": 0.012,
-    "alpha_1d": 0.0068,
+    "alpha_1d": 0.0056,
     "winners": [
       {
         "ticker": "ON",
-        "return_1d": 0.0421,
-        "vs_benchmark": 0.03,
+        "return_1d": 0.0409,
+        "vs_benchmark": 0.0288,
         "tags": [
           "momentum",
           "high_sharpe",
           "breakout",
-          "consensus",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Triple-consensus pick across all three proposals with the strongest active breakout profile today: e",
+        "rationale_snippet": "Best upgrade candidate from Proposal A: elite acceleration (+20.3% 5d) and standout breakout volume ",
         "rsi_at_entry": 99.963456,
-        "vol_ratio_at_entry": 1.920922
+        "vol_ratio_at_entry": 1.954758
       },
       {
         "ticker": "STX",
-        "return_1d": 0.0335,
-        "vs_benchmark": 0.0215,
+        "return_1d": 0.0323,
+        "vs_benchmark": 0.0203,
         "tags": [
           "momentum",
           "high_sharpe",
-          "consensus",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick and current winner that still earns its slot on strong 5d momentum and recent ",
+        "rationale_snippet": "Keep from current holdings because it still has positive 5d momentum (+8.2%) and low crowding, but c",
         "rsi_at_entry": 93.502337,
-        "vol_ratio_at_entry": 0.878022
+        "vol_ratio_at_entry": 0.878696
       },
       {
         "ticker": "AMD",
-        "return_1d": 0.004,
-        "vs_benchmark": -0.008,
+        "return_1d": 0.0028,
+        "vs_benchmark": -0.0092,
         "tags": [
           "momentum",
           "high_sharpe",
-          "consensus",
           "at_52w_high"
         ],
-        "rationale_snippet": "Best unique momentum pick from the strategist with elite trend strength and strong 5d acceleration (",
+        "rationale_snippet": "Keep from current holdings as a core bull-regime leader: +13.0% 5d momentum in the strongest sector ",
         "rsi_at_entry": null,
-        "vol_ratio_at_entry": 0.988897
+        "vol_ratio_at_entry": 0.98965
       },
       {
         "ticker": "INTC",
-        "return_1d": 0.0035,
-        "vs_benchmark": -0.0085,
+        "return_1d": 0.0024,
+        "vs_benchmark": -0.0097,
         "tags": [
           "momentum",
           "high_sharpe",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Strong unique continuation candidate with positive volume support, very strong 5d momentum (+9.2%), ",
+        "rationale_snippet": "Keep from current holdings: still validates its slot with very strong 5d momentum (+9.2%), positive ",
         "rsi_at_entry": 95.440935,
-        "vol_ratio_at_entry": 1.08526
+        "vol_ratio_at_entry": 1.093721
       }
     ],
     "losers": [
       {
         "ticker": "ALB",
-        "return_1d": -0.0793,
-        "vs_benchmark": -0.0914,
+        "return_1d": -0.0805,
+        "vs_benchmark": -0.0926,
         "tags": [
           "momentum",
-          "consensus",
-          "catalyst"
+          "breakout",
+          "catalyst",
+          "overbought"
         ],
-        "rationale_snippet": "Double-consensus pick with powerful volume-confirmed momentum (vol_ratio 2.00, mom_5d +13.2%) and a ",
+        "rationale_snippet": "Best non-tech catalyst pick from Proposal B: strong breakout quality with vol_ratio 2.01, healthy RS",
         "rsi_at_entry": 61.61068,
-        "vol_ratio_at_entry": 2.004258
-      },
-      {
-        "ticker": "ORCL",
-        "return_1d": -0.0149,
-        "vs_benchmark": -0.0269,
-        "tags": [
-          "momentum",
-          "catalyst"
-        ],
-        "rationale_snippet": "Unique catalyst standout from Proposal B with the fastest 5d move in the set (+26.1%) and strong vol",
-        "rsi_at_entry": 78.684161,
-        "vol_ratio_at_entry": 1.615886
+        "vol_ratio_at_entry": 2.011468
       }
     ],
-    "lesson": "'catalyst' entries underperformed \u2014 review sizing for this thesis today; 'momentum' entries outperformed \u2014 continue favouring this setup"
+    "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'high_sharpe' entries outperformed \u2014 continue favouring this setup"
   }
 }

@@ -3,27 +3,27 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "INTC": 22.98535649,
-    "TER": 6.47575846,
-    "AMD": 8.67427438,
-    "STX": 4.0696972,
-    "GLW": 12.56679452,
-    "LRCX": 7.97486249
+    "ON": 31.02138055,
+    "STX": 3.52590351,
+    "ALB": 13.02192094,
+    "AMD": 7.39993457,
+    "INTC": 22.55548788,
+    "ORCL": 12.5032684
   },
   "pending_order": {
-    "submitted_date": "2026-04-18",
+    "submitted_date": "2026-04-20",
     "positions": [
       {
-        "ticker": "INTC",
-        "weight": 0.15
+        "ticker": "ON",
+        "weight": 0.24
       },
       {
         "ticker": "AMD",
-        "weight": 0.21
+        "weight": 0.22
       },
       {
-        "ticker": "ON",
-        "weight": 0.17
+        "ticker": "INTC",
+        "weight": 0.15
       },
       {
         "ticker": "STX",
@@ -31,11 +31,7 @@
       },
       {
         "ticker": "ALB",
-        "weight": 0.17
-      },
-      {
-        "ticker": "CVNA",
-        "weight": 0.15
+        "weight": 0.24
       }
     ]
   },
@@ -137,11 +133,11 @@
       "source": "verified"
     },
     {
-      "date": "2026-04-18",
-      "equity": 10946.75,
+      "date": "2026-04-15",
+      "equity": 10537.0,
       "cash": 0.0,
-      "daily_return": 0.038887,
-      "return_since_start": 0.094675,
+      "daily_return": 0.0,
+      "return_since_start": 0.0537,
       "turnover": 0.0,
       "positions": {
         "INTC": 22.98535649,
@@ -152,19 +148,55 @@
         "LRCX": 7.97486249
       },
       "pending_order": {
-        "submitted_date": "2026-04-18",
+        "submitted_date": "2026-04-15",
         "positions": [
+          {
+            "ticker": "AVGO",
+            "weight": 0.08
+          },
+          {
+            "ticker": "HOOD",
+            "weight": 0.23
+          },
           {
             "ticker": "INTC",
             "weight": 0.15
           },
           {
             "ticker": "AMD",
-            "weight": 0.21
+            "weight": 0.14
           },
           {
+            "ticker": "ORCL",
+            "weight": 0.18
+          },
+          {
+            "ticker": "CVNA",
+            "weight": 0.22
+          }
+        ]
+      },
+      "executed_pending": false
+    },
+    {
+      "date": "2026-04-17",
+      "equity": 10946.75,
+      "cash": 4926.04,
+      "daily_return": 0.038887,
+      "return_since_start": 0.094675,
+      "turnover": 0.335235,
+      "positions": {
+        "AVGO": 2.53486627,
+        "INTC": 28.20778897,
+        "AMD": 6.4780268,
+        "ORCL": 13.24506047
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-17",
+        "positions": [
+          {
             "ticker": "ON",
-            "weight": 0.17
+            "weight": 0.2
           },
           {
             "ticker": "STX",
@@ -172,19 +204,69 @@
           },
           {
             "ticker": "ALB",
-            "weight": 0.17
+            "weight": 0.2
           },
           {
-            "ticker": "CVNA",
-            "weight": 0.15
+            "ticker": "AMD",
+            "weight": 0.16
+          },
+          {
+            "ticker": "INTC",
+            "weight": 0.12
+          },
+          {
+            "ticker": "ORCL",
+            "weight": 0.17
           }
         ]
       },
-      "executed_pending": false
+      "executed_pending": true
+    },
+    {
+      "date": "2026-04-20",
+      "equity": 10953.12,
+      "cash": 0.0,
+      "daily_return": 0.000582,
+      "return_since_start": 0.095312,
+      "turnover": 0.61009,
+      "positions": {
+        "ON": 31.02138055,
+        "STX": 3.52590351,
+        "ALB": 13.02192094,
+        "AMD": 7.39993457,
+        "INTC": 22.55548788,
+        "ORCL": 12.5032684
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-20",
+        "positions": [
+          {
+            "ticker": "ON",
+            "weight": 0.24
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.22
+          },
+          {
+            "ticker": "INTC",
+            "weight": 0.15
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.15
+          },
+          {
+            "ticker": "ALB",
+            "weight": 0.24
+          }
+        ]
+      },
+      "executed_pending": true
     }
   ],
-  "last_rebalanced_date": "2026-04-18",
-  "last_equity": 10946.74710696,
+  "last_rebalanced_date": "2026-04-20",
+  "last_equity": 10953.12347704,
   "verified_weights": {
     "INTC": 0.12,
     "TER": 0.19,

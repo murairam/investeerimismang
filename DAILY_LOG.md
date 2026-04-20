@@ -237,38 +237,110 @@ Winners: INTC +3.7%, GLW +1.5%, STX +1.2% | Losers: TER -0.2%, AMD -0.1%
 - ▼ **TER**: 19.0% → 12.0% (-7.0%)
 
 ---
-## 2026-04-15 09:33:25
+## 2026-04-15 22:44:02
 
-**Market:** BULL regime · SPX vs 50d SMA: +3.1% · VIX: 18.1 · S&P 500 20d: +4.0%
+**Market:** BULL regime · SPX vs 50d SMA: +3.9% · VIX: 18.2 · S&P 500 20d: +4.6%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio -0.2% · Benchmark +1.2% · Alpha -1.4%
-Losers: INTC -0.2%, LRCX -0.2%, GLW -0.2%
+**Yesterday's P&L:** Portfolio -1.2% · Benchmark +0.8% · Alpha -2.0%
+Winners: INTC +1.5%, AMD +0.9% | Losers: LRCX -3.0%, GLW -2.9%, STX -2.9%
 
-**Paper account:** Equity €10,545.94 (start €10,000) · Today +0.09% · Since start +5.46% · Turnover 0.0% · Cash €0.00
+**Paper account:** Equity €10,537.00 (start €10,000) · Today +0.00% · Since start +5.37% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 85% · **Positions:** 5 · **Total weight:** 95.0%
+**Confidence:** 87% · **Positions:** 6 · **Total weight:** 100.0%
 
-**Thesis:** The core synthesis starts with the strongest consensus: AMD and STX are triple-consensus and therefore highest conviction, while LRCX is retained as a validated winner from both proposal logic and recent live-performance learning. I excluded weak/slow current holdings (GLW, TER, and INTC) and skipped low-beta Baltic names and low-volume Nokia because they fail the slot-cost test for a win-only competition; COHR and CVNA are the best unique accelerators to keep the portfolio aggressive. Portfolio beta should remain firmly in the bull-regime target zone and likely above neutral soft targets, which is appropriate given the competition mandate and rotation into active leaders.
+**Thesis:** Consensus drove the core: AVGO is the clear anchor as triple-consensus, while HOOD, INTC, and AMD are independently validated double-consensus names and therefore receive elevated conviction. I excluded current laggards STX, GLW, LRCX, and TER because they failed the rotation mandate, then filled the final slots with ORCL and CVNA as the best unique high-acceleration names; portfolio should remain aggressive and high-beta, consistent with the BULL competition mandate while avoiding weak-volume fillers.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **AMD** | 25.0% | Triple-consensus pick across all three proposals and still one of the strongest active leaders with +9.1% 5d momentum, very high beta, and clear fit for an aggressive bull-regime competition portfolio. |
-| 2 | **STX** | 15.0% | Triple-consensus pick with recent verified outperformance in the live portfolio, +6.6% 5d momentum, and strong continuation evidence; despite overbought RSI, ensemble agreement and acceleration justify max conviction. |
-| 3 | **LRCX** | 15.0% | Double validation from current holdings/learning context and Proposal B, with strong recent performance, +9.6% 5d momentum, and clear semiconductor leadership; earns a consensus-floor high conviction. |
-| 4 | **COHR** | 20.0% | Best unique high-beta momentum add from Proposal C with elite +10.3% 5d momentum and strong upside torque; included because every slot must favor faster movers over legacy laggards. |
-| 5 | **CVNA** | 20.0% | Unique but compelling right-tail competition pick from Proposal C with +9.6% 5d momentum and very high beta, offering differentiated upside versus crowded semi exposure. |
+| 1 | **AVGO** | 8.0% | Triple-consensus pick across all three proposals with strong 5d momentum, positive volume confirmation, and clear tech leadership; this is the highest-conviction validated breakout despite overbought conditions. |
+| 2 | **HOOD** | 23.0% | Double-consensus pick with the strongest catalyst profile in the set (vol_ratio 2.56, mom_5d +20.6%) and low retail crowding, making it an aggressive competition-grade momentum name. |
+| 3 | **INTC** | 15.0% | Double-consensus pick and one of the few current holdings that still earned its slot, with strong relative strength and positive recent contribution even though volume confirmation is slightly below ideal. |
+| 4 | **AMD** | 14.0% | Double-consensus pick with elite momentum and high beta suited for a competition portfolio; conviction is held at the consensus floor despite weaker vol_ratio because the trend strength remains exceptional. |
+| 5 | **ORCL** | 18.0% | Best unique catalyst pick from Proposal B with strong volume-backed acceleration (+17.6% 5d, vol_ratio 1.55) and a cleaner breakout profile than other single-model alternatives. |
+| 6 | **CVNA** | 22.0% | High-beta unique pick with strong 5d momentum and squeeze/catalyst potential, offering right-tail upside that fits the competition mandate better than slower alternatives like MS or weak-volume FCX. |
 
 **Changes from yesterday:**
-- ➕ Added **COHR** at 20.0%
-- ➕ Added **CVNA** at 20.0%
-- ➖ Removed **INTC** (was 12.0%)
-- ➖ Removed **GLW** (was 17.0%)
+- ➕ Added **AVGO** at 8.0%
+- ➕ Added **HOOD** at 23.0%
+- ➕ Added **ORCL** at 18.0%
+- ➕ Added **CVNA** at 22.0%
 - ➖ Removed **TER** (was 19.0%)
-- ▲ **AMD**: 18.0% → 25.0% (+7.0%)
+- ➖ Removed **STX** (was 17.0%)
+- ➖ Removed **GLW** (was 17.0%)
+- ➖ Removed **LRCX** (was 17.0%)
+- ▲ **INTC**: 12.0% → 15.0% (+3.0%)
+- ▼ **AMD**: 18.0% → 14.0% (-4.0%)
+
+---
+
+## 2026-04-17 23:50:04
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.3% · VIX: 17.5 · S&P 500 20d: +7.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.9% · Benchmark +1.2% · Alpha +0.7%
+Winners: TER +4.3%, STX +3.4%, LRCX +2.9% | Losers: GLW -0.7%
+
+**Paper account:** Equity €10,946.75 (start €10,000) · Today +3.89% · Since start +9.47% · Turnover 33.5% · Cash €4,926.04
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** Consensus was strongest in ON, with STX and ALB also independently validated across proposals, so they anchor the portfolio at the highest conviction levels. I excluded slower current holdings like GLW, TER, and LRCX because their 5d momentum/volume confirmation is weaker and they fail the slot-cost test versus faster alternatives such as AMD, INTC, and ORCL. This remains intentionally US- and tech-heavy because that is where the strongest signals cluster, and in this bull regime I accept a likely above-target beta rather than dilute the book with weaker rotation-risk names.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **ON** | 20.0% | Triple-consensus pick across all three proposals with the strongest active breakout profile today: exceptional 5d momentum, vol_ratio 1.92, and clear bull-regime fit despite crowding/overbought risk. |
+| 2 | **STX** | 15.0% | Double-consensus pick and current winner that still earns its slot on strong 5d momentum and recent alpha contribution, though vol_ratio 0.88 keeps conviction at the consensus floor rather than higher. |
+| 3 | **ALB** | 20.0% | Double-consensus pick with powerful volume-confirmed momentum (vol_ratio 2.00, mom_5d +13.2%) and a differentiated catalyst profile, but materials rotation risk caps conviction at the floor. |
+| 4 | **AMD** | 16.0% | Best unique momentum pick from the strategist with elite trend strength and strong 5d acceleration (+13.0%); kept as an aggressive high-beta tech leader even without consensus. |
+| 5 | **INTC** | 12.0% | Strong unique continuation candidate with positive volume support, very strong 5d momentum (+9.2%), and low retail crowding, making it a better slot than slower current holdings. |
+| 6 | **ORCL** | 17.0% | Unique catalyst standout from Proposal B with the fastest 5d move in the set (+26.1%) and strong volume confirmation (1.62), earning the sixth slot as a genuine acceleration play rather than filler. |
+
+**Changes from yesterday:**
+- ➕ Added **ON** at 20.0%
+- ➕ Added **ALB** at 20.0%
+- ➕ Added **ORCL** at 17.0%
+- ➖ Removed **TER** (was 19.0%)
+- ➖ Removed **GLW** (was 17.0%)
+- ➖ Removed **LRCX** (was 17.0%)
 - ▼ **STX**: 17.0% → 15.0% (-2.0%)
-- ▼ **LRCX**: 17.0% → 15.0% (-2.0%)
+
+---
+## 2026-04-20 06:26:31
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.3% · VIX: 17.5 · S&P 500 20d: +7.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.8% · Benchmark +1.2% · Alpha +0.6%
+Winners: TER +4.2%, STX +3.2%, LRCX +2.8% | Losers: GLW -0.8%
+
+**Paper account:** Equity €10,953.12 (start €10,000) · Today +0.06% · Since start +9.53% · Turnover 61.0% · Cash €0.00
+
+**Confidence:** 87% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** The core portfolio is built around the strongest ensemble agreement: ON, AMD, and INTC were triple-consensus names, while STX was double-consensus and retains enough momentum to stay. For the final slot, ALB beats other unique candidates because its breakout is backed by the best volume confirmation, whereas SMCI and COHR fail the low-volume quality test and FCX has materially weaker 5d acceleration. This also respects the rotation mandate by exiting TER, GLW, and LRCX as broken/decelerating holdings; portfolio beta should remain aggressive and near the bull-market target without adding low-quality filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **ON** | 24.0% | Triple-consensus pick and the clearest active breakout: strongest catalyst profile, exceptional 5d acceleration, and vol_ratio 1.95 confirms the move despite crowded/overbought conditions. |
+| 2 | **AMD** | 22.0% | Triple-consensus pick with elite high-beta upside and very strong 5d momentum (+12.9%); volume is only adequate rather than explosive, so it stays just below max conviction. |
+| 3 | **INTC** | 15.0% | Triple-consensus pick and current holding that still fully earns its slot with +9.1% 5d momentum, positive volume confirmation, and strong trend persistence in the leading Tech tape. |
+| 4 | **STX** | 15.0% | Double-consensus pick with solid 5d momentum (+8.2%) and very low retail crowding, but weaker vol_ratio (0.88) and overbought conditions keep conviction at the consensus floor. |
+| 5 | **ALB** | 24.0% | Best unique add versus alternatives: strong 5d momentum (+13.2%) with standout vol_ratio 2.01 gives it cleaner confirmation than SMCI/COHR, while adding a non-consensus breakout with right-tail potential. |
+
+**Changes from yesterday:**
+- ➕ Added **ON** at 24.0%
+- ➕ Added **ALB** at 24.0%
+- ➖ Removed **TER** (was 19.0%)
+- ➖ Removed **GLW** (was 17.0%)
+- ➖ Removed **LRCX** (was 17.0%)
+- ▲ **AMD**: 18.0% → 22.0% (+4.0%)
+- ▲ **INTC**: 12.0% → 15.0% (+3.0%)
+- ▼ **STX**: 17.0% → 15.0% (-2.0%)
 
 ---
 ## 2026-04-18 12:55:07
