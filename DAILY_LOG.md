@@ -271,3 +271,39 @@ Losers: INTC -0.2%, LRCX -0.2%, GLW -0.2%
 - ▼ **LRCX**: 17.0% → 15.0% (-2.0%)
 
 ---
+## 2026-04-18 12:55:07
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.3% · VIX: 17.5 · S&P 500 20d: +7.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.9% · Benchmark +1.2% · Alpha +0.7%
+Winners: TER +4.3%, STX +3.4%, LRCX +2.9% | Losers: GLW -0.7%
+
+**Paper account:** Equity €10,946.75 (start €10,000) · Today +3.89% · Since start +9.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** There were no formal cross-proposal consensus names, so the synthesis leans on the strongest current-holding validations plus the best unique upgrades: ON and CVNA from the momentum book, and ALB as the cleanest catalyst breakout from the challenger set. I would rotate out TER, GLW, and LRCX because the strategist explicitly flagged them as weaker with negative 5d momentum, while INTC/AMD/STX still meet the mandate of positive momentum and acceptable signal quality; portfolio remains concentrated and aggressive for a BULL regime without adding low-quality filler just to manage beta.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **INTC** | 15.0% | Keep from current holdings: still validates its slot with very strong 5d momentum (+9.2%), positive volume confirmation (1.09), low retail crowding, and it remains one of the clearest tech momentum leaders despite extreme RSI. |
+| 2 | **AMD** | 21.0% | Keep from current holdings as a core bull-regime leader: +13.0% 5d momentum in the strongest sector with acceptable volume (0.99) and strong competition fit for a concentrated high-beta portfolio. |
+| 3 | **ON** | 17.0% | Best upgrade candidate from Proposal A: elite acceleration (+20.3% 5d) and standout breakout volume (1.95) make it a worthy aggressive add, though crowded search interest and RSI 100 keep it just below top conviction. |
+| 4 | **STX** | 15.0% | Keep from current holdings because it still has positive 5d momentum (+8.2%) and low crowding, but conviction is capped at 8 since volume confirmation is weaker (0.88) and it no longer looks like a top-tier accelerator. |
+| 5 | **ALB** | 17.0% | Best non-tech catalyst pick from Proposal B: strong breakout quality with vol_ratio 2.01, healthy RSI 62, and +13.2% 5d momentum gives the portfolio a high-upside rotation name outside crowded semis. |
+| 6 | **CVNA** | 15.0% | Aggressive right-tail addition from Proposal A: +14.6% 5d momentum and 1.61 volume support a high-beta squeeze/recovery setup suitable for a competition portfolio, but volatility and distance from highs make it less stable than the top names. |
+
+**Changes from yesterday:**
+- ➕ Added **ON** at 17.0%
+- ➕ Added **ALB** at 17.0%
+- ➕ Added **CVNA** at 15.0%
+- ➖ Removed **TER** (was 19.0%)
+- ➖ Removed **GLW** (was 17.0%)
+- ➖ Removed **LRCX** (was 17.0%)
+- ▲ **INTC**: 12.0% → 15.0% (+3.0%)
+- ▲ **AMD**: 18.0% → 21.0% (+3.0%)
+- ▼ **STX**: 17.0% → 15.0% (-2.0%)
+
+---
