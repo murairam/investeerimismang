@@ -6,9 +6,9 @@ Days remaining: 0
 
 ## Scoreboard
 - Training days with measurable alpha: 27
-- Win days (alpha > 0): 12
-- Loss days (alpha < 0): 15
-- Average daily alpha: -0.35%
+- Win days (alpha > 0): 13
+- Loss days (alpha < 0): 14
+- Average daily alpha: -0.31%
 - Paper account equity: €10,581.79 (from €10,000.00, return +5.82%)
 - Max drawdown (paper): 3.33%
 - Average turnover: 4.19%
@@ -30,14 +30,14 @@ Days remaining: 0
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
+| INTC | winner | 8 | +1.54% | 100% |
 | XOM | winner | 8 | +1.50% | 75% |
-| STX | winner | 22 | +1.19% | 73% |
+| STX | winner | 22 | +1.32% | 73% |
 | APA | winner | 14 | +1.03% | 71% |
+| AMD | winner | 8 | +0.57% | 75% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
 | DOW | loser | 8 | -0.71% | 50% |
-| AMD | loser | 8 | -0.24% | 50% |
 | VWS.CO | loser | 12 | -0.20% | 33% |
-| INTC | loser | 8 | -0.03% | 75% |
 
 ## Action plan until April 6
 - RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% — hit rate 27% over 37 observations (threshold: 30%).

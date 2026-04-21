@@ -796,6 +796,68 @@ class AlphaSharkOrchestrator:
         # Any freed weight that cannot be redistributed stays as cash (game requires ≥75%).
         final_proposal = self.risk_manager._enforce_vix_stress_cap(final_proposal, snapshot)
 
+        # Step 5e: final 75% floor — sector/VIX caps run AFTER the earlier floor check and can
+        # drop total below the game minimum when freed weight can't be redistributed.
+        # Game rule always overrides soft sector cap — normalize back to 100%.
+        total_post_cap = sum(p.weight for p in final_proposal.positions)
+        _min_total = self.validator.c.get("min_total_weight", 0.75)
+        if total_post_cap < _min_total - 1e-9:
+            logger.warning(
+                "Portfolio at %.1f%% after sector/VIX caps — below %.0f%% game minimum; "
+                "game rule overrides soft sector cap, force-normalizing to 100%%",
+                total_post_cap * 100, _min_total * 100,
+            )
+            final_proposal = self.validator.normalize(final_proposal)
+
+        # Step 5f: learning-state ticker hard caps — must run LAST before rounding.
+        # Running earlier (before sector/VIX caps) causes those caps to redistribute freed
+        # weight back into the capped ticker, undoing the cap. Running here is the only
+        # position where it cannot be undone by any subsequent redistribution step.
+        _ls_caps = load_learning_state().get("weight_caps", [])
+        _ticker_hard_caps: dict[str, float] = {}
+        for _cap in _ls_caps:
+            if isinstance(_cap, dict) and _cap.get("scope") == "ticker":
+                _t = _cap.get("ticker")
+                _v = _cap.get("max_weight")
+                try:
+                    _v = float(_v)
+                except (TypeError, ValueError):
+                    continue
+                if isinstance(_t, str) and _v > 0:
+                    _ticker_hard_caps[_t] = _v
+        if _ticker_hard_caps:
+            _updated = list(final_proposal.positions)
+            _freed = 0.0
+            for _i, _pos in enumerate(_updated):
+                _hc = _ticker_hard_caps.get(_pos.ticker)
+                if _hc is not None and _pos.weight > _hc:
+                    logger.info(
+                        "Post-cap learning cap: %s %.0f%% → %.0f%% (recurring underperformer)",
+                        _pos.ticker, _pos.weight * 100, _hc * 100,
+                    )
+                    _freed += _pos.weight - _hc
+                    _updated[_i] = Position(ticker=_pos.ticker, weight=_hc,
+                                            rationale=_pos.rationale, conviction=_pos.conviction)
+            if _freed > 1e-9:
+                _max_w = self.validator.c["max_weight"]
+                _uncapped_idx = [_i for _i, _p in enumerate(_updated)
+                                  if _p.ticker not in _ticker_hard_caps and _max_w - _p.weight > 1e-9]
+                _headrooms = [_max_w - _updated[_i].weight for _i in _uncapped_idx]
+                _total_hr = sum(_headrooms)
+                if _total_hr > 1e-9:
+                    for _j, _i in enumerate(_uncapped_idx):
+                        _add = _freed * (_headrooms[_j] / _total_hr)
+                        _p = _updated[_i]
+                        _updated[_i] = Position(ticker=_p.ticker,
+                                                weight=min(_max_w, _p.weight + _add),
+                                                rationale=_p.rationale, conviction=_p.conviction)
+                final_proposal = PortfolioProposal(
+                    positions=_updated,
+                    reasoning=final_proposal.reasoning,
+                    confidence=final_proposal.confidence,
+                    learning_reflection=final_proposal.learning_reflection,
+                )
+
         # Round all weights to whole percentages (game UI has 1% precision).
         # Must be LAST — sector/VIX cap enforcement does proportional redistribution
         # that produces decimal weights; rounding before those steps creates fractions.

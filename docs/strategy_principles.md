@@ -1,6 +1,6 @@
 # AlphaShark — Permanent Strategy Principles
 
-**Last updated:** 2026-03-24
+**Last updated:** 2026-04-21
 **Status:** Active (overrides any conservative defaults in auto-generated files)
 
 This file is NOT auto-generated. It survives daily pipeline runs and is injected into every
@@ -16,9 +16,11 @@ not to preserve capital.
 
 - **Prioritize:** high-beta breakouts, sector momentum leaders, pre-earnings catalysts
 - **Concentrate:** 5–8 positions maximum. Diversification is for managing money, not winning competitions.
-- **Current regime (2026):** Energy rotation year. Brent ~$103, energy +25% YTD. Tech in correction.
-  Favour XOM, CVX, EQNR.OL, KONG.OL, LLY, DSV.CO.
-- **Avoid:** low-beta telecom, Nordic banks as filler, shipping with SELL consensus (Mærsk)
+- **Current regime (April 2026):** BULL tape but with widespread deceleration. SPX +5% above 50d SMA.
+  Tech/semis had a big 20d run (+16%) but are now overbought and decelerating — rotation risk HIGH.
+  Energy in correction (Brent $90, -19% 20d) — no energy thesis. Follow the momentum signals, not a thesis.
+  Validated winners from live game: XOM, STX, APA. Recurring losers to avoid: AMD, EQNR.OL, DOW, VWS.CO.
+- **Avoid:** low-beta telecom, Nordic banks as filler, shipping with SELL consensus (Mærsk), energy names in downtrend
 
 ---
 
@@ -30,8 +32,8 @@ This guarantees underperformance in a short-term competition. With 844 participa
 portfolio finishes 422nd. Conservative = losing by design.
 
 **Fix in effect:** Prioritize high-beta momentum, extreme concentration (5-8 names), and sector
-rotation leaders. In the 2026 Energy rotation regime, that means XOM/EQNR at 20%+ each.
-Never fill remaining weight with boring Nordic banks or telecom.
+rotation leaders. The alpha source changes with regime — energy worked in pregame, but follow
+live signal data, not a cached thesis. Never fill remaining weight with boring Nordic banks or telecom.
 
 **Rule:** If any position has beta < 0.5 AND is not a deliberate hedge, replace it with a
 higher-momentum candidate.
@@ -47,9 +49,10 @@ higher-momentum candidate.
 - **Implementation:** `agents/risk_manager.py` rules 18 & 19
 
 ### Sector Concentration Policy
-- **Rule:** No sector caps are enforced in code. If alpha clusters in one sector, concentration is allowed up to game position limits.
-- **Rationale:** The game has no sector concentration rule; artificial caps can dilute winning momentum clusters.
-- **Implementation:** Sector concentration remains unconstrained in `agents/risk_manager.py`.
+- **Rule:** The game has no sector caps, but the pipeline enforces soft rotation-risk caps when a sector shows HIGH exhaustion signals (RSI overbought + deceleration). These are competition guardrails, not game rules.
+- **BULL regime cap:** HIGH rotation-risk sector capped at 40%; MEDIUM at 55%; unconditional ceiling 70%.
+- **Rationale:** Prevents over-concentrating in exhausted sectors. When cap frees weight that can't be redistributed, the game's 75% minimum always wins — the pipeline force-normalizes.
+- **Implementation:** `agents/risk_manager.py::_enforce_sector_rotation_cap()` + orchestrator step 5c.
 
 ### Beta — Informational Only in BEAR
 - **Rule:** In BULL/NEUTRAL, beta target is 1.6–2.0 (BULL) or 0.95–1.30 (NEUTRAL) as a soft guide.
@@ -143,17 +146,22 @@ by preventing energy concentration during the 2026 Energy rotation year.
 | Smaller position / lower conviction | 5–10% |
 
 ### Earnings — Opportunity, Not Risk
-Pre-earnings momentum is an OPPORTUNITY. Binary gaps can deliver 10–20% in a single session — exactly the kind of right-tail outcome that wins competitions. Size pre-earnings plays by conviction (up to 25%), not by fear. Rule 13 earnings caps have been removed (2026-03-24).
+Pre-earnings momentum is an OPPORTUNITY. Binary gaps can deliver 10–20% in a single session — exactly the kind of right-tail outcome that wins competitions. Size pre-earnings plays by conviction, not by fear.
+Rule 13 sizing limits apply (reinstated): max 20% per pre-earnings position, max 40% total, ≤2 names same week. Hard cap 10% for earnings within 1 day.
 
 Never equal-weight. If everything gets the same weight, you are not thinking.
 
 ---
 
-## Current Regime Guidance (March–April 2026)
+## Current Regime Guidance (April 2026 — live game)
 
-- **Energy rotation:** Brent ~$103, Iran conflict, OPEC+ discipline. XOM, CVX, EQNR, AKRBP up 25%+ YTD.
-- **Tech correction:** AI/semiconductor names -15-20% from 2025 highs. Avoid pure-tech concentration.
-- **Defense:** European rearmament driving KONG.OL (Kongsberg Gruppen) — strong OBX performer.
-- **Healthcare catalyst:** LLY on GLP-1 drug pipeline momentum.
-- **Nordic logistics:** DSV.CO recovering, differentiated from crowd.
-- **Avoid:** MAERSK-B.CO (SELL consensus, structural overcapacity), telecom (TEL.OL, TELIA.ST, ELISA.HE).
+This section is updated manually when the regime materially shifts. Always defer to live signal data over anything written here.
+
+- **Regime:** BULL. SPX +5% above 50d SMA. VIX ~19. Breadth 65%.
+- **Tech/semis:** Had a huge 20d run (+16%) — now decelerating and showing HIGH rotation risk (RSI overbought, vol fading). Still the strongest sector but sizing risk is elevated. The pipeline will apply rotation caps if concentration is too high.
+- **Energy in correction:** Brent $90 (-19% in 20 days). No energy thesis. Avoid XOM, CVX, EQNR as primary positions unless signals specifically support them.
+- **Validated live winners (from game data):** XOM (+1.5%/day, 75% hit rate), STX (+1.2%/day, 73% hit rate), APA (+1.0%/day, 71% hit rate).
+- **Recurring live losers — avoid or hard-cap:** AMD (7% max cap, -0.24%/day avg), EQNR.OL (7% max cap, -1.56%/day avg), DOW (7% max cap), VWS.CO (-0.20%/day).
+- **Devil accuracy note:** The Devil's HIGH-risk flags have been net BULLISH signals in this game (+0.63%/day on flagged picks vs -0.31% on non-flagged). Do not over-weight Devil warnings.
+- **Signal ranking:** vol_ratio is the most reliable directional signal (56% accuracy). mom_5d and vs_index follow at 50%.
+- **Avoid:** MAERSK-B.CO (SELL consensus), telecom (TEL.OL, TELIA.ST, ELISA.HE), low-beta fillers.

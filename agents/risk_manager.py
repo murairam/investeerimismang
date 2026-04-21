@@ -514,6 +514,22 @@ class OpenAIRiskManager(BaseAgent):
         regime_score = snapshot.get("regime_score", 50)
         minimum_positions = 5
 
+        # Remove tickers not in the fetched game universe — covers hallucinated tickers and
+        # any stock the game marks unavailable that slipped through earlier filtering.
+        # The minimum-positions fill logic below will replace them with valid candidates.
+        hallucinated = [p.ticker for p in proposal.positions if p.ticker not in candidate_map]
+        if hallucinated:
+            logger.warning(
+                "Universe filter: removing %d ticker(s) not in game candidates: %s",
+                len(hallucinated), ", ".join(sorted(hallucinated)),
+            )
+            proposal = PortfolioProposal(
+                positions=[p for p in proposal.positions if p.ticker in candidate_map],
+                reasoning=proposal.reasoning,
+                confidence=proposal.confidence,
+                learning_reflection=proposal.learning_reflection,
+            )
+
         def is_dead_money(ticker: str) -> bool:
             c = candidate_map.get(ticker, {})
             vol_ratio = c.get("vol_ratio", float("nan"))

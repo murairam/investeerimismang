@@ -379,39 +379,37 @@ Winners: TER +4.3%, STX +3.4%, LRCX +2.9% | Losers: GLW -0.7%
 - ▼ **STX**: 17.0% → 15.0% (-2.0%)
 
 ---
-## 2026-04-21 06:11:28
+## 2026-04-21 16:23:45
 
-**Market:** BULL regime · SPX vs 50d SMA: +4.9% · VIX: 18.9 · S&P 500 20d: +9.3%
+**Market:** BULL regime · SPX vs 50d SMA: +5.2% · VIX: 19.1 · S&P 500 20d: +8.4%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 20:27:58.
 
-**Yesterday's P&L:** Portfolio -1.0% · Benchmark -0.2% · Alpha -0.8%
-Winners: ON +2.8% | Losers: INTC -4.4%, ALB -1.8%, STX -1.8%
+**Yesterday's P&L:** Portfolio +0.7% · Benchmark +0.3% · Alpha +0.4%
+Winners: INTC +1.9%, AMD +1.7%, ON +0.3% | Losers: STX -0.3%
 
 **Paper account:** Equity €10,581.79 (start €10,000) · Today -0.92% · Since start +5.82% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 84% · **Positions:** 6 · **Total weight:** 65.0%
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
 
-**Thesis:** ON is the only true consensus name and gets maximum conviction. I rotate out INTC, STX, and ALB because they no longer earn their slots under the hold rule, then add the strongest volume-confirmed accelerators from Proposal C plus AMD as a still-valid incumbent; I prefer ADI/MCHP/STLD over lower-volume COHR/MPWR and slower JBHT. Portfolio remains aggressive and US-heavy because the strongest signals are there, but STLD adds some diversification while keeping beta in a BULL-appropriate high range without adding filler.
+**Thesis:** The synthesis prioritizes the three double-consensus names—ON, AMD, and STLD—as mandatory high-conviction core positions, then adds the strongest unique upgrades in MPWR and UNH while exiting dead-money laggards INTC, STX, and ALB. This stays concentrated for a BULL competition regime, preserves aggressive upside, and modestly tempers the strategist beta of 2.27 by pairing high-beta leaders with one cleaner defensive-momentum rotation name rather than adding filler.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **ON** | 5.0% | Consensus pick in 2/3 proposals with the strongest visible tape: exceptional 5d momentum, positive volume confirmation, and it is the only current holding explicitly validated by both proposals and recent learning. |
-| 2 | **ADI** | 12.0% | Best unique catalyst/momentum replacement from Proposal C: strong 5d momentum with vol_ratio >1.2, solid beta for a BULL regime, and cleaner confirmation than several more overextended alternatives. |
-| 3 | **MCHP** | 13.0% | High-conviction unique pick with strong 5d momentum and supportive volume, fitting the semiconductor leadership theme while offering better confirmation than weaker-volume breakout candidates. |
-| 4 | **AMD** | 25.0% | Kept as a still-valid current holding and Proposal A pick: momentum remains positive and recent learning said keep for now, though conviction is below ON because volume confirmation is only moderate and rotation risk in crowded US tech is elevated. |
-| 5 | **XYZ** | 5.0% | Aggressive competition-style add with strong recent acceleration, positive volume support, and low crowding/search interest, making it a credible right-tail candidate despite higher reversal risk. |
-| 6 | **STLD** | 5.0% | Earns the sixth slot as the best non-tech diversifying momentum name: exceptional volume confirmation, solid 5d strength, and helps reduce pure US-tech crowding without sacrificing upside. |
+| 1 | **ON** | 14.0% | Consensus pick (2/3) and the clearest validated current holding; despite extreme RSI and weak volume confirmation, its exceptional 5d momentum and recent outperformance keep it as a top-conviction BULL-regime leader. |
+| 2 | **AMD** | 20.0% | Consensus pick (2/3) that still earns its slot with strong high-beta momentum and positive recent trend, though conviction is a notch below ON because the setup is similarly overbought with very light volume support. |
+| 3 | **STLD** | 20.0% | Double-consensus pick (2/3) and the best rotation upgrade from weaker current holdings, with powerful 5d acceleration and strong cross-model validation even after accounting for overbought conditions. |
+| 4 | **MPWR** | 21.0% | Best unique pick from Proposal A: elite momentum/trend quality and strong acceleration make it a worthy aggressive slot, but very low volume confirmation and crowded tech rotation risk keep it below consensus names. |
+| 5 | **UNH** | 25.0% | Best unique pick from Proposal C: strong volume-backed momentum offers a cleaner non-tech rotation candidate and helps reduce pure tech crowding, though lower beta and some relative-strength concerns cap conviction. |
 
 **Changes from yesterday:**
-- ➕ Added **ADI** at 12.0%
-- ➕ Added **MCHP** at 13.0%
-- ➕ Added **XYZ** at 5.0%
-- ➕ Added **STLD** at 5.0%
+- ➕ Added **STLD** at 20.0%
+- ➕ Added **MPWR** at 21.0%
+- ➕ Added **UNH** at 25.0%
 - ➖ Removed **ALB** (was 24.0%)
 - ➖ Removed **INTC** (was 15.0%)
 - ➖ Removed **STX** (was 15.0%)
-- ▼ **ON**: 24.0% → 5.0% (-19.0%)
-- ▲ **AMD**: 22.0% → 25.0% (+3.0%)
+- ▼ **ON**: 24.0% → 14.0% (-10.0%)
 
 ---
+

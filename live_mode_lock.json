@@ -16,7 +16,7 @@
     "agents/strategist.py": "ec02ff52eba25f4b0e88c19c0ab136951a662376c9d9b322a5f7bc10ad68aa2d",
     "agents/full_analyst.py": "54329dd021882f1f486acfad8f5b1b5a2433b48ecaf8be4d62748f05247709c4",
     "agents/devil.py": "7793c8b1df6353606d7a15da6062e605c061479e43ad03dd7b440dd3813961b1",
-    "agents/risk_manager.py": "e96370b68036d6b44eabd0892f7aa0934bd36fe2081b98578ce28a7f9333f2f8",
+    "agents/risk_manager.py": "4967d6b413a0700b0feec05b9914966a367ed63702ee3f4e5923e7c7d6438a10",
     "agents/challenger.py": "5b3e9ef418a69c2cc74d750bc93be141de0ff9546fb99695388a6826177341f9"
   }
 }
