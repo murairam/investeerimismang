@@ -9,14 +9,35 @@
     "INTC": 27.49131458,
     "STX": 3.43798275
   },
-  "verified_weights": {
-    "ON": 0.24,
-    "ALB": 0.24,
-    "AMD": 0.22,
-    "INTC": 0.15,
-    "STX": 0.15
+  "pending_order": {
+    "submitted_date": "2026-04-21",
+    "positions": [
+      {
+        "ticker": "ON",
+        "weight": 0.05
+      },
+      {
+        "ticker": "ADI",
+        "weight": 0.12
+      },
+      {
+        "ticker": "MCHP",
+        "weight": 0.13
+      },
+      {
+        "ticker": "AMD",
+        "weight": 0.25
+      },
+      {
+        "ticker": "XYZ",
+        "weight": 0.05
+      },
+      {
+        "ticker": "STLD",
+        "weight": 0.05
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -220,8 +241,60 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-21",
+      "equity": 10581.79,
+      "cash": 0.0,
+      "daily_return": -0.009196,
+      "return_since_start": 0.058179,
+      "turnover": 0.0,
+      "positions": {
+        "ON": 36.29740996,
+        "ALB": 15.23665273,
+        "AMD": 9.92119183,
+        "INTC": 27.49131458,
+        "STX": 3.43798275
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-21",
+        "positions": [
+          {
+            "ticker": "ON",
+            "weight": 0.05
+          },
+          {
+            "ticker": "ADI",
+            "weight": 0.12
+          },
+          {
+            "ticker": "MCHP",
+            "weight": 0.13
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.25
+          },
+          {
+            "ticker": "XYZ",
+            "weight": 0.05
+          },
+          {
+            "ticker": "STLD",
+            "weight": 0.05
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-20",
-  "last_equity": 10680.0
+  "last_rebalanced_date": "2026-04-21",
+  "last_equity": 10581.78799802,
+  "verified_weights": {
+    "ON": 0.24,
+    "ALB": 0.24,
+    "AMD": 0.22,
+    "INTC": 0.15,
+    "STX": 0.15
+  }
 }
