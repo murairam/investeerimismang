@@ -47,7 +47,7 @@ API_TIMEOUT_SECONDS = 45
 # Set to your Äripäev profile URL so the evening review can auto-fetch your
 # rank, portfolio value, and game returns without running verify.py manually.
 # Example: "https://www.aripaev.ee/investeerimismang/mangija/12345?portfell=678"
-MY_PROFILE_URL: str = ""
+MY_PROFILE_URL: str = "https://www.aripaev.ee/investeerimismang/mangija/14687?portfell=563"
 
 # ── Competitor intelligence (manual watchlist only; no broad crawling) ──────
 ENABLE_COMPETITOR_INTEL = True
