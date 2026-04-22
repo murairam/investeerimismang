@@ -1,40 +1,48 @@
 {
   "date": "2026-04-22",
-  "timestamp": "2026-04-22T19:54:38+00:00",
-  "portfolio_return": 0.02968503633416465,
-  "benchmark_return": 0.010134517704041723,
-  "alpha": 0.019550518630122925,
+  "timestamp": "2026-04-22T19:57:06+00:00",
+  "portfolio_return": 0.02844440952366103,
+  "benchmark_return": 0.010025511692329125,
+  "alpha": 0.018418897831331906,
   "position_returns": [
     {
       "ticker": "AMD",
       "weight": 0.25,
-      "return": 0.06840318689815494,
-      "price": 303.95001220703125
+      "return": 0.06604804805062514,
+      "price": 303.2799987792969
     },
     {
       "ticker": "STLD",
       "weight": 0.1,
-      "return": 0.033922100423076085,
-      "price": 227.67999267578125
+      "return": 0.035023357982572056,
+      "price": 227.92250061035156
     },
     {
       "ticker": "ON",
       "weight": 0.05,
-      "return": 0.0292831441917758,
-      "price": 89.45500183105469
+      "return": 0.02519842043185294,
+      "price": 89.0999984741211
     },
     {
       "ticker": "MCHP",
       "weight": 0.2,
-      "return": 0.022117890878258883,
-      "price": 82.72000122070312
+      "return": 0.01995549064227853,
+      "price": 82.54499816894531
     },
     {
       "ticker": "ADI",
       "weight": 0.2,
-      "return": 0.01652147091038869,
-      "price": 381.4700012207031
+      "return": 0.01589521281349593,
+      "price": 381.2349853515625
     }
   ],
-  "ai_recommendation": "Yes\u2014keep AMD, STLD, ON, MCHP, and ADI since all are outperforming the benchmark and your alpha is strongly positive; don\u2019t drop any based on today\u2019s returns. If you want one tweak, slightly trim the biggest winner (AMD) and redistribute to the laggier winners (ADI or MCHP) to reduce concentration risk."
+  "ai_recommendation": "Keep AMD, STLD, ON, MCHP, and ADI for tomorrow since they\u2019re all outperforming the benchmark and your alpha is strongly positive (+1.84%). Don\u2019t drop any positions today; instead, only consider trimming if any single holding spikes again disproportionately versus the others (e.g., AMD leading by a much larger margin than the rest).",
+  "game_standing": {
+    "rank": null,
+    "total_players": 8087,
+    "value_eur": null,
+    "today_return_pct": null,
+    "week_return_pct": null,
+    "month_return_pct": null
+  }
 }
