@@ -260,6 +260,81 @@ def _parse_fund_fields(
     return value_eur, rank, today_return_pct, week_return_pct, month_return_pct
 
 
+_NORKON_WS_URL = "wss://aripaev-s2-api-prod6a34edc4.happymeadow-ddd82b95.westeurope.azurecontainerapps.io//Pulse/"
+
+
+def _fetch_via_norkon_ws(norkon_jwt: str, fund_id: str | None, player_id: str) -> dict | None:
+    """Connect directly to the Norkon Pulse WebSocket and capture fund rank/value."""
+    try:
+        import websocket  # websocket-client
+    except ImportError:
+        logger.info("websocket-client not installed — skipping direct WS fetch")
+        return None
+
+    result: dict = {}
+    frames_seen: list[str] = []
+
+    def _on_open(ws) -> None:
+        # SignalR-style handshake, then subscribe to fund updates
+        ws.send(json.dumps({"protocol": "json", "version": 1}) + "\x1e")
+
+    def _on_message(ws, message: str) -> None:
+        frames_seen.append(message)
+        logger.info("Norkon WS message: %s", message[:500])
+        try:
+            # SignalR frames end with \x1e record separator
+            for part in message.split("\x1e"):
+                part = part.strip()
+                if not part:
+                    continue
+                msg = json.loads(part)
+                if not isinstance(msg, dict):
+                    continue
+                # Look for rank/value in any field
+                for data in [msg, msg.get("arguments", [{}])[0] if msg.get("arguments") else {}]:
+                    if not isinstance(data, dict):
+                        continue
+                    result["value_eur"] = result.get("value_eur") or _coerce_float(
+                        data.get("value") or data.get("portfolioValue") or data.get("equity")
+                    )
+                    result["rank"] = result.get("rank") or _coerce_int(
+                        data.get("rank") or data.get("placement") or data.get("position")
+                    )
+                    result["today_return_pct"] = result.get("today_return_pct") or _coerce_float(
+                        data.get("todayReturn") or data.get("dailyReturn")
+                    )
+                    result["week_return_pct"] = result.get("week_return_pct") or _coerce_float(
+                        data.get("weekReturn") or data.get("weeklyReturn")
+                    )
+                    result["month_return_pct"] = result.get("month_return_pct") or _coerce_float(
+                        data.get("monthReturn") or data.get("monthlyReturn")
+                    )
+        except Exception:
+            pass
+        if len(frames_seen) >= 8 or (result.get("rank") and result.get("value_eur")):
+            ws.close()
+
+    def _on_error(ws, error) -> None:
+        logger.info("Norkon WS error: %s", error)
+
+    try:
+        ws = websocket.WebSocketApp(
+            _NORKON_WS_URL,
+            header={"Authorization": f"Bearer {norkon_jwt}"},
+            on_open=_on_open,
+            on_message=_on_message,
+            on_error=_on_error,
+        )
+        ws.run_forever(ping_timeout=10, ping_interval=0)
+        if result.get("rank") or result.get("value_eur"):
+            logger.info("Norkon WS: rank=%s, value=%s EUR", result.get("rank"), result.get("value_eur"))
+            return result
+        logger.info("Norkon WS: connected, %d frames, no rank/value extracted", len(frames_seen))
+    except Exception as exc:
+        logger.info("Norkon WS connection failed: %s", exc)
+    return None
+
+
 def _fetch_via_playwright(
     profile_url: str,
     cookie_str: str,
@@ -302,11 +377,17 @@ def _fetch_via_playwright(
 
     def _on_websocket(ws) -> None:
         logger.info("Playwright WebSocket connected: %s", ws.url)
-        def _on_frame(payload: dict) -> None:
-            raw = payload.get("payload", "")
+        def _on_frame(payload) -> None:
+            # payload arrives as str directly (not wrapped in dict)
+            if isinstance(payload, dict):
+                raw = str(payload.get("payload") or payload.get("data") or payload)
+            elif isinstance(payload, bytes):
+                raw = payload.decode("utf-8", errors="replace")
+            else:
+                raw = str(payload)
             if raw:
-                logger.info("WS frame: %s", str(raw)[:600])
-                ws_frames.append(str(raw))
+                logger.info("WS frame: %s", raw[:600])
+                ws_frames.append(raw)
         ws.on("framereceived", _on_frame)
 
     rank: int | None = None
@@ -467,6 +548,20 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
                     if str(contents.get("fid") or "") == str(fund_id):
                         portfolio_name = contents.get("fname") or portfolio_name
                         break
+
+        # ── Direct WebSocket to Norkon Pulse server ────────────────────────────
+        if cookie and (value_eur is None or rank is None):
+            jwt_match_ws = re.search(r"\bjwt=([^;]+)", cookie)
+            if jwt_match_ws:
+                ws_jwt = _norkon_jwt(jwt_match_ws.group(1).strip(), headers)
+                if ws_jwt:
+                    ws_result = _fetch_via_norkon_ws(ws_jwt, fund_id, player_id)
+                    if ws_result:
+                        value_eur = value_eur or ws_result.get("value_eur")
+                        rank = rank or ws_result.get("rank")
+                        today_return_pct = today_return_pct or ws_result.get("today_return_pct")
+                        week_return_pct = week_return_pct or ws_result.get("week_return_pct")
+                        month_return_pct = month_return_pct or ws_result.get("month_return_pct")
 
         # ── Authenticated: exchange Äripäev JWT → Norkon JWT ───────────────────
         if cookie and (value_eur is None or rank is None):
