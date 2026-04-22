@@ -13,8 +13,10 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import sys
 from datetime import date, datetime, timezone
+from urllib.parse import parse_qs, urlparse
 
 from dotenv import load_dotenv
 
@@ -27,11 +29,30 @@ import yfinance as yf
 
 from data.portfolio_store import load_latest_verified, save_competition_standing
 from data.paper_account import sync_verified_positions
-from data.leaderboard_fetcher import fetch_competitor_snapshots, CompetitorSnapshot
+from data.leaderboard_fetcher import CompetitorSnapshot
 from output.dispatcher import format_security_label
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 logger = logging.getLogger(__name__)
+
+def _coerce_float(val: object) -> float | None:
+    if val is None:
+        return None
+    try:
+        f = float(val)  # type: ignore[arg-type]
+        return f if f == f else None  # filter NaN
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_int(val: object) -> int | None:
+    if val is None:
+        return None
+    try:
+        return int(val)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+
 
 _PORTFOLIO_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
 _PAPER_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "..", "paper_account.json")
@@ -181,8 +202,61 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
         return "_AI recommendation unavailable._"
 
 
+def _norkon_jwt(aripaev_jwt: str, base_headers: dict) -> str | None:
+    """Exchange Äripäev session JWT for a Norkon game JWT via the initialize endpoint."""
+    try:
+        url = (
+            "https://www.aripaev.ee/investeerimismang/api/v1/user/initialize"
+            f"?token={aripaev_jwt}"
+        )
+        resp = requests.get(url, headers=base_headers, timeout=10)
+        if resp.ok:
+            data = resp.json()
+            if isinstance(data, dict):
+                token = data.get("jwtToken") or data.get("token") or data.get("jwt")
+                if token:
+                    logger.info("Norkon JWT obtained via initialize endpoint")
+                    return str(token)
+    except Exception as exc:
+        logger.debug("JWT exchange failed: %s", exc)
+    return None
+
+
+def _parse_fund_fields(
+    data: dict,
+    fund_id: str | None,
+    value_eur: float | None,
+    rank: int | None,
+    today_return_pct: float | None,
+    week_return_pct: float | None,
+    month_return_pct: float | None,
+) -> tuple[float | None, int | None, float | None, float | None, float | None]:
+    """Try to extract value/rank/returns from a dict, honoring the target fund_id if given."""
+    value_eur = value_eur or _coerce_float(
+        data.get("value") or data.get("portfolioValue") or data.get("totalValue")
+        or data.get("equity") or data.get("currentValue")
+    )
+    rank = rank or _coerce_int(
+        data.get("rank") or data.get("placement") or data.get("rankPosition")
+        or data.get("position")
+    )
+    today_return_pct = today_return_pct or _coerce_float(
+        data.get("todayReturn") or data.get("dailyReturn") or data.get("returnToday")
+        or data.get("dayChange") or data.get("changeToday")
+    )
+    week_return_pct = week_return_pct or _coerce_float(
+        data.get("weekReturn") or data.get("weeklyReturn") or data.get("returnWeek")
+        or data.get("weekChange")
+    )
+    month_return_pct = month_return_pct or _coerce_float(
+        data.get("monthReturn") or data.get("monthlyReturn") or data.get("returnMonth")
+        or data.get("monthChange")
+    )
+    return value_eur, rank, today_return_pct, week_return_pct, month_return_pct
+
+
 def _fetch_own_game_stats() -> CompetitorSnapshot | None:
-    """Fetch rank, portfolio value, and returns from user's own game profile page."""
+    """Fetch rank, portfolio value, and returns via REST API (site is a Nuxt SPA — HTML scraping doesn't work)."""
     try:
         import config
         url = getattr(config, "MY_PROFILE_URL", "").strip()
@@ -190,18 +264,171 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
         return None
     if not url:
         return None
+
+
+    parsed = urlparse(url)
+    player_match = re.search(r"/mangija/(\d+)", parsed.path)
+    if not player_match:
+        logger.warning("Could not parse player ID from MY_PROFILE_URL: %s", url)
+        return None
+    player_id = player_match.group(1)
+    fund_id = (parse_qs(parsed.query).get("portfell") or [None])[0]
+
+    ff_base = "https://www.aripaev.ee/investeerimismang/api/FantasyFunds"
+    api_base = "https://www.aripaev.ee/investeerimismang/api"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; AlphaShark/1.0)",
+        "Accept": "application/json",
+        "Referer": "https://www.aripaev.ee/",
+    }
+    cookie = os.environ.get("ARIPAEV_COOKIE", "")
+    if cookie:
+        headers["Cookie"] = cookie
+
+    total_players: int | None = None
+    rank: int | None = None
+    value_eur: float | None = None
+    today_return_pct: float | None = None
+    week_return_pct: float | None = None
+    month_return_pct: float | None = None
+    portfolio_name = "unknown"
+
     try:
-        snapshots = fetch_competitor_snapshots([url])
-        if snapshots:
-            logger.info(
-                "Own game profile fetched: rank=%s, value=%.0f EUR",
-                snapshots[0].rank,
-                snapshots[0].value_eur or 0.0,
-            )
-            return snapshots[0]
+        # ── Public: total player count ──────────────────────────────────────────
+        resp = requests.get(
+            f"{ff_base}/PlayerBadges?playerId={player_id}", headers=headers, timeout=10
+        )
+        if resp.ok:
+            data = resp.json()
+            if isinstance(data, dict):
+                total_players = _coerce_int(data.get("playerCount"))
+
+        # ── Public: player profile + fund list (may include value/rank with cookie) ──
+        resp = requests.get(f"{ff_base}/PlayerData/{player_id}", headers=headers, timeout=10)
+        if resp.ok:
+            logger.info("PlayerData response: %s", resp.text[:600])
+            data = resp.json()
+            if isinstance(data, dict):
+                portfolio_name = (
+                    data.get("name") or data.get("playerName") or data.get("userName") or "unknown"
+                )
+                funds = data.get("funds") or data.get("fundList") or data.get("portfolios") or []
+                for fund in (funds if isinstance(funds, list) else []):
+                    fid = str(fund.get("id") or fund.get("fundId") or fund.get("fid") or "")
+                    if fund_id and fid != str(fund_id):
+                        continue
+                    value_eur, rank, today_return_pct, week_return_pct, month_return_pct = (
+                        _parse_fund_fields(
+                            fund, fund_id,
+                            value_eur, rank, today_return_pct, week_return_pct, month_return_pct,
+                        )
+                    )
+                    if value_eur is not None:
+                        break
+
+        # ── Authenticated: exchange Äripäev JWT → Norkon JWT ───────────────────
+        if cookie and (value_eur is None or rank is None):
+            jwt_match = re.search(r"\bjwt=([^;]+)", cookie)
+            if jwt_match:
+                nk_token = _norkon_jwt(jwt_match.group(1).strip(), headers)
+                if nk_token:
+                    auth = {**headers, "Authorization": f"Bearer {nk_token}"}
+                    # userdata → confirms fund id
+                    ud_resp = requests.get(
+                        f"{api_base}/fantasyfunds/userdata", headers=auth, timeout=10
+                    )
+                    if ud_resp.ok:
+                        logger.info("userdata response: %s", ud_resp.text[:400])
+
+                    # Authenticated fund-specific endpoints — log responses to aid discovery
+                    for ep in [
+                        f"{api_base}/fantasyfunds/fund/{fund_id}",
+                        f"{api_base}/FantasyFunds/FundDetails/{fund_id}",
+                        f"{api_base}/FantasyFunds/GetFundData?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/FundStats?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/Fund/{fund_id}",
+                        f"{api_base}/fantasyfunds/portfolio/{fund_id}",
+                        f"{api_base}/FantasyFunds/PlayerData/{player_id}",
+                    ]:
+                        try:
+                            r = requests.get(ep, headers=auth, timeout=5)
+                            ep_name = ep.split("/")[-1].split("?")[0]
+                            if not r.ok:
+                                logger.info("Auth endpoint %s → HTTP %s", ep_name, r.status_code)
+                                continue
+                            body = r.text.strip()
+                            if body in ("null", "", "[]"):
+                                logger.info("Auth endpoint %s → empty", ep_name)
+                                continue
+                            logger.info("Auth endpoint %s → %s", ep_name, body[:400])
+                            try:
+                                d = r.json()
+                            except Exception:
+                                continue
+                            if not isinstance(d, dict):
+                                continue
+                            value_eur, rank, today_return_pct, week_return_pct, month_return_pct = (
+                                _parse_fund_fields(
+                                    d, fund_id,
+                                    value_eur, rank, today_return_pct, week_return_pct, month_return_pct,
+                                )
+                            )
+                            if value_eur is not None and rank is not None:
+                                break
+                        except Exception:
+                            continue
+
+        # ── Fallback: unauthenticated fund endpoints ───────────────────────────
+        if fund_id and (value_eur is None or rank is None):
+            for ep in [
+                f"{ff_base}/FundStats?fid={fund_id}",
+                f"{ff_base}/GetFundData?fid={fund_id}",
+                f"{ff_base}/historical-fund-performance?fid={fund_id}",
+            ]:
+                try:
+                    r = requests.get(ep, headers=headers, timeout=5)
+                    if not r.ok or r.text.strip() in ("null", "", "[]"):
+                        continue
+                    d = r.json()
+                    if not isinstance(d, dict):
+                        continue
+                    value_eur, rank, today_return_pct, week_return_pct, month_return_pct = (
+                        _parse_fund_fields(
+                            d, fund_id,
+                            value_eur, rank, today_return_pct, week_return_pct, month_return_pct,
+                        )
+                    )
+                    if value_eur is not None and rank is not None:
+                        break
+                except Exception:
+                    continue
+
     except Exception as exc:
-        logger.warning("Could not fetch own game profile: %s", exc)
-    return None
+        logger.warning("Own game profile API fetch failed: %s", exc)
+        return None
+
+    if total_players is None and rank is None and value_eur is None:
+        logger.warning("Own game profile API returned no usable data for player %s", player_id)
+        return None
+
+    logger.info(
+        "Own game profile fetched via API: rank=%s/%s, value=%s EUR",
+        rank,
+        total_players,
+        f"{value_eur:.0f}" if value_eur is not None else "n/a",
+    )
+    return CompetitorSnapshot(
+        url=url,
+        portfolio_name=portfolio_name,
+        rank=rank,
+        total_players=total_players,
+        value_eur=value_eur,
+        today_return_pct=today_return_pct,
+        week_return_pct=week_return_pct,
+        month_return_pct=month_return_pct,
+        visible_holdings=[],
+        holdings_total_count=None,
+    )
 
 
 def _send(embed: dict, webhook_url: str) -> None:
