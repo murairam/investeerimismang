@@ -1,40 +1,48 @@
 {
-  "date": "2026-04-21",
-  "timestamp": "2026-04-21T21:10:58+00:00",
-  "portfolio_return": 0.02272088803619078,
-  "benchmark_return": -0.006348217959672997,
-  "alpha": 0.029069105995863778,
+  "date": "2026-04-22",
+  "timestamp": "2026-04-22T15:03:52+00:00",
+  "portfolio_return": 0.015576433525336764,
+  "benchmark_return": 0.007873731638673442,
+  "alpha": 0.007702701886663322,
   "position_returns": [
     {
-      "ticker": "STX",
-      "weight": 0.15,
-      "return": 0.03733214342577584,
-      "price": 559.9000244140625
-    },
-    {
       "ticker": "AMD",
-      "weight": 0.22,
-      "return": 0.034697136220384506,
-      "price": 284.489990234375
+      "weight": 0.25,
+      "return": 0.03441248859707313,
+      "price": 294.2799987792969
     },
     {
-      "ticker": "ALB",
-      "weight": 0.24,
-      "return": 0.018426301412262314,
-      "price": 198.4199981689453
+      "ticker": "STLD",
+      "weight": 0.1,
+      "return": 0.024839861019674503,
+      "price": 225.67999267578125
+    },
+    {
+      "ticker": "ADI",
+      "weight": 0.2,
+      "return": 0.013643578715747173,
+      "price": 380.3900146484375
+    },
+    {
+      "ticker": "MCHP",
+      "weight": 0.2,
+      "return": 0.007537385494270854,
+      "price": 81.54000091552734
     },
     {
       "ticker": "ON",
-      "weight": 0.24,
-      "return": 0.015778472908336783,
-      "price": 86.91000366210938
-    },
-    {
-      "ticker": "INTC",
-      "weight": 0.15,
-      "return": 0.008523671445973546,
-      "price": 66.26000213623047
+      "weight": 0.05,
+      "return": 0.005062648641948497,
+      "price": 87.3499984741211
     }
   ],
-  "ai_recommendation": "Yes\u2014keep STX and AMD (they\u2019re leading and driving your positive alpha), and keep ALB/ON as steady contributors; don\u2019t drop any based on today\u2019s returns. If you must make one change, only consider trimming INTC (lowest performer at +0.9%) to redeploy into STX/AMD momentum."
+  "ai_recommendation": "Yes\u2014update the portfolio: keep AMD, STLD, and ADI (they\u2019re leading your alpha), and consider trimming ON (lowest return) while holding MCHP/ADI as steady core. If you need to free risk, drop a small portion of ON and reallocate to AMD or STLD to maintain your positive relative momentum.",
+  "game_standing": {
+    "rank": null,
+    "total_players": null,
+    "value_eur": null,
+    "today_return_pct": null,
+    "week_return_pct": null,
+    "month_return_pct": null
+  }
 }
