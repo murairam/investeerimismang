@@ -195,6 +195,7 @@ def _extract_evening_observations() -> str:
     raw_pos_list = obs.get("position_returns", [])
     pos_list = list(raw_pos_list) if isinstance(raw_pos_list, (list, tuple)) else []
     ai_note = obs.get("ai_recommendation", "")
+    game_standing = obs.get("game_standing") if isinstance(obs.get("game_standing"), dict) else None
 
     formatted_moves = []
     for p in pos_list:
@@ -213,6 +214,18 @@ def _extract_evening_observations() -> str:
     ]
     if moves:
         lines.append(f"Position moves: {moves}")
+    if game_standing:
+        rank = game_standing.get("rank")
+        total = game_standing.get("total_players")
+        value = game_standing.get("value_eur")
+        ret_week = game_standing.get("week_return_pct")
+        rank_str = f"rank {rank}/{total}" if rank and total else ("rank n/a" if rank is None else f"rank {rank}")
+        value_str = f"€{value:,.0f}".replace(",", " ") if isinstance(value, (int, float)) else "n/a"
+        week_str = f"{ret_week:+.2f}% week" if isinstance(ret_week, (int, float)) else ""
+        standing_parts = [rank_str, f"portfolio value {value_str}"]
+        if week_str:
+            standing_parts.append(week_str)
+        lines.append(f"Game standing: {', '.join(standing_parts)}.")
     if ai_note:
         lines.append(f"AI note: {ai_note}")
 
