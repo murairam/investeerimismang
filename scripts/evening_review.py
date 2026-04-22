@@ -210,6 +210,7 @@ def _norkon_jwt(aripaev_jwt: str, base_headers: dict) -> str | None:
             f"?token={aripaev_jwt}"
         )
         resp = requests.get(url, headers=base_headers, timeout=10)
+        logger.info("initialize endpoint → HTTP %s: %s", resp.status_code, resp.text[:300])
         if resp.ok:
             data = resp.json()
             if isinstance(data, dict):
@@ -217,8 +218,9 @@ def _norkon_jwt(aripaev_jwt: str, base_headers: dict) -> str | None:
                 if token:
                     logger.info("Norkon JWT obtained via initialize endpoint")
                     return str(token)
+                logger.info("initialize response has no jwt token field: %s", list(data.keys()))
     except Exception as exc:
-        logger.debug("JWT exchange failed: %s", exc)
+        logger.info("JWT exchange failed: %s", exc)
     return None
 
 
@@ -333,6 +335,7 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
         # ── Authenticated: exchange Äripäev JWT → Norkon JWT ───────────────────
         if cookie and (value_eur is None or rank is None):
             jwt_match = re.search(r"\bjwt=([^;]+)", cookie)
+            logger.info("JWT regex match: %s", bool(jwt_match))
             if jwt_match:
                 nk_token = _norkon_jwt(jwt_match.group(1).strip(), headers)
                 if nk_token:
