@@ -418,15 +418,37 @@ def _fetch_via_playwright(
         logger.warning("Playwright load failed: %s", exc)
 
     # Parse WebSocket frames for rank/value
+    # Norkon Pulse frame: {"seqres":N, "d":{"subscribed":[{"result":{"v":<value>,"b":<bench>,...}}]}}
     for raw in ws_frames:
         try:
             msg = json.loads(raw)
             if not isinstance(msg, dict):
                 continue
-            data = msg.get("result", msg) if isinstance(msg.get("result"), dict) else msg
-            data = msg.get("data", data) if isinstance(msg.get("data"), dict) else data
-            value_eur, rank, today_return_pct, week_return_pct, month_return_pct = _parse_fund_fields(
-                data, fund_id, value_eur, rank, today_return_pct, week_return_pct, month_return_pct
+            d = msg.get("d") or {}
+            for sub in (d.get("subscribed") or [] if isinstance(d, dict) else []):
+                res = (sub.get("result") or {}) if isinstance(sub, dict) else {}
+                if not isinstance(res, dict):
+                    continue
+                # "v" = portfolio value EUR, "b" = benchmark value
+                value_eur = value_eur or _coerce_float(res.get("v"))
+                rank = rank or _coerce_int(res.get("rank") or res.get("placement"))
+                # Compute today's return from ticks if not directly available
+                if today_return_pct is None:
+                    ticks = res.get("ticks") or []
+                    if len(ticks) >= 2 and isinstance(ticks[0], list):
+                        first_val = _coerce_float(ticks[0][1])
+                        last_val = _coerce_float(ticks[-1][1])
+                        if first_val and last_val:
+                            today_return_pct = last_val  # ticks values are cumulative returns
+                week_return_pct = week_return_pct or _coerce_float(
+                    res.get("weekReturn") or res.get("wr") or res.get("week")
+                )
+                month_return_pct = month_return_pct or _coerce_float(
+                    res.get("monthReturn") or res.get("mr") or res.get("month")
+                )
+            # Also scan top-level for rank (may arrive in a separate frame)
+            rank = rank or _coerce_int(
+                msg.get("rank") or (d.get("rank") if isinstance(d, dict) else None)
             )
         except Exception:
             pass
