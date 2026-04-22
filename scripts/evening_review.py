@@ -281,7 +281,7 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
         "Accept": "application/json",
         "Referer": "https://www.aripaev.ee/",
     }
-    cookie = os.environ.get("ARIPAEV_COOKIE", "")
+    cookie = os.environ.get("ARIPAEV_COOKIE", "").strip()
     if cookie:
         headers["Cookie"] = cookie
 
