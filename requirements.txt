@@ -7,4 +7,4 @@ pandas>=2.0.0
 numpy>=1.24.0
 pytrends>=4.9.0
 html5lib>=1.1
-psycopg2-binary>=2.9.0
+psycopg2-binary>=2.9.0playwright>=1.44.0

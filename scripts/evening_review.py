@@ -260,6 +260,114 @@ def _parse_fund_fields(
     return value_eur, rank, today_return_pct, week_return_pct, month_return_pct
 
 
+def _fetch_via_playwright(
+    profile_url: str,
+    cookie_str: str,
+    player_id: str,
+    fund_id: str | None,
+) -> CompetitorSnapshot | None:
+    """Load the SPA with a headless browser and intercept API calls to capture rank/value."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        logger.warning("Playwright not installed — skipping browser-based fetch")
+        return None
+
+    cookies = []
+    for part in cookie_str.split(";"):
+        part = part.strip()
+        if "=" in part:
+            name, _, value = part.partition("=")
+            cookies.append({
+                "name": name.strip(),
+                "value": value.strip(),
+                "domain": "www.aripaev.ee",
+                "path": "/",
+            })
+
+    captured: list[dict] = []
+
+    def _on_response(response) -> None:
+        url = response.url
+        if not ("aripaev" in url or "norkon" in url):
+            return
+        try:
+            body = response.json()
+            if isinstance(body, dict):
+                logger.info("Playwright captured %s → %s", url.split("?")[0].split("/")[-1], str(body)[:400])
+                captured.append({"url": url, "body": body})
+        except Exception:
+            pass
+
+    rank: int | None = None
+    value_eur: float | None = None
+    total_players: int | None = None
+    today_return_pct: float | None = None
+    week_return_pct: float | None = None
+    month_return_pct: float | None = None
+    portfolio_name = "unknown"
+
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(headless=True)
+            ctx = browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            )
+            ctx.add_cookies(cookies)
+            page = ctx.new_page()
+            page.on("response", _on_response)
+
+            logger.info("Playwright: loading %s", profile_url)
+            page.goto(profile_url, wait_until="networkidle", timeout=25000)
+            page.wait_for_timeout(4000)  # let WebSocket / late XHR settle
+
+            browser.close()
+    except Exception as exc:
+        logger.warning("Playwright load failed: %s", exc)
+
+    # Parse captured API responses for rank/value
+    for item in captured:
+        body = item["body"]
+        # Unwrap Norkon envelope
+        data = body.get("result", body) if isinstance(body.get("result"), dict) else body
+        if not isinstance(data, dict):
+            continue
+        value_eur, rank, today_return_pct, week_return_pct, month_return_pct = _parse_fund_fields(
+            data, fund_id, value_eur, rank, today_return_pct, week_return_pct, month_return_pct
+        )
+        if total_players is None:
+            total_players = _coerce_int(
+                data.get("playerCount") or data.get("totalPlayers") or data.get("count")
+            )
+        name_candidate = (
+            data.get("fname") or data.get("name") or data.get("fundName")
+            or data.get("portfolioName")
+        )
+        if name_candidate and portfolio_name == "unknown":
+            portfolio_name = str(name_candidate)
+
+    if rank is None and value_eur is None:
+        logger.info("Playwright: no rank/value found in %d captured responses", len(captured))
+        return None
+
+    logger.info(
+        "Playwright: rank=%s, value=%s EUR, total_players=%s",
+        rank, f"{value_eur:.0f}" if value_eur is not None else "n/a", total_players,
+    )
+    return CompetitorSnapshot(
+        url=profile_url,
+        portfolio_name=portfolio_name,
+        rank=rank,
+        total_players=total_players,
+        value_eur=value_eur,
+        today_return_pct=today_return_pct,
+        week_return_pct=week_return_pct,
+        month_return_pct=month_return_pct,
+        visible_holdings=[],
+        holdings_total_count=None,
+    )
+
+
 def _fetch_own_game_stats() -> CompetitorSnapshot | None:
     """Fetch rank, portfolio value, and returns via REST API (site is a Nuxt SPA — HTML scraping doesn't work)."""
     try:
@@ -433,6 +541,25 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
     except Exception as exc:
         logger.warning("Own game profile API fetch failed: %s", exc)
         return None
+
+    # ── Playwright fallback: load actual SPA and intercept network calls ──────
+    if (rank is None or value_eur is None) and cookie:
+        logger.info("REST APIs missing rank/value — trying Playwright browser fetch")
+        pw_result = _fetch_via_playwright(url, cookie, player_id, fund_id)
+        if pw_result is not None:
+            # Merge: prefer Playwright data for rank/value, keep REST data for total_players
+            return CompetitorSnapshot(
+                url=pw_result.url,
+                portfolio_name=pw_result.portfolio_name if pw_result.portfolio_name != "unknown" else portfolio_name,
+                rank=pw_result.rank if pw_result.rank is not None else rank,
+                total_players=total_players if total_players is not None else pw_result.total_players,
+                value_eur=pw_result.value_eur if pw_result.value_eur is not None else value_eur,
+                today_return_pct=pw_result.today_return_pct if pw_result.today_return_pct is not None else today_return_pct,
+                week_return_pct=pw_result.week_return_pct if pw_result.week_return_pct is not None else week_return_pct,
+                month_return_pct=pw_result.month_return_pct if pw_result.month_return_pct is not None else month_return_pct,
+                visible_holdings=[],
+                holdings_total_count=None,
+            )
 
     if total_players is None and rank is None and value_eur is None:
         logger.warning("Own game profile API returned no usable data for player %s", player_id)
