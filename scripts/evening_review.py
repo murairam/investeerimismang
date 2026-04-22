@@ -299,31 +299,35 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
             f"{ff_base}/PlayerBadges?playerId={player_id}", headers=headers, timeout=10
         )
         if resp.ok:
+            logger.info("PlayerBadges response: %s", resp.text[:400])
             data = resp.json()
+            # Unwrap Norkon envelope {"success": true, "result": {...}}
+            if isinstance(data, dict) and data.get("success") and isinstance(data.get("result"), dict):
+                data = data["result"]
             if isinstance(data, dict):
-                total_players = _coerce_int(data.get("playerCount"))
+                total_players = _coerce_int(
+                    data.get("playerCount") or data.get("totalPlayers")
+                    or data.get("count") or data.get("total")
+                )
 
-        # ── Public: player profile + fund list (may include value/rank with cookie) ──
+        # ── Public: player profile (contains player name + activity log) ──────
         resp = requests.get(f"{ff_base}/PlayerData/{player_id}", headers=headers, timeout=10)
         if resp.ok:
             logger.info("PlayerData response: %s", resp.text[:600])
             data = resp.json()
+            # Unwrap Norkon envelope
+            if isinstance(data, dict) and data.get("success") and isinstance(data.get("result"), dict):
+                data = data["result"]
             if isinstance(data, dict):
+                player = data.get("player") or {}
                 portfolio_name = (
-                    data.get("name") or data.get("playerName") or data.get("userName") or "unknown"
+                    player.get("name") or data.get("name") or data.get("playerName") or "unknown"
                 )
-                funds = data.get("funds") or data.get("fundList") or data.get("portfolios") or []
-                for fund in (funds if isinstance(funds, list) else []):
-                    fid = str(fund.get("id") or fund.get("fundId") or fund.get("fid") or "")
-                    if fund_id and fid != str(fund_id):
-                        continue
-                    value_eur, rank, today_return_pct, week_return_pct, month_return_pct = (
-                        _parse_fund_fields(
-                            fund, fund_id,
-                            value_eur, rank, today_return_pct, week_return_pct, month_return_pct,
-                        )
-                    )
-                    if value_eur is not None:
+                # Extract fund name from activity log (value/rank not present here)
+                for act in (data.get("activity") or []):
+                    contents = act.get("contents") or {}
+                    if str(contents.get("fid") or "") == str(fund_id):
+                        portfolio_name = contents.get("fname") or portfolio_name
                         break
 
         # ── Authenticated: exchange Äripäev JWT → Norkon JWT ───────────────────
@@ -367,6 +371,9 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
                                 continue
                             if not isinstance(d, dict):
                                 continue
+                            # Unwrap Norkon envelope
+                            if d.get("success") and isinstance(d.get("result"), dict):
+                                d = d["result"]
                             value_eur, rank, today_return_pct, week_return_pct, month_return_pct = (
                                 _parse_fund_fields(
                                     d, fund_id,
