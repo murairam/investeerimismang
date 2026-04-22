@@ -386,7 +386,8 @@ def _fetch_via_playwright(
             else:
                 raw = str(payload)
             if raw:
-                logger.info("WS frame: %s", raw[:600])
+                # Log full frame so we can find where rank lives
+                logger.info("WS frame [%d]: %s", len(ws_frames), raw[:2000])
                 ws_frames.append(raw)
         ws.on("framereceived", _on_frame)
 
@@ -411,14 +412,40 @@ def _fetch_via_playwright(
 
             logger.info("Playwright: loading %s", profile_url)
             page.goto(profile_url, wait_until="networkidle", timeout=25000)
-            page.wait_for_timeout(6000)  # let WebSocket frames arrive
+            page.wait_for_timeout(12000)  # wait for rank frame (arrives after initial portfolio frame)
+            logger.info("Playwright: captured %d WS frames, %d API responses", len(ws_frames), len(captured))
 
             browser.close()
     except Exception as exc:
         logger.warning("Playwright load failed: %s", exc)
 
-    # Parse WebSocket frames for rank/value
-    # Norkon Pulse frame: {"seqres":N, "d":{"subscribed":[{"result":{"v":<value>,"b":<bench>,...}}]}}
+    # Parse WebSocket frames for rank/value.
+    # Known frame shape: {"seqres":N,"d":{"subscribed":[{"result":{"v":<EUR>,"b":<bench>,...}}]}}
+    # Rank may arrive in a different frame type — scan every dict node broadly.
+    _RANK_KEYS = {"rank", "placement", "position", "pos", "standing", "rk", "rankPosition", "leaderboardPosition"}
+
+    def _scan_for_rank(node: object, depth: int = 0) -> int | None:
+        """Recursively scan any JSON node for a rank-like integer (1–50000)."""
+        if depth > 6:
+            return None
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k.lower() in _RANK_KEYS:
+                    r = _coerce_int(v)
+                    if r is not None and 1 <= r <= 50000:
+                        logger.info("Rank candidate found at key %r = %s", k, r)
+                        return r
+            for v in node.values():
+                r = _scan_for_rank(v, depth + 1)
+                if r is not None:
+                    return r
+        elif isinstance(node, list):
+            for item in node[:20]:
+                r = _scan_for_rank(item, depth + 1)
+                if r is not None:
+                    return r
+        return None
+
     for raw in ws_frames:
         try:
             msg = json.loads(raw)
@@ -431,25 +458,23 @@ def _fetch_via_playwright(
                     continue
                 # "v" = portfolio value EUR, "b" = benchmark value
                 value_eur = value_eur or _coerce_float(res.get("v"))
-                rank = rank or _coerce_int(res.get("rank") or res.get("placement"))
                 # Compute today's return from ticks if not directly available
                 if today_return_pct is None:
                     ticks = res.get("ticks") or []
                     if len(ticks) >= 2 and isinstance(ticks[0], list):
                         first_val = _coerce_float(ticks[0][1])
                         last_val = _coerce_float(ticks[-1][1])
-                        if first_val and last_val:
-                            today_return_pct = last_val  # ticks values are cumulative returns
+                        if first_val and last_val and first_val != 0:
+                            today_return_pct = (last_val / first_val - 1) * 100
                 week_return_pct = week_return_pct or _coerce_float(
                     res.get("weekReturn") or res.get("wr") or res.get("week")
                 )
                 month_return_pct = month_return_pct or _coerce_float(
                     res.get("monthReturn") or res.get("mr") or res.get("month")
                 )
-            # Also scan top-level for rank (may arrive in a separate frame)
-            rank = rank or _coerce_int(
-                msg.get("rank") or (d.get("rank") if isinstance(d, dict) else None)
-            )
+            # Scan the full frame for rank — may be in any frame type
+            if rank is None:
+                rank = _scan_for_rank(msg)
         except Exception:
             pass
 
