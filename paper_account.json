@@ -9,14 +9,31 @@
     "INTC": 28.97068236,
     "STX": 3.4169635
   },
-  "verified_weights": {
-    "ON": 0.24,
-    "ALB": 0.24,
-    "AMD": 0.22,
-    "INTC": 0.15,
-    "STX": 0.15
+  "pending_order": {
+    "submitted_date": "2026-04-22",
+    "positions": [
+      {
+        "ticker": "ON",
+        "weight": 0.12
+      },
+      {
+        "ticker": "AMD",
+        "weight": 0.25
+      },
+      {
+        "ticker": "MPWR",
+        "weight": 0.19
+      },
+      {
+        "ticker": "STLD",
+        "weight": 0.05
+      },
+      {
+        "ticker": "ANET",
+        "weight": 0.19
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -237,8 +254,56 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-22",
+      "equity": 10883.71,
+      "cash": 0.0,
+      "daily_return": 0.00163,
+      "return_since_start": 0.088371,
+      "turnover": 0.0,
+      "positions": {
+        "ON": 35.35464501,
+        "ALB": 15.51016491,
+        "AMD": 9.86454887,
+        "INTC": 28.97068236,
+        "STX": 3.4169635
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-22",
+        "positions": [
+          {
+            "ticker": "ON",
+            "weight": 0.12
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.25
+          },
+          {
+            "ticker": "MPWR",
+            "weight": 0.19
+          },
+          {
+            "ticker": "STLD",
+            "weight": 0.05
+          },
+          {
+            "ticker": "ANET",
+            "weight": 0.19
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-21",
-  "last_equity": 10866.0
+  "last_rebalanced_date": "2026-04-22",
+  "last_equity": 10883.71136609,
+  "verified_weights": {
+    "ON": 0.24,
+    "ALB": 0.24,
+    "AMD": 0.22,
+    "INTC": 0.15,
+    "STX": 0.15
+  }
 }

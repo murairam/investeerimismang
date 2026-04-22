@@ -413,3 +413,37 @@ Winners: INTC +1.9%, AMD +1.7%, ON +0.3% | Losers: STX -0.3%
 
 ---
 
+## 2026-04-22 06:19:18
+
+**Market:** BULL regime · SPX vs 50d SMA: +4.2% · VIX: 19.5 · S&P 500 20d: +7.3%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +2.5% · Benchmark -0.6% · Alpha +3.2%
+Winners: STX +4.0%, AMD +3.7%, ALB +2.1%
+
+**Paper account:** Equity €10,883.71 (start €10,000) · Today +0.16% · Since start +8.84% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 78% · **Positions:** 5 · **Total weight:** 80.0%
+
+**Thesis:** I kept the two clearly validated current winners, ON and AMD, because they still meet the rotation mandate with strong 5d momentum and acceptable volume support. I removed ALB, INTC, and STX because ALB is explicitly weak on momentum/Sharpe in the proposal, while INTC and STX no longer look like the fastest leaders versus MPWR, STLD, and ANET; this keeps the portfolio concentrated in five names aligned with the competition's right-tail objective. Portfolio beta should remain aggressive and near the bull-market target range, with US concentration accepted because the strongest actionable momentum is still clustered there.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **ON** | 12.0% | Consensus by available evidence across the live portfolio context and Strategist proposal; +21.0% 5d momentum with vol_ratio 1.19 keeps it a top rotation leader despite extreme RSI. |
+| 2 | **AMD** | 25.0% | Consensus hold from current winners and Strategist proposal; still delivering strong alpha with +11.9% 5d momentum, positive volume confirmation, and competition-fit high beta. |
+| 3 | **MPWR** | 19.0% | Best unique upgrade candidate for a vacated slot; +12.5% 5d momentum and solid breakout quality make it a cleaner tech leader than slower existing holdings. |
+| 4 | **STLD** | 5.0% | Strong unique pick with the best volume confirmation in the set (vol_ratio 2.27) and +13.1% 5d momentum; earns a slot even with some sector-rotation risk because the move is active and confirmed. |
+| 5 | **ANET** | 19.0% | High-quality unique momentum continuation name; +12.4% 5d momentum with vol_ratio 1.31 supports keeping concentration in the strongest active leaders. |
+
+**Changes from yesterday:**
+- ➕ Added **MPWR** at 19.0%
+- ➕ Added **STLD** at 5.0%
+- ➕ Added **ANET** at 19.0%
+- ➖ Removed **ALB** (was 24.0%)
+- ➖ Removed **INTC** (was 15.0%)
+- ➖ Removed **STX** (was 15.0%)
+- ▼ **ON**: 24.0% → 12.0% (-12.0%)
+- ▲ **AMD**: 22.0% → 25.0% (+3.0%)
+
+---
