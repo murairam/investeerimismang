@@ -286,6 +286,7 @@ def _fetch_via_playwright(
             })
 
     captured: list[dict] = []
+    ws_frames: list[str] = []
 
     def _on_response(response) -> None:
         url = response.url
@@ -298,6 +299,15 @@ def _fetch_via_playwright(
                 captured.append({"url": url, "body": body})
         except Exception:
             pass
+
+    def _on_websocket(ws) -> None:
+        logger.info("Playwright WebSocket connected: %s", ws.url)
+        def _on_frame(payload: dict) -> None:
+            raw = payload.get("payload", "")
+            if raw:
+                logger.info("WS frame: %s", str(raw)[:600])
+                ws_frames.append(str(raw))
+        ws.on("framereceived", _on_frame)
 
     rank: int | None = None
     value_eur: float | None = None
@@ -316,14 +326,29 @@ def _fetch_via_playwright(
             ctx.add_cookies(cookies)
             page = ctx.new_page()
             page.on("response", _on_response)
+            page.on("websocket", _on_websocket)
 
             logger.info("Playwright: loading %s", profile_url)
             page.goto(profile_url, wait_until="networkidle", timeout=25000)
-            page.wait_for_timeout(4000)  # let WebSocket / late XHR settle
+            page.wait_for_timeout(6000)  # let WebSocket frames arrive
 
             browser.close()
     except Exception as exc:
         logger.warning("Playwright load failed: %s", exc)
+
+    # Parse WebSocket frames for rank/value
+    for raw in ws_frames:
+        try:
+            msg = json.loads(raw)
+            if not isinstance(msg, dict):
+                continue
+            data = msg.get("result", msg) if isinstance(msg.get("result"), dict) else msg
+            data = msg.get("data", data) if isinstance(msg.get("data"), dict) else data
+            value_eur, rank, today_return_pct, week_return_pct, month_return_pct = _parse_fund_fields(
+                data, fund_id, value_eur, rank, today_return_pct, week_return_pct, month_return_pct
+            )
+        except Exception:
+            pass
 
     # Parse captured API responses for rank/value
     for item in captured:
