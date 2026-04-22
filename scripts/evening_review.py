@@ -214,6 +214,9 @@ def _norkon_jwt(aripaev_jwt: str, base_headers: dict) -> str | None:
         if resp.ok:
             data = resp.json()
             if isinstance(data, dict):
+                # Unwrap Norkon envelope {"success": true, "result": {"jwtToken": "..."}}
+                if data.get("success") and isinstance(data.get("result"), dict):
+                    data = data["result"]
                 token = data.get("jwtToken") or data.get("token") or data.get("jwt")
                 if token:
                     logger.info("Norkon JWT obtained via initialize endpoint")
