@@ -25,7 +25,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import requests
 import yfinance as yf
 
-from data.portfolio_store import load_latest_verified
+from data.portfolio_store import load_latest_verified, save_competition_standing
+from data.paper_account import sync_verified_positions
+from data.leaderboard_fetcher import fetch_competitor_snapshots, CompetitorSnapshot
 from output.dispatcher import format_security_label
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
@@ -179,6 +181,29 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
         return "_AI recommendation unavailable._"
 
 
+def _fetch_own_game_stats() -> CompetitorSnapshot | None:
+    """Fetch rank, portfolio value, and returns from user's own game profile page."""
+    try:
+        import config
+        url = getattr(config, "MY_PROFILE_URL", "").strip()
+    except Exception:
+        return None
+    if not url:
+        return None
+    try:
+        snapshots = fetch_competitor_snapshots([url])
+        if snapshots:
+            logger.info(
+                "Own game profile fetched: rank=%s, value=%.0f EUR",
+                snapshots[0].rank,
+                snapshots[0].value_eur or 0.0,
+            )
+            return snapshots[0]
+    except Exception as exc:
+        logger.warning("Could not fetch own game profile: %s", exc)
+    return None
+
+
 def _send(embed: dict, webhook_url: str) -> None:
     resp = requests.post(webhook_url, json={"embeds": [embed]}, timeout=10)
     resp.raise_for_status()
@@ -201,6 +226,7 @@ def main() -> None:
         logger.error("Portfolio has no positions")
         return
 
+    today = date.today().isoformat()
     tickers = [p["ticker"] for p in positions]
     prices = _fetch_prices(tickers)
 
@@ -223,6 +249,33 @@ def main() -> None:
         benchmark_ret = (curr / prev - 1) if prev > 0 else 0.0
 
     alpha = portfolio_ret - benchmark_ret
+
+    # ── Auto-fetch own game profile (rank, equity, game-reported returns) ───
+    game_stats = _fetch_own_game_stats()
+    if game_stats is not None:
+        # Auto-save competition standing so verify.py rank prompt can be skipped.
+        if game_stats.rank is not None and game_stats.total_players is not None:
+            try:
+                save_competition_standing(game_stats.rank, game_stats.total_players, today)
+                logger.info(
+                    "Competition standing auto-saved: rank %d / %d",
+                    game_stats.rank,
+                    game_stats.total_players,
+                )
+            except Exception as exc:
+                logger.warning("Could not auto-save competition standing: %s", exc)
+
+        # Auto-sync paper account equity using game-reported portfolio value.
+        if game_stats.value_eur is not None and game_stats.value_eur > 0:
+            price_map = {t: float(prices[t][1]) for t in tickers if t in prices}
+            if price_map:
+                try:
+                    sync_verified_positions(positions, game_stats.value_eur, today, price_map)
+                    logger.info(
+                        "Paper account equity auto-synced: €%.0f", game_stats.value_eur
+                    )
+                except Exception as exc:
+                    logger.warning("Could not auto-sync paper account equity: %s", exc)
 
     # Sort by return descending for easy scanning on mobile
     pos_returns.sort(key=lambda x: x[2], reverse=True)
@@ -277,34 +330,56 @@ def main() -> None:
 
     portfolio_date = portfolio.get("date", "unknown")
     portfolio_source = portfolio.get("source", "unknown")
-    today = date.today().isoformat()
     stale_warning = ""
     if portfolio_date != today:
         stale_warning = f"\n\n⚠️ _Portfolio data is from **{portfolio_date}** (not today). Run verify.py to update._"
 
     description = f"{perf_line}{us_note}{stale_warning}\n\n💬 {recommendation}{prize_note}"
 
+    # Build game standing field if profile data was fetched.
+    game_standing_field: dict | None = None
+    if game_stats is not None:
+        rank_str = f"#{game_stats.rank} / {game_stats.total_players}" if game_stats.rank else "n/a"
+        value_str = f"€{game_stats.value_eur:,.0f}".replace(",", " ") if game_stats.value_eur else "n/a"
+        ret_today = f"{game_stats.today_return_pct:+.2f}%" if game_stats.today_return_pct is not None else "n/a"
+        ret_week = f"{game_stats.week_return_pct:+.2f}%" if game_stats.week_return_pct is not None else "n/a"
+        ret_month = f"{game_stats.month_return_pct:+.2f}%" if game_stats.month_return_pct is not None else "n/a"
+        game_standing_field = {
+            "name": "📊 Game Standing (auto-fetched)",
+            "value": (
+                f"**Rank:** {rank_str}\n"
+                f"**Portfolio value:** {value_str}\n"
+                f"**Game returns:** today {ret_today} · week {ret_week} · month {ret_month}"
+            ),
+            "inline": False,
+        }
+
+    fields = []
+    if game_standing_field:
+        fields.append(game_standing_field)
+    fields += [
+        {
+            "name": "Game Search List",
+            "value": search_list[:1024],
+            "inline": False,
+        },
+        {
+            "name": "Today's Position Moves",
+            "value": table[:1024],
+            "inline": False,
+        },
+        {
+            "name": "Action For Tomorrow Morning",
+            "value": action_note,
+            "inline": False,
+        },
+    ]
+
     embed = {
         "title": f"🌙 AlphaShark Evening Review — {today}",
         "description": description,
         "color": _EMBED_COLOUR,
-        "fields": [
-            {
-                "name": "Game Search List",
-                "value": search_list[:1024],
-                "inline": False,
-            },
-            {
-                "name": "Today's Position Moves",
-                "value": table[:1024],
-                "inline": False,
-            },
-            {
-                "name": "Action For Tomorrow Morning",
-                "value": action_note,
-                "inline": False,
-            },
-        ],
+        "fields": fields,
         "footer": {
             "text": f"{len(pos_returns)} positions · {portfolio_source} · Changes before 10:00 EET execute at tomorrow's open"
         },
@@ -314,7 +389,7 @@ def main() -> None:
 
     # Persist observations so next morning's agents can read yesterday's evening review.
     try:
-        observations = {
+        observations: dict = {
             "date": today,
             "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
             "portfolio_return": portfolio_ret,
@@ -326,6 +401,15 @@ def main() -> None:
             ],
             "ai_recommendation": recommendation,
         }
+        if game_stats is not None:
+            observations["game_standing"] = {
+                "rank": game_stats.rank,
+                "total_players": game_stats.total_players,
+                "value_eur": game_stats.value_eur,
+                "today_return_pct": game_stats.today_return_pct,
+                "week_return_pct": game_stats.week_return_pct,
+                "month_return_pct": game_stats.month_return_pct,
+            }
         obs_path = os.path.abspath(_OBSERVATIONS_PATH)
         with open(obs_path, "w") as f:
             json.dump(observations, f, indent=2)
