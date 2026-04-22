@@ -352,12 +352,26 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
 
                     # Authenticated fund-specific endpoints — log responses to aid discovery
                     for ep in [
-                        f"{api_base}/fantasyfunds/fund/{fund_id}",
-                        f"{api_base}/FantasyFunds/FundDetails/{fund_id}",
-                        f"{api_base}/FantasyFunds/GetFundData?fid={fund_id}",
-                        f"{api_base}/FantasyFunds/FundStats?fid={fund_id}",
-                        f"{api_base}/FantasyFunds/Fund/{fund_id}",
-                        f"{api_base}/fantasyfunds/portfolio/{fund_id}",
+                        # Norkon lowercase paths (same style as userdata which works)
+                        f"{api_base}/fantasyfunds/fund?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/fund?id={fund_id}",
+                        f"{api_base}/fantasyfunds/funds",
+                        f"{api_base}/fantasyfunds/performance?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/returns?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/stats?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/overview?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/portfolio?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/leaderboard",
+                        f"{api_base}/fantasyfunds/rankings",
+                        f"{api_base}/fantasyfunds/ranking?fid={fund_id}",
+                        # FantasyFunds PascalCase paths
+                        f"{api_base}/FantasyFunds/GetFundPerformance?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/FundPerformance?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/fund-performance?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/GetFundRank?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/FundRank?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/Leaderboard",
+                        f"{api_base}/FantasyFunds/Rankings",
                         f"{api_base}/FantasyFunds/PlayerData/{player_id}",
                     ]:
                         try:
