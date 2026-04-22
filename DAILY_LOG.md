@@ -417,7 +417,7 @@ Winners: INTC +1.9%, AMD +1.7%, ON +0.3% | Losers: STX -0.3%
 
 **Market:** BULL regime · SPX vs 50d SMA: +4.2% · VIX: 19.5 · S&P 500 20d: +7.3%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 10:51:24.
 
 **Yesterday's P&L:** Portfolio +2.5% · Benchmark -0.6% · Alpha +3.2%
 Winners: STX +4.0%, AMD +3.7%, ALB +2.1%
