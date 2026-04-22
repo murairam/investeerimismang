@@ -13,8 +13,10 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import sys
 from datetime import date, datetime, timezone
+from urllib.parse import parse_qs, urlparse
 
 from dotenv import load_dotenv
 
@@ -27,11 +29,30 @@ import yfinance as yf
 
 from data.portfolio_store import load_latest_verified, save_competition_standing
 from data.paper_account import sync_verified_positions
-from data.leaderboard_fetcher import fetch_competitor_snapshots, CompetitorSnapshot
+from data.leaderboard_fetcher import CompetitorSnapshot
 from output.dispatcher import format_security_label
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 logger = logging.getLogger(__name__)
+
+def _coerce_float(val: object) -> float | None:
+    if val is None:
+        return None
+    try:
+        f = float(val)  # type: ignore[arg-type]
+        return f if f == f else None  # filter NaN
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_int(val: object) -> int | None:
+    if val is None:
+        return None
+    try:
+        return int(val)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+
 
 _PORTFOLIO_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
 _PAPER_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "..", "paper_account.json")
@@ -182,7 +203,7 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
 
 
 def _fetch_own_game_stats() -> CompetitorSnapshot | None:
-    """Fetch rank, portfolio value, and returns from user's own game profile page."""
+    """Fetch rank, portfolio value, and returns via REST API (site is a Nuxt SPA — HTML scraping doesn't work)."""
     try:
         import config
         url = getattr(config, "MY_PROFILE_URL", "").strip()
@@ -190,18 +211,131 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
         return None
     if not url:
         return None
+
+    parsed = urlparse(url)
+    player_match = re.search(r"/mangija/(\d+)", parsed.path)
+    if not player_match:
+        logger.warning("Could not parse player ID from MY_PROFILE_URL: %s", url)
+        return None
+    player_id = player_match.group(1)
+    fund_id = (parse_qs(parsed.query).get("portfell") or [None])[0]
+
+    base = "https://www.aripaev.ee/investeerimismang/api/FantasyFunds"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; AlphaShark/1.0)",
+        "Accept": "application/json",
+        "Referer": "https://www.aripaev.ee/",
+    }
+    cookie = os.environ.get("ARIPAEV_COOKIE", "")
+    if cookie:
+        headers["Cookie"] = cookie
+
+    total_players: int | None = None
+    rank: int | None = None
+    value_eur: float | None = None
+    today_return_pct: float | None = None
+    week_return_pct: float | None = None
+    month_return_pct: float | None = None
+    portfolio_name = "unknown"
+
     try:
-        snapshots = fetch_competitor_snapshots([url])
-        if snapshots:
-            logger.info(
-                "Own game profile fetched: rank=%s, value=%.0f EUR",
-                snapshots[0].rank,
-                snapshots[0].value_eur or 0.0,
-            )
-            return snapshots[0]
+        # Total player count — public endpoint
+        resp = requests.get(f"{base}/PlayerBadges?playerId={player_id}", headers=headers, timeout=10)
+        if resp.ok:
+            data = resp.json()
+            if isinstance(data, dict):
+                total_players = data.get("playerCount")
+
+        # Player / fund data — public endpoint; may include portfolio value and rank
+        resp = requests.get(f"{base}/PlayerData/{player_id}", headers=headers, timeout=10)
+        if resp.ok:
+            data = resp.json()
+            if isinstance(data, dict):
+                portfolio_name = (
+                    data.get("name") or data.get("playerName") or data.get("userName") or "unknown"
+                )
+                # Try to find this fund's stats in the funds list
+                funds = data.get("funds") or data.get("fundList") or data.get("portfolios") or []
+                for fund in (funds if isinstance(funds, list) else []):
+                    fid = str(fund.get("id") or fund.get("fundId") or fund.get("fid") or "")
+                    if fund_id and fid != str(fund_id):
+                        continue
+                    value_eur = value_eur or _coerce_float(
+                        fund.get("value") or fund.get("portfolioValue") or fund.get("totalValue")
+                    )
+                    rank = rank or _coerce_int(fund.get("rank") or fund.get("placement") or fund.get("rankPosition"))
+                    today_return_pct = today_return_pct or _coerce_float(
+                        fund.get("todayReturn") or fund.get("dailyReturn") or fund.get("returnToday")
+                    )
+                    week_return_pct = week_return_pct or _coerce_float(
+                        fund.get("weekReturn") or fund.get("weeklyReturn") or fund.get("returnWeek")
+                    )
+                    month_return_pct = month_return_pct or _coerce_float(
+                        fund.get("monthReturn") or fund.get("monthlyReturn") or fund.get("returnMonth")
+                    )
+                    if value_eur is not None:
+                        break
+
+        # Try additional fund-specific endpoints if rank/value still missing
+        if fund_id and (value_eur is None or rank is None):
+            for endpoint in [
+                f"{base}/FundStats?fid={fund_id}",
+                f"{base}/GetFundData?fid={fund_id}",
+                f"{base}/FundDetails/{fund_id}",
+                f"{base}/Fund/{fund_id}",
+                f"{base}/historical-fund-performance?fid={fund_id}",
+            ]:
+                try:
+                    resp = requests.get(endpoint, headers=headers, timeout=5)
+                    if not resp.ok or resp.text.strip() in ("null", "", "[]"):
+                        continue
+                    data = resp.json()
+                    if not isinstance(data, dict):
+                        continue
+                    value_eur = value_eur or _coerce_float(
+                        data.get("value") or data.get("totalValue") or data.get("portfolioValue")
+                    )
+                    rank = rank or _coerce_int(data.get("rank") or data.get("placement"))
+                    today_return_pct = today_return_pct or _coerce_float(
+                        data.get("todayReturn") or data.get("dailyReturn")
+                    )
+                    week_return_pct = week_return_pct or _coerce_float(
+                        data.get("weekReturn") or data.get("weeklyReturn")
+                    )
+                    month_return_pct = month_return_pct or _coerce_float(
+                        data.get("monthReturn") or data.get("monthlyReturn")
+                    )
+                    if value_eur is not None and rank is not None:
+                        break
+                except Exception:
+                    continue
+
     except Exception as exc:
-        logger.warning("Could not fetch own game profile: %s", exc)
-    return None
+        logger.warning("Own game profile API fetch failed: %s", exc)
+        return None
+
+    if total_players is None and rank is None and value_eur is None:
+        logger.warning("Own game profile API returned no usable data for player %s", player_id)
+        return None
+
+    logger.info(
+        "Own game profile fetched via API: rank=%s/%s, value=%s EUR",
+        rank,
+        total_players,
+        f"{value_eur:.0f}" if value_eur is not None else "n/a",
+    )
+    return CompetitorSnapshot(
+        url=url,
+        portfolio_name=portfolio_name,
+        rank=rank,
+        total_players=total_players,
+        value_eur=value_eur,
+        today_return_pct=today_return_pct,
+        week_return_pct=week_return_pct,
+        month_return_pct=month_return_pct,
+        visible_holdings=[],
+        holdings_total_count=None,
+    )
 
 
 def _send(embed: dict, webhook_url: str) -> None:
