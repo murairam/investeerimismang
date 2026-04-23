@@ -1,54 +1,54 @@
 {
   "date": "2026-04-23",
-  "timestamp": "2026-04-23T15:31:08+00:00",
-  "portfolio_return": 0.022194080653858715,
-  "benchmark_return": 0.0005982179057804071,
-  "alpha": 0.021595862748078308,
+  "timestamp": "2026-04-23T21:14:01+00:00",
+  "portfolio_return": 0.010284988810809319,
+  "benchmark_return": -0.004132868267081369,
+  "alpha": 0.014417857077890688,
   "position_returns": [
     {
       "ticker": "ON",
       "weight": 0.12,
-      "return": 0.10017980817546346,
-      "price": 97.90499877929688
+      "return": 0.09877515593363118,
+      "price": 97.77999877929688
     },
     {
       "ticker": "MPWR",
       "weight": 0.19,
-      "return": 0.046174808430040626,
-      "price": 1592.3199462890625
+      "return": 0.046076320650545455,
+      "price": 1592.1700439453125
     },
     {
       "ticker": "STX",
       "weight": 0.15,
-      "return": 0.04250883666706873,
-      "price": 604.530029296875
+      "return": 0.013347572203216806,
+      "price": 587.6199951171875
     },
     {
       "ticker": "AMD",
       "weight": 0.25,
-      "return": 0.017580643652809202,
-      "price": 308.7950134277344
+      "return": 0.006162245995661397,
+      "price": 305.3299865722656
     },
     {
       "ticker": "ANET",
       "weight": 0.19,
-      "return": -0.013616149367691288,
-      "price": 175.30999755859375
+      "return": -0.02914529229901186,
+      "price": 172.5500030517578
     },
     {
       "ticker": "SMCI",
       "weight": 0.1,
-      "return": -0.06785127962305881,
-      "price": 27.20009994506836
+      "return": -0.08327622617415675,
+      "price": 26.75
     }
   ],
-  "ai_recommendation": "Update the portfolio: keep ON, MPWR, and STX (they\u2019re your strongest contributors) and keep AMD; drop SMCI (worst -6.8%) and also drop ANET (negative -1.4%) to reduce drag. For a Monday 09:00 EET leaderboard push, tilt higher-conviction toward ON/MPWR/STX rather than protecting with lower-beta\u2014your alpha is already strong.",
+  "ai_recommendation": "Update the portfolio: keep **ON, MPWR, STX, AMD** (strong relative gains, especially ON/MPWR), and drop **SMCI** (worst performer, -8.3%) and **ANET** (weak, -2.9%) to reduce downside and free capital for higher-conviction momentum. Since the leaderboard snapshot is **Monday 09:00 EET**, lean into upside by reallocating the freed weight toward the remaining winners rather than adding new low-conviction names.",
   "game_standing": {
-    "rank": 536,
-    "total_players": 8598,
-    "value_eur": 11755.179651728773,
-    "today_return_pct": 4.331,
-    "week_return_pct": 12.625,
-    "month_return_pct": 17.552
+    "rank": 547,
+    "total_players": 8611,
+    "value_eur": 11620.910928845151,
+    "today_return_pct": 3.1399999999999997,
+    "week_return_pct": 11.338,
+    "month_return_pct": 16.209
   }
 }
