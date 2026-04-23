@@ -643,7 +643,7 @@ class OpenAIRiskManager(BaseAgent):
                 not math.isnan(rsi) and rsi > config.OVERBOUGHT_RSI_THRESHOLD
                 and not math.isnan(pct_high) and pct_high >= -config.OVERBOUGHT_HIGH_PCT
                 and (math.isnan(vol_ratio) or vol_ratio <= config.OVERBOUGHT_VOLUME_EXCEPTION)
-                and (math.isnan(mom_5d_ob) or mom_5d_ob < config.OVERBOUGHT_MOM5D_FLOOR)
+                and (math.isnan(mom_5d_ob) or mom_5d_ob < getattr(config, "OVERBOUGHT_MOM5D_FLOOR", 0.02))
             )
             if overbought:
                 # Check sector rotation risk to determine effective cap
@@ -995,7 +995,7 @@ class OpenAIRiskManager(BaseAgent):
                 and not math.isnan(pct_from_high)
                 and pct_from_high >= -config.OVERBOUGHT_HIGH_PCT
                 and (math.isnan(vol_ratio) or vol_ratio <= config.OVERBOUGHT_VOLUME_EXCEPTION)
-                and (math.isnan(momentum_5d) or momentum_5d < config.OVERBOUGHT_MOM5D_FLOOR)
+                and (math.isnan(momentum_5d) or momentum_5d < getattr(config, "OVERBOUGHT_MOM5D_FLOOR", 0.02))
             ):
                 multiplier *= config.QUALITY_REBALANCE_OVERBOUGHT_PENALTY
 
