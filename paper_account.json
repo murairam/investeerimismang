@@ -3,18 +3,20 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "AMD": 11.25443818,
-    "MCHP": 31.6498208,
-    "ADI": 6.82553916,
-    "STLD": 5.81585743,
-    "ON": 7.3680241
+    "AMD": 10.85881285,
+    "ANET": 14.09083247,
+    "MPWR": 1.64539929,
+    "STX": 3.40954876,
+    "ON": 17.77394494,
+    "SMCI": 45.17087348
   },
   "verified_weights": {
     "AMD": 0.25,
-    "MCHP": 0.2,
-    "ADI": 0.2,
-    "STLD": 0.1,
-    "ON": 0.05
+    "ANET": 0.19,
+    "MPWR": 0.19,
+    "STX": 0.15,
+    "ON": 0.12,
+    "SMCI": 0.1
   },
   "pending_order": null,
   "history": [
@@ -254,8 +256,26 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-23",
+      "equity": 11267.0,
+      "cash": 0.0,
+      "daily_return": 0.034144,
+      "return_since_start": 0.1267,
+      "turnover": 0.0,
+      "positions": {
+        "AMD": 10.85881285,
+        "ANET": 14.09083247,
+        "MPWR": 1.64539929,
+        "STX": 3.40954876,
+        "ON": 17.77394494,
+        "SMCI": 45.17087348
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-04-22",
-  "last_equity": 10895.0
+  "last_rebalanced_date": "2026-04-23",
+  "last_equity": 11267.0
 }
