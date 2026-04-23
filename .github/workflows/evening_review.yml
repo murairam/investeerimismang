@@ -41,10 +41,19 @@ jobs:
         run: python scripts/evening_review.py
 
       - name: Commit evening observations
+        if: success()
         run: |
           git config user.name "AlphaShark Bot"
           git config user.email "alphashark@noreply"
-          git pull --rebase --autostash origin main
+          for i in {1..3}; do
+            git pull --rebase --autostash origin main && break
+            echo "git pull --rebase failed, retrying in 15s..."
+            [ "$i" -lt 3 ] && sleep 15 || { echo "git pull --rebase failed after 3 attempts"; exit 1; }
+          done
           git add evening_observations.json || true
           git diff --staged --quiet || git commit -m "chore: evening observations $(date +%Y-%m-%d)"
-          git push
+          for i in {1..3}; do
+            git push && break
+            echo "git push failed, retrying in 30s..."
+            [ "$i" -lt 3 ] && sleep 30 || { echo "git push failed after 3 attempts"; exit 1; }
+          done
