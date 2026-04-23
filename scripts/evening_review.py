@@ -13,8 +13,10 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import sys
 from datetime import date, datetime, timezone
+from urllib.parse import parse_qs, urlparse
 
 from dotenv import load_dotenv
 
@@ -25,11 +27,32 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import requests
 import yfinance as yf
 
-from data.portfolio_store import load_latest_verified
+from data.portfolio_store import load_latest_verified, save_competition_standing
+from data.paper_account import sync_verified_positions
+from data.leaderboard_fetcher import CompetitorSnapshot
 from output.dispatcher import format_security_label
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 logger = logging.getLogger(__name__)
+
+def _coerce_float(val: object) -> float | None:
+    if val is None:
+        return None
+    try:
+        f = float(val)  # type: ignore[arg-type]
+        return f if f == f else None  # filter NaN
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_int(val: object) -> int | None:
+    if val is None:
+        return None
+    try:
+        return int(val)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+
 
 _PORTFOLIO_PATH = os.path.join(os.path.dirname(__file__), "..", "portfolio_history.json")
 _PAPER_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "..", "paper_account.json")
@@ -179,6 +202,576 @@ def _ai_take(positions_summary: str, portfolio_ret: float, benchmark_ret: float,
         return "_AI recommendation unavailable._"
 
 
+def _norkon_jwt(aripaev_jwt: str, base_headers: dict) -> str | None:
+    """Exchange Äripäev session JWT for a Norkon game JWT via the initialize endpoint."""
+    try:
+        url = (
+            "https://www.aripaev.ee/investeerimismang/api/v1/user/initialize"
+            f"?token={aripaev_jwt}"
+        )
+        resp = requests.get(url, headers=base_headers, timeout=10)
+        logger.info("initialize endpoint → HTTP %s: %s", resp.status_code, resp.text[:300])
+        if resp.ok:
+            data = resp.json()
+            if isinstance(data, dict):
+                # Unwrap Norkon envelope {"success": true, "result": {"jwtToken": "..."}}
+                if data.get("success") and isinstance(data.get("result"), dict):
+                    data = data["result"]
+                token = data.get("jwtToken") or data.get("token") or data.get("jwt")
+                if token:
+                    logger.info("Norkon JWT obtained via initialize endpoint")
+                    return str(token)
+                logger.info("initialize response has no jwt token field: %s", list(data.keys()))
+    except Exception as exc:
+        logger.info("JWT exchange failed: %s", exc)
+    return None
+
+
+def _parse_fund_fields(
+    data: dict,
+    fund_id: str | None,
+    value_eur: float | None,
+    rank: int | None,
+    today_return_pct: float | None,
+    week_return_pct: float | None,
+    month_return_pct: float | None,
+) -> tuple[float | None, int | None, float | None, float | None, float | None]:
+    """Try to extract value/rank/returns from a dict, honoring the target fund_id if given."""
+    value_eur = value_eur or _coerce_float(
+        data.get("value") or data.get("portfolioValue") or data.get("totalValue")
+        or data.get("equity") or data.get("currentValue")
+    )
+    rank = rank or _coerce_int(
+        data.get("rank") or data.get("placement") or data.get("rankPosition")
+        or data.get("position")
+    )
+    today_return_pct = today_return_pct or _coerce_float(
+        data.get("todayReturn") or data.get("dailyReturn") or data.get("returnToday")
+        or data.get("dayChange") or data.get("changeToday")
+    )
+    week_return_pct = week_return_pct or _coerce_float(
+        data.get("weekReturn") or data.get("weeklyReturn") or data.get("returnWeek")
+        or data.get("weekChange")
+    )
+    month_return_pct = month_return_pct or _coerce_float(
+        data.get("monthReturn") or data.get("monthlyReturn") or data.get("returnMonth")
+        or data.get("monthChange")
+    )
+    return value_eur, rank, today_return_pct, week_return_pct, month_return_pct
+
+
+_NORKON_WS_URL = "wss://aripaev-s2-api-prod6a34edc4.happymeadow-ddd82b95.westeurope.azurecontainerapps.io//Pulse/"
+
+
+def _fetch_via_norkon_ws(norkon_jwt: str, fund_id: str | None, player_id: str) -> dict | None:
+    """Connect directly to the Norkon Pulse WebSocket and capture fund rank/value."""
+    try:
+        import websocket  # websocket-client
+    except ImportError:
+        logger.info("websocket-client not installed — skipping direct WS fetch")
+        return None
+
+    result: dict = {}
+    frames_seen: list[str] = []
+
+    def _on_open(ws) -> None:
+        # SignalR-style handshake, then subscribe to fund updates
+        ws.send(json.dumps({"protocol": "json", "version": 1}) + "\x1e")
+
+    def _on_message(ws, message: str) -> None:
+        frames_seen.append(message)
+        logger.info("Norkon WS message: %s", message[:500])
+        try:
+            # SignalR frames end with \x1e record separator
+            for part in message.split("\x1e"):
+                part = part.strip()
+                if not part:
+                    continue
+                msg = json.loads(part)
+                if not isinstance(msg, dict):
+                    continue
+                # Look for rank/value in any field
+                for data in [msg, msg.get("arguments", [{}])[0] if msg.get("arguments") else {}]:
+                    if not isinstance(data, dict):
+                        continue
+                    result["value_eur"] = result.get("value_eur") or _coerce_float(
+                        data.get("value") or data.get("portfolioValue") or data.get("equity")
+                    )
+                    result["rank"] = result.get("rank") or _coerce_int(
+                        data.get("rank") or data.get("placement") or data.get("position")
+                    )
+                    result["today_return_pct"] = result.get("today_return_pct") or _coerce_float(
+                        data.get("todayReturn") or data.get("dailyReturn")
+                    )
+                    result["week_return_pct"] = result.get("week_return_pct") or _coerce_float(
+                        data.get("weekReturn") or data.get("weeklyReturn")
+                    )
+                    result["month_return_pct"] = result.get("month_return_pct") or _coerce_float(
+                        data.get("monthReturn") or data.get("monthlyReturn")
+                    )
+        except Exception:
+            pass
+        if len(frames_seen) >= 8 or (result.get("rank") and result.get("value_eur")):
+            ws.close()
+
+    def _on_error(ws, error) -> None:
+        logger.info("Norkon WS error: %s", error)
+
+    try:
+        ws = websocket.WebSocketApp(
+            _NORKON_WS_URL,
+            header={"Authorization": f"Bearer {norkon_jwt}"},
+            on_open=_on_open,
+            on_message=_on_message,
+            on_error=_on_error,
+        )
+        ws.run_forever(ping_timeout=10, ping_interval=0)
+        if result.get("rank") or result.get("value_eur"):
+            logger.info("Norkon WS: rank=%s, value=%s EUR", result.get("rank"), result.get("value_eur"))
+            return result
+        logger.info("Norkon WS: connected, %d frames, no rank/value extracted", len(frames_seen))
+    except Exception as exc:
+        logger.info("Norkon WS connection failed: %s", exc)
+    return None
+
+
+def _fetch_via_playwright(
+    profile_url: str,
+    cookie_str: str,
+    player_id: str,
+    fund_id: str | None,
+) -> CompetitorSnapshot | None:
+    """Load the SPA with a headless browser and intercept API calls to capture rank/value."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        logger.warning("Playwright not installed — skipping browser-based fetch")
+        return None
+
+    cookies = []
+    for part in cookie_str.split(";"):
+        part = part.strip()
+        if "=" in part:
+            name, _, value = part.partition("=")
+            cookies.append({
+                "name": name.strip(),
+                "value": value.strip(),
+                "domain": "www.aripaev.ee",
+                "path": "/",
+            })
+
+    captured: list[dict] = []
+    ws_frames: list[str] = []
+
+    def _on_response(response) -> None:
+        url = response.url
+        if not ("aripaev" in url or "norkon" in url):
+            return
+        try:
+            body = response.json()
+            if isinstance(body, dict):
+                logger.info("Playwright captured %s → %s", url.split("?")[0].split("/")[-1], str(body)[:400])
+                captured.append({"url": url, "body": body})
+        except Exception:
+            pass
+
+    def _on_websocket(ws) -> None:
+        logger.info("Playwright WebSocket connected: %s", ws.url)
+        def _on_frame(payload) -> None:
+            # payload arrives as str directly (not wrapped in dict)
+            if isinstance(payload, dict):
+                raw = str(payload.get("payload") or payload.get("data") or payload)
+            elif isinstance(payload, bytes):
+                raw = payload.decode("utf-8", errors="replace")
+            else:
+                raw = str(payload)
+            if raw:
+                # Log full frame so we can find where rank lives
+                logger.info("WS frame [%d]: %s", len(ws_frames), raw[:2000])
+                ws_frames.append(raw)
+        ws.on("framereceived", _on_frame)
+
+    rank: int | None = None
+    value_eur: float | None = None
+    total_players: int | None = None
+    today_return_pct: float | None = None
+    week_return_pct: float | None = None
+    month_return_pct: float | None = None
+    portfolio_name = "unknown"
+
+    page_text: str = ""
+
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(headless=True)
+            ctx = browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            )
+            ctx.add_cookies(cookies)
+            page = ctx.new_page()
+            page.on("response", _on_response)
+            page.on("websocket", _on_websocket)
+
+            logger.info("Playwright: loading %s", profile_url)
+            page.goto(profile_url, wait_until="networkidle", timeout=25000)
+            page.wait_for_timeout(12000)  # wait for rank frame (arrives after initial portfolio frame)
+            logger.info("Playwright: captured %d WS frames, %d API responses", len(ws_frames), len(captured))
+
+            # Extract rendered page text — SPA renders rank visibly in DOM
+            try:
+                page_text = page.inner_text("body") or ""
+                logger.info("Page text sample: %s", page_text[:500])
+            except Exception as exc:
+                logger.info("Could not get page text: %s", exc)
+
+            browser.close()
+    except Exception as exc:
+        logger.warning("Playwright load failed: %s", exc)
+
+    # Parse WebSocket frames for rank/value.
+    # Known frame shape: {"seqres":N,"d":{"subscribed":[{"result":{"v":<EUR>,"b":<bench>,...}}]}}
+    # Rank may arrive in a different frame type — scan every dict node broadly.
+    _RANK_KEYS = {"rank", "placement", "position", "pos", "standing", "rk", "rankPosition", "leaderboardPosition"}
+
+    def _scan_for_rank(node: object, depth: int = 0) -> int | None:
+        """Recursively scan any JSON node for a rank-like integer (1–50000)."""
+        if depth > 6:
+            return None
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k.lower() in _RANK_KEYS:
+                    r = _coerce_int(v)
+                    if r is not None and 1 <= r <= 50000:
+                        logger.info("Rank candidate found at key %r = %s", k, r)
+                        return r
+            for v in node.values():
+                r = _scan_for_rank(v, depth + 1)
+                if r is not None:
+                    return r
+        elif isinstance(node, list):
+            for item in node[:20]:
+                r = _scan_for_rank(item, depth + 1)
+                if r is not None:
+                    return r
+        return None
+
+    for raw in ws_frames:
+        try:
+            msg = json.loads(raw)
+            if not isinstance(msg, dict):
+                continue
+            d = msg.get("d") or {}
+            for sub in (d.get("subscribed") or [] if isinstance(d, dict) else []):
+                res = (sub.get("result") or {}) if isinstance(sub, dict) else {}
+                if not isinstance(res, dict):
+                    continue
+                # "v" = portfolio value EUR, "b" = benchmark value
+                value_eur = value_eur or _coerce_float(res.get("v"))
+                # Compute today's return from ticks if not directly available
+                if today_return_pct is None:
+                    ticks = res.get("ticks") or []
+                    if len(ticks) >= 2 and isinstance(ticks[0], list):
+                        # Use last two ticks for daily return (not first vs last which is game-total)
+                        prev_val = _coerce_float(ticks[-2][1])
+                        last_val = _coerce_float(ticks[-1][1])
+                        if prev_val and last_val and prev_val != 0:
+                            today_return_pct = (last_val / prev_val - 1) * 100
+                week_return_pct = week_return_pct or _coerce_float(
+                    res.get("weekReturn") or res.get("wr") or res.get("week")
+                )
+                month_return_pct = month_return_pct or _coerce_float(
+                    res.get("monthReturn") or res.get("mr") or res.get("month")
+                )
+            # Scan the full frame for rank — may be in any frame type
+            if rank is None:
+                rank = _scan_for_rank(msg)
+        except Exception:
+            pass
+
+    # Extract rank from rendered DOM — the SPA shows "X. koht Y mängija hulgas" on screen
+    if rank is None and page_text:
+        # Pattern: "123. koht 8087 mängija hulgas"
+        dom_rank_match = re.search(r"(\d+)\.\s*koht\s+\d+\s*m[äa]ngija", page_text, re.IGNORECASE)
+        if dom_rank_match:
+            rank = _coerce_int(dom_rank_match.group(1))
+            logger.info("Rank extracted from DOM text: %s", rank)
+        else:
+            logger.info("Rank pattern not found in DOM text (first 300 chars): %s", page_text[:300])
+
+    # Parse captured API responses for rank/value
+    for item in captured:
+        body = item["body"]
+        # Unwrap Norkon envelope
+        data = body.get("result", body) if isinstance(body.get("result"), dict) else body
+        if not isinstance(data, dict):
+            continue
+        value_eur, rank, today_return_pct, week_return_pct, month_return_pct = _parse_fund_fields(
+            data, fund_id, value_eur, rank, today_return_pct, week_return_pct, month_return_pct
+        )
+        if total_players is None:
+            total_players = _coerce_int(
+                data.get("playerCount") or data.get("totalPlayers") or data.get("count")
+            )
+        name_candidate = (
+            data.get("fname") or data.get("name") or data.get("fundName")
+            or data.get("portfolioName")
+        )
+        if name_candidate and portfolio_name == "unknown":
+            portfolio_name = str(name_candidate)
+
+    if rank is None and value_eur is None:
+        logger.info("Playwright: no rank/value found in %d captured responses", len(captured))
+        return None
+
+    logger.info(
+        "Playwright: rank=%s, value=%s EUR, total_players=%s",
+        rank, f"{value_eur:.0f}" if value_eur is not None else "n/a", total_players,
+    )
+    return CompetitorSnapshot(
+        url=profile_url,
+        portfolio_name=portfolio_name,
+        rank=rank,
+        total_players=total_players,
+        value_eur=value_eur,
+        today_return_pct=today_return_pct,
+        week_return_pct=week_return_pct,
+        month_return_pct=month_return_pct,
+        visible_holdings=[],
+        holdings_total_count=None,
+    )
+
+
+def _fetch_own_game_stats() -> CompetitorSnapshot | None:
+    """Fetch rank, portfolio value, and returns via REST API (site is a Nuxt SPA — HTML scraping doesn't work)."""
+    try:
+        import config
+        url = getattr(config, "MY_PROFILE_URL", "").strip()
+    except Exception:
+        return None
+    if not url:
+        return None
+
+
+    parsed = urlparse(url)
+    player_match = re.search(r"/mangija/(\d+)", parsed.path)
+    if not player_match:
+        logger.warning("Could not parse player ID from MY_PROFILE_URL: %s", url)
+        return None
+    player_id = player_match.group(1)
+    fund_id = (parse_qs(parsed.query).get("portfell") or [None])[0]
+
+    ff_base = "https://www.aripaev.ee/investeerimismang/api/FantasyFunds"
+    api_base = "https://www.aripaev.ee/investeerimismang/api"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; AlphaShark/1.0)",
+        "Accept": "application/json",
+        "Referer": "https://www.aripaev.ee/",
+    }
+    cookie = os.environ.get("ARIPAEV_COOKIE", "").strip()
+    if cookie:
+        headers["Cookie"] = cookie
+
+    total_players: int | None = None
+    rank: int | None = None
+    value_eur: float | None = None
+    today_return_pct: float | None = None
+    week_return_pct: float | None = None
+    month_return_pct: float | None = None
+    portfolio_name = "unknown"
+
+    try:
+        # ── Public: total player count ──────────────────────────────────────────
+        resp = requests.get(
+            f"{ff_base}/PlayerBadges?playerId={player_id}", headers=headers, timeout=10
+        )
+        if resp.ok:
+            logger.info("PlayerBadges response: %s", resp.text[:400])
+            data = resp.json()
+            # Unwrap Norkon envelope {"success": true, "result": {...}}
+            if isinstance(data, dict) and data.get("success") and isinstance(data.get("result"), dict):
+                data = data["result"]
+            if isinstance(data, dict):
+                total_players = _coerce_int(
+                    data.get("playerCount") or data.get("totalPlayers")
+                    or data.get("count") or data.get("total")
+                )
+
+        # ── Public: player profile (contains player name + activity log) ──────
+        resp = requests.get(f"{ff_base}/PlayerData/{player_id}", headers=headers, timeout=10)
+        if resp.ok:
+            logger.info("PlayerData response: %s", resp.text[:600])
+            data = resp.json()
+            # Unwrap Norkon envelope
+            if isinstance(data, dict) and data.get("success") and isinstance(data.get("result"), dict):
+                data = data["result"]
+            if isinstance(data, dict):
+                player = data.get("player") or {}
+                portfolio_name = (
+                    player.get("name") or data.get("name") or data.get("playerName") or "unknown"
+                )
+                # Extract fund name from activity log (value/rank not present here)
+                for act in (data.get("activity") or []):
+                    contents = act.get("contents") or {}
+                    if str(contents.get("fid") or "") == str(fund_id):
+                        portfolio_name = contents.get("fname") or portfolio_name
+                        break
+
+        # ── Direct WebSocket to Norkon Pulse server ────────────────────────────
+        if cookie and (value_eur is None or rank is None):
+            jwt_match_ws = re.search(r"\bjwt=([^;]+)", cookie)
+            if jwt_match_ws:
+                ws_jwt = _norkon_jwt(jwt_match_ws.group(1).strip(), headers)
+                if ws_jwt:
+                    ws_result = _fetch_via_norkon_ws(ws_jwt, fund_id, player_id)
+                    if ws_result:
+                        value_eur = value_eur or ws_result.get("value_eur")
+                        rank = rank or ws_result.get("rank")
+                        today_return_pct = today_return_pct or ws_result.get("today_return_pct")
+                        week_return_pct = week_return_pct or ws_result.get("week_return_pct")
+                        month_return_pct = month_return_pct or ws_result.get("month_return_pct")
+
+        # ── Authenticated: exchange Äripäev JWT → Norkon JWT ───────────────────
+        if cookie and (value_eur is None or rank is None):
+            jwt_match = re.search(r"\bjwt=([^;]+)", cookie)
+            logger.info("JWT regex match: %s", bool(jwt_match))
+            if jwt_match:
+                nk_token = _norkon_jwt(jwt_match.group(1).strip(), headers)
+                if nk_token:
+                    auth = {**headers, "Authorization": f"Bearer {nk_token}"}
+                    # userdata → confirms fund id
+                    ud_resp = requests.get(
+                        f"{api_base}/fantasyfunds/userdata", headers=auth, timeout=10
+                    )
+                    if ud_resp.ok:
+                        logger.info("userdata response: %s", ud_resp.text[:400])
+
+                    # Authenticated fund-specific endpoints — log responses to aid discovery
+                    for ep in [
+                        # Norkon lowercase paths (same style as userdata which works)
+                        f"{api_base}/fantasyfunds/fund?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/fund?id={fund_id}",
+                        f"{api_base}/fantasyfunds/funds",
+                        f"{api_base}/fantasyfunds/performance?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/returns?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/stats?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/overview?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/portfolio?fid={fund_id}",
+                        f"{api_base}/fantasyfunds/leaderboard",
+                        f"{api_base}/fantasyfunds/rankings",
+                        f"{api_base}/fantasyfunds/ranking?fid={fund_id}",
+                        # FantasyFunds PascalCase paths
+                        f"{api_base}/FantasyFunds/GetFundPerformance?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/FundPerformance?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/fund-performance?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/GetFundRank?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/FundRank?fid={fund_id}",
+                        f"{api_base}/FantasyFunds/Leaderboard",
+                        f"{api_base}/FantasyFunds/Rankings",
+                        f"{api_base}/FantasyFunds/PlayerData/{player_id}",
+                    ]:
+                        try:
+                            r = requests.get(ep, headers=auth, timeout=5)
+                            ep_name = ep.split("/")[-1].split("?")[0]
+                            if not r.ok:
+                                logger.info("Auth endpoint %s → HTTP %s", ep_name, r.status_code)
+                                continue
+                            body = r.text.strip()
+                            if body in ("null", "", "[]"):
+                                logger.info("Auth endpoint %s → empty", ep_name)
+                                continue
+                            logger.info("Auth endpoint %s → %s", ep_name, body[:400])
+                            try:
+                                d = r.json()
+                            except Exception:
+                                continue
+                            if not isinstance(d, dict):
+                                continue
+                            # Unwrap Norkon envelope
+                            if d.get("success") and isinstance(d.get("result"), dict):
+                                d = d["result"]
+                            value_eur, rank, today_return_pct, week_return_pct, month_return_pct = (
+                                _parse_fund_fields(
+                                    d, fund_id,
+                                    value_eur, rank, today_return_pct, week_return_pct, month_return_pct,
+                                )
+                            )
+                            if value_eur is not None and rank is not None:
+                                break
+                        except Exception:
+                            continue
+
+        # ── Fallback: unauthenticated fund endpoints ───────────────────────────
+        if fund_id and (value_eur is None or rank is None):
+            for ep in [
+                f"{ff_base}/FundStats?fid={fund_id}",
+                f"{ff_base}/GetFundData?fid={fund_id}",
+                f"{ff_base}/historical-fund-performance?fid={fund_id}",
+            ]:
+                try:
+                    r = requests.get(ep, headers=headers, timeout=5)
+                    if not r.ok or r.text.strip() in ("null", "", "[]"):
+                        continue
+                    d = r.json()
+                    if not isinstance(d, dict):
+                        continue
+                    value_eur, rank, today_return_pct, week_return_pct, month_return_pct = (
+                        _parse_fund_fields(
+                            d, fund_id,
+                            value_eur, rank, today_return_pct, week_return_pct, month_return_pct,
+                        )
+                    )
+                    if value_eur is not None and rank is not None:
+                        break
+                except Exception:
+                    continue
+
+    except Exception as exc:
+        logger.warning("Own game profile API fetch failed: %s", exc)
+        return None
+
+    # ── Playwright fallback: load actual SPA and intercept network calls ──────
+    if (rank is None or value_eur is None) and cookie:
+        logger.info("REST APIs missing rank/value — trying Playwright browser fetch")
+        pw_result = _fetch_via_playwright(url, cookie, player_id, fund_id)
+        if pw_result is not None:
+            # Merge: prefer Playwright data for rank/value, keep REST data for total_players
+            return CompetitorSnapshot(
+                url=pw_result.url,
+                portfolio_name=pw_result.portfolio_name if pw_result.portfolio_name != "unknown" else portfolio_name,
+                rank=pw_result.rank if pw_result.rank is not None else rank,
+                total_players=total_players if total_players is not None else pw_result.total_players,
+                value_eur=pw_result.value_eur if pw_result.value_eur is not None else value_eur,
+                today_return_pct=pw_result.today_return_pct if pw_result.today_return_pct is not None else today_return_pct,
+                week_return_pct=pw_result.week_return_pct if pw_result.week_return_pct is not None else week_return_pct,
+                month_return_pct=pw_result.month_return_pct if pw_result.month_return_pct is not None else month_return_pct,
+                visible_holdings=[],
+                holdings_total_count=None,
+            )
+
+    if total_players is None and rank is None and value_eur is None:
+        logger.warning("Own game profile API returned no usable data for player %s", player_id)
+        return None
+
+    logger.info(
+        "Own game profile fetched via API: rank=%s/%s, value=%s EUR",
+        rank,
+        total_players,
+        f"{value_eur:.0f}" if value_eur is not None else "n/a",
+    )
+    return CompetitorSnapshot(
+        url=url,
+        portfolio_name=portfolio_name,
+        rank=rank,
+        total_players=total_players,
+        value_eur=value_eur,
+        today_return_pct=today_return_pct,
+        week_return_pct=week_return_pct,
+        month_return_pct=month_return_pct,
+        visible_holdings=[],
+        holdings_total_count=None,
+    )
+
+
 def _send(embed: dict, webhook_url: str) -> None:
     resp = requests.post(webhook_url, json={"embeds": [embed]}, timeout=10)
     resp.raise_for_status()
@@ -201,6 +794,7 @@ def main() -> None:
         logger.error("Portfolio has no positions")
         return
 
+    today = date.today().isoformat()
     tickers = [p["ticker"] for p in positions]
     prices = _fetch_prices(tickers)
 
@@ -223,6 +817,33 @@ def main() -> None:
         benchmark_ret = (curr / prev - 1) if prev > 0 else 0.0
 
     alpha = portfolio_ret - benchmark_ret
+
+    # ── Auto-fetch own game profile (rank, equity, game-reported returns) ───
+    game_stats = _fetch_own_game_stats()
+    if game_stats is not None:
+        # Auto-save competition standing so verify.py rank prompt can be skipped.
+        if game_stats.rank is not None and game_stats.total_players is not None:
+            try:
+                save_competition_standing(game_stats.rank, game_stats.total_players, today)
+                logger.info(
+                    "Competition standing auto-saved: rank %d / %d",
+                    game_stats.rank,
+                    game_stats.total_players,
+                )
+            except Exception as exc:
+                logger.warning("Could not auto-save competition standing: %s", exc)
+
+        # Auto-sync paper account equity using game-reported portfolio value.
+        if game_stats.value_eur is not None and game_stats.value_eur > 0:
+            price_map = {t: float(prices[t][1]) for t in tickers if t in prices}
+            if price_map:
+                try:
+                    sync_verified_positions(positions, game_stats.value_eur, today, price_map)
+                    logger.info(
+                        "Paper account equity auto-synced: €%.0f", game_stats.value_eur
+                    )
+                except Exception as exc:
+                    logger.warning("Could not auto-sync paper account equity: %s", exc)
 
     # Sort by return descending for easy scanning on mobile
     pos_returns.sort(key=lambda x: x[2], reverse=True)
@@ -277,34 +898,56 @@ def main() -> None:
 
     portfolio_date = portfolio.get("date", "unknown")
     portfolio_source = portfolio.get("source", "unknown")
-    today = date.today().isoformat()
     stale_warning = ""
     if portfolio_date != today:
         stale_warning = f"\n\n⚠️ _Portfolio data is from **{portfolio_date}** (not today). Run verify.py to update._"
 
     description = f"{perf_line}{us_note}{stale_warning}\n\n💬 {recommendation}{prize_note}"
 
+    # Build game standing field if profile data was fetched.
+    game_standing_field: dict | None = None
+    if game_stats is not None:
+        rank_str = f"#{game_stats.rank} / {game_stats.total_players}" if game_stats.rank else "n/a"
+        value_str = f"€{game_stats.value_eur:,.0f}".replace(",", " ") if game_stats.value_eur else "n/a"
+        ret_today = f"{game_stats.today_return_pct:+.2f}%" if game_stats.today_return_pct is not None else "n/a"
+        ret_week = f"{game_stats.week_return_pct:+.2f}%" if game_stats.week_return_pct is not None else "n/a"
+        ret_month = f"{game_stats.month_return_pct:+.2f}%" if game_stats.month_return_pct is not None else "n/a"
+        game_standing_field = {
+            "name": "📊 Game Standing (auto-fetched)",
+            "value": (
+                f"**Rank:** {rank_str}\n"
+                f"**Portfolio value:** {value_str}\n"
+                f"**Game returns:** today {ret_today} · week {ret_week} · month {ret_month}"
+            ),
+            "inline": False,
+        }
+
+    fields = []
+    if game_standing_field:
+        fields.append(game_standing_field)
+    fields += [
+        {
+            "name": "Game Search List",
+            "value": search_list[:1024],
+            "inline": False,
+        },
+        {
+            "name": "Today's Position Moves",
+            "value": table[:1024],
+            "inline": False,
+        },
+        {
+            "name": "Action For Tomorrow Morning",
+            "value": action_note,
+            "inline": False,
+        },
+    ]
+
     embed = {
         "title": f"🌙 AlphaShark Evening Review — {today}",
         "description": description,
         "color": _EMBED_COLOUR,
-        "fields": [
-            {
-                "name": "Game Search List",
-                "value": search_list[:1024],
-                "inline": False,
-            },
-            {
-                "name": "Today's Position Moves",
-                "value": table[:1024],
-                "inline": False,
-            },
-            {
-                "name": "Action For Tomorrow Morning",
-                "value": action_note,
-                "inline": False,
-            },
-        ],
+        "fields": fields,
         "footer": {
             "text": f"{len(pos_returns)} positions · {portfolio_source} · Changes before 10:00 EET execute at tomorrow's open"
         },
@@ -314,7 +957,7 @@ def main() -> None:
 
     # Persist observations so next morning's agents can read yesterday's evening review.
     try:
-        observations = {
+        observations: dict = {
             "date": today,
             "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
             "portfolio_return": portfolio_ret,
@@ -326,6 +969,15 @@ def main() -> None:
             ],
             "ai_recommendation": recommendation,
         }
+        if game_stats is not None:
+            observations["game_standing"] = {
+                "rank": game_stats.rank,
+                "total_players": game_stats.total_players,
+                "value_eur": game_stats.value_eur,
+                "today_return_pct": game_stats.today_return_pct,
+                "week_return_pct": game_stats.week_return_pct,
+                "month_return_pct": game_stats.month_return_pct,
+            }
         obs_path = os.path.abspath(_OBSERVATIONS_PATH)
         with open(obs_path, "w") as f:
             json.dump(observations, f, indent=2)

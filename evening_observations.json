@@ -1,40 +1,48 @@
 {
-  "date": "2026-04-21",
-  "timestamp": "2026-04-21T21:10:58+00:00",
-  "portfolio_return": 0.02272088803619078,
-  "benchmark_return": -0.006348217959672997,
-  "alpha": 0.029069105995863778,
+  "date": "2026-04-22",
+  "timestamp": "2026-04-22T21:15:22+00:00",
+  "portfolio_return": 0.02826726348468418,
+  "benchmark_return": 0.010460084168953943,
+  "alpha": 0.017807179315730236,
   "position_returns": [
     {
-      "ticker": "STX",
-      "weight": 0.15,
-      "return": 0.03733214342577584,
-      "price": 559.9000244140625
-    },
-    {
       "ticker": "AMD",
-      "weight": 0.22,
-      "return": 0.034697136220384506,
-      "price": 284.489990234375
+      "weight": 0.25,
+      "return": 0.06668073349461201,
+      "price": 303.4599914550781
     },
     {
-      "ticker": "ALB",
-      "weight": 0.24,
-      "return": 0.018426301412262314,
-      "price": 198.4199981689453
+      "ticker": "STLD",
+      "weight": 0.1,
+      "return": 0.032923117837330595,
+      "price": 227.4600067138672
     },
     {
       "ticker": "ON",
-      "weight": 0.24,
-      "return": 0.015778472908336783,
-      "price": 86.91000366210938
+      "weight": 0.05,
+      "return": 0.023932736325116277,
+      "price": 88.98999786376953
     },
     {
-      "ticker": "INTC",
-      "weight": 0.15,
-      "return": 0.008523671445973546,
-      "price": 66.26000213623047
+      "ticker": "MCHP",
+      "weight": 0.2,
+      "return": 0.019152391522463397,
+      "price": 82.4800033569336
+    },
+    {
+      "ticker": "ADI",
+      "weight": 0.2,
+      "return": 0.016388266032748122,
+      "price": 381.4200134277344
     }
   ],
-  "ai_recommendation": "Yes\u2014keep STX and AMD (they\u2019re leading and driving your positive alpha), and keep ALB/ON as steady contributors; don\u2019t drop any based on today\u2019s returns. If you must make one change, only consider trimming INTC (lowest performer at +0.9%) to redeploy into STX/AMD momentum."
+  "ai_recommendation": "Yes\u2014keep the current positions (AMD, STLD, ON, MCHP, ADI) since all are outperforming the benchmark today, and the portfolio\u2019s positive alpha (+1.78%) suggests the tilt is working. Don\u2019t drop anything yet; only consider trimming if any position reverses tomorrow (e.g., falls below the benchmark return) and redeploy into the strongest remaining winner.",
+  "game_standing": {
+    "rank": null,
+    "total_players": 8087,
+    "value_eur": 11266.454461715966,
+    "today_return_pct": 60.018770530267474,
+    "week_return_pct": null,
+    "month_return_pct": null
+  }
 }

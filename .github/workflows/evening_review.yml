@@ -9,7 +9,7 @@ on:
 jobs:
   review:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
     concurrency:
       group: alphashark-git-push
       cancel-in-progress: false
@@ -29,11 +29,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Install Playwright browser
+        run: playwright install chromium --with-deps
+
       - name: Run evening review
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           SUPABASE_CONNECTION_STRING: ${{ secrets.SUPABASE_CONNECTION_STRING }}
+          ARIPAEV_COOKIE: ${{ secrets.ARIPAEV_COOKIE }}
         run: python scripts/evening_review.py
 
       - name: Commit evening observations
