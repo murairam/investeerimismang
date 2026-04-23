@@ -1,6 +1,6 @@
 {
   "date": "2026-04-23",
-  "timestamp": "2026-04-23T12:47:01+00:00",
+  "timestamp": "2026-04-23T12:59:15+00:00",
   "portfolio_return": 0.03215089219046994,
   "benchmark_return": 0.010460084168953943,
   "alpha": 0.021690808021515996,
@@ -42,13 +42,13 @@
       "price": 1522.0400390625
     }
   ],
-  "ai_recommendation": "Update: keep AMD, STX, ANET, SMCI, and ON (all outperforming today) and drop MPWR (only laggard at -0.4%) to free risk for higher-conviction upside. Since the leaderboard snapshot is Monday 09:00 EET and you\u2019re currently beating the benchmark (positive alpha), tilt tomorrow\u2019s portfolio more toward the strongest performers\u2014add incremental weight to AMD/SMCI/STX rather than adding new low-momentum names.",
+  "ai_recommendation": "Update: keep AMD, STX, ANET, and SMCI (they\u2019re driving the outperformance), and drop MPWR (it\u2019s the laggard at -0.4%) while keeping ON for stability; add a higher-conviction tilt toward AMD/STX for the Monday 09:00 EET leaderboard push.",
   "game_standing": {
-    "rank": 1653,
+    "rank": 1649,
     "total_players": 8107,
     "value_eur": 11267.146265226178,
-    "today_return_pct": null,
-    "week_return_pct": null,
-    "month_return_pct": null
+    "today_return_pct": 3.414279005274934,
+    "week_return_pct": 7.949000000000001,
+    "month_return_pct": 12.671
   }
 }
