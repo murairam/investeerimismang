@@ -201,7 +201,7 @@ Note: `verify.py` in interactive mode requires manual input — use `--show` fla
 ## Operational Modes
 
 - **PREGAME (before 2026-04-06):** Updates one canonical `PREGAME_LOG.md` entry per date, appends full reruns to `PREGAME_RUNS.md`, tracks virtual €10k in `paper_account.json`, and generates structured learning files.
-- **LIVE (on/after 2026-04-06):** Writes to `DAILY_LOG.md`. `live_mode_lock.json` SHA256-locks strategy files — do not edit it manually.
+- **LIVE (on/after 2026-04-06):** Writes to `DAILY_LOG.md`. `live_mode_lock.json` SHA256-locks strategy files. **Do not edit it manually** — the `update_live_lock.yml` workflow regenerates it automatically on every merge to `main` that touches a protected file.
 
 ## Coding Conventions
 
@@ -238,13 +238,16 @@ Before committing code changes, update the following documentation files if they
 
 Auto-generated files (`PREGAME_LOG.md`, `PREGAME_RUNS.md`, `PREGAME_LEARNING.md`, `AI_SELF_CRITIQUE.md`, `portfolio_history.json`, `learning_state.json`) do NOT need manual updates.
 
+7. **Modified a protected strategy file** (`config.py`, `docs/rules.txt`, any file in `agents/`)? → **Do NOT update `live_mode_lock.json` manually.** The `update_live_lock.yml` workflow regenerates it automatically as soon as your PR is merged to `main`. Including a manually-updated lock in your PR is fine too, but the workflow will overwrite it correctly anyway.
+
 ## GitHub Actions
 
 | Workflow | Schedule | Purpose |
 |----------|----------|---------|
-| `alphashark.yml` | Mon–Fri 06:00 UTC | Full pipeline, auto-commits portfolio + learning files |
+| `alphashark.yml` | Mon–Fri 04:00 UTC | Full pipeline, auto-commits portfolio + learning files |
 | `verification_reminder.yml` | Mon–Fri 07:00 UTC | Discord reminder if portfolio not verified (LIVE only) |
 | `evening_review.yml` | Post-market | Optional evening review |
+| `update_live_lock.yml` | On push to `main` (protected files only) | Regenerates `live_mode_lock.json` fingerprints so the daily run never hits a freeze violation |
 
 GitHub secrets required: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_URL`.
 Optional: `OPENROUTER_API_KEY`, `DISCORD_USER_ID`.
