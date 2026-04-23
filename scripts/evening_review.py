@@ -399,6 +399,8 @@ def _fetch_via_playwright(
     month_return_pct: float | None = None
     portfolio_name = "unknown"
 
+    page_text: str = ""
+
     try:
         with sync_playwright() as pw:
             browser = pw.chromium.launch(headless=True)
@@ -414,6 +416,13 @@ def _fetch_via_playwright(
             page.goto(profile_url, wait_until="networkidle", timeout=25000)
             page.wait_for_timeout(12000)  # wait for rank frame (arrives after initial portfolio frame)
             logger.info("Playwright: captured %d WS frames, %d API responses", len(ws_frames), len(captured))
+
+            # Extract rendered page text — SPA renders rank visibly in DOM
+            try:
+                page_text = page.inner_text("body") or ""
+                logger.info("Page text sample: %s", page_text[:500])
+            except Exception as exc:
+                logger.info("Could not get page text: %s", exc)
 
             browser.close()
     except Exception as exc:
@@ -462,10 +471,11 @@ def _fetch_via_playwright(
                 if today_return_pct is None:
                     ticks = res.get("ticks") or []
                     if len(ticks) >= 2 and isinstance(ticks[0], list):
-                        first_val = _coerce_float(ticks[0][1])
+                        # Use last two ticks for daily return (not first vs last which is game-total)
+                        prev_val = _coerce_float(ticks[-2][1])
                         last_val = _coerce_float(ticks[-1][1])
-                        if first_val and last_val and first_val != 0:
-                            today_return_pct = (last_val / first_val - 1) * 100
+                        if prev_val and last_val and prev_val != 0:
+                            today_return_pct = (last_val / prev_val - 1) * 100
                 week_return_pct = week_return_pct or _coerce_float(
                     res.get("weekReturn") or res.get("wr") or res.get("week")
                 )
@@ -477,6 +487,16 @@ def _fetch_via_playwright(
                 rank = _scan_for_rank(msg)
         except Exception:
             pass
+
+    # Extract rank from rendered DOM — the SPA shows "X. koht Y mängija hulgas" on screen
+    if rank is None and page_text:
+        # Pattern: "123. koht 8087 mängija hulgas"
+        dom_rank_match = re.search(r"(\d+)\.\s*koht\s+\d+\s*m[äa]ngija", page_text, re.IGNORECASE)
+        if dom_rank_match:
+            rank = _coerce_int(dom_rank_match.group(1))
+            logger.info("Rank extracted from DOM text: %s", rank)
+        else:
+            logger.info("Rank pattern not found in DOM text (first 300 chars): %s", page_text[:300])
 
     # Parse captured API responses for rank/value
     for item in captured:
