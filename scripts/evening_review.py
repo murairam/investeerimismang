@@ -533,8 +533,13 @@ def _fetch_via_playwright(
         return None
 
     logger.info(
-        "Playwright: rank=%s, value=%s EUR, total_players=%s",
-        rank, f"{value_eur:.0f}" if value_eur is not None else "n/a", total_players,
+        "Playwright: rank=%s, value=%s EUR, total_players=%s | today=%s%% week=%s%% month=%s%%",
+        rank,
+        f"{value_eur:.0f}" if value_eur is not None else "n/a",
+        total_players,
+        f"{today_return_pct:.2f}" if today_return_pct is not None else "n/a",
+        f"{week_return_pct:.2f}" if week_return_pct is not None else "n/a",
+        f"{month_return_pct:.2f}" if month_return_pct is not None else "n/a",
     )
     return CompetitorSnapshot(
         url=profile_url,
@@ -748,7 +753,7 @@ def _fetch_own_game_stats() -> CompetitorSnapshot | None:
                 url=pw_result.url,
                 portfolio_name=pw_result.portfolio_name if pw_result.portfolio_name != "unknown" else portfolio_name,
                 rank=pw_result.rank if pw_result.rank is not None else rank,
-                total_players=total_players if total_players is not None else pw_result.total_players,
+                total_players=pw_result.total_players if pw_result.total_players is not None else total_players,
                 value_eur=pw_result.value_eur if pw_result.value_eur is not None else value_eur,
                 today_return_pct=pw_result.today_return_pct if pw_result.today_return_pct is not None else today_return_pct,
                 week_return_pct=pw_result.week_return_pct if pw_result.week_return_pct is not None else week_return_pct,
