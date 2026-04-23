@@ -465,53 +465,62 @@ def _fetch_via_playwright(
                 res = (sub.get("result") or {}) if isinstance(sub, dict) else {}
                 if not isinstance(res, dict):
                     continue
-                # "v" = portfolio value EUR, "b" = benchmark value
+                # "v" = portfolio value EUR
                 value_eur = value_eur or _coerce_float(res.get("v"))
-                # Compute today's return from ticks if not directly available
+                # "pos": [rank_0indexed, total_portfolios] — most reliable rank source
+                pos = res.get("pos")
+                if isinstance(pos, list) and len(pos) >= 2:
+                    if rank is None:
+                        rank = _coerce_int(pos[0])
+                        if rank is not None:
+                            rank += 1  # convert 0-indexed to 1-indexed
+                    if total_players is None:
+                        total_players = _coerce_int(pos[1])
+                    logger.info("pos[] from WS frame: rank=%s, total=%s", rank, total_players)
+                # "pcts": {"d": daily%, "w": weekly%, "m": monthly%, "t": total%}
+                pcts = res.get("pcts") or {}
+                if isinstance(pcts, dict):
+                    if today_return_pct is None:
+                        raw_d = _coerce_float(pcts.get("d"))
+                        if raw_d is not None:
+                            today_return_pct = raw_d * 100
+                    if week_return_pct is None:
+                        raw_w = _coerce_float(pcts.get("w"))
+                        if raw_w is not None:
+                            week_return_pct = raw_w * 100
+                    if month_return_pct is None:
+                        raw_m = _coerce_float(pcts.get("m"))
+                        if raw_m is not None:
+                            month_return_pct = raw_m * 100
+                # Fallback: derive today's return from history (last two closes)
                 if today_return_pct is None:
-                    ticks = res.get("ticks") or []
-                    if len(ticks) >= 2 and isinstance(ticks[0], list):
-                        # Use last two ticks for daily return (not first vs last which is game-total)
-                        prev_val = _coerce_float(ticks[-2][1])
-                        last_val = _coerce_float(ticks[-1][1])
-                        if prev_val and last_val and prev_val != 0:
-                            today_return_pct = (last_val / prev_val - 1) * 100
-                week_return_pct = week_return_pct or _coerce_float(
-                    res.get("weekReturn") or res.get("wr") or res.get("week")
-                )
-                month_return_pct = month_return_pct or _coerce_float(
-                    res.get("monthReturn") or res.get("mr") or res.get("month")
-                )
-            # Scan the full frame for rank — may be in any frame type
+                    history = res.get("history") or []
+                    if len(history) >= 2:
+                        prev_close = _coerce_float(history[-2].get("close"))
+                        last_close = _coerce_float(history[-1].get("close"))
+                        if prev_close and last_close and prev_close != 0:
+                            today_return_pct = (last_close / prev_close - 1) * 100
+            # DOM fallback for rank if pos[] not in WS frame
             if rank is None:
                 rank = _scan_for_rank(msg)
         except Exception:
             pass
 
-    # Extract rank from rendered DOM — the SPA shows "X. koht Y mängija hulgas" on screen
+    # Extract rank/total from rendered DOM as fallback (DOM shows "X. koht Y mängija hulgas")
     if rank is None and page_text:
-        # Pattern: "123. koht 8087 mängija hulgas"
-        dom_rank_match = re.search(r"(\d+)\.\s*koht\s+\d+\s*m[äa]ngija", page_text, re.IGNORECASE)
+        dom_rank_match = re.search(r"(\d+)\.\s*koht\s+(\d+)\s*m[äa]ngija", page_text, re.IGNORECASE)
         if dom_rank_match:
             rank = _coerce_int(dom_rank_match.group(1))
-            logger.info("Rank extracted from DOM text: %s", rank)
-        else:
-            logger.info("Rank pattern not found in DOM text (first 300 chars): %s", page_text[:300])
+            if total_players is None:
+                total_players = _coerce_int(dom_rank_match.group(2))
+            logger.info("Rank/total from DOM: %s / %s", rank, total_players)
 
-    # Parse captured API responses for rank/value
+    # Extract portfolio name from captured API responses
     for item in captured:
         body = item["body"]
-        # Unwrap Norkon envelope
         data = body.get("result", body) if isinstance(body.get("result"), dict) else body
         if not isinstance(data, dict):
             continue
-        value_eur, rank, today_return_pct, week_return_pct, month_return_pct = _parse_fund_fields(
-            data, fund_id, value_eur, rank, today_return_pct, week_return_pct, month_return_pct
-        )
-        if total_players is None:
-            total_players = _coerce_int(
-                data.get("playerCount") or data.get("totalPlayers") or data.get("count")
-            )
         name_candidate = (
             data.get("fname") or data.get("name") or data.get("fundName")
             or data.get("portfolioName")
