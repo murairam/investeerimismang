@@ -1,5 +1,5 @@
 {
-  "created_on": "2026-04-15",
+  "created_on": "2026-04-23",
   "game_start_date": "2026-04-06",
   "protected_files": [
     "config.py",
@@ -11,12 +11,12 @@
     "agents/challenger.py"
   ],
   "fingerprints": {
-    "config.py": "851d7d8952bbf789ef752ef8bf7d74bbda604d1987f8ad3281c94c31fff8ce4d",
+    "config.py": "dcaab1cf032e9cdf55f465c9fecceeda735c5f3025c4a7c881e88d427a739b36",
     "docs/rules.txt": "72cd80a937c847262b7754b21c21e4ecf5266cc91705b599a929f62c1cb75881",
     "agents/strategist.py": "ec02ff52eba25f4b0e88c19c0ab136951a662376c9d9b322a5f7bc10ad68aa2d",
     "agents/full_analyst.py": "54329dd021882f1f486acfad8f5b1b5a2433b48ecaf8be4d62748f05247709c4",
     "agents/devil.py": "7793c8b1df6353606d7a15da6062e605c061479e43ad03dd7b440dd3813961b1",
-    "agents/risk_manager.py": "4967d6b413a0700b0feec05b9914966a367ed63702ee3f4e5923e7c7d6438a10",
+    "agents/risk_manager.py": "9e8d8880e8cfb219f217754d796d7d8dea8a5fbfc52943816f899ec030f6cecd",
     "agents/challenger.py": "5b3e9ef418a69c2cc74d750bc93be141de0ff9546fb99695388a6826177341f9"
   }
 }

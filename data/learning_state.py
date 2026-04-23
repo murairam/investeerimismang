@@ -743,9 +743,13 @@ def build_prompt_learning_context(
                 )
         winners = state.get("validated_winners", [])
         if winners:
+            winner_tickers = [item["ticker"] for item in winners[:5]]
             lines.append(
-                "Validated winners (historically strong, but require vol_ratio > 1.0 before max-sizing — "
-                "past performance does not override today's volume confirmation):"
+                f"Validated winners — WINNER LOCKUP in effect for: {', '.join(winner_tickers)}. "
+                "Do NOT drop these names without a clear signal deterioration: mom_5d turning negative, "
+                "RSI < 50, or vs_index clearly negative. Do NOT exit a validated winner just because another "
+                "name has marginally stronger signals today — the switching cost (T+1 fills) is real. "
+                "Hold unless the thesis is broken, not merely slightly weaker:"
             )
             lines.extend(
                 f"- {item['ticker']}: avg {item['avg_return_1d']:+.2%} over {item['observations']} obs"

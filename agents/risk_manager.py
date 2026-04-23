@@ -56,8 +56,8 @@ Position sizing is computed downstream by Kelly math.
 1. **Consensus picks** (appear in 2+ of the 3 proposals): independently validated across different signal lenses. Give them higher conviction scores (8–10) unless there is a specific risk reason not to.
 2. **Unique picks**: evaluate on their own merits — Sharpe, momentum, vol_ratio, regime fit. Include the best ones.
 3. **Ignore weak unique picks**: if only one model picked something and its signals are mediocre, skip it.
-4. **Consensus conviction floor (MANDATORY)**: ticker in exactly 2 of 3 proposals → minimum conviction 8 (unless Devil flags HIGH risk). Ticker in all 3 proposals → minimum conviction 9 (unless Devil flags HIGH risk). Do not assign below these floors — ensemble agreement IS the signal.
-5. **Score by conviction** (see RULE #1 above): consensus 8–10, strong single-model 6–8, diversifiers 3–6.
+4. **Consensus conviction floor (MANDATORY)**: ticker in exactly 2 of 3 proposals → minimum conviction 8. Ticker in all 3 proposals → minimum conviction 9. Do not assign below these floors — ensemble agreement IS the signal. (Devil HIGH-risk exception only applies when devil accuracy is confirmed reliable — see runtime accuracy note injected below.)
+5. **Score by conviction** (see RULE #1 above): consensus 8–10, strong single-model 7–10 (a single agent with a unique breakout thesis + vol_ratio>1.5 + at_52w_high can score 9–10), diversifiers 3–6. Do NOT artificially cap unique picks at conviction 6–8 just because only one agent proposed them — unique high-conviction picks from the outcome data beat consensus filler.
    Conviction → weight mapping (Python-computed): 10→~25% | 9→~22% | 8→~20% | 7→~18% | 6→~16% | 5→~13% | 4→~11% | 3→~9% | 2→~7% | 1→~5%
 6. **Check market concentration**: if >65% ends up in one market, redistribute unless signal concentration is clearly superior.
 7. **Check regime fit and portfolio beta**:
@@ -69,7 +69,10 @@ Position sizing is computed downstream by Kelly math.
 8. **Acceleration matters**: prefer active movers. If two stocks are similar on 20d momentum, keep the one with better 5d momentum and stronger volume confirmation.
 9. **Slot cost rule**: every position must earn its slot. Do not include a merely acceptable stock if a better alternative from either proposal exists.
 10. **Earnings timing rule**: pre-earnings setups can be high conviction; earnings in <=1 day should be low conviction due to binary gap risk.
-11. **Risk overlays**: respect Devil HIGH/MEDIUM risk assessments and learning-state constraints.
+11. **Risk overlays**: respect Devil HIGH/MEDIUM risk assessments ONLY when devil accuracy is confirmed reliable (see runtime note). Learning-state constraints always apply.
+12. **at_52w_high is a POSITIVE signal**: empirical data shows picks at/near 52-week highs return +0.67%/day (61% hit rate in this game). NEVER cite 52-week high proximity as a reason to reduce conviction or weight. Stocks making new highs on momentum are leaders, not tops — size them accordingly.
+13. **RSI>85 + mom_5d>2% = momentum leader, NOT overextended**: the overbought weight cap only fires when RSI>85 AND 5-day momentum is stalling (<2%). An accelerating RSI breakout (RSI>85 with mom_5d>2%) is a primary BULL signal — assign full conviction. Do not downgrade these picks.
+14. **T+1 execution mechanics — 2-day minimum hold**: all game orders execute at the NEXT DAY'S open price. A 1-day hold means buying at the T+0 gap-up open and selling at the T+1 gap-up open — a round-trip through two consecutive opens with zero time for the thesis to develop. Do NOT rotate out of a position added in the last 2 trading days unless it has lost >5% cumulative or its core momentum signals (mom_5d, vs_index) have turned clearly negative.
 
 ## Guardrail ownership
 Hard game constraints and final weight bounds are enforced by Python validator logic. Focus this synthesis on ranking and conviction quality, not on re-deriving hard bounds.
@@ -610,7 +613,15 @@ class OpenAIRiskManager(BaseAgent):
         if not kept:
             return proposal
 
-        kept = self._rebalance_for_competition_edge(kept, candidate_map, bear_cases, regime_score)
+        # Load learning state once here — reused by _rebalance_for_competition_edge and Passes B/C2 below.
+        _learning_state_qe = load_learning_state()
+        _devil_acc_qe = _learning_state_qe.get("devil_accuracy", {})
+        _devil_accurate_qe: bool | None = (
+            _devil_acc_qe.get("devil_is_accurate")
+            if "devil_is_accurate" in _devil_acc_qe
+            else None
+        )
+        kept = self._rebalance_for_competition_edge(kept, candidate_map, bear_cases, regime_score, _devil_accurate_qe)
 
         # Pass A — Overbought-at-peak cap (Rule 18): code-enforced hard cap
         # When a stock is overbought AND its sector has HIGH rotation risk, apply a tighter
@@ -624,10 +635,15 @@ class OpenAIRiskManager(BaseAgent):
             rsi = c.get("rsi_14", float("nan"))
             pct_high = c.get("pct_from_52w_high", float("nan"))
             vol_ratio = c.get("vol_ratio", float("nan"))
+            mom_5d_ob = c.get("mom_5d", float("nan"))
+            # Dead-cat filter: cap when momentum is stalling OR unavailable (NaN).
+            # RSI>85 + mom_5d>2% = accelerating momentum leader — do NOT cap.
+            # RSI>85 + mom_5d<2% or mom_5d missing = exhausted/uncertain = apply overbought cap.
             overbought = (
                 not math.isnan(rsi) and rsi > config.OVERBOUGHT_RSI_THRESHOLD
                 and not math.isnan(pct_high) and pct_high >= -config.OVERBOUGHT_HIGH_PCT
                 and (math.isnan(vol_ratio) or vol_ratio <= config.OVERBOUGHT_VOLUME_EXCEPTION)
+                and (math.isnan(mom_5d_ob) or mom_5d_ob < getattr(config, "OVERBOUGHT_MOM5D_FLOOR", 0.02))
             )
             if overbought:
                 # Check sector rotation risk to determine effective cap
@@ -655,7 +671,7 @@ class OpenAIRiskManager(BaseAgent):
         # Pass B — Devil accuracy cap (Rule 19): code-enforced tiered cap
         devil_capped_indices: set[int] = set()
         devil_cap_by_index: dict[int, float] = {}  # track per-position cap for re-enforcement
-        learning_state = load_learning_state()
+        learning_state = _learning_state_qe  # reuse instance loaded above — avoid redundant IO
         devil = learning_state.get("devil_accuracy", {})
         if devil.get("devil_is_accurate"):
             for i, pos in enumerate(kept):
@@ -940,6 +956,7 @@ class OpenAIRiskManager(BaseAgent):
         candidate_map: dict[str, dict],
         bear_cases: dict[str, dict],
         regime_score: int,
+        devil_is_accurate: bool | None = None,
     ) -> list[Position]:
         if not positions:
             return positions
@@ -970,19 +987,26 @@ class OpenAIRiskManager(BaseAgent):
                 if cautious_market and vol_ratio < config.LOW_VOLUME_VOL_RATIO_THRESHOLD:
                     multiplier *= config.QUALITY_REBALANCE_WEAK_VOLUME_PENALTY
 
+            # Overbought penalty only fires when momentum is stalling (mom_5d < floor).
+            # RSI>85 + accelerating mom_5d = momentum leader; skip penalty.
             if (
                 not math.isnan(rsi)
                 and rsi > config.OVERBOUGHT_RSI_THRESHOLD
                 and not math.isnan(pct_from_high)
                 and pct_from_high >= -config.OVERBOUGHT_HIGH_PCT
                 and (math.isnan(vol_ratio) or vol_ratio <= config.OVERBOUGHT_VOLUME_EXCEPTION)
+                and (math.isnan(momentum_5d) or momentum_5d < getattr(config, "OVERBOUGHT_MOM5D_FLOOR", 0.02))
             ):
                 multiplier *= config.QUALITY_REBALANCE_OVERBOUGHT_PENALTY
 
-            if devil_risk == "HIGH":
-                multiplier *= config.QUALITY_REBALANCE_HIGH_RISK_PENALTY
-            elif devil_risk == "MEDIUM":
-                multiplier *= config.QUALITY_REBALANCE_MEDIUM_RISK_PENALTY
+            # Devil risk penalty: only apply when Devil accuracy is confirmed (≥60%).
+            # When devil_is_accurate=False, HIGH-flagged picks have been OUTPERFORMING —
+            # applying the penalty is anti-alpha. Skip entirely when inaccurate or unknown.
+            if devil_is_accurate is True:
+                if devil_risk == "HIGH":
+                    multiplier *= config.QUALITY_REBALANCE_HIGH_RISK_PENALTY
+                elif devil_risk == "MEDIUM":
+                    multiplier *= config.QUALITY_REBALANCE_MEDIUM_RISK_PENALTY
 
             if (
                 not math.isnan(vol_ratio)
@@ -1496,12 +1520,15 @@ class OpenAIRiskManager(BaseAgent):
         )
         _devil_acc_pct = _devil_acc.get("accuracy", float("nan"))
         if _devil_accurate is False and not math.isnan(_devil_acc_pct):
-            # Known inaccurate: suppress HIGH-risk penalty and override conflicting system prompt clause
+            # Known inaccurate: suppress ALL devil penalties — HIGH flags are anti-predictive.
+            _high_risk_ret = _devil_acc.get("high_risk_avg_return_1d", float("nan"))
+            _hr_str = f"{_high_risk_ret:+.2%}/day" if not math.isnan(_high_risk_ret) else "positively"
             _devil_note = (
-                f"⚠️ Devil accuracy: {_devil_acc_pct:.0%} — BELOW threshold (empirically unreliable). "
-                "HIGH-risk flags are frequently wrong. "
-                "SYSTEM PROMPT OVERRIDE: ignore the 'unless Devil flags HIGH risk' clause in the consensus floor rule. "
-                "Treat all HIGH flags as MEDIUM for today's synthesis — do NOT apply the 3-point conviction reduction."
+                f"🚨 Devil accuracy: {_devil_acc_pct:.0%} — EMPIRICALLY WRONG this game. "
+                f"HIGH-risk-flagged picks have returned {_hr_str} on average (Devil predicted losses; they OUTPERFORMED). "
+                "SYSTEM PROMPT OVERRIDE: ignore ALL conviction-reduction language tied to Devil HIGH-risk flags. "
+                "Devil HIGH-risk flags are BULLISH confirmation of volatile breakouts in this game — "
+                "SIZE THESE NAMES BY MOMENTUM AND CONSENSUS SIGNALS ALONE. Do not reduce conviction."
             )
         elif _devil_accurate is True and not math.isnan(_devil_acc_pct):
             _devil_note = f"Devil accuracy: {_devil_acc_pct:.0%} — reliable. Apply conviction reductions as instructed."
@@ -1517,8 +1544,8 @@ class OpenAIRiskManager(BaseAgent):
             if _devil_note:
                 lines.append(_devil_note)
             _high_action = (
-                "HIGH-risk flags shown below are LOW-RELIABILITY (see accuracy note above) — treat as informational, "
-                "trust the actual signals."
+                "HIGH-risk flags below are ANTI-PREDICTIVE — these names have OUTPERFORMED in this game. "
+                "Read the ACTUAL SIGNALS appended below and size by those, NOT the Devil's narrative."
                 if _devil_accurate is False
                 else "HIGH risk picks should be sized down or cut."
             )
@@ -1530,7 +1557,7 @@ class OpenAIRiskManager(BaseAgent):
             if high_risk:
                 lines.append("")
                 _high_label = (
-                    "**HIGH FLAG — LOW RELIABILITY (see accuracy note; treat as MEDIUM):**"
+                    "**HIGH FLAG — EMPIRICALLY WRONG (these names have OUTPERFORMED; size by SIGNALS, not this flag):**"
                     if _devil_accurate is False
                     else "**HIGH RISK (reduce weight or exclude):**"
                 )
@@ -1577,8 +1604,13 @@ class OpenAIRiskManager(BaseAgent):
             "Synthesise the final portfolio. Score consensus picks higher (conviction), not weights. "
             + (
                 "For HIGH-RISK picks flagged above: reduce conviction by at least 3 points or exclude. "
-                if _devil_accurate
-                else "Devil accuracy is below threshold — HIGH-risk flags are informational only; use your own judgment on sizing. "
+                if _devil_accurate is True
+                else (
+                    "Devil HIGH-risk flags have been WRONG this game — do NOT reduce conviction on flagged names. "
+                    "Size every position by its actual momentum, vol_ratio, RSI, and consensus signals. Ignore Devil narrative. "
+                    if _devil_accurate is False
+                    else "Devil accuracy is not yet established — use your own judgment on Devil HIGH-risk flags. "
+                )
             )
             + "Apply regime and concentration rules. Respond ONLY with the JSON object.",
         ]

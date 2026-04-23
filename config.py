@@ -77,6 +77,7 @@ OVERBOUGHT_RSI_THRESHOLD = 85   # raised from 79: in competition momentum market
 OVERBOUGHT_HIGH_PCT = 0.02      # within 2% of 52w high
 OVERBOUGHT_VOLUME_EXCEPTION = 1.8  # vol_ratio above this bypasses cap (genuine breakout volume)
 OVERBOUGHT_WEIGHT_CAP = 0.15
+OVERBOUGHT_MOM5D_FLOOR = 0.02   # dead-cat filter: RSI>85 cap fires when mom_5d < 2% OR mom_5d is NaN (data unavailable); accelerating RSI = leader, not topper
 # Tier-1 RSI gate: positions with RSI above this but below OVERBOUGHT_RSI_THRESHOLD are
 # "hot but unconfirmed" — cap at HIGH_MOMENTUM_CAP unless vol_ratio >= OVERBOUGHT_VOLUME_EXCEPTION.
 # Prevents the observed pattern of max-sizing exhausted momentum without volume backing.
