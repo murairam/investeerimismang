@@ -447,3 +447,35 @@ Winners: STX +4.0%, AMD +3.7%, ALB +2.1%
 - ▲ **AMD**: 22.0% → 25.0% (+3.0%)
 
 ---
+## 2026-04-23 07:04:14
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.3% · VIX: 18.9 · S&P 500 20d: +8.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +3.1% · Benchmark +1.0% · Alpha +2.0%
+Winners: AMD +7.0%, STLD +3.6%, ON +2.7%
+
+**Paper account:** Equity €9,062.16 (start €10,000) · Today -16.82% · Since start -9.38% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 95.0%
+
+**Thesis:** There were no formal cross-proposal consensus names, so the portfolio is built from the strongest slot-earning uniques: keep validated live winners AMD, ON, and STLD, then rotate out MCHP and ADI because tech alternatives STX and catalyst breakout GEV show materially stronger competition upside. I avoided slower or lower-beta names like ABB.ST and TXN, and also skipped adding a 6th filler because the bull mandate favors concentration; this mix should keep beta aggressive and near the desired bull range while reducing dead-money exposure and exiting weakening industrial legacy exposure.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **AMD** | 25.0% | Current holding and Proposal A anchor; still fully earns its slot with elite momentum, strong volume confirmation, and the best competition profile despite extreme overbought conditions in a BULL regime. |
+| 2 | **ON** | 12.0% | Current holding and Proposal A high-beta continuation name; 5d momentum is among the strongest in the set and volume remains supportive, making it a strong competition-style breakout hold. |
+| 3 | **STLD** | 20.0% | Current holding and Proposal A validated winner; materials remain a stronger rotation area than industrials, and STLD combines exceptional recent momentum with solid volume and low retail crowding. |
+| 4 | **STX** | 17.0% | Best unique replacement from Proposal A for slower semis; strong trend and high beta fit the bull mandate, and it is a clearer momentum upgrade over MCHP/ADI even with only average volume confirmation. |
+| 5 | **GEV** | 21.0% | Best unique catalyst pick from Proposal B; very strong volume-backed breakout and high beta add needed right-tail upside, and it is preferable to weaker industrial alternatives despite sector rotation risk. |
+
+**Changes from yesterday:**
+- ➕ Added **STX** at 17.0%
+- ➕ Added **GEV** at 21.0%
+- ➖ Removed **MCHP** (was 20.0%)
+- ➖ Removed **ADI** (was 20.0%)
+- ▲ **ON**: 5.0% → 12.0% (+7.0%)
+- ▲ **STLD**: 10.0% → 20.0% (+10.0%)
+
+---

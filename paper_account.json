@@ -9,14 +9,31 @@
     "STLD": 5.81585743,
     "ON": 7.3680241
   },
-  "verified_weights": {
-    "AMD": 0.25,
-    "MCHP": 0.2,
-    "ADI": 0.2,
-    "STLD": 0.1,
-    "ON": 0.05
+  "pending_order": {
+    "submitted_date": "2026-04-23",
+    "positions": [
+      {
+        "ticker": "AMD",
+        "weight": 0.25
+      },
+      {
+        "ticker": "ON",
+        "weight": 0.12
+      },
+      {
+        "ticker": "STLD",
+        "weight": 0.2
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.17
+      },
+      {
+        "ticker": "GEV",
+        "weight": 0.21
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -254,8 +271,56 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-23",
+      "equity": 9062.16,
+      "cash": 0.0,
+      "daily_return": -0.168228,
+      "return_since_start": -0.093784,
+      "turnover": 0.0,
+      "positions": {
+        "AMD": 11.25443818,
+        "MCHP": 31.6498208,
+        "ADI": 6.82553916,
+        "STLD": 5.81585743,
+        "ON": 7.3680241
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-23",
+        "positions": [
+          {
+            "ticker": "AMD",
+            "weight": 0.25
+          },
+          {
+            "ticker": "ON",
+            "weight": 0.12
+          },
+          {
+            "ticker": "STLD",
+            "weight": 0.2
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.17
+          },
+          {
+            "ticker": "GEV",
+            "weight": 0.21
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-22",
-  "last_equity": 10895.0
+  "last_rebalanced_date": "2026-04-23",
+  "last_equity": 9062.15955959,
+  "verified_weights": {
+    "AMD": 0.25,
+    "MCHP": 0.2,
+    "ADI": 0.2,
+    "STLD": 0.1,
+    "ON": 0.05
+  }
 }
