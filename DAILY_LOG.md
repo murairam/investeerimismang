@@ -447,35 +447,36 @@ Winners: STX +4.0%, AMD +3.7%, ALB +2.1%
 - ▲ **AMD**: 22.0% → 25.0% (+3.0%)
 
 ---
-## 2026-04-23 07:04:14
+## 2026-04-23 21:53:27
 
-**Market:** BULL regime · SPX vs 50d SMA: +5.3% · VIX: 18.9 · S&P 500 20d: +8.9%
+**Market:** BULL regime · SPX vs 50d SMA: +4.8% · VIX: 19.3 · S&P 500 20d: +7.8%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio +3.1% · Benchmark +1.0% · Alpha +2.0%
-Winners: AMD +7.0%, STLD +3.6%, ON +2.7%
+**Yesterday's P&L:** Portfolio +1.5% · Benchmark -0.4% · Alpha +1.9%
+Winners: ON +10.3%, MPWR +5.1%, STX +1.8% | Losers: SMCI -7.9%, ANET -2.4%
 
-**Paper account:** Equity €9,062.16 (start €10,000) · Today -16.82% · Since start -9.38% · Turnover 0.0% · Cash €0.00
+**Paper account:** Equity €11,267.00 (start €10,000) · Today +3.41% · Since start +12.67% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 84% · **Positions:** 5 · **Total weight:** 95.0%
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
 
-**Thesis:** There were no formal cross-proposal consensus names, so the portfolio is built from the strongest slot-earning uniques: keep validated live winners AMD, ON, and STLD, then rotate out MCHP and ADI because tech alternatives STX and catalyst breakout GEV show materially stronger competition upside. I avoided slower or lower-beta names like ABB.ST and TXN, and also skipped adding a 6th filler because the bull mandate favors concentration; this mix should keep beta aggressive and near the desired bull range while reducing dead-money exposure and exiting weakening industrial legacy exposure.
+**Thesis:** I elevated the double-consensus names ON, MPWR, and STX to highest conviction per ensemble rules, then filled remaining slots with the strongest unique accelerators TXN and MCHP while retaining AMD because learning-state guidance explicitly favored keeping it and its signals remain positive. I removed SMCI and ANET because both failed the slot-cost test and were specifically flagged as weak recent performers; this stays aggressive in a BULL regime while slightly reducing dependence on the weakest decelerating tech names, with beta likely still near the upper end of the 1.6-2.0 target range.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **AMD** | 25.0% | Current holding and Proposal A anchor; still fully earns its slot with elite momentum, strong volume confirmation, and the best competition profile despite extreme overbought conditions in a BULL regime. |
-| 2 | **ON** | 12.0% | Current holding and Proposal A high-beta continuation name; 5d momentum is among the strongest in the set and volume remains supportive, making it a strong competition-style breakout hold. |
-| 3 | **STLD** | 20.0% | Current holding and Proposal A validated winner; materials remain a stronger rotation area than industrials, and STLD combines exceptional recent momentum with solid volume and low retail crowding. |
-| 4 | **STX** | 17.0% | Best unique replacement from Proposal A for slower semis; strong trend and high beta fit the bull mandate, and it is a clearer momentum upgrade over MCHP/ADI even with only average volume confirmation. |
-| 5 | **GEV** | 21.0% | Best unique catalyst pick from Proposal B; very strong volume-backed breakout and high beta add needed right-tail upside, and it is preferable to weaker industrial alternatives despite sector rotation risk. |
+| 1 | **ON** | 7.0% | Consensus pick in both available proposals and also explicitly validated by learning context to keep; exceptional momentum leader with mom_5d +23.3% and vol_ratio 2.32 makes it a top BULL-regime breakout despite crowding. |
+| 2 | **MPWR** | 17.0% | Consensus pick across both proposals with strong recent live performance and continued momentum confirmation; mom_5d +14.5% and solid volume keep it among the highest-conviction semiconductor leaders. |
+| 3 | **STX** | 15.0% | Consensus pick across both proposals and reinforced by recent portfolio gains; strong relative strength and mom_5d +11.5% justify high conviction even with lighter volume, as storage remains one of the cleaner momentum pockets. |
+| 4 | **TXN** | 22.0% | Best unique addition from the full analyst with standout acceleration: mom_5d +27.5% and vol_ratio 4.30 are elite breakout signals, and low retail crowding improves right-tail competition appeal. |
+| 5 | **MCHP** | 16.0% | Best unique addition from the strategist replacing weaker incumbents; mom_5d +18.9% with vol_ratio 2.08 and strong trend persistence make it a worthy aggressive rotation target. |
+| 6 | **AMD** | 23.0% | Retained from current holdings and supported by learning context to keep; not consensus, but still has positive mom_5d +10.7%, acceptable volume, and high beta that fits the competition mandate better than slower alternatives. |
 
 **Changes from yesterday:**
-- ➕ Added **STX** at 17.0%
-- ➕ Added **GEV** at 21.0%
-- ➖ Removed **MCHP** (was 20.0%)
-- ➖ Removed **ADI** (was 20.0%)
-- ▲ **ON**: 5.0% → 12.0% (+7.0%)
-- ▲ **STLD**: 10.0% → 20.0% (+10.0%)
+- ➕ Added **TXN** at 22.0%
+- ➕ Added **MCHP** at 16.0%
+- ➖ Removed **ANET** (was 19.0%)
+- ➖ Removed **SMCI** (was 10.0%)
+- ▼ **ON**: 12.0% → 7.0% (-5.0%)
 
 ---
+
