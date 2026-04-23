@@ -1519,19 +1519,32 @@ class OpenAIRiskManager(BaseAgent):
             else None  # unknown — not enough observations
         )
         _devil_acc_pct = _devil_acc.get("accuracy", float("nan"))
-        if _devil_accurate is False and not math.isnan(_devil_acc_pct):
-            # Known inaccurate: suppress ALL devil penalties — HIGH flags are anti-predictive.
-            _high_risk_ret = _devil_acc.get("high_risk_avg_return_1d", float("nan"))
-            _hr_str = f"{_high_risk_ret:+.2%}/day" if not math.isnan(_high_risk_ret) else "positively"
+        _high_risk_ret = _devil_acc.get("high_risk_avg_return_1d", float("nan"))
+        _low_risk_ret = _devil_acc.get("low_risk_avg_return_1d", float("nan"))
+        _below_threshold = _devil_accurate is False and not math.isnan(_devil_acc_pct)
+        _anti_predictive = (
+            _below_threshold
+            and _devil_acc_pct < 0.40
+            and not math.isnan(_high_risk_ret)
+            and not math.isnan(_low_risk_ret)
+            and _high_risk_ret > _low_risk_ret
+        )
+        if _anti_predictive:
+            _hr_str = f"{_high_risk_ret:+.2%}/day"
+            _lr_str = f"{_low_risk_ret:+.2%}/day"
             _devil_note = (
-                f"🚨 Devil accuracy: {_devil_acc_pct:.0%} — EMPIRICALLY WRONG this game. "
-                f"HIGH-risk-flagged picks have returned {_hr_str} on average (Devil predicted losses; they OUTPERFORMED). "
-                "SYSTEM PROMPT OVERRIDE: ignore ALL conviction-reduction language tied to Devil HIGH-risk flags. "
-                "Devil HIGH-risk flags are BULLISH confirmation of volatile breakouts in this game — "
-                "SIZE THESE NAMES BY MOMENTUM AND CONSENSUS SIGNALS ALONE. Do not reduce conviction."
+                f"🚨 Devil accuracy: {_devil_acc_pct:.0%} (<40%) and anti-predictive in recent data. "
+                f"HIGH-risk picks have averaged {_hr_str} vs LOW-risk {_lr_str}. "
+                "SYSTEM PROMPT OVERRIDE: do not reduce conviction solely due to Devil HIGH-risk flags; "
+                "size by momentum, volume, RSI, and consensus signals."
             )
         elif _devil_accurate is True and not math.isnan(_devil_acc_pct):
             _devil_note = f"Devil accuracy: {_devil_acc_pct:.0%} — reliable. Apply conviction reductions as instructed."
+        elif _below_threshold:
+            _devil_note = (
+                f"Devil accuracy: {_devil_acc_pct:.0%} — below reliability threshold. "
+                "Treat HIGH-risk flags as informational and use your own judgment."
+            )
         else:
             _devil_note = ""  # unknown accuracy: no override, apply system prompt defaults
 
@@ -1543,12 +1556,18 @@ class OpenAIRiskManager(BaseAgent):
             lines += ["", "### ⚠️ Devil's Advocate — Bear Cases"]
             if _devil_note:
                 lines.append(_devil_note)
-            _high_action = (
-                "HIGH-risk flags below are ANTI-PREDICTIVE — these names have OUTPERFORMED in this game. "
-                "Read the ACTUAL SIGNALS appended below and size by those, NOT the Devil's narrative."
-                if _devil_accurate is False
-                else "HIGH risk picks should be sized down or cut."
-            )
+            if _devil_accurate is True:
+                _high_action = "HIGH risk picks should be sized down or cut."
+            elif _anti_predictive:
+                _high_action = (
+                    "HIGH-risk flags below are anti-predictive in current data. "
+                    "Read the ACTUAL SIGNALS appended below and size by those, not by the Devil narrative alone."
+                )
+            else:
+                _high_action = (
+                    "HIGH-risk flags below are informational only (not yet reliable enough for hard penalties). "
+                    "Use the ACTUAL SIGNALS plus your own judgment."
+                )
             lines.append(
                 "These are the strongest arguments AGAINST each pick. "
                 f"Factor them into your weight decisions — {_high_action} "
@@ -1556,11 +1575,12 @@ class OpenAIRiskManager(BaseAgent):
             )
             if high_risk:
                 lines.append("")
-                _high_label = (
-                    "**HIGH FLAG — EMPIRICALLY WRONG (these names have OUTPERFORMED; size by SIGNALS, not this flag):**"
-                    if _devil_accurate is False
-                    else "**HIGH RISK (reduce weight or exclude):**"
-                )
+                if _devil_accurate is True:
+                    _high_label = "**HIGH RISK (reduce weight or exclude):**"
+                elif _anti_predictive:
+                    _high_label = "**HIGH FLAG — ANTI-PREDICTIVE IN RECENT DATA (size by signals, not this flag alone):**"
+                else:
+                    _high_label = "**HIGH RISK (informational only — apply judgment with signal context):**"
                 lines.append(_high_label)
                 for ticker, v in high_risk:
                     sigs = _signal_lookup.get(ticker, {})
@@ -1606,10 +1626,12 @@ class OpenAIRiskManager(BaseAgent):
                 "For HIGH-RISK picks flagged above: reduce conviction by at least 3 points or exclude. "
                 if _devil_accurate is True
                 else (
-                    "Devil HIGH-risk flags have been WRONG this game — do NOT reduce conviction on flagged names. "
-                    "Size every position by its actual momentum, vol_ratio, RSI, and consensus signals. Ignore Devil narrative. "
-                    if _devil_accurate is False
-                    else "Devil accuracy is not yet established — use your own judgment on Devil HIGH-risk flags. "
+                    "Devil HIGH-risk flags are currently anti-predictive — do NOT reduce conviction on flagged names solely due to that flag. "
+                    "Size by momentum, vol_ratio, RSI, and consensus signals. "
+                    if _anti_predictive
+                    else (
+                        "Devil accuracy is below threshold (or not yet established) — treat HIGH-risk flags as advisory and use your own judgment. "
+                    )
                 )
             )
             + "Apply regime and concentration rules. Respond ONLY with the JSON object.",
