@@ -430,6 +430,21 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 
 ---
 
+## Recent Development Highlights
+
+| Date | Change | Why |
+|------|--------|-----|
+| Apr 2026 | **Norkon WebSocket integration** — `verify.py` now intercepts live WS frames via Playwright to extract rank, portfolio value, and daily returns from the game platform | Game SPA delivers stats via WebSocket, not REST; HTML scraping broke after a platform update |
+| Apr 2026 | **JWT auth for game API** — authenticated REST calls using `ARIPAEV_COOKIE` → Norkon JWT exchange | Required for fetching own profile stats from the Norkon backend |
+| Apr 2026 | **Auto-regenerate live_mode_lock.json** (`update_live_lock.yml`) — SHA256 fingerprints are rebuilt automatically on every merge to `main` that touches a protected file | Prevents manual lock drift; no more "strategy freeze" failures after legitimate merges |
+| Apr 2026 | **Devil accuracy feedback loop refined** — HIGH-flagged picks hard-capped at 10% only when Devil accuracy > 60%; repeat-offender pre-injection (≥2 flags in last 5 days) added for all agents | Devil accuracy came in at 24% (bullish signal); tightened thresholds to avoid over-weighting a noisy critic |
+| Mar 2026 | **Competition-optimized ranking** — `competition_score` Z-score composite replaces generic selection score | Regime-specific weighting (BULL: mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%) directly targets the 75-day competition format |
+| Mar 2026 | **Overbought threshold raised 79→85** — RSI cap for weight reduction moved up | RSI 79–84 in momentum markets = leader, not topper; old threshold was cutting winners |
+| Mar 2026 | **Sector rotation table** injected into all agent prompts | Rotation is the #1 alpha source in short competitions — agents were previously blind to which sectors were exhausted |
+| Mar 2026 | **Pre-earnings opportunity signal** (`PRE_EARNINGS_SETUP` tag) | 2–6 day earners with strong momentum + RSI 50–75 have historically been the best short-window setups |
+
+---
+
 ## Research References
 
 Design decisions in this project are grounded in the following papers and open-source work.
