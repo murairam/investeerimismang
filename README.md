@@ -311,6 +311,26 @@ Candidate selection currently works like this:
 
 ---
 
+## Data Sources & APIs
+
+| Source | What it provides | Required key |
+|--------|-----------------|:------------:|
+| **yfinance** | Primary price data, OHLCV history, fundamentals, analyst ratings, earnings calendar, news headlines, options data, insider filing summaries | None (free) |
+| **EODHD** | Fallback for Nordic/Baltic tickers where yfinance coverage is unreliable or missing | `EODHD_API_KEY` |
+| **OpenAI** | GPT-5.4 for Strategist + Risk Manager; GPT-5.4-nano as last-resort fallback for all agents | `OPENAI_API_KEY` |
+| **OpenRouter** | Routes NVIDIA Nemotron-Super-120B (Challenger), DeepSeek V3.2 (Full Analyst), Qwen3-235B-A22B (Devil) | `OPENROUTER_API_KEY` |
+| **Google Gemini** | Gemini 2.5 Flash — Challenger fallback when OpenRouter/Nemotron is unavailable | `GEMINI_API_KEY` |
+| **SEC EDGAR Form 4** | Recent open-market insider purchases >$50k for US S&P 500 tickers | None (public API) |
+| **Google Trends** (`pytrends`) | Search interest — distinguishes crowded retail names from under-the-radar setups | None (free) |
+| **Discord webhooks** | Daily portfolio embed; @mention reminders in LIVE mode | `DISCORD_WEBHOOK_URL` |
+| **Supabase PostgreSQL** | Canonical persistent state (portfolios, learning records, cost log) | `SUPABASE_URL` + `SUPABASE_KEY` |
+| **Norkon/Äripäev game API** | Live rank, portfolio value, and daily returns scraped from the game platform via JWT auth + Playwright | `ARIPAEV_COOKIE` |
+| **GitHub Actions** | Zero-infra scheduled runs; auto-commits portfolio + learning files back to repo | Repo secrets |
+
+**Norkon integration note:** The game UI is a React SPA backed by the Norkon trading platform. Portfolio stats (rank, value, returns) are delivered via WebSocket frames — `verify.py` uses Playwright to intercept those WS frames and extract the data, with a REST fallback for less-frequent polling.
+
+---
+
 ## Setup
 
 ```bash
