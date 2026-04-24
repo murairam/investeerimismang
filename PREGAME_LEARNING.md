@@ -1,22 +1,22 @@
 # Pre-Game Learning Report
 
-Generated: 2026-04-23
+Generated: 2026-04-24
 Target go-live date: 2026-04-06
 Days remaining: 0
 
 ## Scoreboard
-- Training days with measurable alpha: 29
-- Win days (alpha > 0): 15
+- Training days with measurable alpha: 30
+- Win days (alpha > 0): 16
 - Loss days (alpha < 0): 14
-- Average daily alpha: -0.11%
-- Paper account equity: €11,267.00 (from €10,000.00, return +12.67%)
+- Average daily alpha: -0.06%
+- Paper account equity: €11,396.20 (from €10,000.00, return +13.96%)
 - Max drawdown (paper): 2.44%
-- Average turnover: 3.35%
+- Average turnover: 3.05%
 
 ## Confidence note
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
-- Latest day is verified against the actual game portfolio.
+- Latest day is still experimental / unverified.
 
 ## Best and worst day
 - Best alpha day: 2026-04-21 (+3.17%)
@@ -30,11 +30,11 @@ Days remaining: 0
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| ON | winner | 10 | +4.16% | 100% |
+| ON | winner | 12 | +5.14% | 100% |
 | INTC | winner | 8 | +1.54% | 100% |
 | XOM | winner | 8 | +1.50% | 75% |
-| STX | winner | 22 | +1.32% | 73% |
-| AMD | winner | 12 | +1.18% | 83% |
+| STX | winner | 24 | +1.34% | 75% |
+| AMD | winner | 14 | +1.13% | 86% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
 | DOW | loser | 8 | -0.71% | 50% |
 | VWS.CO | loser | 12 | -0.20% | 33% |

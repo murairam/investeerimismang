@@ -10,15 +10,31 @@
     "ON": 17.77394494,
     "SMCI": 45.17087348
   },
-  "verified_weights": {
-    "AMD": 0.25,
-    "ANET": 0.19,
-    "MPWR": 0.19,
-    "STX": 0.15,
-    "ON": 0.12,
-    "SMCI": 0.1
+  "pending_order": {
+    "submitted_date": "2026-04-24",
+    "positions": [
+      {
+        "ticker": "ON",
+        "weight": 0.05
+      },
+      {
+        "ticker": "MPWR",
+        "weight": 0.14
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.18
+      },
+      {
+        "ticker": "AMD",
+        "weight": 0.25
+      },
+      {
+        "ticker": "MCHP",
+        "weight": 0.18
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -274,8 +290,58 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-24",
+      "equity": 11396.2,
+      "cash": 0.0,
+      "daily_return": 0.011467,
+      "return_since_start": 0.13962,
+      "turnover": 0.0,
+      "positions": {
+        "AMD": 10.85881285,
+        "ANET": 14.09083247,
+        "MPWR": 1.64539929,
+        "STX": 3.40954876,
+        "ON": 17.77394494,
+        "SMCI": 45.17087348
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-24",
+        "positions": [
+          {
+            "ticker": "ON",
+            "weight": 0.05
+          },
+          {
+            "ticker": "MPWR",
+            "weight": 0.14
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.18
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.25
+          },
+          {
+            "ticker": "MCHP",
+            "weight": 0.18
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-23",
-  "last_equity": 11267.0
+  "last_rebalanced_date": "2026-04-24",
+  "last_equity": 11396.19739911,
+  "verified_weights": {
+    "AMD": 0.25,
+    "ANET": 0.19,
+    "MPWR": 0.19,
+    "STX": 0.15,
+    "ON": 0.12,
+    "SMCI": 0.1
+  }
 }
