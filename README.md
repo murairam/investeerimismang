@@ -4,33 +4,31 @@
 ![CI](https://github.com/murairam/investeerimismang/actions/workflows/alphashark.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data across ~630 selectable tickers in 6 markets, scores the full universe, runs a multi-model adversarial AI ensemble, validates the final portfolio against competition rules, and posts the recommendation to Discord.
+**AlphaShark** is an autonomous AI trading agent built to win the **Äripäev/SEB Investment Game** (Estonia). Every weekday it wakes up at 06:00 UTC, scans ~630 live tickers across 6 markets, runs a five-agent adversarial AI ensemble, and posts a validated portfolio recommendation to Discord — before the 10:00 EET submission deadline.
 
-**Game period: 6 April – 19 June 2026 · 844 participants · objective: rank #1**
+> **Game period:** 6 April – 19 June 2026 · **8 595 portfolios** · **Objective: rank #1**
 
 ---
 
 ## Engineering Highlights
 
-These are the non-obvious design decisions worth explaining in depth.
+### Adversarial multi-agent ensemble
+Three agents propose portfolios in parallel — Strategist, Challenger, and Full Analyst — using configurable model routes and fallbacks. A separate Devil pass stress-tests the combined shortlist, then the Risk Manager synthesizes the final portfolio. Agent roles are stable; model routing is configurable via `config.py`.
 
-**Adversarial multi-agent ensemble**
-Three agents propose portfolios in parallel — Strategist, Challenger, and Full Analyst — using configurable model routes and fallbacks. A separate Devil pass stress-tests the combined shortlist, then the Risk Manager synthesizes the final portfolio. Agent roles are stable; model routing is intentionally configurable via `config.py`.
+### Self-improving learning loop
+Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record with no human labelling required.
 
-**Self-improving learning loop**
-Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record without any human labelling.
+### Competition-optimized quantitative ranking
+Candidates are ranked by `competition_score`, a regime-specific Z-score composite: in BULL regimes it weights `mom_20d` 35%, `mom_5d` 25%, `sharpe_20d` 20%, `beta` 20% — with different weights in NEUTRAL and BEAR. The regime itself is a 0–100 score derived from VIX level, VIX term structure, SPX vs 200d SMA, market breadth, and credit spreads.
 
-**Optional cross-agent debate (second pass)**
-The debate pass is available behind `ENABLE_CROSS_CHECK` for shadow comparison experiments. When enabled, agents surface agreements/disagreements for Risk Manager context; when disabled (default), the pipeline skips this latency/cost step.
+### SHA256 strategy lock in LIVE mode
+Once the competition starts, `live_mode_lock.json` stores SHA256 fingerprints of all strategy files. Any accidental drift (edited prompt, changed config) is caught at startup and the pipeline refuses to run — preventing the classic mistake of iterating on a live system mid-game.
 
-**Competition-optimized quantitative ranking**
-Candidates are ranked by `competition_score`, a regime-specific Z-score composite: in BULL regimes it weights `mom_20d` 35%, `mom_5d` 25%, `sharpe_20d` 20%, `beta` 20% — different weights in NEUTRAL and BEAR. The regime is determined by a 0–100 composite score from VIX level, VIX term structure, SPX vs 200d SMA, market breadth, and credit spreads.
+### Symbol aliasing across 6 markets
+Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD. `symbol_master.json` maintains the canonical mapping. Yahoo is the primary source; EODHD fills a curated override set of edge-case tickers where Yahoo coverage is unreliable.
 
-**SHA256 strategy lock in LIVE mode**
-Once the competition starts, `live_mode_lock.json` stores SHA256 fingerprints of all strategy files. Any accidental drift (edited prompt, changed config) is caught at startup and the pipeline refuses to run. This prevents the classic mistake of iterating on a live competition system mid-game.
-
-**Symbol aliasing across 6 markets**
-Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (fallback provider). `symbol_master.json` maintains the canonical mapping. Yahoo is the primary source; EODHD is used only for a curated override set of edge-case tickers where Yahoo's coverage is unreliable.
+### Optional cross-agent debate
+A second-pass debate is available behind `ENABLE_CROSS_CHECK`. When enabled, agents surface agreements and disagreements for Risk Manager context. Disabled by default — the latency/cost tradeoff only makes sense for shadow comparison experiments.
 
 ---
 
@@ -53,33 +51,30 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 
 ---
 
-## Key Features
+## Quick Start
 
-- **Mixed AI decision stack**: Strategist + Challenger + Full Analyst run in parallel, Devil pressure-tests the shortlist, and Risk Manager synthesizes the final portfolio. Routes/fallbacks are configurable in `config.py`.
-- **Full-universe candidate set**: agents see the current filtered universe instead of a tiny shortlist capped per market
-- **Rich signal snapshot**: momentum, Sharpe, RSI, beta, volume confirmation, MACD, ATR, dividend yield, regime data, and catalyst overlays
-- **Parallel enrichment layer**: news, earnings, insider buying, and Google Trends are fetched concurrently and injected into prompts
-- **Sector rotation indicator**: per-sector `avg_mom_20d/5d`, RSI, breadth, and count computed from the full universe and injected into all agent prompts — rotation is the primary alpha source in 75-day competitions
-- **Pre-earnings opportunity signal**: tags stocks with earnings in 2–6 days + strong momentum as `PRE_EARNINGS_SETUP`; `EARNINGS RISK` warnings for low-conviction earners
-- **Competition-optimized ranking**: regime-specific Z-score weighted `competition_score` (BULL: mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%; NEUTRAL/BEAR variants) replaces the generic selection score
-- **Commodity price context**: live Brent crude, WTI, and Henry Hub nat gas injected for energy thesis validation
-- **Optional cross-agent debate**: second-pass agreement/disagreement analysis is available behind `ENABLE_CROSS_CHECK` for shadow comparisons
-- **Dynamic signal importance**: `learning_state.py` tracks directional accuracy of each signal vs next-day returns; most predictive signals flagged in the learning context
-- **Strategy decay monitoring**: compares recent 5-day alpha vs prior 10-day alpha; Risk Manager sees a STRATEGY DECAY ALERT when momentum gap exceeds threshold
-- **Confidence calibration tracking**: flags overconfidence patterns when high-confidence days underperform expectations
-- **Structured learning loop**: `portfolio_history.json` stores the canonical daily record, `learning_state.json` drives prompt injection, and `PREGAME_LEARNING.md` / `AI_SELF_CRITIQUE.md` are derived human summaries
-- **Verification and audit trail**: whole-percent portfolio rounding, manual verification tooling, and devil's-advocate impact logging
-- **Historical shadow trader**: strict no-lookahead backtest script for open-to-open portfolio simulation over prior periods
-
-**Quick commands:**
 ```bash
-python main.py                   # Run full pipeline
-python scripts/status.py         # View project dashboard (costs, learning, next steps)
-python scripts/verify.py         # Confirm portfolio sync (LIVE mode)
-python scripts/check_models.py   # Smoke-test model routes/keys without full pipeline run
-python scripts/pregame_review.py # View learning summary (PREGAME mode)
+cp .env.example .env             # fill in API keys
+pip install -r requirements.txt
+python main.py                   # run full pipeline
+python scripts/status.py         # dashboard: costs, learning state, next steps
+python scripts/verify.py         # sync portfolio after manual game submission (LIVE)
+python scripts/check_models.py   # smoke-test all model routes without a full run
 python scripts/historical_shadow_trader.py --start 2024-04-01 --end 2024-06-21
 ```
+
+## What it does
+
+| Capability | Detail |
+|------------|--------|
+| **Full-universe scan** | ~630 tickers across 6 markets, scored every day |
+| **15 per-stock signals** | momentum, Sharpe, RSI, beta, vol_ratio, MACD, ATR, and more — see [Signals](#signals-computed-per-candidate) |
+| **Parallel enrichment** | news, earnings calendar, SEC insider filings, Google Trends, commodity prices — all fetched concurrently |
+| **Sector rotation** | per-sector avg momentum, RSI, and breadth injected into every agent prompt |
+| **Pre-earnings signal** | `PRE_EARNINGS_SETUP` for 2–6 day earners with strong momentum; `EARNINGS RISK` for low-conviction names |
+| **Dynamic learning** | signal accuracy, devil performance, and strategy decay are tracked and injected into next-day prompts |
+| **Audit trail** | `DAILY_LOG.md`, `AI_SELF_CRITIQUE.md`, `verification_tracker.json` — every decision is logged |
+| **Historical backtest** | no-lookahead open-to-open simulator for prior periods |
 
 ---
 
@@ -107,20 +102,42 @@ Then confirm the system's record matches yours:
 `verify.py` is the truth-after-submission step: it confirms or corrects the day's canonical record and marks it as verified.
 ```
 
-### Pre-game training mode (until 6 April)
+### Current mode: LIVE (since 6 April 2026)
 
-The bot runs daily in **PREGAME** mode — all decisions are recorded but don't count toward the real game:
+The bot is now in **LIVE mode** — every decision counts toward the real game ranking.
 
-- Writes to `PREGAME_LOG.md` (separate from the real game log)
-- Tracks virtual P&L against the paper account
-- Generates `learning_state.json` (machine-usable rules, winners/losers, decision-quality metrics)
-- Generates `PREGAME_LEARNING.md` and `AI_SELF_CRITIQUE.md` as human-readable summaries of that structured state
-- Prompt injection prefers `learning_state.json`; markdown reports are derived outputs and fallbacks
+- Writes to `DAILY_LOG.md` (one entry per trading day)
+- Strategy files are SHA256-locked via `live_mode_lock.json` — any accidental change is caught at startup
+- `verify.py` must be run after each manual submission to keep the system's record in sync
+- A second GitHub Actions workflow fires at 07:00 UTC and pings Discord if verification hasn't happened
 
-### Automatic mode switch on 6 April
+**Pre-game training ran from ~March through 5 April.** During that period the system operated in PREGAME mode: recording decisions to `PREGAME_LOG.md`, tracking a virtual €10k paper account, and building up `learning_state.json` from 30 days of paper trades. That structured history is still injected into every live-mode prompt — the pre-game learning carries forward.
 
-- **PREGAME (before 2026-04-06):** training mode, writes to `PREGAME_LOG.md`
-- **LIVE (on/after 2026-04-06):** real game mode, writes to `DAILY_LOG.md`, paper account resets to €10,000, strategy files are SHA256-locked to prevent accidental drift
+---
+
+## Live Performance
+
+**Game start:** 6 April 2026 · **Today:** 24 April 2026 · **Days elapsed:** ~14 trading days
+
+| Metric | Value |
+|--------|-------|
+| Pre-game paper return (30 days) | **+13.96%** |
+| Pre-game win/loss record | 16W – 14L |
+| Devil's advocate accuracy | 24.14% (surprisingly bullish — signals are mostly noise) |
+| Best pre-game signal | `vol_ratio` — breakout confirmation (≈62% directional accuracy) |
+| Worst pre-game signal | `catalyst` rationale tag (–43% alpha vs benchmark) |
+
+**What's working:**
+- Momentum + volume confirmation (`mom_20d` + `vol_ratio`) — the core alpha source
+- Pre-earnings setups with RSI 50–75 — consistent edge when sized correctly (≤20%)
+- Aggressive concentration (5 names at ~20% each) — outperforms diversified books in 75-day format
+
+**What isn't working:**
+- Nordic diversification for its own sake — adding EQNR.OL, DOW, VWS.CO as "balance" diluted returns
+- Over-cautious tuning in early pregame — conservative risk limits hurt performance before they were relaxed
+- `non_US_differentiator` rationale tag — –27% alpha; Nordic names need genuine signal, not geographic quota
+
+**Key lesson:** The game rewards conviction. Equal-weighting or sector-capping to look balanced is the fastest way to lose to a competitor running 5 concentrated positions.
 
 ---
 
@@ -131,36 +148,39 @@ flowchart TD
     GHA["⏰ GitHub Actions\n06:00 UTC Mon–Fri"]
 
     subgraph DATA["Data Layer"]
-        FETCH["data/fetcher.py\n15 signals per stock\n~630 universe tickers"]
+        FETCH["data/fetcher.py\n15 signals per stock · ~630 tickers"]
         MACRO["Macro Context\nRegime score 0–100\nVIX · Breadth · Credit spreads"]
-        ENRICH["Parallel Enrichment\nNews · Earnings calendar\nSEC insider filings · Google Trends\nBrent/WTI/NatGas prices"]
-        SCORE["competition_score\nZ-score weighted by regime\nBULL / NEUTRAL / BEAR variants"]
+        ENRICH["Parallel Enrichment\nNews · Earnings · SEC insider filings\nGoogle Trends · Brent/WTI/NatGas"]
+        SCORE["competition_score\nZ-score composite by regime\nBULL / NEUTRAL / BEAR weights"]
         FETCH --> MACRO
         FETCH --> ENRICH
         MACRO & ENRICH --> SCORE
     end
 
-    subgraph AGENTS["Agent Layer — run in parallel"]
+    subgraph AGENTS["Agent Layer — parallel proposals"]
         S["GPT-5.4\nStrategist\nmomentum + breakouts"]
-      G["NVIDIA Nemotron via OpenRouter\nChallenger\ncatalyst hunter\n(Gemini → GPT-5.4-nano fallback)"]
-      F["DeepSeek V3.2 via OpenRouter\nFull Analyst\nall-signals view\n(GPT-5.4-nano fallback)"]
+        G["NVIDIA Nemotron · OpenRouter\nChallenger\ncatalyst hunter\n(Gemini 2.5 Flash fallback)"]
+        F["DeepSeek V3.2 · OpenRouter\nFull Analyst\nall-signals view\n(GPT-5.4-nano fallback)"]
     end
 
     subgraph SYNTHESIS["Synthesis Layer"]
-        DEBATE["Cross-Agent Debate\nlightweight second pass\nagreements / disagreements"]
-        DEVIL["Qwen3-235B-A22B via OpenRouter\nDevil's Advocate\nbear cases for top picks"]
-        RM["GPT-5.4 Risk Manager\nconviction sizing\nfinal portfolio"]
+        DEVIL["Qwen3-235B-A22B · OpenRouter\nDevil's Advocate\nbear cases for top picks\n(GPT-5.4-nano fallback)"]
+        RM["GPT-5.4\nRisk Manager\nconviction sizing · final portfolio"]
     end
+
+    DEBATE["Cross-Agent Debate\noptional · ENABLE_CROSS_CHECK\nagreements / disagreements"]
 
     GHA --> DATA
     SCORE --> AGENTS
-    AGENTS --> DEBATE
-    DEBATE --> DEVIL
+    AGENTS -->|"top picks"| DEVIL
+    AGENTS -.->|"optional"| DEBATE
+    DEBATE -.->|"context"| DEVIL
     DEVIL --> RM
 
-    RM --> VAL["portfolio/validator.py\nconstraint enforcement\nweight normalisation"]
-    VAL --> DISCORD["Discord\ndaily embed"]
-    VAL --> HIST["portfolio_history.json\ncanonical state"]
+    RM --> VAL["portfolio/validator.py\nconstraint enforcement · weight normalisation"]
+    VAL --> DISCORD["Discord\ndaily portfolio embed"]
+    VAL --> HIST["portfolio_history.json\ncanonical daily record"]
+    VAL --> DB["Supabase PostgreSQL\npersistent state"]
 
     HIST --> LEARN["learning_state.json\nsignal importance · devil accuracy\nconfidence calibration · strategy decay"]
     LEARN -->|"next-day context injection"| AGENTS
@@ -171,19 +191,20 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    RUN["Daily run"] --> HIST["portfolio_history.json\npositions + outcomes"]
-    HIST --> LS["learning_state.py"]
+    RUN["Daily pipeline run"] --> HIST["portfolio_history.json\npositions + outcomes"]
+    RUN --> LOG["DAILY_LOG.md\nhuman-readable diary"]
+    HIST --> LS["learning_state.py\nderive metrics from history"]
 
     subgraph DERIVED["Derived State"]
         LSJ["learning_state.json\n• signal_importance\n• devil_accuracy\n• confidence_calibration\n• strategy_decay\n• rationale_tags"]
-        MD["Markdown reports\nPREGAME_LEARNING.md\nAI_SELF_CRITIQUE.md"]
+        MD["Markdown reports\nAI_SELF_CRITIQUE.md\nPREGAME_LEARNING.md"]
     end
 
     LS --> LSJ
     LS --> MD
 
-    LSJ --> LC["learning_context.py\nstructured prompt builder\n(JSON-first, markdown fallback)"]
-    LC --> ALL["All agents\nStrategist · Challenger · Full Analyst\nDevil · Risk Manager"]
+    LSJ --> LC["learning_context.py\nJSON-first prompt builder\n(markdown fallback)"]
+    LC --> ALL["All 5 agents\nStrategist · Challenger · Full Analyst\nDevil · Risk Manager"]
     ALL --> RUN
 ```
 
@@ -206,23 +227,27 @@ flowchart LR
 
 ## Signals computed per candidate
 
-| Signal | What it means |
-|--------|---------------|
-| `momentum` | 20-day price return — primary momentum signal |
-| `sharpe_20d` | momentum / annualised vol — primary ranking signal |
-| `mom_5d` | 5-day return (short-term acceleration) |
-| `mom_60d` | 60-day return (longer trend confirmation) |
-| `rsi_14` | 14-day RSI — used as a breakout / exhaustion context signal, not a hard exclusion filter |
-| `vs_index` | stock return minus S&P 500 return — pure alpha signal |
-| `pct_from_52w_high` | proximity to 52-week high — breakout signal |
-| `beta` | sensitivity to S&P 500 moves |
-| `vol_ratio` | today's volume / 20d avg volume — high-volume confirmation (>1.5 = strong) |
-| `macd_hist` | MACD histogram normalised by price — trend acceleration signal |
-| `atr_pct` | 14-day ATR as % of price — daily expected move, used for position sizing |
-| `dividend_yield` | trailing 12-month dividend yield — relevant because the game auto-reinvests dividends |
-| `analyst_rating` | analyst consensus rating 1–5 (1=Strong Buy → 5=Strong Sell); strong for US S&P 500, partial Nordic coverage |
-| `analyst_upside` | (target price − current price) / current price; NaN for non-US tickers due to currency mismatch |
-| `sector` | abbreviated sector tag (Tech, Health, Fin, Energy, Ind, Mat, Tel, Util, Cons) |
+Directional accuracy is tracked live in `learning_state.json` — how often each signal's direction matched next-day returns. Updated automatically each run.
+
+| Signal | What it means | Global acc. | BULL | NEUTRAL |
+|--------|---------------|:-----------:|:----:|:-------:|
+| `momentum` | 20-day price return — primary momentum signal | 55% | 81% | 48% |
+| `sharpe_20d` | momentum / annualised vol — primary ranking signal | 55% | 81% | 48% |
+| `mom_5d` | 5-day return (short-term acceleration) | 55% | 81% | 48% |
+| `mom_60d` | 60-day return (longer trend confirmation) | — | — | — |
+| `vol_ratio` | today's volume / 20d avg volume — breakout confirmation (>1.5 = strong) | **62%** | 81% | **54%** |
+| `vs_index` | stock return minus S&P 500 return — pure alpha signal | 55% | 81% | 48% |
+| `rsi_14` | 14-day RSI — breakout/exhaustion context, not a hard filter | 54% | 78% | 48% |
+| `beta` | sensitivity to S&P 500 moves | 53% | 81% | 49% |
+| `pct_from_52w_high` | proximity to 52-week high — breakout signal | — | — | — |
+| `macd_hist` | MACD histogram normalised by price — trend acceleration | — | — | — |
+| `atr_pct` | 14-day ATR as % of price — daily expected move, used for sizing | — | — | — |
+| `dividend_yield` | trailing 12-month yield — game auto-reinvests dividends | — | — | — |
+| `analyst_rating` | consensus rating 1–5 (1=Strong Buy); good US coverage, partial Nordic | — | — | — |
+| `analyst_upside` | (target − price) / price; NaN for non-US tickers (currency mismatch) | — | — | — |
+| `sector` | sector tag (Tech, Health, Fin, Energy, Ind, Mat, Tel, Util, Cons) | — | — | — |
+
+`vol_ratio` is consistently the highest-accuracy individual signal. In BULL regimes almost all momentum signals converge — the edge comes from conviction sizing, not signal selection.
 
 ---
 
@@ -278,6 +303,26 @@ Candidate selection currently works like this:
 - Maintain a symbol master / alias layer so game tickers, Yahoo symbols, and fallback-provider symbols can differ safely
 - Rank candidates with a regime-specific `competition_score` (Z-score weighted: BULL = mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%; NEUTRAL/BEAR variants) plus catalyst overlays
 - Top `TOP_N_CANDIDATES` are passed downstream after filtering and scoring
+
+---
+
+## Data Sources & APIs
+
+| Source | What it provides | Required key |
+|--------|-----------------|:------------:|
+| **yfinance** | Primary price data, OHLCV history, fundamentals, analyst ratings, earnings calendar, news headlines, options data, insider filing summaries | None (free) |
+| **EODHD** | Fallback for Nordic/Baltic tickers where yfinance coverage is unreliable or missing | `EODHD_API_KEY` |
+| **OpenAI** | GPT-5.4 for Strategist + Risk Manager; GPT-5.4-nano as last-resort fallback for all agents | `OPENAI_API_KEY` |
+| **OpenRouter** | Routes NVIDIA Nemotron-Super-120B (Challenger), DeepSeek V3.2 (Full Analyst), Qwen3-235B-A22B (Devil) | `OPENROUTER_API_KEY` |
+| **Google Gemini** | Gemini 2.5 Flash — Challenger fallback when OpenRouter/Nemotron is unavailable | `GEMINI_API_KEY` |
+| **SEC EDGAR Form 4** | Recent open-market insider purchases >$50k for US S&P 500 tickers | None (public API) |
+| **Google Trends** (`pytrends`) | Search interest — distinguishes crowded retail names from under-the-radar setups | None (free) |
+| **Discord webhooks** | Daily portfolio embed; @mention reminders in LIVE mode | `DISCORD_WEBHOOK_URL` |
+| **Supabase PostgreSQL** | Canonical persistent state (portfolios, learning records, cost log) | `SUPABASE_URL` + `SUPABASE_KEY` |
+| **Norkon/Äripäev game API** | Live rank, portfolio value, and daily returns scraped from the game platform via JWT auth + Playwright | `ARIPAEV_COOKIE` |
+| **GitHub Actions** | Zero-infra scheduled runs; auto-commits portfolio + learning files back to repo | Repo secrets |
+
+**Norkon integration note:** The game UI is a React SPA backed by the Norkon trading platform. Portfolio stats (rank, value, returns) are delivered via WebSocket frames — `verify.py` uses Playwright to intercept those WS frames and extract the data, with a REST fallback for less-frequent polling.
 
 ---
 
@@ -377,6 +422,21 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 ├── LIVE_HANDOFF_2026-04-06.md   # one-time pregame-to-live transition summary
 └── live_mode_lock.json          # strategy file fingerprints for LIVE mode (auto-generated)
 ```
+
+---
+
+## Recent Development Highlights
+
+| Date | Change | Why |
+|------|--------|-----|
+| Apr 2026 | **Norkon WebSocket integration** — `verify.py` now intercepts live WS frames via Playwright to extract rank, portfolio value, and daily returns from the game platform | Game SPA delivers stats via WebSocket, not REST; HTML scraping broke after a platform update |
+| Apr 2026 | **JWT auth for game API** — authenticated REST calls using `ARIPAEV_COOKIE` → Norkon JWT exchange | Required for fetching own profile stats from the Norkon backend |
+| Apr 2026 | **Auto-regenerate live_mode_lock.json** (`update_live_lock.yml`) — SHA256 fingerprints are rebuilt automatically on every merge to `main` that touches a protected file | Prevents manual lock drift; no more "strategy freeze" failures after legitimate merges |
+| Apr 2026 | **Devil accuracy feedback loop refined** — HIGH-flagged picks hard-capped at 10% only when Devil accuracy > 60%; repeat-offender pre-injection (≥2 flags in last 5 days) added for all agents | Devil accuracy came in at 24% (bullish signal); tightened thresholds to avoid over-weighting a noisy critic |
+| Mar 2026 | **Competition-optimized ranking** — `competition_score` Z-score composite replaces generic selection score | Regime-specific weighting (BULL: mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%) directly targets the 75-day competition format |
+| Mar 2026 | **Overbought threshold raised 79→85** — RSI cap for weight reduction moved up | RSI 79–84 in momentum markets = leader, not topper; old threshold was cutting winners |
+| Mar 2026 | **Sector rotation table** injected into all agent prompts | Rotation is the #1 alpha source in short competitions — agents were previously blind to which sectors were exhausted |
+| Mar 2026 | **Pre-earnings opportunity signal** (`PRE_EARNINGS_SETUP` tag) | 2–6 day earners with strong momentum + RSI 50–75 have historically been the best short-window setups |
 
 ---
 
