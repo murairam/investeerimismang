@@ -232,23 +232,27 @@ flowchart LR
 
 ## Signals computed per candidate
 
-| Signal | What it means |
-|--------|---------------|
-| `momentum` | 20-day price return — primary momentum signal |
-| `sharpe_20d` | momentum / annualised vol — primary ranking signal |
-| `mom_5d` | 5-day return (short-term acceleration) |
-| `mom_60d` | 60-day return (longer trend confirmation) |
-| `rsi_14` | 14-day RSI — used as a breakout / exhaustion context signal, not a hard exclusion filter |
-| `vs_index` | stock return minus S&P 500 return — pure alpha signal |
-| `pct_from_52w_high` | proximity to 52-week high — breakout signal |
-| `beta` | sensitivity to S&P 500 moves |
-| `vol_ratio` | today's volume / 20d avg volume — high-volume confirmation (>1.5 = strong) |
-| `macd_hist` | MACD histogram normalised by price — trend acceleration signal |
-| `atr_pct` | 14-day ATR as % of price — daily expected move, used for position sizing |
-| `dividend_yield` | trailing 12-month dividend yield — relevant because the game auto-reinvests dividends |
-| `analyst_rating` | analyst consensus rating 1–5 (1=Strong Buy → 5=Strong Sell); strong for US S&P 500, partial Nordic coverage |
-| `analyst_upside` | (target price − current price) / current price; NaN for non-US tickers due to currency mismatch |
-| `sector` | abbreviated sector tag (Tech, Health, Fin, Energy, Ind, Mat, Tel, Util, Cons) |
+Directional accuracy is tracked live in `learning_state.json` — how often each signal's direction matched next-day returns. Updated automatically each run.
+
+| Signal | What it means | Global acc. | BULL | NEUTRAL |
+|--------|---------------|:-----------:|:----:|:-------:|
+| `momentum` | 20-day price return — primary momentum signal | 55% | 81% | 48% |
+| `sharpe_20d` | momentum / annualised vol — primary ranking signal | 55% | 81% | 48% |
+| `mom_5d` | 5-day return (short-term acceleration) | 55% | 81% | 48% |
+| `mom_60d` | 60-day return (longer trend confirmation) | — | — | — |
+| `vol_ratio` | today's volume / 20d avg volume — breakout confirmation (>1.5 = strong) | **62%** | 81% | **54%** |
+| `vs_index` | stock return minus S&P 500 return — pure alpha signal | 55% | 81% | 48% |
+| `rsi_14` | 14-day RSI — breakout/exhaustion context, not a hard filter | 54% | 78% | 48% |
+| `beta` | sensitivity to S&P 500 moves | 53% | 81% | 49% |
+| `pct_from_52w_high` | proximity to 52-week high — breakout signal | — | — | — |
+| `macd_hist` | MACD histogram normalised by price — trend acceleration | — | — | — |
+| `atr_pct` | 14-day ATR as % of price — daily expected move, used for sizing | — | — | — |
+| `dividend_yield` | trailing 12-month yield — game auto-reinvests dividends | — | — | — |
+| `analyst_rating` | consensus rating 1–5 (1=Strong Buy); good US coverage, partial Nordic | — | — | — |
+| `analyst_upside` | (target − price) / price; NaN for non-US tickers (currency mismatch) | — | — | — |
+| `sector` | sector tag (Tech, Health, Fin, Energy, Ind, Mat, Tel, Util, Cons) | — | — | — |
+
+`vol_ratio` is consistently the highest-accuracy individual signal. In BULL regimes almost all momentum signals converge — the edge comes from conviction sizing, not signal selection.
 
 ---
 
