@@ -107,20 +107,16 @@ Then confirm the system's record matches yours:
 `verify.py` is the truth-after-submission step: it confirms or corrects the day's canonical record and marks it as verified.
 ```
 
-### Pre-game training mode (until 6 April)
+### Current mode: LIVE (since 6 April 2026)
 
-The bot runs daily in **PREGAME** mode — all decisions are recorded but don't count toward the real game:
+The bot is now in **LIVE mode** — every decision counts toward the real game ranking.
 
-- Writes to `PREGAME_LOG.md` (separate from the real game log)
-- Tracks virtual P&L against the paper account
-- Generates `learning_state.json` (machine-usable rules, winners/losers, decision-quality metrics)
-- Generates `PREGAME_LEARNING.md` and `AI_SELF_CRITIQUE.md` as human-readable summaries of that structured state
-- Prompt injection prefers `learning_state.json`; markdown reports are derived outputs and fallbacks
+- Writes to `DAILY_LOG.md` (one entry per trading day)
+- Strategy files are SHA256-locked via `live_mode_lock.json` — any accidental change is caught at startup
+- `verify.py` must be run after each manual submission to keep the system's record in sync
+- A second GitHub Actions workflow fires at 07:00 UTC and pings Discord if verification hasn't happened
 
-### Automatic mode switch on 6 April
-
-- **PREGAME (before 2026-04-06):** training mode, writes to `PREGAME_LOG.md`
-- **LIVE (on/after 2026-04-06):** real game mode, writes to `DAILY_LOG.md`, paper account resets to €10,000, strategy files are SHA256-locked to prevent accidental drift
+**Pre-game training ran from ~March through 5 April.** During that period the system operated in PREGAME mode: recording decisions to `PREGAME_LOG.md`, tracking a virtual €10k paper account, and building up `learning_state.json` from 30 days of paper trades. That structured history is still injected into every live-mode prompt — the pre-game learning carries forward.
 
 ---
 
