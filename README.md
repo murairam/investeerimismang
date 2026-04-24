@@ -4,33 +4,31 @@
 ![CI](https://github.com/murairam/investeerimismang/actions/workflows/alphashark.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-An autonomous quantitative trading agent for the **Äripäev/SEB Investment Game** (Estonia). It runs daily via GitHub Actions, fetches live market data across ~630 selectable tickers in 6 markets, scores the full universe, runs a multi-model adversarial AI ensemble, validates the final portfolio against competition rules, and posts the recommendation to Discord.
+**AlphaShark** is an autonomous AI trading agent built to win the **Äripäev/SEB Investment Game** (Estonia). Every weekday it wakes up at 06:00 UTC, scans ~630 live tickers across 6 markets, runs a five-agent adversarial AI ensemble, and posts a validated portfolio recommendation to Discord — before the 10:00 EET submission deadline.
 
-**Game period: 6 April – 19 June 2026 · 844 participants · objective: rank #1**
+> **Game period:** 6 April – 19 June 2026 · **8 595 portfolios** · **Objective: rank #1**
 
 ---
 
 ## Engineering Highlights
 
-These are the non-obvious design decisions worth explaining in depth.
+### Adversarial multi-agent ensemble
+Three agents propose portfolios in parallel — Strategist, Challenger, and Full Analyst — using configurable model routes and fallbacks. A separate Devil pass stress-tests the combined shortlist, then the Risk Manager synthesizes the final portfolio. Agent roles are stable; model routing is configurable via `config.py`.
 
-**Adversarial multi-agent ensemble**
-Three agents propose portfolios in parallel — Strategist, Challenger, and Full Analyst — using configurable model routes and fallbacks. A separate Devil pass stress-tests the combined shortlist, then the Risk Manager synthesizes the final portfolio. Agent roles are stable; model routing is intentionally configurable via `config.py`.
+### Self-improving learning loop
+Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record with no human labelling required.
 
-**Self-improving learning loop**
-Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record without any human labelling.
+### Competition-optimized quantitative ranking
+Candidates are ranked by `competition_score`, a regime-specific Z-score composite: in BULL regimes it weights `mom_20d` 35%, `mom_5d` 25%, `sharpe_20d` 20%, `beta` 20% — with different weights in NEUTRAL and BEAR. The regime itself is a 0–100 score derived from VIX level, VIX term structure, SPX vs 200d SMA, market breadth, and credit spreads.
 
-**Optional cross-agent debate (second pass)**
-The debate pass is available behind `ENABLE_CROSS_CHECK` for shadow comparison experiments. When enabled, agents surface agreements/disagreements for Risk Manager context; when disabled (default), the pipeline skips this latency/cost step.
+### SHA256 strategy lock in LIVE mode
+Once the competition starts, `live_mode_lock.json` stores SHA256 fingerprints of all strategy files. Any accidental drift (edited prompt, changed config) is caught at startup and the pipeline refuses to run — preventing the classic mistake of iterating on a live system mid-game.
 
-**Competition-optimized quantitative ranking**
-Candidates are ranked by `competition_score`, a regime-specific Z-score composite: in BULL regimes it weights `mom_20d` 35%, `mom_5d` 25%, `sharpe_20d` 20%, `beta` 20% — different weights in NEUTRAL and BEAR. The regime is determined by a 0–100 composite score from VIX level, VIX term structure, SPX vs 200d SMA, market breadth, and credit spreads.
+### Symbol aliasing across 6 markets
+Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD. `symbol_master.json` maintains the canonical mapping. Yahoo is the primary source; EODHD fills a curated override set of edge-case tickers where Yahoo coverage is unreliable.
 
-**SHA256 strategy lock in LIVE mode**
-Once the competition starts, `live_mode_lock.json` stores SHA256 fingerprints of all strategy files. Any accidental drift (edited prompt, changed config) is caught at startup and the pipeline refuses to run. This prevents the classic mistake of iterating on a live competition system mid-game.
-
-**Symbol aliasing across 6 markets**
-Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (fallback provider). `symbol_master.json` maintains the canonical mapping. Yahoo is the primary source; EODHD is used only for a curated override set of edge-case tickers where Yahoo's coverage is unreliable.
+### Optional cross-agent debate
+A second-pass debate is available behind `ENABLE_CROSS_CHECK`. When enabled, agents surface agreements and disagreements for Risk Manager context. Disabled by default — the latency/cost tradeoff only makes sense for shadow comparison experiments.
 
 ---
 
@@ -53,33 +51,30 @@ Nordic and Baltic tickers differ between the game UI, Yahoo Finance, and EODHD (
 
 ---
 
-## Key Features
+## Quick Start
 
-- **Mixed AI decision stack**: Strategist + Challenger + Full Analyst run in parallel, Devil pressure-tests the shortlist, and Risk Manager synthesizes the final portfolio. Routes/fallbacks are configurable in `config.py`.
-- **Full-universe candidate set**: agents see the current filtered universe instead of a tiny shortlist capped per market
-- **Rich signal snapshot**: momentum, Sharpe, RSI, beta, volume confirmation, MACD, ATR, dividend yield, regime data, and catalyst overlays
-- **Parallel enrichment layer**: news, earnings, insider buying, and Google Trends are fetched concurrently and injected into prompts
-- **Sector rotation indicator**: per-sector `avg_mom_20d/5d`, RSI, breadth, and count computed from the full universe and injected into all agent prompts — rotation is the primary alpha source in 75-day competitions
-- **Pre-earnings opportunity signal**: tags stocks with earnings in 2–6 days + strong momentum as `PRE_EARNINGS_SETUP`; `EARNINGS RISK` warnings for low-conviction earners
-- **Competition-optimized ranking**: regime-specific Z-score weighted `competition_score` (BULL: mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%; NEUTRAL/BEAR variants) replaces the generic selection score
-- **Commodity price context**: live Brent crude, WTI, and Henry Hub nat gas injected for energy thesis validation
-- **Optional cross-agent debate**: second-pass agreement/disagreement analysis is available behind `ENABLE_CROSS_CHECK` for shadow comparisons
-- **Dynamic signal importance**: `learning_state.py` tracks directional accuracy of each signal vs next-day returns; most predictive signals flagged in the learning context
-- **Strategy decay monitoring**: compares recent 5-day alpha vs prior 10-day alpha; Risk Manager sees a STRATEGY DECAY ALERT when momentum gap exceeds threshold
-- **Confidence calibration tracking**: flags overconfidence patterns when high-confidence days underperform expectations
-- **Structured learning loop**: `portfolio_history.json` stores the canonical daily record, `learning_state.json` drives prompt injection, and `PREGAME_LEARNING.md` / `AI_SELF_CRITIQUE.md` are derived human summaries
-- **Verification and audit trail**: whole-percent portfolio rounding, manual verification tooling, and devil's-advocate impact logging
-- **Historical shadow trader**: strict no-lookahead backtest script for open-to-open portfolio simulation over prior periods
-
-**Quick commands:**
 ```bash
-python main.py                   # Run full pipeline
-python scripts/status.py         # View project dashboard (costs, learning, next steps)
-python scripts/verify.py         # Confirm portfolio sync (LIVE mode)
-python scripts/check_models.py   # Smoke-test model routes/keys without full pipeline run
-python scripts/pregame_review.py # View learning summary (PREGAME mode)
+cp .env.example .env             # fill in API keys
+pip install -r requirements.txt
+python main.py                   # run full pipeline
+python scripts/status.py         # dashboard: costs, learning state, next steps
+python scripts/verify.py         # sync portfolio after manual game submission (LIVE)
+python scripts/check_models.py   # smoke-test all model routes without a full run
 python scripts/historical_shadow_trader.py --start 2024-04-01 --end 2024-06-21
 ```
+
+## What it does
+
+| Capability | Detail |
+|------------|--------|
+| **Full-universe scan** | ~630 tickers across 6 markets, scored every day |
+| **15 per-stock signals** | momentum, Sharpe, RSI, beta, vol_ratio, MACD, ATR, and more — see [Signals](#signals-computed-per-candidate) |
+| **Parallel enrichment** | news, earnings calendar, SEC insider filings, Google Trends, commodity prices — all fetched concurrently |
+| **Sector rotation** | per-sector avg momentum, RSI, and breadth injected into every agent prompt |
+| **Pre-earnings signal** | `PRE_EARNINGS_SETUP` for 2–6 day earners with strong momentum; `EARNINGS RISK` for low-conviction names |
+| **Dynamic learning** | signal accuracy, devil performance, and strategy decay are tracked and injected into next-day prompts |
+| **Audit trail** | `DAILY_LOG.md`, `AI_SELF_CRITIQUE.md`, `verification_tracker.json` — every decision is logged |
+| **Historical backtest** | no-lookahead open-to-open simulator for prior periods |
 
 ---
 
