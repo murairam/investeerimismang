@@ -484,7 +484,7 @@ Winners: ON +10.3%, MPWR +5.1%, STX +1.8% | Losers: SMCI -7.9%, ANET -2.4%
 
 **Market:** BULL regime · SPX vs 50d SMA: +4.8% · VIX: 19.3 · S&P 500 20d: +7.8%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 15:35:43.
 
 **Yesterday's P&L:** Portfolio +1.2% · Benchmark -0.4% · Alpha +1.6%
 Winners: ON +10.1%, MPWR +4.8%, STX +1.5% | Losers: SMCI -8.1%, ANET -2.7%
