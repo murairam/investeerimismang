@@ -157,36 +157,39 @@ flowchart TD
     GHA["⏰ GitHub Actions\n06:00 UTC Mon–Fri"]
 
     subgraph DATA["Data Layer"]
-        FETCH["data/fetcher.py\n15 signals per stock\n~630 universe tickers"]
+        FETCH["data/fetcher.py\n15 signals per stock · ~630 tickers"]
         MACRO["Macro Context\nRegime score 0–100\nVIX · Breadth · Credit spreads"]
-        ENRICH["Parallel Enrichment\nNews · Earnings calendar\nSEC insider filings · Google Trends\nBrent/WTI/NatGas prices"]
-        SCORE["competition_score\nZ-score weighted by regime\nBULL / NEUTRAL / BEAR variants"]
+        ENRICH["Parallel Enrichment\nNews · Earnings · SEC insider filings\nGoogle Trends · Brent/WTI/NatGas"]
+        SCORE["competition_score\nZ-score composite by regime\nBULL / NEUTRAL / BEAR weights"]
         FETCH --> MACRO
         FETCH --> ENRICH
         MACRO & ENRICH --> SCORE
     end
 
-    subgraph AGENTS["Agent Layer — run in parallel"]
+    subgraph AGENTS["Agent Layer — parallel proposals"]
         S["GPT-5.4\nStrategist\nmomentum + breakouts"]
-      G["NVIDIA Nemotron via OpenRouter\nChallenger\ncatalyst hunter\n(Gemini → GPT-5.4-nano fallback)"]
-      F["DeepSeek V3.2 via OpenRouter\nFull Analyst\nall-signals view\n(GPT-5.4-nano fallback)"]
+        G["NVIDIA Nemotron · OpenRouter\nChallenger\ncatalyst hunter\n(Gemini 2.5 Flash fallback)"]
+        F["DeepSeek V3.2 · OpenRouter\nFull Analyst\nall-signals view\n(GPT-5.4-nano fallback)"]
     end
 
     subgraph SYNTHESIS["Synthesis Layer"]
-        DEBATE["Cross-Agent Debate\nlightweight second pass\nagreements / disagreements"]
-        DEVIL["Qwen3-235B-A22B via OpenRouter\nDevil's Advocate\nbear cases for top picks"]
-        RM["GPT-5.4 Risk Manager\nconviction sizing\nfinal portfolio"]
+        DEVIL["Qwen3-235B-A22B · OpenRouter\nDevil's Advocate\nbear cases for top picks\n(GPT-5.4-nano fallback)"]
+        RM["GPT-5.4\nRisk Manager\nconviction sizing · final portfolio"]
     end
+
+    DEBATE["Cross-Agent Debate\noptional · ENABLE_CROSS_CHECK\nagreements / disagreements"]
 
     GHA --> DATA
     SCORE --> AGENTS
-    AGENTS --> DEBATE
-    DEBATE --> DEVIL
+    AGENTS -->|"top picks"| DEVIL
+    AGENTS -.->|"optional"| DEBATE
+    DEBATE -.->|"context"| DEVIL
     DEVIL --> RM
 
-    RM --> VAL["portfolio/validator.py\nconstraint enforcement\nweight normalisation"]
-    VAL --> DISCORD["Discord\ndaily embed"]
-    VAL --> HIST["portfolio_history.json\ncanonical state"]
+    RM --> VAL["portfolio/validator.py\nconstraint enforcement · weight normalisation"]
+    VAL --> DISCORD["Discord\ndaily portfolio embed"]
+    VAL --> HIST["portfolio_history.json\ncanonical daily record"]
+    VAL --> DB["Supabase PostgreSQL\npersistent state"]
 
     HIST --> LEARN["learning_state.json\nsignal importance · devil accuracy\nconfidence calibration · strategy decay"]
     LEARN -->|"next-day context injection"| AGENTS
@@ -197,19 +200,20 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    RUN["Daily run"] --> HIST["portfolio_history.json\npositions + outcomes"]
-    HIST --> LS["learning_state.py"]
+    RUN["Daily pipeline run"] --> HIST["portfolio_history.json\npositions + outcomes"]
+    RUN --> LOG["DAILY_LOG.md\nhuman-readable diary"]
+    HIST --> LS["learning_state.py\nderive metrics from history"]
 
     subgraph DERIVED["Derived State"]
         LSJ["learning_state.json\n• signal_importance\n• devil_accuracy\n• confidence_calibration\n• strategy_decay\n• rationale_tags"]
-        MD["Markdown reports\nPREGAME_LEARNING.md\nAI_SELF_CRITIQUE.md"]
+        MD["Markdown reports\nAI_SELF_CRITIQUE.md\nPREGAME_LEARNING.md"]
     end
 
     LS --> LSJ
     LS --> MD
 
-    LSJ --> LC["learning_context.py\nstructured prompt builder\n(JSON-first, markdown fallback)"]
-    LC --> ALL["All agents\nStrategist · Challenger · Full Analyst\nDevil · Risk Manager"]
+    LSJ --> LC["learning_context.py\nJSON-first prompt builder\n(markdown fallback)"]
+    LC --> ALL["All 5 agents\nStrategist · Challenger · Full Analyst\nDevil · Risk Manager"]
     ALL --> RUN
 ```
 
