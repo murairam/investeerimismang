@@ -124,6 +124,32 @@ The bot runs daily in **PREGAME** mode — all decisions are recorded but don't 
 
 ---
 
+## Live Performance
+
+**Game start:** 6 April 2026 · **Today:** 24 April 2026 · **Days elapsed:** ~14 trading days
+
+| Metric | Value |
+|--------|-------|
+| Pre-game paper return (30 days) | **+13.96%** |
+| Pre-game win/loss record | 16W – 14L |
+| Devil's advocate accuracy | 24.14% (surprisingly bullish — signals are mostly noise) |
+| Best pre-game signal | `vol_ratio` — breakout confirmation (≈62% directional accuracy) |
+| Worst pre-game signal | `catalyst` rationale tag (–43% alpha vs benchmark) |
+
+**What's working:**
+- Momentum + volume confirmation (`mom_20d` + `vol_ratio`) — the core alpha source
+- Pre-earnings setups with RSI 50–75 — consistent edge when sized correctly (≤20%)
+- Aggressive concentration (5 names at ~20% each) — outperforms diversified books in 75-day format
+
+**What isn't working:**
+- Nordic diversification for its own sake — adding EQNR.OL, DOW, VWS.CO as "balance" diluted returns
+- Over-cautious tuning in early pregame — conservative risk limits hurt performance before they were relaxed
+- `non_US_differentiator` rationale tag — –27% alpha; Nordic names need genuine signal, not geographic quota
+
+**Key lesson:** The game rewards conviction. Equal-weighting or sector-capping to look balanced is the fastest way to lose to a competitor running 5 concentrated positions.
+
+---
+
 ## How it works
 
 ```mermaid
