@@ -10,15 +10,31 @@
     "TXN": 10.67752257,
     "ON": 9.6072626
   },
-  "verified_weights": {
-    "AMD": 0.23,
-    "STX": 0.15,
-    "MPWR": 0.17,
-    "MCHP": 0.16,
-    "TXN": 0.22,
-    "ON": 0.07
+  "pending_order": {
+    "submitted_date": "2026-04-26",
+    "positions": [
+      {
+        "ticker": "INTC",
+        "weight": 0.15
+      },
+      {
+        "ticker": "ON",
+        "weight": 0.22
+      },
+      {
+        "ticker": "MCHP",
+        "weight": 0.23
+      },
+      {
+        "ticker": "AMD",
+        "weight": 0.2
+      },
+      {
+        "ticker": "TXN",
+        "weight": 0.2
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -292,8 +308,58 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-26",
+      "equity": 11590.35,
+      "cash": 0.0,
+      "daily_return": -0.002638,
+      "return_since_start": 0.159035,
+      "turnover": 0.0,
+      "positions": {
+        "AMD": 9.1318897,
+        "STX": 3.44804164,
+        "MPWR": 1.41988311,
+        "MCHP": 24.17199103,
+        "TXN": 10.67752257,
+        "ON": 9.6072626
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-26",
+        "positions": [
+          {
+            "ticker": "INTC",
+            "weight": 0.15
+          },
+          {
+            "ticker": "ON",
+            "weight": 0.22
+          },
+          {
+            "ticker": "MCHP",
+            "weight": 0.23
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.2
+          },
+          {
+            "ticker": "TXN",
+            "weight": 0.2
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-24",
-  "last_equity": 11621.0
+  "last_rebalanced_date": "2026-04-26",
+  "last_equity": 11590.34782315,
+  "verified_weights": {
+    "AMD": 0.23,
+    "STX": 0.15,
+    "MPWR": 0.17,
+    "MCHP": 0.16,
+    "TXN": 0.22,
+    "ON": 0.07
+  }
 }

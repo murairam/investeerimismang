@@ -512,3 +512,35 @@ Winners: ON +10.1%, MPWR +4.8%, STX +1.5% | Losers: SMCI -8.1%, ANET -2.7%
 - ▲ **STX**: 15.0% → 18.0% (+3.0%)
 
 ---
+## 2026-04-26 19:38:34
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.5% · VIX: 18.7 · S&P 500 20d: +10.6%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +2.7% · Benchmark +0.8% · Alpha +1.9%
+Winners: AMD +13.6%, MPWR +2.2%, ON +0.3% | Losers: TXN -2.1%, MCHP -1.6%, STX -0.5%
+
+**Paper account:** Equity €11,590.35 (start €10,000) · Today -0.26% · Since start +15.90% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 87% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** The synthesis leans into the strongest validated semiconductor momentum cluster: INTC is the clear triple-consensus anchor, while ON and MCHP are mandatory high-conviction double-consensus names. AMD and TXN beat the next-best uniques on current momentum/volume and also justify rotating out weaker current holdings like STX, MPWR, and likely ON's weaker peers under the slot-cost rule; portfolio remains concentrated and aggressive with beta likely still in the BULL-appropriate high range, though slightly above the soft 1.6-2.0 target is acceptable given the competition mandate and tech leadership.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **INTC** | 15.0% | Triple-consensus pick and the clearest momentum/catalyst leader today: vol_ratio 2.51, mom_5d +20.7%, at 52-week high, and strong beta for a BULL-regime winner. |
+| 2 | **ON** | 22.0% | Double-consensus pick with powerful acceleration (mom_5d +18.7%) and solid volume confirmation; despite crowding risk, ensemble agreement gives it a mandatory high-conviction slot. |
+| 3 | **MCHP** | 23.0% | Double-consensus continuation name with strong 5-day momentum (+13.8%) and acceptable volume support; keeps exposure in the strongest semiconductor tape while still earning its slot. |
+| 4 | **AMD** | 20.0% | Best unique momentum hold from the strategist with elite breakout stats (mom_5d +25.1%, vol_ratio 2.24, beta 2.53); current holding remains fully validated and should not be rotated out. |
+| 5 | **TXN** | 20.0% | Strong unique all-signal pick from the full analyst with exceptional current confirmation (mom_5d +20.8%, vol_ratio 2.00); materially stronger than weaker existing slots and under-owned by retail. |
+
+**Changes from yesterday:**
+- ➕ Added **INTC** at 15.0%
+- ➖ Removed **STX** (was 15.0%)
+- ➖ Removed **MPWR** (was 17.0%)
+- ▲ **ON**: 7.0% → 22.0% (+15.0%)
+- ▲ **MCHP**: 16.0% → 23.0% (+7.0%)
+- ▼ **AMD**: 23.0% → 20.0% (-3.0%)
+
+---
