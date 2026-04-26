@@ -24,6 +24,7 @@ from config import (
 )
 from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot, sanitize_ticker
+from data.macro_fetcher import fetch_macro_intelligence
 from data.portfolio_store import load_performance_history
 from portfolio.models import PortfolioProposal, Position
 
@@ -536,6 +537,12 @@ class OpenAIStrategist(BaseAgent):
             vix_guidance=_vix_guidance(vix),
             n_participants=n_participants,
         )
+        macro_context = fetch_macro_intelligence()
+        if macro_context:
+            system_prompt += (
+                "\n\n## External global macro intelligence (worldmonitor localhost)\n"
+                + macro_context
+            )
         # Inject learning context into the system prompt so it has mandatory-instruction weight.
         # Placed after the strategy rules so it acts as a live override, not a soft suggestion.
         if learning_context:

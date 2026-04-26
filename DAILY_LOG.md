@@ -480,35 +480,35 @@ Winners: ON +10.3%, MPWR +5.1%, STX +1.8% | Losers: SMCI -7.9%, ANET -2.4%
 
 ---
 
-## 2026-04-24 06:16:14
+## 2026-04-24 17:17:11
 
-**Market:** BULL regime · SPX vs 50d SMA: +4.8% · VIX: 19.3 · S&P 500 20d: +7.8%
+**Market:** BULL regime · SPX vs 50d SMA: +5.1% · VIX: 18.8 · S&P 500 20d: +10.2%
 
-**Verification:** Verified against actual game holdings at 15:35:43.
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio +1.2% · Benchmark -0.4% · Alpha +1.6%
-Winners: ON +10.1%, MPWR +4.8%, STX +1.5% | Losers: SMCI -8.1%, ANET -2.7%
+**Yesterday's P&L:** Portfolio +2.5% · Benchmark +0.4% · Alpha +2.1%
+Winners: AMD +13.1%, MPWR +2.5%, STX +1.1% | Losers: TXN -3.0%, MCHP -2.6%, ON -0.3%
 
-**Paper account:** Equity €11,396.20 (start €10,000) · Today +1.15% · Since start +13.96% · Turnover 0.0% · Cash €0.00
+**Paper account:** Equity €11,621.00 (start €10,000) · Today +3.14% · Since start +16.21% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 87% · **Positions:** 5 · **Total weight:** 80.0%
+**Confidence:** 88% · **Positions:** 5 · **Total weight:** 90.0%
 
-**Thesis:** The portfolio keeps all four triple-consensus names—ON, MPWR, STX, and AMD—as independently validated leaders, then adds MCHP as the strongest double-consensus replacement while removing SMCI and ANET for broken relative momentum. I did not include URI because MCHP had stronger ensemble support and semis remain the clearest alpha cluster despite US concentration; beta should remain appropriately aggressive for a BULL regime and close to the 1.6–2.0 target without adding filler.
+**Thesis:** Both available proposals fully agreed on AMD, INTC, ON, MPWR, and STX, creating a clean high-conviction consensus core with no better validated unique alternative from the incomplete catalyst proposal. I am rotating out TXN and MCHP as lower-beta/slower names and not adding filler because the mandate favors concentrated exposure to the fastest tech leaders; portfolio beta should remain aggressive and likely near the upper end of the BULL target, though softened slightly from the strategist's 2.32 by retaining STX/MPWR rather than adding a sixth higher-beta name.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **ON** | 5.0% | Triple-consensus core leader with exceptional 5d momentum (+23.2%) and strong volume confirmation (vol_ratio 2.34); recent live performance and breakout strength justify maximum conviction despite crowding. |
-| 2 | **MPWR** | 14.0% | Triple-consensus momentum winner with elite recent gains, strong 5d momentum (+14.3%), and validated live alpha; keeps its slot as a high-beta bull-regime leader. |
-| 3 | **STX** | 18.0% | Triple-consensus pick and one of the validated current winners; strong 5d momentum (+11.3%) and top strategist trend/Sharpe support outweigh slightly soft volume. |
-| 4 | **AMD** | 25.0% | Triple-consensus semiconductor leader with strong momentum (+10.6%), positive volume support, and continued inclusion under the learning constraint to keep validated winners. |
-| 5 | **MCHP** | 18.0% | Double-consensus upgrade over weaker holdings, with superior 5d acceleration (+18.7%) and breakout volume (vol_ratio 2.11); best replacement for ANET/SMCI among unique additions. |
+| 1 | **AMD** | 25.0% | Consensus pick across proposals and the strongest overall momentum leader with elite 5d acceleration (+24.7%) in a BULL tape; keep despite prior learning caution because current signals clearly validate the slot. |
+| 2 | **INTC** | 25.0% | Consensus pick with the best fresh upgrade case versus current holdings: strong breakout volume (vol_ratio 1.29), very strong 5d momentum (+21.0%), and higher competition upside than slower legacy semi names being replaced. |
+| 3 | **ON** | 5.0% | Consensus pick and one of the strongest live-game winners; 5d momentum remains exceptional (+18.1%) and recent verified performance supports keeping it despite weak volume confirmation. |
+| 4 | **MPWR** | 17.0% | Consensus pick with continued strong momentum (+11.8%) and recent live alpha contribution; volume is light, so conviction is slightly below the top tier but still above the mandatory consensus floor. |
+| 5 | **STX** | 18.0% | Consensus pick with solid momentum persistence (+9.1%), strong prior contribution, and low retail crowding; earns the fifth slot over slower current holdings even with softer volume. |
 
 **Changes from yesterday:**
-- ➕ Added **MCHP** at 18.0%
-- ➖ Removed **ANET** (was 19.0%)
-- ➖ Removed **SMCI** (was 10.0%)
-- ▼ **ON**: 12.0% → 5.0% (-7.0%)
-- ▼ **MPWR**: 19.0% → 14.0% (-5.0%)
+- ➕ Added **INTC** at 25.0%
+- ➖ Removed **MCHP** (was 16.0%)
+- ➖ Removed **TXN** (was 22.0%)
+- ▼ **ON**: 7.0% → 5.0% (-2.0%)
 - ▲ **STX**: 15.0% → 18.0% (+3.0%)
 
 ---
+

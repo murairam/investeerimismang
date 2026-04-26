@@ -23,6 +23,7 @@ import config
 from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot, sanitize_ticker
 from data.learning_state import load_learning_state
+from data.macro_fetcher import fetch_global_risk_metrics
 from portfolio.models import PortfolioProposal, Position
 from portfolio.validator import PortfolioValidator
 
@@ -1640,6 +1641,13 @@ class OpenAIRiskManager(BaseAgent):
 
     def _call_openai(self, user_message: str, n_participants: int = 844) -> PortfolioProposal:
         system_prompt = _SYSTEM_PROMPT.format(n_participants=n_participants)
+        metrics = fetch_global_risk_metrics()
+        if metrics:
+            system_prompt += (
+                "\n\n## External quantitative risk metrics (worldmonitor localhost)\n"
+                + metrics
+                + "\nIf GLOBAL RISK GAUGES indicate high volatility or market stress, mandate higher cash reserves."
+            )
         response = self.client.chat.completions.create(
             model=self.MODEL,
             response_format={"type": "json_object"},

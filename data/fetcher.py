@@ -1156,6 +1156,7 @@ class DataFetcher:
                         low    = low.drop(columns=[previous_yahoo_ticker], errors="ignore")
                     yahoo_to_game[yahoo_ticker] = game_ticker
                 missing = [game_to_yahoo.get(game_ticker, game_ticker) for game_ticker in missing_game_tickers]
+                flat_tickers = list(game_to_yahoo.values())
                 logger.info(
                     "Resolved %d failed Yahoo symbols before retry: %s",
                     len(resolved_aliases),

@@ -9,14 +9,14 @@ Days remaining: 0
 - Win days (alpha > 0): 16
 - Loss days (alpha < 0): 14
 - Average daily alpha: -0.06%
-- Paper account equity: €11,396.20 (from €10,000.00, return +13.96%)
+- Paper account equity: €11,621.00 (from €10,000.00, return +16.21%)
 - Max drawdown (paper): 2.44%
 - Average turnover: 3.05%
 
 ## Confidence note
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
-- Latest day is still experimental / unverified.
+- Latest day is verified against the actual game portfolio.
 
 ## Best and worst day
 - Best alpha day: 2026-04-21 (+3.17%)

@@ -51,10 +51,10 @@ def _check_openai_model(client: OpenAI, model: str, name: str) -> CheckResult:
         response = client.chat.completions.create(
             model=model,
             temperature=0,
-            max_tokens=24,
+            max_completion_tokens=24,
             messages=[
                 {"role": "system", "content": "Return short valid JSON only."},
-                {"role": "user", "content": "Return {'ok': true} as JSON."},
+                {"role": "user", "content": 'Return {"ok": true} as JSON.'},
             ],
         )
         latency = _now_ms() - start
@@ -77,7 +77,7 @@ def _check_openrouter_model(client: OpenAI, model: str, name: str) -> CheckResul
             max_tokens=24,
             messages=[
                 {"role": "system", "content": "Return short valid JSON only."},
-                {"role": "user", "content": "Return {'ok': true} as JSON."},
+                {"role": "user", "content": 'Return {"ok": true} as JSON.'},
             ],
         )
         latency = _now_ms() - start
@@ -95,7 +95,7 @@ def _check_gemini_model(client: genai.Client, model: str, name: str) -> CheckRes
     try:
         response = client.models.generate_content(
             model=model,
-            contents="Return {'ok': true} as JSON only.",
+            contents='Return {"ok": true} as JSON only.',
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 temperature=0,

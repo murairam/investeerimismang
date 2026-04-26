@@ -13,7 +13,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
 - Minimum rationale observations for bias claims: 5
-- Latest day status: experimental / unverified
+- Latest day status: verified
 
 ## What's Working ✅
 - 'momentum' rationale is working: +0.5% avg, 55% hit rate

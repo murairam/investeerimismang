@@ -1,6 +1,6 @@
 {
-  "generated_from_days": 31,
-  "position_observations": 139,
+  "generated_from_days": 32,
+  "position_observations": 144,
   "minimums": {
     "strong_daily_observations": 7,
     "strong_ticker_observations": 8,
@@ -15,15 +15,9 @@
   "validated_winners": [
     {
       "ticker": "ON",
-      "observations": 10,
-      "avg_return_1d": 0.026271,
-      "hit_rate": 1.0
-    },
-    {
-      "ticker": "AMD",
       "observations": 12,
-      "avg_return_1d": 0.021603,
-      "hit_rate": 0.8333
+      "avg_return_1d": 0.05142,
+      "hit_rate": 1.0
     },
     {
       "ticker": "INTC",
@@ -39,9 +33,15 @@
     },
     {
       "ticker": "STX",
-      "observations": 22,
-      "avg_return_1d": 0.01321,
-      "hit_rate": 0.7273
+      "observations": 24,
+      "avg_return_1d": 0.013371,
+      "hit_rate": 0.75
+    },
+    {
+      "ticker": "AMD",
+      "observations": 14,
+      "avg_return_1d": 0.011259,
+      "hit_rate": 0.8571
     }
   ],
   "recurring_losers": [
@@ -99,7 +99,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.582308,
+    "avg_turnover_estimate": 0.575926,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -107,17 +107,17 @@
     {
       "tag": "momentum",
       "instruction": "Prefer momentum setups when other signals are comparable.",
-      "observations": 124
+      "observations": 129
     },
     {
       "tag": "high_sharpe",
       "instruction": "Prefer high_sharpe setups when other signals are comparable.",
-      "observations": 103
+      "observations": 108
     },
     {
       "tag": "breakout",
       "instruction": "Prefer breakout setups when other signals are comparable.",
-      "observations": 22
+      "observations": 25
     },
     {
       "tag": "consensus",
@@ -127,7 +127,7 @@
     {
       "tag": "overbought",
       "instruction": "Prefer overbought setups when other signals are comparable.",
-      "observations": 63
+      "observations": 67
     }
   ],
   "early_warning_notes": [
@@ -135,29 +135,29 @@
   ],
   "rationale_stats": {
     "momentum": {
-      "observations": 124,
-      "avg_return_1d": 0.004759,
-      "hit_rate": 0.5484
+      "observations": 129,
+      "avg_return_1d": 0.005414,
+      "hit_rate": 0.5504
     },
     "high_sharpe": {
-      "observations": 103,
-      "avg_return_1d": 0.005526,
-      "hit_rate": 0.534
+      "observations": 108,
+      "avg_return_1d": 0.006273,
+      "hit_rate": 0.537
     },
     "breakout": {
-      "observations": 22,
-      "avg_return_1d": 0.006196,
-      "hit_rate": 0.5909
+      "observations": 25,
+      "avg_return_1d": 0.010372,
+      "hit_rate": 0.6
     },
     "consensus": {
       "observations": 95,
-      "avg_return_1d": 0.004126,
+      "avg_return_1d": 0.004313,
       "hit_rate": 0.5263
     },
     "catalyst": {
-      "observations": 20,
-      "avg_return_1d": -0.004708,
-      "hit_rate": 0.4
+      "observations": 21,
+      "avg_return_1d": -0.00347,
+      "hit_rate": 0.4286
     },
     "diversifier": {
       "observations": 5,
@@ -170,32 +170,32 @@
       "hit_rate": 0.2703
     },
     "overbought": {
-      "observations": 63,
-      "avg_return_1d": 0.007968,
-      "hit_rate": 0.6032
+      "observations": 67,
+      "avg_return_1d": 0.007608,
+      "hit_rate": 0.597
     },
     "at_52w_high": {
-      "observations": 92,
-      "avg_return_1d": 0.008085,
-      "hit_rate": 0.6196
+      "observations": 97,
+      "avg_return_1d": 0.008785,
+      "hit_rate": 0.6186
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.005542,
-    "tier2_avg_return_1d": 0.004009,
-    "tier3_avg_return_1d": -0.003466,
-    "tier1_observations": 57,
-    "tier2_observations": 70,
+    "tier1_avg_return_1d": 0.004626,
+    "tier2_avg_return_1d": 0.006514,
+    "tier3_avg_return_1d": -0.006947,
+    "tier1_observations": 60,
+    "tier2_observations": 72,
     "tier3_observations": 12
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
     "status": "actionable",
-    "observations": 58,
-    "high_risk_avg_return_1d": 0.010595,
-    "low_risk_avg_return_1d": -0.000736,
-    "high_risk_negative_rate": 0.2414,
-    "accuracy": 0.2414,
+    "observations": 63,
+    "high_risk_avg_return_1d": 0.012137,
+    "low_risk_avg_return_1d": -0.001252,
+    "high_risk_negative_rate": 0.2381,
+    "accuracy": 0.2381,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
@@ -204,22 +204,18 @@
       },
       {
         "ticker": "AMD",
-        "flag_count": 4
+        "flag_count": 5
       },
       {
         "ticker": "STX",
         "flag_count": 3
       },
       {
-        "ticker": "INTC",
-        "flag_count": 2
+        "ticker": "MPWR",
+        "flag_count": 3
       },
       {
         "ticker": "COHR",
-        "flag_count": 2
-      },
-      {
-        "ticker": "MPWR",
         "flag_count": 2
       },
       {
@@ -230,23 +226,23 @@
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.5504,
-      "mom_5d": 0.5504,
-      "sharpe_20d": 0.5504,
-      "rsi_14": 0.5397,
-      "vs_index": 0.5504,
-      "vol_ratio": 0.619,
-      "beta": 0.5349
+      "momentum": 0.5522,
+      "mom_5d": 0.5522,
+      "sharpe_20d": 0.5522,
+      "rsi_14": 0.5385,
+      "vs_index": 0.5522,
+      "vol_ratio": 0.6182,
+      "beta": 0.5373
     },
     "per_regime": {
       "BULL": {
-        "momentum": 0.8077,
-        "mom_5d": 0.8077,
-        "sharpe_20d": 0.8077,
-        "rsi_14": 0.7826,
-        "vs_index": 0.8077,
-        "vol_ratio": 0.8077,
-        "beta": 0.8077
+        "momentum": 0.7742,
+        "mom_5d": 0.7742,
+        "sharpe_20d": 0.7742,
+        "rsi_14": 0.7407,
+        "vs_index": 0.7742,
+        "vol_ratio": 0.7742,
+        "beta": 0.7742
       },
       "NEUTRAL": {
         "momentum": 0.4783,
@@ -289,76 +285,75 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-04-22",
-    "portfolio_return_1d": 0.0306,
-    "benchmark_return_1d": 0.0105,
-    "alpha_1d": 0.0202,
+    "date": "2026-04-23",
+    "portfolio_return_1d": 0.0121,
+    "benchmark_return_1d": -0.0041,
+    "alpha_1d": 0.0162,
     "winners": [
       {
-        "ticker": "AMD",
-        "return_1d": 0.0696,
-        "vs_benchmark": 0.0592,
+        "ticker": "ON",
+        "return_1d": 0.1006,
+        "vs_benchmark": 0.1047,
         "tags": [
           "momentum",
           "high_sharpe",
-          "consensus",
-          "overbought",
+          "breakout",
           "at_52w_high"
         ],
-        "rationale_snippet": "Consensus hold from current winners and Strategist proposal; still delivering strong alpha with +11.",
-        "rsi_at_entry": 95.761455,
-        "vol_ratio_at_entry": 1.081722
+        "rationale_snippet": "Current holding and Proposal A high-beta continuation name; 5d momentum is among the strongest in th",
+        "rsi_at_entry": null,
+        "vol_ratio_at_entry": 1.336352
       },
       {
-        "ticker": "STLD",
-        "return_1d": 0.0359,
+        "ticker": "GEV",
+        "return_1d": 0.0213,
         "vs_benchmark": 0.0254,
         "tags": [
           "momentum",
           "high_sharpe",
           "breakout",
+          "catalyst",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Strong unique pick with the best volume confirmation in the set (vol_ratio 2.27) and +13.1% 5d momen",
-        "rsi_at_entry": 85.432463,
-        "vol_ratio_at_entry": 2.271949
+        "rationale_snippet": "Best unique catalyst pick from Proposal B; very strong volume-backed breakout and high beta add need",
+        "rsi_at_entry": 90.522025,
+        "vol_ratio_at_entry": 1.887607
       },
       {
-        "ticker": "ANET",
-        "return_1d": 0.0311,
-        "vs_benchmark": 0.0207,
+        "ticker": "STX",
+        "return_1d": 0.0151,
+        "vs_benchmark": 0.0193,
         "tags": [
           "momentum",
           "high_sharpe",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "High-quality unique momentum continuation name; +12.4% 5d momentum with vol_ratio 1.31 supports keep",
-        "rsi_at_entry": 99.039849,
-        "vol_ratio_at_entry": 1.310172
+        "rationale_snippet": "Best unique replacement from Proposal A for slower semis; strong trend and high beta fit the bull ma",
+        "rsi_at_entry": 88.753852,
+        "vol_ratio_at_entry": 0.898817
       },
       {
-        "ticker": "ON",
-        "return_1d": 0.0269,
-        "vs_benchmark": 0.0164,
+        "ticker": "AMD",
+        "return_1d": 0.008,
+        "vs_benchmark": 0.0121,
         "tags": [
           "momentum",
           "high_sharpe",
-          "consensus",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Consensus by available evidence across the live portfolio context and Strategist proposal; +21.0% 5d",
-        "rsi_at_entry": 99.959555,
-        "vol_ratio_at_entry": 1.188606
+        "rationale_snippet": "Current holding and Proposal A anchor; still fully earns its slot with elite momentum, strong volume",
+        "rsi_at_entry": 96.294698,
+        "vol_ratio_at_entry": 1.341274
       }
     ],
     "losers": [
       {
-        "ticker": "MPWR",
-        "return_1d": -0.0009,
-        "vs_benchmark": -0.0114,
+        "ticker": "STLD",
+        "return_1d": -0.0088,
+        "vs_benchmark": -0.0047,
         "tags": [
           "momentum",
           "high_sharpe",
@@ -366,9 +361,9 @@
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Best unique upgrade candidate for a vacated slot; +12.5% 5d momentum and solid breakout quality make",
-        "rsi_at_entry": 95.489374,
-        "vol_ratio_at_entry": 1.030696
+        "rationale_snippet": "Current holding and Proposal A validated winner; materials remain a stronger rotation area than indu",
+        "rsi_at_entry": 91.224707,
+        "vol_ratio_at_entry": 1.540135
       }
     ],
     "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'high_sharpe' entries outperformed \u2014 continue favouring this setup"
