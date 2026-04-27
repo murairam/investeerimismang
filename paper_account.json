@@ -3,27 +3,18 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "AMD": 9.1318897,
-    "STX": 3.44804164,
-    "MPWR": 1.41988311,
-    "MCHP": 24.17199103,
-    "TXN": 10.67752257,
-    "ON": 9.6072626
+    "INTC": 24.68144716,
+    "ON": 30.36486862,
+    "MCHP": 34.9252774,
+    "AMD": 7.80965349,
+    "TXN": 9.80109482
   },
   "pending_order": {
-    "submitted_date": "2026-04-26",
+    "submitted_date": "2026-04-27",
     "positions": [
       {
         "ticker": "INTC",
-        "weight": 0.15
-      },
-      {
-        "ticker": "ON",
-        "weight": 0.22
-      },
-      {
-        "ticker": "MCHP",
-        "weight": 0.23
+        "weight": 0.2
       },
       {
         "ticker": "AMD",
@@ -32,6 +23,18 @@
       {
         "ticker": "TXN",
         "weight": 0.2
+      },
+      {
+        "ticker": "ON",
+        "weight": 0.07
+      },
+      {
+        "ticker": "MCHP",
+        "weight": 0.17
+      },
+      {
+        "ticker": "GEV",
+        "weight": 0.16
       }
     ]
   },
@@ -350,10 +353,55 @@
         ]
       },
       "executed_pending": false
+    },
+    {
+      "date": "2026-04-27",
+      "equity": 11583.56,
+      "cash": 0.0,
+      "daily_return": -0.000586,
+      "return_since_start": 0.158356,
+      "turnover": 0.422955,
+      "positions": {
+        "INTC": 24.68144716,
+        "ON": 30.36486862,
+        "MCHP": 34.9252774,
+        "AMD": 7.80965349,
+        "TXN": 9.80109482
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-27",
+        "positions": [
+          {
+            "ticker": "INTC",
+            "weight": 0.2
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.2
+          },
+          {
+            "ticker": "TXN",
+            "weight": 0.2
+          },
+          {
+            "ticker": "ON",
+            "weight": 0.07
+          },
+          {
+            "ticker": "MCHP",
+            "weight": 0.17
+          },
+          {
+            "ticker": "GEV",
+            "weight": 0.16
+          }
+        ]
+      },
+      "executed_pending": true
     }
   ],
-  "last_rebalanced_date": "2026-04-26",
-  "last_equity": 11590.34782315,
+  "last_rebalanced_date": "2026-04-27",
+  "last_equity": 11583.55713424,
   "verified_weights": {
     "AMD": 0.23,
     "STX": 0.15,

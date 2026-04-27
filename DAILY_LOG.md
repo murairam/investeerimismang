@@ -544,3 +544,35 @@ Winners: AMD +13.6%, MPWR +2.2%, ON +0.3% | Losers: TXN -2.1%, MCHP -1.6%, STX -
 - ▼ **AMD**: 23.0% → 20.0% (-3.0%)
 
 ---
+## 2026-04-27 06:33:50
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.5% · VIX: 18.7 · S&P 500 20d: +10.6%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +2.7% · Benchmark +0.8% · Alpha +1.9%
+Winners: AMD +13.6%, MPWR +2.2%, ON +0.3% | Losers: TXN -2.1%, MCHP -1.6%, STX -0.6%
+
+**Paper account:** Equity €11,583.56 (start €10,000) · Today -0.06% · Since start +15.84% · Turnover 42.3% · Cash €0.00
+
+**Confidence:** 87% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I built around the strongest ensemble agreement first: INTC as triple-consensus anchor, then AMD/TXN/ON/MCHP as double-consensus names with mandatory high conviction floors. For the final slot, GEV beats other uniques on catalyst quality and lower crowding, while I exclude current holdings STX and MPWR because they were explicitly identified as weaker/decelerating versus today's faster leaders; this stays aggressive in a BULL tape and should keep portfolio beta in a strong pro-cyclical range without adding filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **INTC** | 20.0% | Triple-consensus pick and the clearest momentum/catalyst leader with vol_ratio 2.51, mom_5d +20.7%, RSI 88, and very high beta that fits the BULL competition mandate. |
+| 2 | **AMD** | 20.0% | Double-consensus pick with elite acceleration (mom_5d +25.1%) and strong volume confirmation (vol_ratio 2.24); despite prior mixed learning, today's live signals are too strong to ignore. |
+| 3 | **TXN** | 20.0% | Double-consensus pick with mandatory conviction floor; strong breakout confirmation from vol_ratio 2.00 and mom_5d +20.8% makes it a validated rotation leader even with lower beta. |
+| 4 | **ON** | 7.0% | Double-consensus pick with mandatory conviction floor and powerful short-term momentum (mom_5d +18.7%); keeps exposure to a high-beta semiconductor mover with squeeze-style upside. |
+| 5 | **MCHP** | 17.0% | Double-consensus pick with mandatory conviction floor; momentum remains strong enough (mom_5d +13.7%) to retain a slot, though below the top tier due to weaker volume than the leaders. |
+| 6 | **GEV** | 16.0% | Best unique add from the catalyst book: vol_ratio 1.59, mom_5d +14.8%, RSI 91, and very low retail crowding create a credible right-tail breakout candidate that diversifies away from all-semi concentration. |
+
+**Changes from yesterday:**
+- ➕ Added **INTC** at 20.0%
+- ➕ Added **GEV** at 16.0%
+- ➖ Removed **STX** (was 15.0%)
+- ➖ Removed **MPWR** (was 17.0%)
+- ▼ **AMD**: 23.0% → 20.0% (-3.0%)
+
+---
