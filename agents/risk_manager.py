@@ -319,7 +319,7 @@ class OpenAIRiskManager(BaseAgent):
                 except Exception:
                     best_div = None
 
-                if best_div:
+                if best_div and len(positions) < config.GAME_CONSTRAINTS["max_stocks"]:
                     # Size the diversifier so that total weight ≥ 75% (game floor), preventing
                     # step-5e normalize() from firing and re-inflating the capped sector.
                     # Floor at 20% if total_freed allows — that keeps total ≥ 75% (55% + 20%).
@@ -328,6 +328,7 @@ class OpenAIRiskManager(BaseAgent):
                     positions.append(Position(
                         ticker=best_div["ticker"],
                         weight=div_weight,
+                        conviction=5,
                         rationale=(
                             f"Sector diversifier ({best_div.get('sector', '?')}): "
                             "auto-inserted by sector cap — mono-sector book detected, "

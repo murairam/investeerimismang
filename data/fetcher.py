@@ -265,7 +265,7 @@ def detect_rotation_risk(
             )
             if high_count == len(top3) and len(top3) >= 2:
                 triggers.append("exhaustion_high")
-                reasons.append(f"top {len(top3)} RSI>80 at 52w-high, vol<1.2")
+                reasons.append(f"top {len(top3)} RSI>80 at/near 52w-high")
             elif med_count >= 2:
                 triggers.append("exhaustion_medium")
                 reasons.append(f"{med_count}/{len(top3)} leaders RSI>75 near 52w-high")
