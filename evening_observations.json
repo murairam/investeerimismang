@@ -1,54 +1,54 @@
 {
   "date": "2026-04-27",
-  "timestamp": "2026-04-27T17:28:10+00:00",
-  "portfolio_return": -0.02579049240488641,
-  "benchmark_return": 0.0006238208804039136,
-  "alpha": -0.026414313285290324,
+  "timestamp": "2026-04-27T21:35:10+00:00",
+  "portfolio_return": -0.016385829428033252,
+  "benchmark_return": 0.0012323767534654362,
+  "alpha": -0.01761820618149869,
   "position_returns": [
     {
       "ticker": "INTC",
       "weight": 0.2,
-      "return": 0.002648381508174369,
-      "price": 82.75859832763672
+      "return": 0.029682540841616367,
+      "price": 84.98999786376953
     },
     {
       "ticker": "ON",
       "weight": 0.07,
-      "return": -0.008130112188539096,
-      "price": 97.5999984741211
+      "return": -0.0036585427313929886,
+      "price": 98.04000091552734
     },
     {
       "ticker": "GEV",
       "weight": 0.16,
-      "return": -0.026753623582508212,
-      "price": 1118.4449462890625
+      "return": -0.025200325806943646,
+      "price": 1120.22998046875
     },
     {
       "ticker": "TXN",
       "weight": 0.2,
-      "return": -0.029606035419504906,
-      "price": 268.93499755859375
-    },
-    {
-      "ticker": "AMD",
-      "weight": 0.2,
-      "return": -0.038354000399051014,
-      "price": 334.4700927734375
+      "return": -0.0275673459068303,
+      "price": 269.5
     },
     {
       "ticker": "MCHP",
       "weight": 0.17,
-      "return": -0.04634396421418263,
-      "price": 85.29499816894531
+      "return": -0.029069834889807078,
+      "price": 86.83999633789062
+    },
+    {
+      "ticker": "AMD",
+      "weight": 0.2,
+      "return": -0.03789423181707385,
+      "price": 334.6300048828125
     }
   ],
-  "ai_recommendation": "Yes\u2014update: drop/trim **MCHP** and **AMD** (worst momentum: -4.6% and -3.8%) and consider reducing **TXN** (-3.0%) if weakness persists. Keep **INTC** (only green: +0.3%) and **ON** (smallest loser: -0.8%) as your core, while reassessing **GEV** (-2.7%) for a quick rebound before adding risk.",
+  "ai_recommendation": "Keep INTC (it\u2019s the only strong winner today) and keep ON for now, but drop the weakest laggards\u2014TXN, MCHP, and AMD\u2014then reallocate that freed capital into stronger relative performers (or cash/defensive names) for tomorrow.",
   "game_standing": {
-    "rank": 974,
-    "total_players": 8690,
-    "value_eur": 11764.757825072298,
-    "today_return_pct": -2.138,
-    "week_return_pct": 10.156,
-    "month_return_pct": 17.648
+    "rank": 925,
+    "total_players": 8694,
+    "value_eur": 11825.737456387777,
+    "today_return_pct": -1.6310000000000002,
+    "week_return_pct": 10.727,
+    "month_return_pct": 18.257
   }
 }
