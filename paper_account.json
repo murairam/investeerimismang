@@ -3,41 +3,22 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "INTC": 24.68144716,
-    "ON": 30.36486862,
-    "MCHP": 34.9252774,
-    "AMD": 7.80965349,
-    "TXN": 9.80109482
+    "INTC": 34.03528346,
+    "AMD": 8.07703156,
+    "TXN": 10.1366536,
+    "MCHP": 26.69813745,
+    "GEV": 1.95565396,
+    "ON": 9.99233028
   },
-  "pending_order": {
-    "submitted_date": "2026-04-27",
-    "positions": [
-      {
-        "ticker": "INTC",
-        "weight": 0.2
-      },
-      {
-        "ticker": "AMD",
-        "weight": 0.2
-      },
-      {
-        "ticker": "TXN",
-        "weight": 0.2
-      },
-      {
-        "ticker": "ON",
-        "weight": 0.07
-      },
-      {
-        "ticker": "MCHP",
-        "weight": 0.17
-      },
-      {
-        "ticker": "GEV",
-        "weight": 0.16
-      }
-    ]
+  "verified_weights": {
+    "INTC": 0.2,
+    "AMD": 0.2,
+    "TXN": 0.2,
+    "MCHP": 0.17,
+    "GEV": 0.16,
+    "ON": 0.07
   },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -356,58 +337,23 @@
     },
     {
       "date": "2026-04-27",
-      "equity": 11583.56,
+      "equity": 12022.0,
       "cash": 0.0,
-      "daily_return": -0.000586,
-      "return_since_start": 0.158356,
-      "turnover": 0.422955,
+      "daily_return": 0.037242,
+      "return_since_start": 0.2022,
+      "turnover": 0.0,
       "positions": {
-        "INTC": 24.68144716,
-        "ON": 30.36486862,
-        "MCHP": 34.9252774,
-        "AMD": 7.80965349,
-        "TXN": 9.80109482
+        "INTC": 34.03528346,
+        "AMD": 8.07703156,
+        "TXN": 10.1366536,
+        "MCHP": 26.69813745,
+        "GEV": 1.95565396,
+        "ON": 9.99233028
       },
-      "pending_order": {
-        "submitted_date": "2026-04-27",
-        "positions": [
-          {
-            "ticker": "INTC",
-            "weight": 0.2
-          },
-          {
-            "ticker": "AMD",
-            "weight": 0.2
-          },
-          {
-            "ticker": "TXN",
-            "weight": 0.2
-          },
-          {
-            "ticker": "ON",
-            "weight": 0.07
-          },
-          {
-            "ticker": "MCHP",
-            "weight": 0.17
-          },
-          {
-            "ticker": "GEV",
-            "weight": 0.16
-          }
-        ]
-      },
-      "executed_pending": true
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-04-27",
-  "last_equity": 11583.55713424,
-  "verified_weights": {
-    "AMD": 0.23,
-    "STX": 0.15,
-    "MPWR": 0.17,
-    "MCHP": 0.16,
-    "TXN": 0.22,
-    "ON": 0.07
-  }
+  "last_equity": 12022.0
 }
