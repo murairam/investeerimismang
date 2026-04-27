@@ -59,7 +59,10 @@ Position sizing is computed downstream by Kelly math.
 4. **Consensus conviction floor (MANDATORY)**: ticker in exactly 2 of 3 proposals → minimum conviction 8. Ticker in all 3 proposals → minimum conviction 9. Do not assign below these floors — ensemble agreement IS the signal. (Devil HIGH-risk exception only applies when devil accuracy is confirmed reliable — see runtime accuracy note injected below.)
 5. **Score by conviction** (see RULE #1 above): consensus 8–10, strong single-model 7–10 (a single agent with a unique breakout thesis + vol_ratio>1.5 + at_52w_high can score 9–10), diversifiers 3–6. Do NOT artificially cap unique picks at conviction 6–8 just because only one agent proposed them — unique high-conviction picks from the outcome data beat consensus filler.
    Conviction → weight mapping (Python-computed): 10→~25% | 9→~22% | 8→~20% | 7→~18% | 6→~16% | 5→~13% | 4→~11% | 3→~9% | 2→~7% | 1→~5%
-6. **Check market concentration**: if >65% ends up in one market, redistribute unless signal concentration is clearly superior.
+6. **Check market AND sector concentration**:
+   - Market: if >65% ends up in one market (e.g., all US), redistribute unless signal concentration is clearly superior.
+   - Sector: maximum **55% in any single sector** (Tech, Fin, Health, Energy, Ind, etc.) — code-enforced hard cap, never exceed.
+   - **MANDATORY — at least 2 sectors**: every portfolio MUST contain at least one position (≥5%) in a sector different from the dominant sector. A mono-sector portfolio (e.g., all semiconductors) has zero internal hedge and amplifies factor risk on sector down-days — this is how a -2.5% loss drops you 300 ranks. BULL momentum does NOT override this rule.
 7. **Check regime fit and portfolio beta**:
    - You will be given the portfolio-weighted beta computed from the proposals.
    - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
@@ -81,6 +84,7 @@ Hard game constraints and final weight bounds are enforced by Python validator l
 - 5 to 20 stocks.
 - No duplicate tickers.
 - Every position must include a conviction integer from 1 to 10.
+- **At least 2 different sectors must be represented.** (No mono-sector portfolios — code enforces a 55% sector cap and will override your output if violated.)
 
 ## Output — JSON only
 CRITICAL: output `conviction` (1-10), not `weight`.
