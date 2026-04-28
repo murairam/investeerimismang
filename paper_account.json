@@ -3,42 +3,22 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "INTC": 34.03528346,
-    "AMD": 8.07703156,
-    "TXN": 10.1366536,
-    "MCHP": 26.69813745,
-    "GEV": 1.95565396,
-    "ON": 9.99233028
+    "QCOM": 18.40099088,
+    "MU": 5.27095623,
+    "INTC": 32.5324492,
+    "ON": 22.56167084,
+    "STX": 3.48017931,
+    "TER": 3.09507402
   },
-  "pending_order": {
-    "submitted_date": "2026-04-28",
-    "positions": [
-      {
-        "ticker": "INTC",
-        "weight": 0.2
-      },
-      {
-        "ticker": "ON",
-        "weight": 0.16
-      },
-      {
-        "ticker": "MU",
-        "weight": 0.2
-      },
-      {
-        "ticker": "QCOM",
-        "weight": 0.2
-      },
-      {
-        "ticker": "TER",
-        "weight": 0.09
-      },
-      {
-        "ticker": "STX",
-        "weight": 0.15
-      }
-    ]
+  "verified_weights": {
+    "QCOM": 0.2,
+    "MU": 0.2,
+    "INTC": 0.2,
+    "ON": 0.16,
+    "STX": 0.15,
+    "TER": 0.09
   },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -375,59 +355,23 @@
     },
     {
       "date": "2026-04-28",
-      "equity": 11804.56,
+      "equity": 11827.0,
       "cash": 0.0,
-      "daily_return": -0.018087,
-      "return_since_start": 0.180456,
+      "daily_return": -0.01622,
+      "return_since_start": 0.1827,
       "turnover": 0.0,
       "positions": {
-        "INTC": 34.03528346,
-        "AMD": 8.07703156,
-        "TXN": 10.1366536,
-        "MCHP": 26.69813745,
-        "GEV": 1.95565396,
-        "ON": 9.99233028
+        "QCOM": 18.40099088,
+        "MU": 5.27095623,
+        "INTC": 32.5324492,
+        "ON": 22.56167084,
+        "STX": 3.48017931,
+        "TER": 3.09507402
       },
-      "pending_order": {
-        "submitted_date": "2026-04-28",
-        "positions": [
-          {
-            "ticker": "INTC",
-            "weight": 0.2
-          },
-          {
-            "ticker": "ON",
-            "weight": 0.16
-          },
-          {
-            "ticker": "MU",
-            "weight": 0.2
-          },
-          {
-            "ticker": "QCOM",
-            "weight": 0.2
-          },
-          {
-            "ticker": "TER",
-            "weight": 0.09
-          },
-          {
-            "ticker": "STX",
-            "weight": 0.15
-          }
-        ]
-      },
-      "executed_pending": false
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-04-28",
-  "last_equity": 11804.5615788,
-  "verified_weights": {
-    "INTC": 0.2,
-    "AMD": 0.2,
-    "TXN": 0.2,
-    "MCHP": 0.17,
-    "GEV": 0.16,
-    "ON": 0.07
-  }
+  "last_equity": 11827.0
 }

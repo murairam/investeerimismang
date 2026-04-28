@@ -580,7 +580,7 @@ Winners: AMD +13.6%, MPWR +2.2%, ON +0.3% | Losers: TXN -2.1%, MCHP -1.6%, STX -
 
 **Market:** BULL regime · SPX vs 50d SMA: +5.6% · VIX: 18.0 · S&P 500 20d: +12.6%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 14:22:11.
 
 **Yesterday's P&L:** Portfolio -1.5% · Benchmark +0.1% · Alpha -1.6%
 Winners: INTC +3.1% | Losers: AMD -3.7%, MCHP -2.8%, TXN -2.6%
