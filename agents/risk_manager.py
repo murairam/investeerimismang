@@ -287,10 +287,11 @@ class OpenAIRiskManager(BaseAgent):
                     )
             elif not uncapped:
                 # Mono-sector book: every position is in a capped sector.
-                # Without a non-capped position, step-5e normalize() rescales everything
-                # back to 100% and completely undoes the sector cap.
-                # Fix: inject the best non-dominant-sector candidate from the snapshot so
-                # the freed weight lands in a different sector and total stays ≥ 75%.
+                # Without non-capped weight, step-5e normalize() rescales back to 100%,
+                # completely undoing the sector cap.
+                # Fix: inject diversifiers from non-capped sectors until total ≥ 75%.
+                # One diversifier (≤25%) is not enough when cap < 55% (MEDIUM=45%,
+                # HIGH=35%), so we loop and add candidates until the floor is met.
                 portfolio_tickers = {p.ticker for p in positions}
 
                 def _div_score(c: dict) -> float:
@@ -303,44 +304,64 @@ class OpenAIRiskManager(BaseAgent):
                         except (TypeError, ValueError):
                             pass
                     s2 = c.get("sharpe_20d")
-                    return float(s2) if s2 is not None else 0.0
+                    if s2 is not None:
+                        try:
+                            v2 = float(s2)
+                            if not math.isnan(v2):
+                                return v2
+                        except (TypeError, ValueError):
+                            pass
+                    return 0.0
 
-                try:
-                    best_div = max(
-                        (
-                            c for c in snapshot.get("candidates", [])
-                            if c.get("ticker") not in portfolio_tickers
-                            and c.get("ticker")
-                            and (_sector_of(c["ticker"]) not in capped_sectors)
-                        ),
-                        key=_div_score,
-                        default=None,
-                    )
-                except Exception:
-                    best_div = None
+                div_candidates = sorted(
+                    (
+                        c for c in snapshot.get("candidates", [])
+                        if c.get("ticker") not in portfolio_tickers
+                        and c.get("ticker")
+                        and (_sector_of(c["ticker"]) not in capped_sectors)
+                    ),
+                    key=_div_score,
+                    reverse=True,
+                )
 
-                if best_div and len(positions) < config.GAME_CONSTRAINTS["max_stocks"]:
-                    # Size the diversifier so that total weight ≥ 75% (game floor), preventing
-                    # step-5e normalize() from firing and re-inflating the capped sector.
-                    # Floor at 20% if total_freed allows — that keeps total ≥ 75% (55% + 20%).
-                    div_weight = min(total_freed, max_w)
-                    div_weight = max(div_weight, min(0.20, total_freed))
+                freed_remaining = total_freed
+                injected: list[tuple[dict, float]] = []
+                for cand in div_candidates:
+                    current_total = sum(p.weight for p in positions) + sum(w for _, w in injected)
+                    if current_total >= 0.75:
+                        break
+                    if len(positions) + len(injected) >= config.GAME_CONSTRAINTS["max_stocks"]:
+                        break
+                    if freed_remaining <= 1e-9:
+                        break
+                    needed = 0.75 - current_total
+                    div_weight = min(freed_remaining, max_w, max(needed, min_w))
+                    if div_weight < min_w:
+                        break
+                    injected.append((cand, div_weight))
+                    freed_remaining -= div_weight
+
+                for cand, div_weight in injected:
                     positions.append(Position(
-                        ticker=best_div["ticker"],
+                        ticker=cand["ticker"],
                         weight=div_weight,
                         conviction=5,
                         rationale=(
-                            f"Sector diversifier ({best_div.get('sector', '?')}): "
+                            f"Sector diversifier ({cand.get('sector', '?')}): "
                             "auto-inserted by sector cap — mono-sector book detected, "
                             "prevents normalizer from re-inflating capped sector"
                         ),
                     ))
+
+                final_total = sum(p.weight for p in positions)
+                if injected:
                     logger.warning(
-                        "Sector cap: mono-sector book — injecting diversifier %s (%s) at %.0f%% "
-                        "(total_freed was %.0f%%, new total %.0f%%)",
-                        best_div["ticker"], best_div.get("sector", "?"), div_weight * 100,
+                        "Sector cap: mono-sector book — injected %d diversifier(s) %s "
+                        "(total_freed %.0f%%, new total %.0f%%)",
+                        len(injected),
+                        [f"{c['ticker']} {w*100:.0f}%" for c, w in injected],
                         total_freed * 100,
-                        sum(p.weight for p in positions) * 100,
+                        final_total * 100,
                     )
                 else:
                     logger.warning(
@@ -348,7 +369,7 @@ class OpenAIRiskManager(BaseAgent):
                         "candidates available — leaving as cash (%.0f%% total). "
                         "Step-5e normalizer may partially undo this cap.",
                         total_freed * 100,
-                        sum(p.weight for p in positions) * 100,
+                        final_total * 100,
                     )
             else:
                 # Uncapped positions exist but are all at max_weight — leave freed weight as cash
