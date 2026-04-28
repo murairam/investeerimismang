@@ -11,7 +11,7 @@
     "agents/challenger.py"
   ],
   "fingerprints": {
-    "config.py": "dc562fc1f8f3da365716ab6bb37fe0dc952b84afd50fa45727476bbbe3d6ec5e",
+    "config.py": "1d8ac7ea6a7ed7e1c00afbc98be56d30c471604049b80940a36b059d9711fea6",
     "docs/rules.txt": "72cd80a937c847262b7754b21c21e4ecf5266cc91705b599a929f62c1cb75881",
     "agents/strategist.py": "ec02ff52eba25f4b0e88c19c0ab136951a662376c9d9b322a5f7bc10ad68aa2d",
     "agents/full_analyst.py": "54329dd021882f1f486acfad8f5b1b5a2433b48ecaf8be4d62748f05247709c4",
