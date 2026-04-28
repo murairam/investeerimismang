@@ -59,7 +59,10 @@ Position sizing is computed downstream by Kelly math.
 4. **Consensus conviction floor (MANDATORY)**: ticker in exactly 2 of 3 proposals → minimum conviction 8. Ticker in all 3 proposals → minimum conviction 9. Do not assign below these floors — ensemble agreement IS the signal. (Devil HIGH-risk exception only applies when devil accuracy is confirmed reliable — see runtime accuracy note injected below.)
 5. **Score by conviction** (see RULE #1 above): consensus 8–10, strong single-model 7–10 (a single agent with a unique breakout thesis + vol_ratio>1.5 + at_52w_high can score 9–10), diversifiers 3–6. Do NOT artificially cap unique picks at conviction 6–8 just because only one agent proposed them — unique high-conviction picks from the outcome data beat consensus filler.
    Conviction → weight mapping (Python-computed): 10→~25% | 9→~22% | 8→~20% | 7→~18% | 6→~16% | 5→~13% | 4→~11% | 3→~9% | 2→~7% | 1→~5%
-6. **Check market concentration**: if >65% ends up in one market, redistribute unless signal concentration is clearly superior.
+6. **Check market AND sector concentration**:
+   - Market: if >65% ends up in one market (e.g., all US), redistribute unless signal concentration is clearly superior.
+   - Sector: maximum **55% in any single sector** (Tech, Fin, Health, Energy, Ind, etc.) — code-enforced hard cap, never exceed.
+   - **MANDATORY — at least 2 sectors**: every portfolio MUST contain at least one position (≥5%) in a sector different from the dominant sector. A mono-sector portfolio (e.g., all semiconductors) has zero internal hedge and amplifies factor risk on sector down-days — this is how a -2.5% loss drops you 300 ranks. BULL momentum does NOT override this rule.
 7. **Check regime fit and portfolio beta**:
    - You will be given the portfolio-weighted beta computed from the proposals.
    - BEAR regime: target portfolio beta ≤ 0.90. Cap individual positions at 15%.
@@ -81,6 +84,7 @@ Hard game constraints and final weight bounds are enforced by Python validator l
 - 5 to 20 stocks.
 - No duplicate tickers.
 - Every position must include a conviction integer from 1 to 10.
+- **At least 2 different sectors must be represented.** (No mono-sector portfolios — code enforces a 55% sector cap and will override your output if violated.)
 
 ## Output — JSON only
 CRITICAL: output `conviction` (1-10), not `weight`.
@@ -281,8 +285,94 @@ class OpenAIRiskManager(BaseAgent):
                         rationale=pos.rationale,
                         conviction=pos.conviction,
                     )
+            elif not uncapped:
+                # Mono-sector book: every position is in a capped sector.
+                # Without non-capped weight, step-5e normalize() rescales back to 100%,
+                # completely undoing the sector cap.
+                # Fix: inject diversifiers from non-capped sectors until total ≥ 75%.
+                # One diversifier (≤25%) is not enough when cap < 55% (MEDIUM=45%,
+                # HIGH=35%), so we loop and add candidates until the floor is met.
+                portfolio_tickers = {p.ticker for p in positions}
+
+                def _div_score(c: dict) -> float:
+                    s = c.get("competition_score")
+                    if s is not None:
+                        try:
+                            v = float(s)
+                            if not math.isnan(v):
+                                return v
+                        except (TypeError, ValueError):
+                            pass
+                    s2 = c.get("sharpe_20d")
+                    if s2 is not None:
+                        try:
+                            v2 = float(s2)
+                            if not math.isnan(v2):
+                                return v2
+                        except (TypeError, ValueError):
+                            pass
+                    return 0.0
+
+                div_candidates = sorted(
+                    (
+                        c for c in snapshot.get("candidates", [])
+                        if c.get("ticker") not in portfolio_tickers
+                        and c.get("ticker")
+                        and (_sector_of(c["ticker"]) not in capped_sectors)
+                    ),
+                    key=_div_score,
+                    reverse=True,
+                )
+
+                freed_remaining = total_freed
+                injected: list[tuple[dict, float]] = []
+                for cand in div_candidates:
+                    current_total = sum(p.weight for p in positions) + sum(w for _, w in injected)
+                    if current_total >= 0.75:
+                        break
+                    if len(positions) + len(injected) >= config.GAME_CONSTRAINTS["max_stocks"]:
+                        break
+                    if freed_remaining <= 1e-9:
+                        break
+                    needed = 0.75 - current_total
+                    div_weight = min(freed_remaining, max_w, max(needed, min_w))
+                    if div_weight < min_w:
+                        break
+                    injected.append((cand, div_weight))
+                    freed_remaining -= div_weight
+
+                for cand, div_weight in injected:
+                    positions.append(Position(
+                        ticker=cand["ticker"],
+                        weight=div_weight,
+                        conviction=5,
+                        rationale=(
+                            f"Sector diversifier ({cand.get('sector', '?')}): "
+                            "auto-inserted by sector cap — mono-sector book detected, "
+                            "prevents normalizer from re-inflating capped sector"
+                        ),
+                    ))
+
+                final_total = sum(p.weight for p in positions)
+                if injected:
+                    logger.warning(
+                        "Sector cap: mono-sector book — injected %d diversifier(s) %s "
+                        "(total_freed %.0f%%, new total %.0f%%)",
+                        len(injected),
+                        [f"{c['ticker']} {w*100:.0f}%" for c, w in injected],
+                        total_freed * 100,
+                        final_total * 100,
+                    )
+                else:
+                    logger.warning(
+                        "Sector cap freed %.0f%% but mono-sector book has no non-dominant "
+                        "candidates available — leaving as cash (%.0f%% total). "
+                        "Step-5e normalizer may partially undo this cap.",
+                        total_freed * 100,
+                        final_total * 100,
+                    )
             else:
-                # All uncapped positions are already at max_weight — leave as residual cash
+                # Uncapped positions exist but are all at max_weight — leave freed weight as cash
                 logger.warning(
                     "Sector cap freed %.0f%% but all non-capped positions are at max_weight — "
                     "leaving as cash (%.0f%% total)",

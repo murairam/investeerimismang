@@ -245,7 +245,11 @@ def detect_rotation_risk(
                 triggers.append("breadth_medium")
                 reasons.append(f"breadth {breadth:.0%}")
 
-        # Trigger 2: top-3 exhaustion (RSI overbought at 52w high with low volume)
+        # Trigger 2: top-3 exhaustion (RSI overbought at 52w high)
+        # vol_ratio gate removed 2026-04-27: sector-wide high-volume rallies ARE the most
+        # dangerous crowding scenario, not the safest — everyone piling in at once.
+        # The old vol < 1.2 condition meant a sector with RSI>80 + 52w-high + strong volume
+        # NEVER triggered exhaustion_high, which is exactly the mono-sector bubble we must catch.
         if srecs:
             sorted_recs = sorted(srecs, key=lambda r: r.get("momentum", 0.0), reverse=True)
             top3 = sorted_recs[:3]
@@ -253,7 +257,6 @@ def detect_rotation_risk(
                 1 for r in top3
                 if r.get("rsi_14", float("nan")) > 80
                 and r.get("pct_from_52w_high", float("nan")) > -0.03
-                and r.get("vol_ratio", float("nan")) < 1.2
             )
             med_count = sum(
                 1 for r in top3
@@ -262,7 +265,7 @@ def detect_rotation_risk(
             )
             if high_count == len(top3) and len(top3) >= 2:
                 triggers.append("exhaustion_high")
-                reasons.append(f"top {len(top3)} RSI>80 at 52w-high, vol<1.2")
+                reasons.append(f"top {len(top3)} RSI>80 at/near 52w-high")
             elif med_count >= 2:
                 triggers.append("exhaustion_medium")
                 reasons.append(f"{med_count}/{len(top3)} leaders RSI>75 near 52w-high")

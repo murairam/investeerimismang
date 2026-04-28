@@ -1,6 +1,6 @@
 # AlphaShark — Permanent Strategy Principles
 
-**Last updated:** 2026-04-21
+**Last updated:** 2026-04-27
 **Status:** Active (overrides any conservative defaults in auto-generated files)
 
 This file is NOT auto-generated. It survives daily pipeline runs and is injected into every
@@ -49,10 +49,14 @@ higher-momentum candidate.
 - **Implementation:** `agents/risk_manager.py` rules 18 & 19
 
 ### Sector Concentration Policy
-- **Rule:** The game has no sector caps, but the pipeline enforces soft rotation-risk caps when a sector shows HIGH exhaustion signals (RSI overbought + deceleration). These are competition guardrails, not game rules.
-- **BULL regime cap:** HIGH rotation-risk sector capped at 40%; MEDIUM at 55%; unconditional ceiling 70%.
-- **Rationale:** Prevents over-concentrating in exhausted sectors. When cap frees weight that can't be redistributed, the game's 75% minimum always wins — the pipeline force-normalizes.
-- **Implementation:** `agents/risk_manager.py::_enforce_sector_rotation_cap()` + orchestrator step 5c.
+- **Updated 2026-04-27:** Caps tightened after a mono-sector (84% semiconductors) book dropped 300 ranks on a single sector down-day. Root causes: SECTOR_MAP was missing 20 tickers (mis-tagged as "US"), old 70% cap was too permissive for a 5-6 stock book, and exhaustion trigger had a vol < 1.2 gate that blocked detection of high-volume crowded sectors.
+- **Unconditional ceiling:** 55% max in any single sector (was 70%).
+- **Rotation-risk MEDIUM cap:** 45% (was 55%).
+- **Rotation-risk HIGH cap:** 35% (was 40%).
+- **MANDATORY: at least 2 different sectors** in every portfolio — code-enforced, never waivable.
+- **Exhaustion trigger fix:** `vol_ratio < 1.2` gate removed from `exhaustion_high`. High-volume sector rallies (everyone piling into the same sector) are the most dangerous crowding scenario, not the safest.
+- **SECTOR_MAP fix:** 20 tickers added (ON, MCHP, MPWR, LRCX, TER, ANET, COHR, SMCI, WDC, STX, GLW, DELL, GEV, WAB, STLD, HOOD, CVNA, FOXA, SBAC, SDRL.OL). Previously tagged "US" fallback, making sector enforcement blind to true concentration.
+- **Implementation:** `agents/risk_manager.py::_enforce_sector_rotation_cap()` + orchestrator step 5c + `config.SECTOR_CAP_UNCONDITIONAL`.
 
 ### Beta — Informational Only in BEAR
 - **Rule:** In BULL/NEUTRAL, beta target is 1.6–2.0 (BULL) or 0.95–1.30 (NEUTRAL) as a soft guide.

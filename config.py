@@ -96,9 +96,9 @@ STRESS_INDIVIDUAL_BETA_CAP = 2.0  # any single stock with beta > this gets cappe
 FALLBACK_REPLACEMENT_WEIGHT = 0.05
 MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
 # Sector concentration caps — enforced when rotation_risk signals sector exhaustion
-SECTOR_CAP_UNCONDITIONAL = 0.70   # never exceed 70% in any single sector
-SECTOR_ROTATION_CAP_MEDIUM = 0.55 # cap at 55% when rotation risk is MEDIUM
-SECTOR_ROTATION_CAP_HIGH = 0.40   # cap at 40% when rotation risk is HIGH
+SECTOR_CAP_UNCONDITIONAL = 0.55   # never exceed 55% in any single sector (was 70% — a 6-stock mono-sector book reached 84% with the 70% cap; lowered 2026-04-27)
+SECTOR_ROTATION_CAP_MEDIUM = 0.45 # cap at 45% when rotation risk is MEDIUM (was 55%)
+SECTOR_ROTATION_CAP_HIGH = 0.35   # cap at 35% when rotation risk is HIGH (was 40%)
 LOW_VOLUME_VOL_RATIO_THRESHOLD = 0.80   # low-volume confirmation floor for concentration caps
 LOW_VOLUME_MAX_WEIGHT = 0.18
 PORTFOLIO_MIN_AVG_VOL_RATIO = 0.85
@@ -179,6 +179,20 @@ SECTOR_MAP: dict[str, str] = {
     "CF": "Chem", "NTR": "Chem", "ALB": "Chem", "CE": "Chem",
     "NEE": "Util",
     "MU": "Tech",
+    # SP500 — Tech (semiconductors, storage, networking — missing from original map; added 2026-04-27)
+    "ON": "Tech", "MCHP": "Tech", "MPWR": "Tech", "LRCX": "Tech",
+    "TER": "Tech", "ANET": "Tech", "COHR": "Tech", "SMCI": "Tech",
+    "WDC": "Tech", "STX": "Tech", "GLW": "Tech", "DELL": "Tech",
+    # SP500 — Other sectors missing from original map (added 2026-04-27)
+    "GEV": "Ind",    # GE Vernova — power equipment / energy transition
+    "WAB": "Ind",    # Wabtec — rail equipment
+    "STLD": "Mat",   # Steel Dynamics
+    "HOOD": "Fin",   # Robinhood Markets
+    "CVNA": "Cons",  # Carvana
+    "FOXA": "Cons",  # Fox Corporation — media
+    "SBAC": "Tel",   # SBA Communications — cell towers
+    # Norway — OBX (additional)
+    "SDRL.OL": "Energy",  # Seadrill — offshore drilling
     # SP500 — Industrials
     "HON": "Ind", "CAT": "Ind", "UPS": "Ind", "BA": "Ind",
     # Finland — OMXHLCPI

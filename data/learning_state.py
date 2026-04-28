@@ -244,7 +244,7 @@ def generate_learning_state() -> dict:
         weight_caps.append({"scope": "global", "max_weight": 0.15, "reason": "inverted_conviction"})
 
     early_warning_notes: list[str] = []
-    _RATIONALE_CAP_HIT_RATE_THRESHOLD = 0.30
+    _RATIONALE_CAP_HIT_RATE_THRESHOLD = 0.25  # lowered from 0.30: tags at 25-30% hit rate are mediocre but often provide sector diversification (e.g. non_us_differentiator)
     for tag, stats in rationale_stats.items():
         observations = stats["observations"]
         hit_rate = stats["hit_rate"]

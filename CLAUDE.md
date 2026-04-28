@@ -98,6 +98,14 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 
 ## Risk Control Features (Added March 2026, updated April 2026)
 
+### Sector Concentration Cap (Updated 2026-04-27)
+- **Unconditional ceiling:** 55% in any single sector (lowered from 70% — the old 70% cap was too high for a 5-6 stock book; a 6-stock mono-sector portfolio reached 84% and dropped 300 ranks in one sector down-day)
+- **Rotation-risk MEDIUM:** 45% (was 55%); **HIGH:** 35% (was 40%)
+- **MANDATORY minimum:** at least 2 sectors in every portfolio — hard constraint in Risk Manager system prompt + enforced by `_enforce_sector_rotation_cap()` after step 5c
+- **SECTOR_MAP fix:** 20 SP500/OBX tickers added that were previously mis-tagged as "US" fallback (ON, MCHP, MPWR, LRCX, TER, ANET, COHR, SMCI, WDC, STX, GLW, DELL, GEV, WAB, STLD, HOOD, CVNA, FOXA, SBAC, SDRL.OL) — the missing tags made sector enforcement blind to true Tech concentration
+- **Exhaustion trigger fix:** `vol_ratio < 1.2` gate removed from `detect_rotation_risk()` `exhaustion_high` branch — high-volume sector rallies are crowding events, not exceptions
+- **Learning-state cap threshold:** `_RATIONALE_CAP_HIT_RATE_THRESHOLD` lowered from 0.30 → 0.25 so that mediocre diversification rationales (e.g. `non_us_differentiator` at 27%) no longer trigger a hard position cap that compounds the mono-sector bias
+
 ### Overbought Weight Cap
 - **When triggered:** RSI > 85 AND position within 2% of 52-week high (raised from 79 — in competition momentum markets RSI 79-84 = leader, not topper)
 - **Action:** Cap position weight at 15% — **code-enforced in `_enforce_selection_quality()` (Pass A)**
