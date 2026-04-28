@@ -1,17 +1,17 @@
 # Pre-Game Learning Report
 
-Generated: 2026-04-27
+Generated: 2026-04-28
 Target go-live date: 2026-04-06
 Days remaining: 0
 
 ## Scoreboard
-- Training days with measurable alpha: 32
+- Training days with measurable alpha: 33
 - Win days (alpha > 0): 18
-- Loss days (alpha < 0): 14
-- Average daily alpha: +0.07%
-- Paper account equity: €11,583.56 (from €10,000.00, return +15.84%)
+- Loss days (alpha < 0): 15
+- Average daily alpha: +0.02%
+- Paper account equity: €11,804.56 (from €10,000.00, return +18.05%)
 - Max drawdown (paper): 2.44%
-- Average turnover: 5.83%
+- Average turnover: 2.39%
 
 ## Confidence note
 - Evidence status: actionable
@@ -23,16 +23,16 @@ Days remaining: 0
 - Worst alpha day: 2026-04-07 (-3.42%)
 
 ## Structured learning state
-- Active hard rules: 1
+- Active hard rules: 0
 - Changed hard rules since yesterday: 0
 - Confidence notes: 5
 
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| INTC | winner | 10 | +5.89% | 100% |
-| ON | winner | 16 | +3.94% | 100% |
-| AMD | winner | 18 | +3.90% | 89% |
+| INTC | winner | 12 | +5.42% | 100% |
+| ON | winner | 18 | +3.47% | 89% |
+| AMD | winner | 20 | +3.14% | 80% |
 | MPWR | winner | 8 | +2.65% | 100% |
 | XOM | winner | 8 | +1.50% | 75% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
@@ -40,7 +40,7 @@ Days remaining: 0
 | VWS.CO | loser | 12 | -0.20% | 33% |
 
 ## Action plan until April 6
-- RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% — hit rate 27% over 37 observations (threshold: 30%).
+- Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%.
 
 ## Daily routine
 - Run: `python main.py`
