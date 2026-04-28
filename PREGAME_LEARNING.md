@@ -8,7 +8,7 @@ Days remaining: 0
 - Training days with measurable alpha: 33
 - Win days (alpha > 0): 18
 - Loss days (alpha < 0): 15
-- Average daily alpha: +0.01%
+- Average daily alpha: +0.02%
 - Paper account equity: €11,804.56 (from €10,000.00, return +18.05%)
 - Max drawdown (paper): 2.44%
 - Average turnover: 2.39%
@@ -23,16 +23,16 @@ Days remaining: 0
 - Worst alpha day: 2026-04-07 (-3.42%)
 
 ## Structured learning state
-- Active hard rules: 1
+- Active hard rules: 0
 - Changed hard rules since yesterday: 0
 - Confidence notes: 5
 
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| INTC | winner | 12 | +5.40% | 100% |
-| ON | winner | 18 | +3.46% | 89% |
-| AMD | winner | 20 | +3.13% | 80% |
+| INTC | winner | 12 | +5.42% | 100% |
+| ON | winner | 18 | +3.47% | 89% |
+| AMD | winner | 20 | +3.14% | 80% |
 | MPWR | winner | 8 | +2.65% | 100% |
 | XOM | winner | 8 | +1.50% | 75% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
@@ -40,7 +40,7 @@ Days remaining: 0
 | VWS.CO | loser | 12 | -0.20% | 33% |
 
 ## Action plan until April 6
-- RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% — hit rate 27% over 37 observations (threshold: 30%).
+- Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%.
 
 ## Daily routine
 - Run: `python main.py`

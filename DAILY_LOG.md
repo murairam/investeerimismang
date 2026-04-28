@@ -576,39 +576,39 @@ Winners: AMD +13.6%, MPWR +2.2%, ON +0.3% | Losers: TXN -2.1%, MCHP -1.6%, STX -
 - ▼ **AMD**: 23.0% → 20.0% (-3.0%)
 
 ---
-## 2026-04-28 06:39:48
+## 2026-04-28 07:04:20
 
 **Market:** BULL regime · SPX vs 50d SMA: +5.6% · VIX: 18.0 · S&P 500 20d: +12.6%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio -1.6% · Benchmark +0.1% · Alpha -1.8%
-Winners: INTC +3.0% | Losers: AMD -3.8%, MCHP -2.9%, TXN -2.7%
+**Yesterday's P&L:** Portfolio -1.5% · Benchmark +0.1% · Alpha -1.6%
+Winners: INTC +3.1% | Losers: AMD -3.7%, MCHP -2.8%, TXN -2.6%
 
 **Paper account:** Equity €11,804.56 (start €10,000) · Today -1.81% · Since start +18.05% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 85% · **Positions:** 6 · **Total weight:** 100.0%
+**Confidence:** 87% · **Positions:** 6 · **Total weight:** 95.0%
 
-**Thesis:** I anchored the portfolio around the strongest ensemble agreement: triple-consensus INTC and ON, then added double-consensus MU and QCOM as independently validated Tech leaders. Unique adds TER and STX beat current laggards TXN, MCHP, AMD, and GEV on momentum/slot cost while also rotating away from weaker breadth sectors; this keeps the book aggressive and still broadly aligned with a BULL-regime high-beta target without adding filler.
+**Thesis:** I prioritized the independently validated consensus names first: INTC and ON as triple-consensus anchors, MU and GEV as double-consensus adds. Then I filled remaining slots with the strongest unique momentum upgrades, choosing STX and CDNS over weaker or slower names; TXN, MCHP, and AMD are removed because they were explicitly flagged as laggards to rotate out, while GEV is retained despite one proposal cutting it because its actual momentum/volume still justify the slot and it satisfies the required second sector. The result stays aggressive for a BULL regime with a tech-heavy but not mono-sector structure, and should keep portfolio beta elevated without adding low-beta filler.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **INTC** | 20.0% | Triple-consensus core hold with the strongest validated setup in the book: +30.0% 5d momentum, vol_ratio 1.45, strong relative strength, and explicitly reinforced by learning context as the one clear winner to keep. |
-| 2 | **ON** | 16.0% | Triple-consensus momentum leader and validated keep despite crowding: +15.3% 5d momentum with acceptable vol_ratio 0.99, still earning its slot under the rotation mandate and protected by the consensus floor. |
-| 3 | **MU** | 20.0% | Double-consensus semiconductor leader with elite continuation signals: +17.6% 5d momentum, near-high leadership, and strong regime fit in the leading Tech sector despite only moderate volume confirmation. |
-| 4 | **QCOM** | 20.0% | Double-consensus breakout name with the best catalyst/volume confirmation in the set: vol_ratio 3.91 and +9.9% 5d momentum make it a high-conviction acceleration pick. |
-| 5 | **TER** | 9.0% | Best unique add from the full analyst: high-beta Tech exposure with vol_ratio 1.46 and positive momentum, giving a cleaner aggressive replacement than lagging current holds in weak-breadth sectors. |
-| 6 | **STX** | 15.0% | Strong unique momentum alternative from the strategist with smooth trend and +11.1% 5d momentum; lower vol_ratio (0.82) keeps conviction below the top tier, but it still beats dead-money incumbents on slot value. |
+| 1 | **INTC** | 5.0% | Triple-consensus core holding and validated live winner; elite 5d momentum (+30.1%), strong volume (1.45), very high beta, and low retail crowding fit the BULL competition mandate. |
+| 2 | **ON** | 8.0% | Triple-consensus pick with still-strong 5d momentum (+15.4%) and acceptable volume (0.99); kept per learning context and earns its slot despite crowding because the trend remains intact. |
+| 3 | **MU** | 17.0% | Double-consensus replacement for weaker semi laggards; strong 5d momentum (+17.8%) and powerful 20d trend make it one of the best rotation targets even with only average volume. |
+| 4 | **GEV** | 25.0% | Double-consensus non-Tech diversifier with strong volume confirmation (1.64) and solid 5d momentum (+13.9%); keeps the portfolio from becoming mono-sector while still preserving aggressive upside. |
+| 5 | **STX** | 15.0% | Best unique momentum add from the strategist: strong relative strength and 5d momentum (+11.2%) with low crowding, and a clearly superior slot versus dead-money current laggards like TXN and MCHP. |
+| 6 | **CDNS** | 25.0% | High-quality unique breakout candidate with strong volume support (1.79) and positive acceleration; included as the sixth name because it meaningfully beats weaker alternatives and fits the tech leadership tape. |
 
 **Changes from yesterday:**
-- ➕ Added **MU** at 20.0%
-- ➕ Added **QCOM** at 20.0%
-- ➕ Added **TER** at 9.0%
+- ➕ Added **MU** at 17.0%
 - ➕ Added **STX** at 15.0%
+- ➕ Added **CDNS** at 25.0%
 - ➖ Removed **AMD** (was 20.0%)
 - ➖ Removed **TXN** (was 20.0%)
 - ➖ Removed **MCHP** (was 17.0%)
-- ➖ Removed **GEV** (was 16.0%)
-- ▲ **ON**: 7.0% → 16.0% (+9.0%)
+- ▼ **INTC**: 20.0% → 5.0% (-15.0%)
+- ▲ **GEV**: 16.0% → 25.0% (+9.0%)
 
 ---
+
