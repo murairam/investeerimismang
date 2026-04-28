@@ -179,10 +179,23 @@ SECTOR_MAP: dict[str, str] = {
     "CF": "Chem", "NTR": "Chem", "ALB": "Chem", "CE": "Chem",
     "NEE": "Util",
     "MU": "Tech",
-    # SP500 — Tech (semiconductors, storage, networking — missing from original map; added 2026-04-27)
+    # SP500 — Tech: semiconductors extended (added 2026-04-27/28)
     "ON": "Tech", "MCHP": "Tech", "MPWR": "Tech", "LRCX": "Tech",
     "TER": "Tech", "ANET": "Tech", "COHR": "Tech", "SMCI": "Tech",
     "WDC": "Tech", "STX": "Tech", "GLW": "Tech", "DELL": "Tech",
+    "CDNS": "Tech", "SNPS": "Tech", "KLAC": "Tech", "MRVL": "Tech",
+    "ADI": "Tech", "NXPI": "Tech", "SWKS": "Tech", "QRVO": "Tech",
+    "ENTG": "Tech", "ACLS": "Tech", "WOLF": "Tech", "AMKR": "Tech",
+    # SP500 — Tech: software, cybersecurity, IT services (added 2026-04-28)
+    "NOW": "Tech", "INTU": "Tech", "ADSK": "Tech", "ADBE": "Tech",
+    "ANSS": "Tech", "PANW": "Tech", "FTNT": "Tech", "CRWD": "Tech",
+    "DDOG": "Tech", "ZS": "Tech", "OKTA": "Tech", "HUBS": "Tech",
+    "PAYC": "Tech", "PTC": "Tech", "AKAM": "Tech", "VRSN": "Tech",
+    "GDDY": "Tech", "EPAM": "Tech", "IT": "Tech", "CDW": "Tech",
+    "PLTR": "Tech", "CTSH": "Tech",
+    # SP500 — Tech: hardware, networking, storage (added 2026-04-28)
+    "HPQ": "Tech", "HPE": "Tech", "JNPR": "Tech", "NTAP": "Tech",
+    "ZBRA": "Tech", "FFIV": "Tech", "PSTG": "Tech",
     # SP500 — Other sectors missing from original map (added 2026-04-27)
     "GEV": "Ind",    # GE Vernova — power equipment / energy transition
     "WAB": "Ind",    # Wabtec — rail equipment
@@ -191,8 +204,74 @@ SECTOR_MAP: dict[str, str] = {
     "CVNA": "Cons",  # Carvana
     "FOXA": "Cons",  # Fox Corporation — media
     "SBAC": "Tel",   # SBA Communications — cell towers
+    # SP500 — Industrials extended (added 2026-04-28)
+    "URI": "Ind", "ETN": "Ind", "LMT": "Ind", "RTX": "Ind",
+    "NOC": "Ind", "GD": "Ind", "DE": "Ind", "EMR": "Ind",
+    "ROK": "Ind", "ITW": "Ind", "PH": "Ind", "ROP": "Ind",
+    "CARR": "Ind", "OTIS": "Ind", "TDG": "Ind", "LHX": "Ind",
+    "AXON": "Ind", "LDOS": "Ind", "SAIC": "Ind", "FDX": "Ind",
+    "JCI": "Ind", "VRSK": "Ind", "RSG": "Ind", "WM": "Ind",
+    "GNRC": "Ind", "VLTO": "Ind", "HUBB": "Ind", "XYLEM": "Ind",
+    # SP500 — Financials extended (added 2026-04-28)
+    "MS": "Fin", "BLK": "Fin", "AXP": "Fin", "COF": "Fin",
+    "SCHW": "Fin", "WFC": "Fin", "C": "Fin", "USB": "Fin",
+    "MMC": "Fin", "ICE": "Fin", "CME": "Fin", "CB": "Fin",
+    "PGR": "Fin", "MET": "Fin", "AFL": "Fin", "ALL": "Fin",
+    "TRV": "Fin", "HIG": "Fin", "AON": "Fin", "PYPL": "Fin",
+    "BK": "Fin", "STT": "Fin", "RF": "Fin", "FITB": "Fin",
+    "KEY": "Fin", "HBAN": "Fin", "CFG": "Fin", "DFS": "Fin",
+    "SYF": "Fin", "CBOE": "Fin",
+    # SP500 — Healthcare extended (added 2026-04-28)
+    "BSX": "Health", "SYK": "Health", "MDT": "Health",
+    "ISRG": "Health", "BMY": "Health", "CI": "Health",
+    "CVS": "Health", "ELV": "Health", "HUM": "Health",
+    "EW": "Health", "REGN": "Health", "GILD": "Health",
+    "BIIB": "Health", "VRTX": "Health", "ZTS": "Health",
+    "ILMN": "Health", "DXCM": "Health", "BDX": "Health",
+    "IDXX": "Health", "HOLX": "Health", "IQV": "Health",
+    "MRNA": "Health", "ALGN": "Health", "BAX": "Health",
+    "PODD": "Health", "MTD": "Health",
+    # SP500 — Consumer extended (added 2026-04-28)
+    "F": "Cons", "GM": "Cons", "SBUX": "Cons", "TGT": "Cons",
+    "DG": "Cons", "BKNG": "Cons", "ABNB": "Cons", "MAR": "Cons",
+    "HLT": "Cons", "DIS": "Cons", "CMCSA": "Cons", "WBD": "Cons",
+    "MGM": "Cons", "LVS": "Cons", "DLTR": "Cons", "ROST": "Cons",
+    "TJX": "Cons", "APTV": "Cons", "PHM": "Cons", "DHI": "Cons",
+    "LEN": "Cons",
+    # SP500 — Materials extended (added 2026-04-28)
+    "FCX": "Mat", "NEM": "Mat", "APD": "Mat", "LIN": "Mat",
+    "PPG": "Mat", "SHW": "Mat", "ECL": "Mat", "VMC": "Mat",
+    "MLM": "Mat", "NUE": "Mat", "PKG": "Mat", "AMCR": "Mat",
+    # SP500 — Energy extended (added 2026-04-28)
+    "LNG": "Energy", "KMI": "Energy", "OKE": "Energy", "TRGP": "Energy",
+    # SP500 — Utilities extended (added 2026-04-28)
+    "SO": "Util", "DUK": "Util", "D": "Util", "EXC": "Util",
+    "SRE": "Util", "AEP": "Util", "PCG": "Util", "XEL": "Util",
+    "ED": "Util", "ETR": "Util", "AES": "Util", "WEC": "Util",
+    "PPL": "Util", "CNP": "Util", "CMS": "Util",
+    "FSLR": "Util", "ENPH": "Util",
+    # SP500 — Real Estate (added 2026-04-28)
+    "PLD": "RE", "AMT": "RE", "SPG": "RE", "WELL": "RE",
+    "O": "RE", "DLR": "RE", "EQIX": "RE", "CCI": "RE",
+    "PSA": "RE", "EXR": "RE", "AVB": "RE", "EQR": "RE",
+    # SP500 — Telecom extended (added 2026-04-28)
+    "VZ": "Tel", "T": "Tel", "TMUS": "Tel",
     # Norway — OBX (additional)
     "SDRL.OL": "Energy",  # Seadrill — offshore drilling
+    # Norway — OBX extended (added 2026-04-28)
+    "AUTO.OL": "Tech",    # AutoStore Holdings — warehouse robotics
+    "BAKKA.OL": "Cons",   # Bakkafrost — salmon farming
+    "BWLPG.OL": "Energy", # BW LPG — LPG tanker shipping
+    "DOF.OL": "Energy",   # DOF Group — offshore marine services
+    "FRO.OL": "Energy",   # Frontline — crude oil tankers
+    "GJF.OL": "Fin",      # Gjensidige Forsikring — insurance
+    "GOGL.OL": "Energy",  # Golden Ocean — dry bulk shipping
+    "HAFNI.OL": "Energy", # Hafnia — product tankers
+    "HAUTO.OL": "Ind",    # Höegh Autoliners — car carriers
+    "NAS.OL": "Ind",      # Norse Atlantic Airways — aviation
+    "PGS.OL": "Energy",   # PGS ASA — seismic services
+    "SCHA.OL": "Ind",     # Sats/Scharnow — health clubs/hospitality
+    "TOM.OL": "Ind",      # Tomra Systems — recycling/sorting automation
     # SP500 — Industrials
     "HON": "Ind", "CAT": "Ind", "UPS": "Ind", "BA": "Ind",
     # Finland — OMXHLCPI
@@ -200,6 +279,24 @@ SECTOR_MAP: dict[str, str] = {
     "NESTE.HE": "Energy", "KNEBV.HE": "Ind", "WRT1V.HE": "Ind",
     "STERV.HE": "Mat", "OUT1V.HE": "Mat", "ELISA.HE": "Tel",
     "ORNBV.HE": "Health", "UPM.HE": "Mat", "METSO.HE": "Ind",
+    # Finland — OMXHLCPI extended (added 2026-04-28)
+    "NDA-FI.HE": "Fin",    # Nordea (Helsinki listing)
+    "KCR.HE": "Ind",       # KONE — elevators/escalators
+    "VALMT.HE": "Ind",     # Valmet — paper/energy/marine automation
+    "TIETO.HE": "Tech",    # Tietoevry — IT services/software
+    "KESKOB.HE": "Cons",   # Kesko — grocery/hardware retail
+    "KOJAMO.HE": "RE",     # Kojamo — residential real estate
+    "HUH1V.HE": "Mat",     # Huhtamäki — packaging
+    "CGCBV.HE": "Ind",     # Cargotec — cargo/port handling equipment
+    "METSB.HE": "Mat",     # Metsä Board — paperboard
+    "TYRES.HE": "Cons",    # Nokian Tyres — tires
+    "YIT.HE": "Ind",       # YIT Corporation — construction
+    "DIGIA.HE": "Tech",    # Digia — software/IT services
+    "CTY1S.HE": "RE",      # Citycon — shopping centre REIT
+    "MANTA.HE": "Fin",     # Mandatum — insurance/wealth management
+    "KALMAR.HE": "Ind",    # Kalmar — cargo handling equipment
+    "RAUT.HE": "Ind",      # Raute Corporation — wood processing machinery
+    "OKDAV.HE": "Mat",     # Outokumpu — stainless steel
     # Sweden — OMXS30
     "ERIC-B.ST": "Tech", "VOLV-B.ST": "Ind", "ATCO-A.ST": "Ind",
     "SEB-A.ST": "Fin", "SWED-A.ST": "Fin", "INVE-B.ST": "Fin",
@@ -207,6 +304,19 @@ SECTOR_MAP: dict[str, str] = {
     "ABB.ST": "Ind", "SAND.ST": "Ind", "SKF-B.ST": "Ind",
     "ALFA.ST": "Ind", "TELIA.ST": "Tel", "BOL.ST": "Mat",
     "NIBE-B.ST": "Ind", "EVO.ST": "Cons", "SSAB-A.ST": "Mat",
+    # Sweden — OMXS30 extended (added 2026-04-28)
+    "ASSA-B.ST": "Ind",    # Assa Abloy — access solutions/locks
+    "ATCO-B.ST": "Ind",    # Atlas Copco B shares
+    "AZN.ST": "Health",    # AstraZeneca (Stockholm listing)
+    "ELUX-B.ST": "Cons",   # Electrolux — home appliances
+    "GETI-B.ST": "Health", # Getinge — med-tech/sterilization
+    "HEXA-B.ST": "Tech",   # Hexagon — precision measurement/software
+    "INDU-C.ST": "Fin",    # Industrivärden — investment holding
+    "NDA-SE.ST": "Fin",    # Nordea (Stockholm listing)
+    "SAAB-B.ST": "Ind",    # SAAB — defense/aerospace
+    "SKA-B.ST": "Ind",     # Skanska — construction
+    "TEL2-B.ST": "Tel",    # Tele2 — telecoms
+    "VOLCAR-B.ST": "Cons", # Volvo Cars — automotive
     # Norway — OBX
     "EQNR.OL": "Energy", "DNB.OL": "Fin", "NHY.OL": "Mat",
     "TEL.OL": "Tel", "MOWI.OL": "Cons", "ORK.OL": "Cons",
@@ -220,10 +330,28 @@ SECTOR_MAP: dict[str, str] = {
     "PNDORA.CO": "Cons", "ISS.CO": "Ind", "VWS.CO": "Ind",
     "DANSKE.CO": "Fin", "NKT.CO": "Ind", "NSIS-B.CO": "Ind",
     "TRYG.CO": "Fin", "RBREW.CO": "Cons", "AMBU-B.CO": "Health",
+    # Denmark — OMXC25 extended (added 2026-04-28)
+    "BAVA.CO": "Health",    # Bavarian Nordic — vaccines/biotech
+    "JYSK.CO": "Fin",       # Jyske Bank — Danish banking
+    "MAERSK-A.CO": "Ind",   # A.P. Møller-Mærsk A shares — shipping/logistics
+    "NDA-DK.CO": "Fin",     # Nordea (Copenhagen listing)
+    "ROCK-B.CO": "Mat",     # Rockwool International — insulation materials
+    "SYDB.CO": "Fin",       # Sydbank — Danish regional banking
+    "ZEAL.CO": "Health",    # Zealand Pharma — peptide therapeutics
     # Baltic
     "LHV1T.TL": "Fin", "PRF1T.TL": "Cons", "TKM1T.TL": "Cons",
     "MRK1T.TL": "Ind", "ARC1T.TL": "RE", "TAL1T.TL": "Cons",
     "GRG1L.VS": "Mat", "APG1L.VS": "Cons", "VLP1L.VS": "Cons",
+    # Baltic extended (added 2026-04-28)
+    "CPA1T.TL": "Fin",    # Coop Pank — Estonian cooperative bank
+    "EEG1T.TL": "Util",   # Enefit Green — renewable energy (wind/solar)
+    "HAE1T.TL": "Cons",   # Hagen — food/consumer goods
+    "HPR1T.TL": "RE",     # Hepror — real estate
+    "INF1T.TL": "Ind",    # Infotar — transport/IT holding
+    "NCN1T.TL": "Fin",    # Coop holding — financial/consumer cooperative
+    "TSM1T.TL": "Ind",    # Tallinna Sadam — Tallinn Port (infrastructure)
+    "SAB1L.VS": "Fin",    # Šiaulių bankas — Lithuanian regional bank
+    "TEL1L.VS": "Tel",    # Telia (Lithuania) — telecommunications
 }
 
 # ── Ticker universe ──────────────────────────────────────────────────────────

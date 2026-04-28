@@ -302,11 +302,11 @@ class DataFetcher:
             return SECTOR_MAP[ticker]
         fallback = {
             "SP500": "US",
-            "OMXHLCPI": "Fin",
-            "OMXS30": "Swe",
-            "OBX": "Nor",
-            "OMXC25": "Den",
-            "BALTIC": "Baltic",
+            "OMXHLCPI": "HE-other",  # was "Fin" — renamed to avoid collision with Financial sector label
+            "OMXS30": "ST-other",
+            "OBX": "OL-other",
+            "OMXC25": "CO-other",
+            "BALTIC": "BAL-other",
         }
         return fallback.get(market, "Other")
 
