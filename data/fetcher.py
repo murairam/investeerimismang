@@ -1012,7 +1012,7 @@ class DataFetcher:
         import datetime as _dt
         _now_utc = _dt.datetime.now(_dt.timezone.utc)
         _us_market_open_utc = _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
-        _us_premarket_available = _now_utc >= _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
+        _us_premarket_available = _now_utc >= _us_market_open_utc
         if us_tickers and not _us_premarket_available:
             logger.info(
                 "US premarket gap suppressed: pipeline runs at %s UTC, US market opens at 13:30 UTC — "
