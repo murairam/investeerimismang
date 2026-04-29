@@ -1031,7 +1031,7 @@ class DataFetcher:
         import datetime as _dt
         _now_label: str
         try:
-            from zoneinfo import ZoneInfo as _ZoneInfo, ZoneInfoNotFoundError as _ZIErr
+            from zoneinfo import ZoneInfo as _ZoneInfo
             _now_et = _dt.datetime.now(_ZoneInfo("America/New_York"))
             _market_open_et = _now_et.replace(hour=9, minute=30, second=0, microsecond=0)
             _allow_us_premarket_signal = _now_et >= _market_open_et
@@ -1068,7 +1068,9 @@ class DataFetcher:
                         if yahoo_ticker in closes.columns:
                             s = closes[yahoo_ticker].dropna()
                             if len(s) >= 2:
-                                # Last candle vs the regular-hours close two candles back (rough proxy)
+                                # Last candle vs the prior candle — gap since the most recent close.
+                                # Note: no explicit after-hours window filter; relies on the 09:30 ET
+                                # guard above ensuring this branch only runs after market open.
                                 last_price = float(s.iloc[-1])
                                 prev_price = float(s.iloc[-2])
                                 result[t] = (last_price / prev_price - 1) if prev_price > 0 else None

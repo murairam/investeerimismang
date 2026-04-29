@@ -809,7 +809,8 @@ def build_prompt_learning_context(
                 accuracy_rate = da.get("high_risk_negative_rate", 0)
                 lines.append(
                     f"Devil's advocate accuracy so far: {accuracy_rate:.0%} of HIGH-risk flags went negative "
-                    f"({da['observations']} obs, threshold for action: 65%). Use your own judgement on flagged picks."
+                    f"({da['observations']} obs, threshold for action: >=65% accuracy and >={_DEVIL_MIN_OBSERVATIONS} obs). "
+                    "Use your own judgement on flagged picks."
                 )
                 # When Devil is clearly WRONG (accuracy < 40%), repeat flags are ANTI-signals —
                 # explicitly tell agents NOT to penalise momentum picks the Devil has been flagging.
