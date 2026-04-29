@@ -517,6 +517,10 @@ class DataFetcher:
         try:
             last_date = volume.index[-1].date() if hasattr(volume.index[-1], "date") else None
             last_is_today = (last_date == _dt.date.today()) if last_date is not None else False
+            if last_is_today:
+                # A today-dated row is only partial before the US session closes (~20:00 UTC).
+                # Post-close manual runs have a complete today row — don't skip it.
+                last_is_today = _dt.datetime.now(_dt.timezone.utc).hour < 20
         except Exception:
             last_is_today = False
 
@@ -1022,12 +1026,10 @@ class DataFetcher:
                 for t in eu_tickers:
                     result[t] = None
 
-        # US tickers: 60m bars with prepost=True, find last after-hours candle (16:00–20:00 ET).
-        # Guard: the pipeline runs at 04:00 UTC = 00:00 ET. US premarket trading does exist
-        # before 09:30 ET, but this pipeline intentionally ignores it — extended-hours candles
-        # fetched before the regular session opens are typically yesterday's AH close (13+ hours
-        # stale at US execution at 16:30 EET). Return None for all US tickers before the regular
-        # open so agents do not treat stale extended-hours data as fresh momentum confirmation.
+        # US tickers: 60m bars with prepost=True. Returns the most recent 60m candle-to-candle
+        # change (s.iloc[-1] / s.iloc[-2] - 1) — no explicit after-hours window filter.
+        # The 09:30 ET gate above ensures this branch is suppressed during normal 04:00 UTC
+        # pipeline runs; it only executes during manual runs after market open.
         import datetime as _dt
         _now_label: str
         try:
