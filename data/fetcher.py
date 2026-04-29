@@ -1023,21 +1023,31 @@ class DataFetcher:
                     result[t] = None
 
         # US tickers: 60m bars with prepost=True, find last after-hours candle (16:00–20:00 ET).
-        # Guard: the pipeline runs at 04:00 UTC = 00:00 ET. US premarket data (04:00–09:30 ET)
-        # is unavailable until at least 09:30 ET (13:30 UTC). Before that threshold, the "last
-        # candle" is yesterday's AH close — 13+ hours stale at US execution (16:30 EET).
-        # Return None for all US tickers when fetched before the US open rather than passing
-        # a stale signal to agents that would treat it as fresh momentum confirmation.
+        # Guard: the pipeline runs at 04:00 UTC = 00:00 ET. US premarket trading does exist
+        # before 09:30 ET, but this pipeline intentionally ignores it — extended-hours candles
+        # fetched before the regular session opens are typically yesterday's AH close (13+ hours
+        # stale at US execution at 16:30 EET). Return None for all US tickers before the regular
+        # open so agents do not treat stale extended-hours data as fresh momentum confirmation.
         import datetime as _dt
-        from zoneinfo import ZoneInfo as _ZoneInfo
-        _now_et = _dt.datetime.now(_ZoneInfo("America/New_York"))
-        _market_open_et = _now_et.replace(hour=9, minute=30, second=0, microsecond=0)
-        _us_premarket_available = _now_et >= _market_open_et
-        if us_tickers and not _us_premarket_available:
+        _now_label: str
+        try:
+            from zoneinfo import ZoneInfo as _ZoneInfo, ZoneInfoNotFoundError as _ZIErr
+            _now_et = _dt.datetime.now(_ZoneInfo("America/New_York"))
+            _market_open_et = _now_et.replace(hour=9, minute=30, second=0, microsecond=0)
+            _allow_us_premarket_signal = _now_et >= _market_open_et
+            _now_label = _now_et.strftime("%H:%M %Z")
+        except Exception:
+            # tzdata not installed or unavailable — fall back to a fixed UTC offset.
+            # Game period (April–June) is EDT = UTC-4, so 09:30 ET = 13:30 UTC.
+            logger.warning("zoneinfo/tzdata unavailable; using UTC 13:30 fallback for US premarket gate")
+            _now_utc = _dt.datetime.now(_dt.timezone.utc)
+            _allow_us_premarket_signal = _now_utc >= _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
+            _now_label = _now_utc.strftime("%H:%M UTC")
+        if us_tickers and not _allow_us_premarket_signal:
             logger.info(
-                "US premarket gap suppressed: current ET time %s is before 09:30 ET market open — "
-                "yesterday's AH data would be stale at US execution (16:30 EET); returning None",
-                _now_et.strftime("%H:%M %Z"),
+                "US premarket gap suppressed: current time %s is before the 09:30 ET regular open; "
+                "pipeline intentionally ignores pre-open extended-hours data to avoid stale signals",
+                _now_label,
             )
             for t in us_tickers:
                 result[t] = None

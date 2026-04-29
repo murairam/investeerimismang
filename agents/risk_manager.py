@@ -560,13 +560,15 @@ class OpenAIRiskManager(BaseAgent):
                             deficit * 100, len(under_cap),
                         )
                     else:
-                        # Not enough under-cap headroom — leave as-is; orchestrator step-5e
-                        # will normalize, but with all positions already at 15% max the
-                        # normalize will scale them all equally, preserving relative weights.
+                        # Not enough under-cap headroom to absorb the deficit within the 15% ceiling.
+                        # Leaving weights unchanged here. A downstream orchestrator/validator
+                        # floor-normalization step may still rescale positions above the temporary
+                        # 15% BEAR beta cap to satisfy the 75% minimum invested game rule.
                         logger.warning(
                             "BEAR beta cap: insufficient under-cap headroom (%.1f%%) to absorb "
-                            "%.1f%% deficit — leaving as cash; orchestrator will floor at 75%%",
-                            headroom_total * 100, deficit * 100,
+                            "%.1f%% deficit — leaving unchanged; downstream floor normalization "
+                            "may push some positions above the %.0f%% cap",
+                            headroom_total * 100, deficit * 100, cap * 100,
                         )
                 proposal = PortfolioProposal(
                     positions=positions,

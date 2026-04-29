@@ -82,19 +82,17 @@ class PortfolioValidator:
             )
 
         # Hard minimum: at least 2 distinct sectors to prevent mono-sector blowups.
-        # Uses candidate-provided sector tag first; falls back to SECTOR_MAP; "?" if unknown.
-        # Unknown-sector tickers each count as their own sector so this check stays conservative.
+        # Looks up each ticker in SECTOR_MAP; tickers not present are grouped into a
+        # single "Unknown" bucket so an all-unmapped portfolio correctly counts as 1 sector.
         sectors_seen: set[str] = set()
         for pos in proposal.positions:
-            sector = getattr(pos, "sector", None) or SECTOR_MAP.get(pos.ticker)
-            # All unmapped tickers share a single "Unknown" bucket so that a portfolio of
-            # 5 unmapped tickers (each previously getting a unique key) correctly counts
-            # as 1 sector, not 5 — which would silently bypass the diversification guard.
+            sector = SECTOR_MAP.get(pos.ticker)
             sectors_seen.add(sector if sector else "Unknown")
         if len(proposal.positions) >= 2 and len(sectors_seen) < 2:
+            sector_label = sorted(sectors_seen)[0] if sectors_seen else "Unknown"
             errors.append(
                 f"Mono-sector portfolio: all {len(proposal.positions)} positions map to "
-                f"{sectors_seen} — at least 2 different sectors required"
+                f"{sector_label!r} — at least 2 different sectors required"
             )
 
         return ValidationResult(ok=len(errors) == 0, errors=errors)

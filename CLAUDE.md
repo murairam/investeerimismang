@@ -124,7 +124,7 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 
 ### BEAR Regime Beta Cap
 - **When triggered:** BEAR regime AND portfolio beta exceeds adjusted target (≤0.90 scaled for non-US exposure)
-- **Action:** All individual position weights capped at 15%; freed weight left as cash (NOT re-normalized — renormalizing would immediately undo the cap; orchestrator step-5e floors at 75% if needed)
+- **Action:** All individual position weights capped at 15%; any deficit vs the 75% floor is redistributed into positions already below 15% (up to 15% each). If redistribution headroom is insufficient, the orchestrator step-5e normalize may push some positions past 15% — that edge case is logged.
 - **Where enforced:** `_enforce_beta()` in `agents/risk_manager.py` (fixed 2026-04-29: removed internal renormalization that was undoing the cap)
 - **Rationale:** Prevents high-beta concentration in bear markets where downside risk is asymmetric
 
