@@ -444,6 +444,9 @@ def _devil_accuracy(history: list[dict]) -> dict:
         "low_risk_avg_return_1d": round(low_avg, 6),
         "high_risk_negative_rate_raw": round(high_neg_rate_raw, 4),
         "high_risk_negative_rate_filtered": round(high_neg_rate_filtered, 4),
+        # Backward-compat alias: downstream consumers access da["high_risk_negative_rate"].
+        # Maps to the filtered rate (>0.5% loss) which is the operative accuracy metric.
+        "high_risk_negative_rate": round(high_neg_rate_filtered, 4),
         "accuracy": round(accuracy, 4),
         "devil_is_accurate": accuracy >= _DEVIL_ACCURACY_THRESHOLD and len(high_returns) >= _DEVIL_MIN_OBSERVATIONS,
         "high_flagged_tickers_recent": high_flagged_tickers_recent,
@@ -806,7 +809,7 @@ def build_prompt_learning_context(
                 accuracy_rate = da.get("high_risk_negative_rate", 0)
                 lines.append(
                     f"Devil's advocate accuracy so far: {accuracy_rate:.0%} of HIGH-risk flags went negative "
-                    f"({da['observations']} obs, threshold for action: 60%). Use your own judgement on flagged picks."
+                    f"({da['observations']} obs, threshold for action: 65%). Use your own judgement on flagged picks."
                 )
                 # When Devil is clearly WRONG (accuracy < 40%), repeat flags are ANTI-signals —
                 # explicitly tell agents NOT to penalise momentum picks the Devil has been flagging.

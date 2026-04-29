@@ -119,7 +119,7 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 - **Win definition:** Loss > 0.5% (–0.005) — plain negative returns include intraday mean-reversion noise; only real losses count as devil wins
 - **If accuracy > 65%:** HIGH-flagged picks are hard-capped at 10% — **code-enforced in `_enforce_selection_quality()` (Pass B)** (threshold raised from 60%)
 - **Rolling window:** 30-day lookback — stale pregame errors no longer permanently cap live picks
-- **If accuracy ≤ 60%:** Risk Manager uses own judgment (Devil is noisy, lighter weight)
+- **If accuracy ≤ 65%:** Risk Manager uses own judgment (Devil is noisy, lighter weight)
 - **How to inspect:** Run `python scripts/status.py` — shows Devil accuracy, active rules, and weight caps
 
 ### BEAR Regime Beta Cap

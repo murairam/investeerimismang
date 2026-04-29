@@ -527,19 +527,47 @@ class OpenAIRiskManager(BaseAgent):
                 actual_beta, target_str, covered_weight * 100,
             )
             if regime == "BEAR" and hi is not None and actual_beta > hi:
+                cap = config.OVERBOUGHT_WEIGHT_CAP  # 15%
                 logger.warning(
-                    "BEAR regime beta too high (%.2f > %.2f) — capping positions at 15%%; "
-                    "freed weight left as cash (orchestrator step-5e will floor at 75%% if needed)",
-                    actual_beta, hi,
+                    "BEAR regime beta too high (%.2f > %.2f) — capping all positions at %.0f%%",
+                    actual_beta, hi, cap * 100,
                 )
                 positions = [
-                    Position(ticker=p.ticker, weight=min(p.weight, config.OVERBOUGHT_WEIGHT_CAP), rationale=p.rationale, conviction=p.conviction)
+                    Position(ticker=p.ticker, weight=min(p.weight, cap), rationale=p.rationale, conviction=p.conviction)
                     for p in proposal.positions
                 ]
-                # Do NOT renormalize here: renormalizing immediately after capping undoes the cap
-                # entirely (5 positions × 15% = 75% → renorm → 5 × 20% = original weights).
-                # The orchestrator's 75% floor normalize runs after all enforcement passes and
-                # will deploy freed weight only if total falls below the game minimum.
+                # After capping, some positions may already have been below 15% (e.g. from a
+                # prior devil cap), leaving total < 75%. Redistribute the deficit into those
+                # under-cap positions up to 15% each so the game floor is met without renorming
+                # (renorming would re-inflate every position past 15%, undoing the cap).
+                min_total = config.GAME_CONSTRAINTS.get("min_total_weight", 0.75)
+                total_after_cap = sum(p.weight for p in positions)
+                if total_after_cap < min_total - 1e-9:
+                    deficit = min_total - total_after_cap
+                    under_cap = [(i, p) for i, p in enumerate(positions) if p.weight < cap - 1e-9]
+                    headroom_total = sum(cap - p.weight for _, p in under_cap)
+                    if headroom_total >= deficit - 1e-9:
+                        for i, pos in under_cap:
+                            share = (cap - pos.weight) / headroom_total
+                            positions[i] = Position(
+                                ticker=pos.ticker,
+                                weight=min(cap, pos.weight + deficit * share),
+                                rationale=pos.rationale,
+                                conviction=pos.conviction,
+                            )
+                        logger.info(
+                            "BEAR beta cap: redistributed %.1f%% deficit into %d under-cap positions",
+                            deficit * 100, len(under_cap),
+                        )
+                    else:
+                        # Not enough under-cap headroom — leave as-is; orchestrator step-5e
+                        # will normalize, but with all positions already at 15% max the
+                        # normalize will scale them all equally, preserving relative weights.
+                        logger.warning(
+                            "BEAR beta cap: insufficient under-cap headroom (%.1f%%) to absorb "
+                            "%.1f%% deficit — leaving as cash; orchestrator will floor at 75%%",
+                            headroom_total * 100, deficit * 100,
+                        )
                 proposal = PortfolioProposal(
                     positions=positions,
                     reasoning=proposal.reasoning,

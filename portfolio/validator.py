@@ -87,7 +87,10 @@ class PortfolioValidator:
         sectors_seen: set[str] = set()
         for pos in proposal.positions:
             sector = getattr(pos, "sector", None) or SECTOR_MAP.get(pos.ticker)
-            sectors_seen.add(sector if sector else f"unknown:{pos.ticker}")
+            # All unmapped tickers share a single "Unknown" bucket so that a portfolio of
+            # 5 unmapped tickers (each previously getting a unique key) correctly counts
+            # as 1 sector, not 5 — which would silently bypass the diversification guard.
+            sectors_seen.add(sector if sector else "Unknown")
         if len(proposal.positions) >= 2 and len(sectors_seen) < 2:
             errors.append(
                 f"Mono-sector portfolio: all {len(proposal.positions)} positions map to "

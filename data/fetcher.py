@@ -503,14 +503,33 @@ class DataFetcher:
         return rows
 
     def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
-        """Ratio of yesterday's full-session volume to prior 20d average volume. >1.5 = high-volume confirmation.
-        Uses iloc[-2] (yesterday's complete session) to avoid comparing a partial intraday volume
-        against a full-day average — the pipeline runs at 04:00 UTC before any market opens."""
-        if volume.empty or len(volume) < window + 2:
+        """Ratio of the most recent complete session's volume to the prior 20d average.
+        >1.5 = high-volume confirmation.
+
+        yfinance daily data normally does not include a partial 'today' row when fetched
+        at 04:00 UTC, but this is not guaranteed. We check the last index date explicitly:
+        - If it equals today → partial session, skip it and use iloc[-2] as latest.
+        - If it is a prior date → already a complete session, use iloc[-1] as latest.
+        This avoids the overcorrection of always skipping one day on non-partial data."""
+        import datetime as _dt
+        if volume.empty or len(volume) < window + 1:
             return pd.Series(dtype=float)
-        # Prior 20d avg excludes both today (iloc[-1]) and yesterday (iloc[-2]) to avoid overlap
-        avg_vol = volume.iloc[-window - 2:-2].mean()
-        latest_vol = volume.iloc[-2]  # yesterday's complete session
+        try:
+            last_date = volume.index[-1].date() if hasattr(volume.index[-1], "date") else None
+            last_is_today = (last_date == _dt.date.today()) if last_date is not None else False
+        except Exception:
+            last_is_today = False
+
+        if last_is_today:
+            # Partial intraday row — need one extra row in history
+            if len(volume) < window + 2:
+                return pd.Series(dtype=float)
+            avg_vol = volume.iloc[-window - 2:-2].mean()
+            latest_vol = volume.iloc[-2]
+        else:
+            # Last row is already a complete prior session (normal at 04:00 UTC)
+            avg_vol = volume.iloc[-window - 1:-1].mean()
+            latest_vol = volume.iloc[-1]
         ratio = latest_vol / avg_vol.replace(0, np.nan)
         return ratio.rename("vol_ratio")
 
@@ -1010,14 +1029,15 @@ class DataFetcher:
         # Return None for all US tickers when fetched before the US open rather than passing
         # a stale signal to agents that would treat it as fresh momentum confirmation.
         import datetime as _dt
-        _now_utc = _dt.datetime.now(_dt.timezone.utc)
-        _us_market_open_utc = _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
-        _us_premarket_available = _now_utc >= _us_market_open_utc
+        from zoneinfo import ZoneInfo as _ZoneInfo
+        _now_et = _dt.datetime.now(_ZoneInfo("America/New_York"))
+        _market_open_et = _now_et.replace(hour=9, minute=30, second=0, microsecond=0)
+        _us_premarket_available = _now_et >= _market_open_et
         if us_tickers and not _us_premarket_available:
             logger.info(
-                "US premarket gap suppressed: pipeline runs at %s UTC, US market opens at 13:30 UTC — "
-                "yesterday's AH data would be 13+ hours stale at US execution; returning None",
-                _now_utc.strftime("%H:%M"),
+                "US premarket gap suppressed: current ET time %s is before 09:30 ET market open — "
+                "yesterday's AH data would be stale at US execution (16:30 EET); returning None",
+                _now_et.strftime("%H:%M %Z"),
             )
             for t in us_tickers:
                 result[t] = None
