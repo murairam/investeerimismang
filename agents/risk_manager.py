@@ -528,19 +528,18 @@ class OpenAIRiskManager(BaseAgent):
             )
             if regime == "BEAR" and hi is not None and actual_beta > hi:
                 logger.warning(
-                    "BEAR regime beta too high (%.2f > %.2f) — capping positions at 15%%",
+                    "BEAR regime beta too high (%.2f > %.2f) — capping positions at 15%%; "
+                    "freed weight left as cash (orchestrator step-5e will floor at 75%% if needed)",
                     actual_beta, hi,
                 )
                 positions = [
                     Position(ticker=p.ticker, weight=min(p.weight, config.OVERBOUGHT_WEIGHT_CAP), rationale=p.rationale, conviction=p.conviction)
                     for p in proposal.positions
                 ]
-                total = sum(p.weight for p in positions)
-                if total > 0:
-                    positions = [
-                        Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale, conviction=p.conviction)
-                        for p in positions
-                    ]
+                # Do NOT renormalize here: renormalizing immediately after capping undoes the cap
+                # entirely (5 positions × 15% = 75% → renorm → 5 × 20% = original weights).
+                # The orchestrator's 75% floor normalize runs after all enforcement passes and
+                # will deploy freed weight only if total falls below the game minimum.
                 proposal = PortfolioProposal(
                     positions=positions,
                     reasoning=proposal.reasoning,

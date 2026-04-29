@@ -503,12 +503,14 @@ class DataFetcher:
         return rows
 
     def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
-        """Ratio of latest volume to prior 20d average volume. >1.5 = high-volume confirmation."""
-        if volume.empty or len(volume) < window + 1:
+        """Ratio of yesterday's full-session volume to prior 20d average volume. >1.5 = high-volume confirmation.
+        Uses iloc[-2] (yesterday's complete session) to avoid comparing a partial intraday volume
+        against a full-day average — the pipeline runs at 04:00 UTC before any market opens."""
+        if volume.empty or len(volume) < window + 2:
             return pd.Series(dtype=float)
-        # Use iloc[-window-1:-1] to get the prior 20d avg (excluding today), then compare to today
-        avg_vol = volume.iloc[-window - 1:-1].mean()
-        latest_vol = volume.iloc[-1]
+        # Prior 20d avg excludes both today (iloc[-1]) and yesterday (iloc[-2]) to avoid overlap
+        avg_vol = volume.iloc[-window - 2:-2].mean()
+        latest_vol = volume.iloc[-2]  # yesterday's complete session
         ratio = latest_vol / avg_vol.replace(0, np.nan)
         return ratio.rename("vol_ratio")
 
@@ -1001,8 +1003,25 @@ class DataFetcher:
                 for t in eu_tickers:
                     result[t] = None
 
-        # US tickers: 60m bars with prepost=True, find last after-hours candle (16:00–20:00 ET)
-        if us_tickers:
+        # US tickers: 60m bars with prepost=True, find last after-hours candle (16:00–20:00 ET).
+        # Guard: the pipeline runs at 04:00 UTC = 00:00 ET. US premarket data (04:00–09:30 ET)
+        # is unavailable until at least 09:30 ET (13:30 UTC). Before that threshold, the "last
+        # candle" is yesterday's AH close — 13+ hours stale at US execution (16:30 EET).
+        # Return None for all US tickers when fetched before the US open rather than passing
+        # a stale signal to agents that would treat it as fresh momentum confirmation.
+        import datetime as _dt
+        _now_utc = _dt.datetime.now(_dt.timezone.utc)
+        _us_market_open_utc = _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
+        _us_premarket_available = _now_utc >= _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
+        if us_tickers and not _us_premarket_available:
+            logger.info(
+                "US premarket gap suppressed: pipeline runs at %s UTC, US market opens at 13:30 UTC — "
+                "yesterday's AH data would be 13+ hours stale at US execution; returning None",
+                _now_utc.strftime("%H:%M"),
+            )
+            for t in us_tickers:
+                result[t] = None
+        elif us_tickers:
             try:
                 data = yf.download(
                     list(us_map.values()), period="5d", interval="60m",
