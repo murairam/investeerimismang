@@ -616,7 +616,7 @@ Winners: INTC +3.1% | Losers: AMD -3.7%, MCHP -2.8%, TXN -2.6%
 
 **Market:** BULL regime · SPX vs 50d SMA: +4.9% · VIX: 17.8 · S&P 500 20d: +12.5%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 14:22:02.
 
 **Yesterday's P&L:** Portfolio -2.4% · Benchmark -0.5% · Alpha -1.9%
 Winners: QCOM +0.0% | Losers: TER -5.3%, ON -4.7%, MU -3.7%
