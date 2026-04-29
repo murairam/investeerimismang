@@ -10,15 +10,35 @@
     "STX": 3.48017931,
     "TER": 3.09507402
   },
-  "verified_weights": {
-    "QCOM": 0.2,
-    "MU": 0.2,
-    "INTC": 0.2,
-    "ON": 0.16,
-    "STX": 0.15,
-    "TER": 0.09
+  "pending_order": {
+    "submitted_date": "2026-04-29",
+    "positions": [
+      {
+        "ticker": "INTC",
+        "weight": 0.17
+      },
+      {
+        "ticker": "CNC",
+        "weight": 0.17
+      },
+      {
+        "ticker": "NUE",
+        "weight": 0.17
+      },
+      {
+        "ticker": "BEN",
+        "weight": 0.17
+      },
+      {
+        "ticker": "GEV",
+        "weight": 0.17
+      },
+      {
+        "ticker": "QCOM",
+        "weight": 0.15
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -370,8 +390,62 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-29",
+      "equity": 11505.45,
+      "cash": 0.0,
+      "daily_return": -0.027188,
+      "return_since_start": 0.150545,
+      "turnover": 0.0,
+      "positions": {
+        "QCOM": 18.40099088,
+        "MU": 5.27095623,
+        "INTC": 32.5324492,
+        "ON": 22.56167084,
+        "STX": 3.48017931,
+        "TER": 3.09507402
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-29",
+        "positions": [
+          {
+            "ticker": "INTC",
+            "weight": 0.17
+          },
+          {
+            "ticker": "CNC",
+            "weight": 0.17
+          },
+          {
+            "ticker": "NUE",
+            "weight": 0.17
+          },
+          {
+            "ticker": "BEN",
+            "weight": 0.17
+          },
+          {
+            "ticker": "GEV",
+            "weight": 0.17
+          },
+          {
+            "ticker": "QCOM",
+            "weight": 0.15
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-28",
-  "last_equity": 11827.0
+  "last_rebalanced_date": "2026-04-29",
+  "last_equity": 11505.45325801,
+  "verified_weights": {
+    "QCOM": 0.2,
+    "MU": 0.2,
+    "INTC": 0.2,
+    "ON": 0.16,
+    "STX": 0.15,
+    "TER": 0.09
+  }
 }

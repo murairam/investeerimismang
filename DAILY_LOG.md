@@ -612,3 +612,40 @@ Winners: INTC +3.1% | Losers: AMD -3.7%, MCHP -2.8%, TXN -2.6%
 
 ---
 
+## 2026-04-29 06:31:52
+
+**Market:** BULL regime · SPX vs 50d SMA: +4.9% · VIX: 17.8 · S&P 500 20d: +12.5%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.4% · Benchmark -0.5% · Alpha -1.9%
+Winners: QCOM +0.0% | Losers: TER -5.3%, ON -4.7%, MU -3.7%
+
+**Paper account:** Equity €11,505.45 (start €10,000) · Today -2.72% · Since start +15.05% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** Consensus was narrow but important: INTC was the only double-consensus name and earns top conviction. I rotated out weaker current semis/storage names (TER, ON, MU, STX) because the mandate explicitly says to cut dead-money or clearly inferior momentum slots, then added the strongest catalyst/volume breakouts from outside Tech: CNC, NUE, BEN, and GEV, while keeping QCOM as a still-valid resilient hold. This should pull portfolio beta down from the strategist's 2.51 toward a more usable BULL profile while respecting the rotation alert and the requirement to diversify across sectors.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **INTC** | 17.0% | Consensus pick in 2/3 proposals with mandatory high-conviction floor; elite 5d momentum (+27.9%) and still-supported volume make it the strongest remaining tech hold despite sector deceleration. |
+| 2 | **CNC** | 17.0% | Best unique catalyst setup: explosive breakout volume (vol_ratio 3.36), 5d momentum (+27.0%), RSI>85 with acceleration, and non-Tech sector exposure that helps rotation risk. |
+| 3 | **NUE** | 17.0% | High-conviction rotation leader from Proposal C with exceptional volume confirmation (vol_ratio 2.43), strong 5d momentum, and Materials leadership outside crowded Tech. |
+| 4 | **BEN** | 17.0% | Strong cross-signal breakout with vol_ratio 2.37 and positive 5d momentum, plus sector diversification away from Tech; slightly lower than top names because Financials breadth is weak. |
+| 5 | **GEV** | 17.0% | Clean unique breakout candidate with solid volume (1.75), strong 5d momentum (+10.2%), and attractive non-Tech exposure that fits the rotation mandate better than slower semiconductor holdovers. |
+| 6 | **QCOM** | 15.0% | Retained as the second resilient current holding per learning context; strong volume (1.87) and positive 5d momentum (+11.0%) keep it valid, but conviction is below INTC due to Tech deceleration and weaker proposal support. |
+
+**Changes from yesterday:**
+- ➕ Added **CNC** at 17.0%
+- ➕ Added **NUE** at 17.0%
+- ➕ Added **BEN** at 17.0%
+- ➕ Added **GEV** at 17.0%
+- ➖ Removed **MU** (was 20.0%)
+- ➖ Removed **ON** (was 16.0%)
+- ➖ Removed **STX** (was 15.0%)
+- ➖ Removed **TER** (was 9.0%)
+- ▼ **INTC**: 20.0% → 17.0% (-3.0%)
+- ▼ **QCOM**: 20.0% → 15.0% (-5.0%)
+
+---

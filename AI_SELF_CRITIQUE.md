@@ -1,7 +1,7 @@
 # AI Self-Critique Report
 
-Generated: 2026-04-28
-Training days analyzed: 33
+Generated: 2026-04-29
+Training days analyzed: 34
 Days until live mode: 0
 
 ## Meta-Learning Question
@@ -16,35 +16,33 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - Latest day status: experimental / unverified
 
 ## What's Working ✅
-- 'breakout' rationale is working: +1.6% avg, 56% hit rate
-- 'overbought' rationale is working: +1.1% avg, 56% hit rate
-- 'at_52w_high' rationale is working: +1.1% avg, 59% hit rate
-- Conviction sizing is working: Tier 1 +0.7% > Tier 3 -0.6%
+- 'at_52w_high' rationale is working: +1.0% avg, 57% hit rate
+- Conviction sizing is working: Tier 1 +0.6% > Tier 3 -0.8%
 
 ## Systematic Biases / Errors ⚠️
-- 'diversifier' rationale is weak: -0.7% avg, 33% hit rate
+- 'diversifier' rationale is weak: -1.0% avg, 29% hit rate
 - 'non_us_differentiator' rationale is weak: -0.3% avg, 27% hit rate
-- Alpha hit rate is low: 55%.
+- Alpha hit rate is low: 53%.
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
 |---|---:|---:|---:|
-| momentum | 145 | +0.75% | 54% |
-| high_sharpe | 124 | +0.86% | 52% |
-| breakout | 34 | +1.58% | 56% |
-| consensus | 108 | +0.65% | 52% |
+| momentum | 151 | +0.61% | 52% |
+| high_sharpe | 130 | +0.69% | 50% |
+| breakout | 36 | +1.33% | 53% |
+| consensus | 112 | +0.53% | 50% |
 | catalyst | 25 | +0.66% | 44% |
-| diversifier | 6 | -0.75% | 33% |
+| diversifier | 7 | -1.02% | 29% |
 | non_us_differentiator | 37 | -0.31% | 27% |
-| overbought | 80 | +1.12% | 56% |
-| at_52w_high | 113 | +1.10% | 59% |
+| overbought | 85 | +0.89% | 53% |
+| at_52w_high | 117 | +0.96% | 57% |
 
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 68 | +0.71% |
-| Tier 2 (medium conviction) | 12-18% | 78 | +0.83% |
-| Tier 3 (low conviction) | 5-10% | 14 | -0.59% |
+| Tier 1 (high conviction) | 20-25% | 70 | +0.61% |
+| Tier 2 (medium conviction) | 12-18% | 80 | +0.73% |
+| Tier 3 (low conviction) | 5-10% | 16 | -0.83% |
 
 ## Structured Learning State
 - Active hard rules: 0

@@ -1,17 +1,17 @@
 # Pre-Game Learning Report
 
-Generated: 2026-04-28
+Generated: 2026-04-29
 Target go-live date: 2026-04-06
 Days remaining: 0
 
 ## Scoreboard
-- Training days with measurable alpha: 33
+- Training days with measurable alpha: 34
 - Win days (alpha > 0): 18
-- Loss days (alpha < 0): 15
-- Average daily alpha: +0.02%
-- Paper account equity: €11,804.56 (from €10,000.00, return +18.05%)
-- Max drawdown (paper): 2.44%
-- Average turnover: 2.39%
+- Loss days (alpha < 0): 16
+- Average daily alpha: -0.04%
+- Paper account equity: €11,505.45 (from €10,000.00, return +15.05%)
+- Max drawdown (paper): 4.30%
+- Average turnover: 2.23%
 
 ## Confidence note
 - Evidence status: actionable
@@ -30,9 +30,9 @@ Days remaining: 0
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| INTC | winner | 12 | +5.42% | 100% |
-| ON | winner | 18 | +3.47% | 89% |
+| INTC | winner | 14 | +4.59% | 86% |
 | AMD | winner | 20 | +3.14% | 80% |
+| ON | winner | 20 | +2.66% | 80% |
 | MPWR | winner | 8 | +2.65% | 100% |
 | XOM | winner | 8 | +1.50% | 75% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
