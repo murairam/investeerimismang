@@ -653,7 +653,7 @@ Winners: QCOM +0.0% | Losers: TER -5.3%, ON -4.7%, MU -3.7%
 
 **Market:** BULL regime · SPX vs 50d SMA: +4.8% · VIX: 18.8 · S&P 500 20d: +9.3%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 18:41:14.
 
 **Yesterday's P&L:** Portfolio +4.0% · Benchmark -0.0% · Alpha +4.0%
 Winners: INTC +12.5%, CNC +9.3%, QCOM +4.4% | Losers: GEV -2.0%, NUE -0.8%
