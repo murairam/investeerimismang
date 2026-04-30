@@ -1,5 +1,5 @@
 {
-  "created_on": "2026-04-28",
+  "created_on": "2026-04-30",
   "game_start_date": "2026-04-06",
   "protected_files": [
     "config.py",
@@ -16,7 +16,7 @@
     "agents/strategist.py": "ec02ff52eba25f4b0e88c19c0ab136951a662376c9d9b322a5f7bc10ad68aa2d",
     "agents/full_analyst.py": "54329dd021882f1f486acfad8f5b1b5a2433b48ecaf8be4d62748f05247709c4",
     "agents/devil.py": "7793c8b1df6353606d7a15da6062e605c061479e43ad03dd7b440dd3813961b1",
-    "agents/risk_manager.py": "29a6b0ed95b4d8eb84328757fc3a02e4808d6b85fdfb2876f9c25430ceeaa3c6",
+    "agents/risk_manager.py": "d04737401d595c793995f7b8a7c5b03f36788695153f1f7c718d08ad7ef03198",
     "agents/challenger.py": "5b3e9ef418a69c2cc74d750bc93be141de0ff9546fb99695388a6826177341f9"
   }
 }
