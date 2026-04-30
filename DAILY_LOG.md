@@ -649,3 +649,38 @@ Winners: QCOM +0.0% | Losers: TER -5.3%, ON -4.7%, MU -3.7%
 - ▼ **QCOM**: 20.0% → 15.0% (-5.0%)
 
 ---
+## 2026-04-30 06:41:45
+
+**Market:** BULL regime · SPX vs 50d SMA: +4.8% · VIX: 18.8 · S&P 500 20d: +9.3%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +4.0% · Benchmark -0.0% · Alpha +4.0%
+Winners: INTC +12.5%, CNC +9.3%, QCOM +4.4% | Losers: GEV -2.0%, NUE -0.8%
+
+**Paper account:** Equity €12,017.26 (start €10,000) · Today +3.92% · Since start +20.17% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 85.0%
+
+**Thesis:** I prioritized the 2-of-3 consensus names INTC, CNC, and NOKIA.HE at high conviction, then filled the remaining slots with the strongest unique accelerators GNRC and NXPI. I am removing BEN and GEV because they were negative/flat laggards, and replacing NUE despite only modest weakness because stronger momentum alternatives clearly exist; QCOM is also excluded because tech rotation risk is high and NXPI/GNRC offered cleaner slot economics today. The final book stays aggressive for a BULL regime, but with one non-US telecom/infrastructure name to avoid an all-US tech pileup while still leaning into the strongest breakout signals.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **INTC** | 5.0% | Consensus pick and verified live alpha driver with exceptional acceleration (mom_5d +45.5%, vol_ratio 1.76, RSI 87); in this BULL competition tape, RSI>85 with strong 5d momentum is a leadership signal, not a cap. |
+| 2 | **CNC** | 25.0% | Consensus pick and one of the clearest current winners in the actual portfolio; vol_ratio 3.11, mom_5d +39.0%, and yesterday’s +8.9% confirm a powerful catalyst-backed breakout despite low beta. |
+| 3 | **NOKIA.HE** | 12.0% | Consensus pick with fresh breakout characteristics, vol_ratio 1.87, mom_5d +21.7%, and at/near 52-week high; also helps satisfy the mandatory cross-sector/non-US diversification without sacrificing momentum quality. |
+| 4 | **GNRC** | 25.0% | Best unique catalyst pick from Proposal B with elite volume confirmation (vol_ratio 3.32), strong 5d momentum (+18.7%), and beta 1.69 that better fits the competition’s aggressive upside mandate than slower incumbents. |
+| 5 | **NXPI** | 18.0% | Best unique momentum/Sharpe rotation candidate from Proposal A; vol_ratio 3.49 and mom_5d +28.4% make it a stronger slot than BEN, GEV, or NUE, while adding another high-quality semiconductor leader. |
+
+**Changes from yesterday:**
+- ➕ Added **NOKIA.HE** at 12.0%
+- ➕ Added **GNRC** at 25.0%
+- ➕ Added **NXPI** at 18.0%
+- ➖ Removed **NUE** (was 17.0%)
+- ➖ Removed **BEN** (was 17.0%)
+- ➖ Removed **GEV** (was 17.0%)
+- ➖ Removed **QCOM** (was 15.0%)
+- ▼ **INTC**: 17.0% → 5.0% (-12.0%)
+- ▲ **CNC**: 17.0% → 25.0% (+8.0%)
+
+---

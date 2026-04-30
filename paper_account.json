@@ -10,15 +10,31 @@
     "GEV": 2.11421917,
     "QCOM": 13.54256939
   },
-  "verified_weights": {
-    "INTC": 0.17,
-    "CNC": 0.17,
-    "NUE": 0.17,
-    "BEN": 0.17,
-    "GEV": 0.17,
-    "QCOM": 0.15
+  "pending_order": {
+    "submitted_date": "2026-04-30",
+    "positions": [
+      {
+        "ticker": "INTC",
+        "weight": 0.05
+      },
+      {
+        "ticker": "CNC",
+        "weight": 0.25
+      },
+      {
+        "ticker": "NOKIA.HE",
+        "weight": 0.12
+      },
+      {
+        "ticker": "GNRC",
+        "weight": 0.25
+      },
+      {
+        "ticker": "NXPI",
+        "weight": 0.18
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -388,8 +404,58 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-04-30",
+      "equity": 12017.26,
+      "cash": 0.0,
+      "daily_return": 0.039196,
+      "return_since_start": 0.201726,
+      "turnover": 0.0,
+      "positions": {
+        "INTC": 27.23895986,
+        "CNC": 46.44415594,
+        "NUE": 10.22716356,
+        "BEN": 78.14789095,
+        "GEV": 2.11421917,
+        "QCOM": 13.54256939
+      },
+      "pending_order": {
+        "submitted_date": "2026-04-30",
+        "positions": [
+          {
+            "ticker": "INTC",
+            "weight": 0.05
+          },
+          {
+            "ticker": "CNC",
+            "weight": 0.25
+          },
+          {
+            "ticker": "NOKIA.HE",
+            "weight": 0.12
+          },
+          {
+            "ticker": "GNRC",
+            "weight": 0.25
+          },
+          {
+            "ticker": "NXPI",
+            "weight": 0.18
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-29",
-  "last_equity": 11564.0
+  "last_rebalanced_date": "2026-04-30",
+  "last_equity": 12017.2595546,
+  "verified_weights": {
+    "INTC": 0.17,
+    "CNC": 0.17,
+    "NUE": 0.17,
+    "BEN": 0.17,
+    "GEV": 0.17,
+    "QCOM": 0.15
+  }
 }
