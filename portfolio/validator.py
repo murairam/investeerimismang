@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 
-from config import GAME_CONSTRAINTS, POSITION_TARGETS_BY_REGIME
+from config import GAME_CONSTRAINTS, POSITION_TARGETS_BY_REGIME, SECTOR_MAP
 from portfolio.models import PortfolioProposal, Position
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,20 @@ class PortfolioValidator:
         if total < self.c["min_total_weight"] - 1e-9:
             errors.append(
                 f"Total weight {total:.1%} below {self.c['min_total_weight']:.0%} minimum"
+            )
+
+        # Hard minimum: at least 2 distinct sectors to prevent mono-sector blowups.
+        # Looks up each ticker in SECTOR_MAP; tickers not present are grouped into a
+        # single "Unknown" bucket so an all-unmapped portfolio correctly counts as 1 sector.
+        sectors_seen: set[str] = set()
+        for pos in proposal.positions:
+            sector = SECTOR_MAP.get(pos.ticker)
+            sectors_seen.add(sector if sector else "Unknown")
+        if len(proposal.positions) >= 2 and len(sectors_seen) < 2:
+            sector_label = sorted(sectors_seen)[0] if sectors_seen else "Unknown"
+            errors.append(
+                f"Mono-sector portfolio: all {len(proposal.positions)} positions map to "
+                f"{sector_label!r} — at least 2 different sectors required"
             )
 
         return ValidationResult(ok=len(errors) == 0, errors=errors)

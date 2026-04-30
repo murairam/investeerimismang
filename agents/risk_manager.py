@@ -527,20 +527,57 @@ class OpenAIRiskManager(BaseAgent):
                 actual_beta, target_str, covered_weight * 100,
             )
             if regime == "BEAR" and hi is not None and actual_beta > hi:
+                cap = config.OVERBOUGHT_WEIGHT_CAP  # 15%
                 logger.warning(
-                    "BEAR regime beta too high (%.2f > %.2f) — capping positions at 15%%",
-                    actual_beta, hi,
+                    "BEAR regime beta too high (%.2f > %.2f) — capping all positions at %.0f%%",
+                    actual_beta, hi, cap * 100,
                 )
                 positions = [
-                    Position(ticker=p.ticker, weight=min(p.weight, config.OVERBOUGHT_WEIGHT_CAP), rationale=p.rationale, conviction=p.conviction)
+                    Position(ticker=p.ticker, weight=min(p.weight, cap), rationale=p.rationale, conviction=p.conviction)
                     for p in proposal.positions
                 ]
-                total = sum(p.weight for p in positions)
-                if total > 0:
-                    positions = [
-                        Position(ticker=p.ticker, weight=p.weight / total, rationale=p.rationale, conviction=p.conviction)
-                        for p in positions
-                    ]
+                # After capping, some positions may already have been below 15% (e.g. from a
+                # prior devil cap), leaving total < 75%. Redistribute the deficit into those
+                # under-cap positions up to 15% each so the game floor is met without renorming
+                # (renorming would re-inflate every position past 15%, undoing the cap).
+                min_total = config.GAME_CONSTRAINTS.get("min_total_weight", 0.75)
+                total_after_cap = sum(p.weight for p in positions)
+                if total_after_cap < min_total - 1e-9:
+                    deficit = min_total - total_after_cap
+                    under_cap = [(i, p) for i, p in enumerate(positions) if p.weight < cap - 1e-9]
+                    headroom_total = sum(cap - p.weight for _, p in under_cap)
+                    if headroom_total >= deficit - 1e-9:
+                        for i, pos in under_cap:
+                            share = (cap - pos.weight) / headroom_total
+                            positions[i] = Position(
+                                ticker=pos.ticker,
+                                weight=min(cap, pos.weight + deficit * share),
+                                rationale=pos.rationale,
+                                conviction=pos.conviction,
+                            )
+                        logger.info(
+                            "BEAR beta cap: redistributed %.1f%% deficit into %d under-cap positions",
+                            deficit * 100, len(under_cap),
+                        )
+                    else:
+                        # Not enough under-cap headroom to absorb the full deficit within the
+                        # 15% ceiling. Fill every under-cap position to the cap so downstream
+                        # floor-normalization has as little remaining deficit as possible,
+                        # reducing the chance of re-inflating positions above the cap.
+                        for i, pos in under_cap:
+                            positions[i] = Position(
+                                ticker=pos.ticker,
+                                weight=cap,
+                                rationale=pos.rationale,
+                                conviction=pos.conviction,
+                            )
+                        remaining_deficit = max(0.0, deficit - headroom_total)
+                        logger.warning(
+                            "BEAR beta cap: used all available under-cap headroom (%.1f%%) across "
+                            "%d positions, but %.1f%% deficit remains; downstream floor normalization "
+                            "may still push some positions above the %.0f%% cap",
+                            headroom_total * 100, len(under_cap), remaining_deficit * 100, cap * 100,
+                        )
                 proposal = PortfolioProposal(
                     positions=positions,
                     reasoning=proposal.reasoning,

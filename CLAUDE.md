@@ -98,10 +98,10 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 
 ## Risk Control Features (Added March 2026, updated April 2026)
 
-### Sector Concentration Cap (Updated 2026-04-27)
+### Sector Concentration Cap (Updated 2026-04-29)
 - **Unconditional ceiling:** 55% in any single sector (lowered from 70% — the old 70% cap was too high for a 5-6 stock book; a 6-stock mono-sector portfolio reached 84% and dropped 300 ranks in one sector down-day)
 - **Rotation-risk MEDIUM:** 45% (was 55%); **HIGH:** 35% (was 40%)
-- **MANDATORY minimum:** at least 2 sectors in every portfolio — hard constraint in Risk Manager system prompt + enforced by `_enforce_sector_rotation_cap()` after step 5c
+- **MANDATORY minimum:** at least 2 sectors in every portfolio — **code-enforced in `portfolio/validator.py::validate()` AND by `_enforce_sector_rotation_cap()` after step 5c** (previously prompt-only; added to validator 2026-04-29)
 - **SECTOR_MAP fix:** 20 SP500/OBX tickers added that were previously mis-tagged as "US" fallback (ON, MCHP, MPWR, LRCX, TER, ANET, COHR, SMCI, WDC, STX, GLW, DELL, GEV, WAB, STLD, HOOD, CVNA, FOXA, SBAC, SDRL.OL) — the missing tags made sector enforcement blind to true Tech concentration
 - **Exhaustion trigger fix:** `vol_ratio < 1.2` gate removed from `detect_rotation_risk()` `exhaustion_high` branch — high-volume sector rallies are crowding events, not exceptions
 - **Learning-state cap threshold:** `_RATIONALE_CAP_HIT_RATE_THRESHOLD` lowered from 0.30 → 0.25 so that mediocre diversification rationales (e.g. `non_us_differentiator` at 27%) no longer trigger a hard position cap that compounds the mono-sector bias
@@ -112,18 +112,20 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 - **Exception:** If volume_ratio > 1.8 (strong breakout volume), full 25% is allowed
 - **Rationale:** Prevents max-sizing exhausted patterns while allowing momentum leaders at RSI 79-84
 
-### Devil's Accuracy Feedback Loop
+### Devil's Accuracy Feedback Loop (Updated 2026-04-29)
 - **What it measures:** Devil's advocate flagged picks as HIGH-risk — tracked against 1-day returns
 - **Where stored:** `learning_state.json['devil_accuracy']`
-- **Activation criterion:** Once ≥5 HIGH-flag observations exist, accuracy score is evaluated
-- **If accuracy > 60%:** HIGH-flagged picks are hard-capped at 10% — **code-enforced in `_enforce_selection_quality()` (Pass B)**
-- **If accuracy ≤ 60%:** Risk Manager uses own judgment (Devil is noisy, lighter weight)
+- **Activation criterion:** ≥15 HIGH-flag observations in the rolling 30-day window (raised from 5/8 — at n=5 the 95% CI spans ±35%, making the cap statistically indefensible)
+- **Win definition:** Loss > 0.5% (–0.005) — plain negative returns include intraday mean-reversion noise; only real losses count as devil wins
+- **If accuracy > 65%:** HIGH-flagged picks are hard-capped at 10% — **code-enforced in `_enforce_selection_quality()` (Pass B)** (threshold raised from 60%)
+- **Rolling window:** 30-day lookback — stale pregame errors no longer permanently cap live picks
+- **If accuracy ≤ 65%:** Risk Manager uses own judgment (Devil is noisy, lighter weight)
 - **How to inspect:** Run `python scripts/status.py` — shows Devil accuracy, active rules, and weight caps
 
 ### BEAR Regime Beta Cap
 - **When triggered:** BEAR regime AND portfolio beta exceeds adjusted target (≤0.90 scaled for non-US exposure)
-- **Action:** All individual position weights capped at 15%, then re-normalized
-- **Where enforced:** `_enforce_beta()` in `agents/risk_manager.py`
+- **Action:** All individual position weights capped at 15%; any deficit vs the 75% floor is redistributed into positions already below 15% (up to 15% each). If redistribution headroom is insufficient, the orchestrator step-5e normalize may push some positions past 15% — that edge case is logged.
+- **Where enforced:** `_enforce_beta()` in `agents/risk_manager.py` (fixed 2026-04-29: removed internal renormalization that was undoing the cap)
 - **Rationale:** Prevents high-beta concentration in bear markets where downside risk is asymmetric
 
 ### Analyst Consensus + Price Target

@@ -503,12 +503,37 @@ class DataFetcher:
         return rows
 
     def compute_vol_ratio(self, volume: pd.DataFrame, window: int = MOMENTUM_WINDOW) -> pd.Series:
-        """Ratio of latest volume to prior 20d average volume. >1.5 = high-volume confirmation."""
+        """Ratio of the most recent complete session's volume to the prior 20d average.
+        >1.5 = high-volume confirmation.
+
+        yfinance daily data normally does not include a partial 'today' row when fetched
+        at 04:00 UTC, but this is not guaranteed. We check the last index date explicitly:
+        - If it equals today → partial session, skip it and use iloc[-2] as latest.
+        - If it is a prior date → already a complete session, use iloc[-1] as latest.
+        This avoids the overcorrection of always skipping one day on non-partial data."""
+        import datetime as _dt
         if volume.empty or len(volume) < window + 1:
             return pd.Series(dtype=float)
-        # Use iloc[-window-1:-1] to get the prior 20d avg (excluding today), then compare to today
-        avg_vol = volume.iloc[-window - 1:-1].mean()
-        latest_vol = volume.iloc[-1]
+        try:
+            last_date = volume.index[-1].date() if hasattr(volume.index[-1], "date") else None
+            last_is_today = (last_date == _dt.date.today()) if last_date is not None else False
+            if last_is_today:
+                # A today-dated row is only partial before the US session closes (~20:00 UTC).
+                # Post-close manual runs have a complete today row — don't skip it.
+                last_is_today = _dt.datetime.now(_dt.timezone.utc).hour < 20
+        except Exception:
+            last_is_today = False
+
+        if last_is_today:
+            # Partial intraday row — need one extra row in history
+            if len(volume) < window + 2:
+                return pd.Series(dtype=float)
+            avg_vol = volume.iloc[-window - 2:-2].mean()
+            latest_vol = volume.iloc[-2]
+        else:
+            # Last row is already a complete prior session (normal at 04:00 UTC)
+            avg_vol = volume.iloc[-window - 1:-1].mean()
+            latest_vol = volume.iloc[-1]
         ratio = latest_vol / avg_vol.replace(0, np.nan)
         return ratio.rename("vol_ratio")
 
@@ -1001,8 +1026,34 @@ class DataFetcher:
                 for t in eu_tickers:
                     result[t] = None
 
-        # US tickers: 60m bars with prepost=True, find last after-hours candle (16:00–20:00 ET)
-        if us_tickers:
+        # US tickers: 60m bars with prepost=True. Returns the most recent 60m candle-to-candle
+        # change — only allowed before the 09:30 ET regular open. After the market opens, the
+        # most recent 60m bar is intraday data, not a premarket gap vs prior close, so we
+        # suppress the signal to avoid misleading agents with an incorrect metric.
+        import datetime as _dt
+        _now_label: str
+        try:
+            from zoneinfo import ZoneInfo as _ZoneInfo
+            _now_et = _dt.datetime.now(_ZoneInfo("America/New_York"))
+            _market_open_et = _now_et.replace(hour=9, minute=30, second=0, microsecond=0)
+            _allow_us_premarket_signal = _now_et < _market_open_et
+            _now_label = _now_et.strftime("%H:%M %Z")
+        except Exception:
+            # tzdata not installed or unavailable — fall back to a fixed UTC offset.
+            # Game period (April–June) is EDT = UTC-4, so 09:30 ET = 13:30 UTC.
+            logger.warning("zoneinfo/tzdata unavailable; using UTC 13:30 fallback for US premarket gate")
+            _now_utc = _dt.datetime.now(_dt.timezone.utc)
+            _allow_us_premarket_signal = _now_utc < _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
+            _now_label = _now_utc.strftime("%H:%M UTC")
+        if us_tickers and not _allow_us_premarket_signal:
+            logger.info(
+                "US premarket gap suppressed: current time %s is at or after the 09:30 ET regular open; "
+                "post-open bars would no longer represent a true premarket gap vs prior close",
+                _now_label,
+            )
+            for t in us_tickers:
+                result[t] = None
+        elif us_tickers:
             try:
                 data = yf.download(
                     list(us_map.values()), period="5d", interval="60m",
@@ -1019,7 +1070,9 @@ class DataFetcher:
                         if yahoo_ticker in closes.columns:
                             s = closes[yahoo_ticker].dropna()
                             if len(s) >= 2:
-                                # Last candle vs the regular-hours close two candles back (rough proxy)
+                                # Last candle vs the prior candle — gap since the most recent close.
+                                # Note: no explicit after-hours window filter; relies on the 09:30 ET
+                                # guard above ensuring this branch only runs after market open.
                                 last_price = float(s.iloc[-1])
                                 prev_price = float(s.iloc[-2])
                                 result[t] = (last_price / prev_price - 1) if prev_price > 0 else None

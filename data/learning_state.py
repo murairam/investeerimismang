@@ -29,6 +29,10 @@ _MIN_STRONG_DAILY_OBSERVATIONS = 7       # 7 trading days ≈ 1.5 weeks before d
 _MIN_STRONG_TICKER_OBSERVATIONS = 8      # Raised from 5 — prevents 2-day noise from promoting a ticker bias to a hard rule
 _MIN_STRONG_RATIONALE_OBSERVATIONS = 5  # Rationale tags share observations across many positions — 5 obs is enough signal
 _MIN_MANDATORY_RATIONALE_OBSERVATIONS = 8   # ~1.5 weeks before a rationale-tag cap becomes code-enforced (75-day game moves fast)
+_DEVIL_MIN_OBSERVATIONS = 15             # Min HIGH-flag observations before devil accuracy cap fires (n=5 has CI ±35%)
+_DEVIL_ACCURACY_THRESHOLD = 0.65        # Raised from 0.60 to reduce false positives at low sample counts
+_DEVIL_WIN_LOSS_THRESHOLD = -0.005      # Devil "wins" only on losses > 0.5% — filters intraday mean-reversion noise
+_DEVIL_LOOKBACK_DAYS = 30               # Rolling 30-day window — stale pregame errors don't permanently cap live picks
 
 
 def _avg(values: list[float]) -> float:
@@ -365,12 +369,31 @@ def _devil_accuracy(history: list[dict]) -> dict:
     """
     Compare 1d returns of HIGH vs LOW/unflagged positions across all days
     where bear_cases + position_returns are both present.
-    Returns accuracy stats for injecting into agent prompts.
+
+    Uses a rolling 30-day window (_DEVIL_LOOKBACK_DAYS) so that stale pregame
+    observations don't permanently suppress live picks. Only counts losses
+    exceeding _DEVIL_WIN_LOSS_THRESHOLD (–0.5%) as devil "wins" to filter
+    intraday mean-reversion noise. Requires _DEVIL_MIN_OBSERVATIONS (15) before
+    the cap fires to ensure statistical significance (95% CI ±~25% at n=15).
     """
+    import datetime as _dt
+
+    cutoff_date = _dt.date.today() - _dt.timedelta(days=_DEVIL_LOOKBACK_DAYS)
+
     high_returns: list[float] = []
     low_returns: list[float] = []  # LOW-flagged or unflagged (in portfolio but not HIGH)
 
     for day in history:
+        # Apply rolling window: skip days outside the lookback period
+        day_date_str = day.get("date") or day.get("run_date") or ""
+        if day_date_str:
+            try:
+                day_date = _dt.date.fromisoformat(str(day_date_str)[:10])
+                if day_date < cutoff_date:
+                    continue
+            except (ValueError, TypeError):
+                pass  # unparseable date — include the record conservatively
+
         bear_cases: dict = day.get("bear_cases", {}) or {}
         outcomes = (day.get("outcomes", {}) or {}).get("1d", {})
         pos_returns: dict = outcomes.get("position_returns", {}) or day.get("performance", {}).get("position_returns", {})
@@ -383,7 +406,7 @@ def _devil_accuracy(history: list[dict]) -> dict:
             else:
                 low_returns.append(float(ret))
 
-    # Track repeat HIGH-flag offenders over the last 5 days (always computed)
+    # Track repeat HIGH-flag offenders over the last 5 days (always computed, no rolling filter)
     recent_high_flagged: dict[str, int] = {}
     for day in history[-5:]:
         bear_cases_day: dict = day.get("bear_cases", {}) or {}
@@ -401,21 +424,31 @@ def _devil_accuracy(history: list[dict]) -> dict:
             "status": "insufficient_data",
             "observations": 0,
             "high_flagged_tickers_recent": high_flagged_tickers_recent,
+            "lookback_days": _DEVIL_LOOKBACK_DAYS,
         }
 
     high_avg = _avg(high_returns)
     low_avg = _avg(low_returns)
-    high_neg_rate = sum(1 for r in high_returns if r < 0) / len(high_returns)
-    accuracy = high_neg_rate  # % of HIGH-risk flags that correctly predicted negative return
+    # Use noise-filtered win rate: only count losses > 0.5% as true devil wins.
+    # Plain negative-return counting misclassifies mean-reversion noise (–0.1% dip
+    # followed by +0.3% close) as a correct bear call.
+    high_neg_rate_raw = sum(1 for r in high_returns if r < 0) / len(high_returns)
+    high_neg_rate_filtered = sum(1 for r in high_returns if r < _DEVIL_WIN_LOSS_THRESHOLD) / len(high_returns)
+    accuracy = high_neg_rate_filtered
 
     return {
-        "status": "actionable" if len(high_returns) >= 5 else "early_data",
+        "status": "actionable" if len(high_returns) >= _DEVIL_MIN_OBSERVATIONS else "early_data",
         "observations": len(high_returns),
+        "lookback_days": _DEVIL_LOOKBACK_DAYS,
         "high_risk_avg_return_1d": round(high_avg, 6),
         "low_risk_avg_return_1d": round(low_avg, 6),
-        "high_risk_negative_rate": round(high_neg_rate, 4),
+        "high_risk_negative_rate_raw": round(high_neg_rate_raw, 4),
+        "high_risk_negative_rate_filtered": round(high_neg_rate_filtered, 4),
+        # Backward-compat alias: downstream consumers access da["high_risk_negative_rate"].
+        # Maps to the filtered rate (>0.5% loss) which is the operative accuracy metric.
+        "high_risk_negative_rate": round(high_neg_rate_filtered, 4),
         "accuracy": round(accuracy, 4),
-        "devil_is_accurate": accuracy >= 0.60 and len(high_returns) >= _MIN_STRONG_TICKER_OBSERVATIONS,
+        "devil_is_accurate": accuracy >= _DEVIL_ACCURACY_THRESHOLD and len(high_returns) >= _DEVIL_MIN_OBSERVATIONS,
         "high_flagged_tickers_recent": high_flagged_tickers_recent,
     }
 
@@ -776,7 +809,8 @@ def build_prompt_learning_context(
                 accuracy_rate = da.get("high_risk_negative_rate", 0)
                 lines.append(
                     f"Devil's advocate accuracy so far: {accuracy_rate:.0%} of HIGH-risk flags went negative "
-                    f"({da['observations']} obs, threshold for action: 60%). Use your own judgement on flagged picks."
+                    f"({da['observations']} obs, threshold for action: >=65% accuracy and >={_DEVIL_MIN_OBSERVATIONS} obs). "
+                    "Use your own judgement on flagged picks."
                 )
                 # When Devil is clearly WRONG (accuracy < 40%), repeat flags are ANTI-signals —
                 # explicitly tell agents NOT to penalise momentum picks the Devil has been flagging.
