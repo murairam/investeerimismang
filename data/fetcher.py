@@ -1027,28 +1027,28 @@ class DataFetcher:
                     result[t] = None
 
         # US tickers: 60m bars with prepost=True. Returns the most recent 60m candle-to-candle
-        # change (s.iloc[-1] / s.iloc[-2] - 1) — no explicit after-hours window filter.
-        # The 09:30 ET gate above ensures this branch is suppressed during normal 04:00 UTC
-        # pipeline runs; it only executes during manual runs after market open.
+        # change — only allowed before the 09:30 ET regular open. After the market opens, the
+        # most recent 60m bar is intraday data, not a premarket gap vs prior close, so we
+        # suppress the signal to avoid misleading agents with an incorrect metric.
         import datetime as _dt
         _now_label: str
         try:
             from zoneinfo import ZoneInfo as _ZoneInfo
             _now_et = _dt.datetime.now(_ZoneInfo("America/New_York"))
             _market_open_et = _now_et.replace(hour=9, minute=30, second=0, microsecond=0)
-            _allow_us_premarket_signal = _now_et >= _market_open_et
+            _allow_us_premarket_signal = _now_et < _market_open_et
             _now_label = _now_et.strftime("%H:%M %Z")
         except Exception:
             # tzdata not installed or unavailable — fall back to a fixed UTC offset.
             # Game period (April–June) is EDT = UTC-4, so 09:30 ET = 13:30 UTC.
             logger.warning("zoneinfo/tzdata unavailable; using UTC 13:30 fallback for US premarket gate")
             _now_utc = _dt.datetime.now(_dt.timezone.utc)
-            _allow_us_premarket_signal = _now_utc >= _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
+            _allow_us_premarket_signal = _now_utc < _now_utc.replace(hour=13, minute=30, second=0, microsecond=0)
             _now_label = _now_utc.strftime("%H:%M UTC")
         if us_tickers and not _allow_us_premarket_signal:
             logger.info(
-                "US premarket gap suppressed: current time %s is before the 09:30 ET regular open; "
-                "pipeline intentionally ignores pre-open extended-hours data to avoid stale signals",
+                "US premarket gap suppressed: current time %s is at or after the 09:30 ET regular open; "
+                "post-open bars would no longer represent a true premarket gap vs prior close",
                 _now_label,
             )
             for t in us_tickers:

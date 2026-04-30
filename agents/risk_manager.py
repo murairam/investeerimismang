@@ -560,15 +560,23 @@ class OpenAIRiskManager(BaseAgent):
                             deficit * 100, len(under_cap),
                         )
                     else:
-                        # Not enough under-cap headroom to absorb the deficit within the 15% ceiling.
-                        # Leaving weights unchanged here. A downstream orchestrator/validator
-                        # floor-normalization step may still rescale positions above the temporary
-                        # 15% BEAR beta cap to satisfy the 75% minimum invested game rule.
+                        # Not enough under-cap headroom to absorb the full deficit within the
+                        # 15% ceiling. Fill every under-cap position to the cap so downstream
+                        # floor-normalization has as little remaining deficit as possible,
+                        # reducing the chance of re-inflating positions above the cap.
+                        for i, pos in under_cap:
+                            positions[i] = Position(
+                                ticker=pos.ticker,
+                                weight=cap,
+                                rationale=pos.rationale,
+                                conviction=pos.conviction,
+                            )
+                        remaining_deficit = max(0.0, deficit - headroom_total)
                         logger.warning(
-                            "BEAR beta cap: insufficient under-cap headroom (%.1f%%) to absorb "
-                            "%.1f%% deficit — leaving unchanged; downstream floor normalization "
-                            "may push some positions above the %.0f%% cap",
-                            headroom_total * 100, deficit * 100, cap * 100,
+                            "BEAR beta cap: used all available under-cap headroom (%.1f%%) across "
+                            "%d positions, but %.1f%% deficit remains; downstream floor normalization "
+                            "may still push some positions above the %.0f%% cap",
+                            headroom_total * 100, len(under_cap), remaining_deficit * 100, cap * 100,
                         )
                 proposal = PortfolioProposal(
                     positions=positions,
