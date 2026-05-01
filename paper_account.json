@@ -12,17 +12,35 @@
     "NVDA": 3.63513247,
     "STX": 1.12282736
   },
-  "verified_weights": {
-    "GNRC": 0.25,
-    "CNC": 0.25,
-    "NXPI": 0.18,
-    "NOKIA.HE": 0.12,
-    "QCOM": 0.05,
-    "INTC": 0.05,
-    "NVDA": 0.05,
-    "STX": 0.05
+  "pending_order": {
+    "submitted_date": "2026-05-01",
+    "positions": [
+      {
+        "ticker": "QCOM",
+        "weight": 0.05
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.05
+      },
+      {
+        "ticker": "GNRC",
+        "weight": 0.25
+      },
+      {
+        "ticker": "PWR",
+        "weight": 0.25
+      },
+      {
+        "ticker": "INTC",
+        "weight": 0.11
+      },
+      {
+        "ticker": "NOKIA.HE",
+        "weight": 0.14
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -412,8 +430,66 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-05-01",
+      "equity": 12517.14,
+      "cash": 0.0,
+      "daily_return": 0.009284,
+      "return_since_start": 0.251714,
+      "turnover": 0.0,
+      "positions": {
+        "GNRC": 14.14275196,
+        "CNC": 67.82823982,
+        "NXPI": 9.12994119,
+        "NOKIA.HE": 140.33381087,
+        "QCOM": 4.03209564,
+        "INTC": 7.79790407,
+        "NVDA": 3.63513247,
+        "STX": 1.12282736
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-01",
+        "positions": [
+          {
+            "ticker": "QCOM",
+            "weight": 0.05
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.05
+          },
+          {
+            "ticker": "GNRC",
+            "weight": 0.25
+          },
+          {
+            "ticker": "PWR",
+            "weight": 0.25
+          },
+          {
+            "ticker": "INTC",
+            "weight": 0.11
+          },
+          {
+            "ticker": "NOKIA.HE",
+            "weight": 0.14
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-04-30",
-  "last_equity": 12402.0
+  "last_rebalanced_date": "2026-05-01",
+  "last_equity": 12517.13923801,
+  "verified_weights": {
+    "GNRC": 0.25,
+    "CNC": 0.25,
+    "NXPI": 0.18,
+    "NOKIA.HE": 0.12,
+    "QCOM": 0.05,
+    "INTC": 0.05,
+    "NVDA": 0.05,
+    "STX": 0.05
+  }
 }

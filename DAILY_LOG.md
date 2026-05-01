@@ -684,3 +684,36 @@ Winners: INTC +12.5%, CNC +9.3%, QCOM +4.4% | Losers: GEV -2.0%, NUE -0.8%
 - ▲ **CNC**: 17.0% → 25.0% (+8.0%)
 
 ---
+## 2026-05-01 06:45:15
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.8% · VIX: 16.9 · S&P 500 20d: +9.6%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.5% · Benchmark +1.0% · Alpha +0.5%
+Winners: QCOM +14.8%, STX +4.4%, NOKIA.HE +2.9% | Losers: NVDA -5.0%, CNC -0.9%, INTC -0.6%
+
+**Paper account:** Equity €12,517.14 (start €10,000) · Today +0.93% · Since start +25.17% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 6 · **Total weight:** 85.0%
+
+**Thesis:** I prioritized the independently validated consensus core first: QCOM as triple-consensus, then STX, GNRC, and PWR as double-consensus names with conviction floors respected. For unique additions, INTC wins on sheer acceleration and beta for a BULL tape, while NOKIA.HE stays because it is still working, diversifies sector/market exposure, and avoids overconcentration as Tech rotation risk rises; removals implied by this synthesis are CNC, NXPI, NVDA, and the weak residual semis because stronger momentum alternatives clearly beat them on slot cost. Portfolio should remain aggressive and near the strategist's high-beta target, but with some rotation-aware reduction in pure Tech concentration via GNRC and PWR.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **QCOM** | 5.0% | Triple-consensus pick across all three proposals and the cleanest momentum/catalyst leader in the set: vol_ratio 4.29, mom_5d +33.7%, RSI 93 accelerating, with current-holding validation and no retail-crowding signal. |
+| 2 | **STX** | 5.0% | Double-consensus pick with elite Sharpe/relative-strength support from the strategist plus strong live momentum confirmation (mom_5d +14.3%, vol_ratio 1.61); it is already a verified contributor and still earns its slot. |
+| 3 | **GNRC** | 25.0% | Double-consensus pick and strong industrial rotation-compatible breakout with vol_ratio 2.37, mom_5d +18.4%, RSI 80, plus low crowding and continued positive contribution from the current book. |
+| 4 | **PWR** | 25.0% | Double-consensus pick that helps reduce pure Tech concentration while keeping aggressive upside; volume-confirmed industrial leader with vol_ratio 2.74, mom_5d +14.5%, RSI 87 and strong breadth alignment. |
+| 5 | **INTC** | 11.0% | Best unique aggressor from Proposal A: exceptional acceleration (mom_5d +41.1%) and very high beta 2.83 fit the BULL competition mandate, while low search interest suggests the move is not yet crowded. |
+| 6 | **NOKIA.HE** | 14.0% | Strong unique non-US diversifier that remains validated by current holdings performance; mom_5d +17.7% and vol_ratio 1.65 are strong enough to keep, and it satisfies the mandate to avoid an all-US/all-Tech book. |
+
+**Changes from yesterday:**
+- ➕ Added **PWR** at 25.0%
+- ➖ Removed **CNC** (was 25.0%)
+- ➖ Removed **NXPI** (was 18.0%)
+- ➖ Removed **NVDA** (was 5.0%)
+- ▲ **INTC**: 5.0% → 11.0% (+6.0%)
+- ▲ **NOKIA.HE**: 12.0% → 14.0% (+2.0%)
+
+---
