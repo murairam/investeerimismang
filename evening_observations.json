@@ -1,66 +1,54 @@
 {
-  "date": "2026-05-01",
-  "timestamp": "2026-05-01T21:15:04+00:00",
-  "portfolio_return": 0.0086008711254543,
-  "benchmark_return": 0.002928328889657106,
-  "alpha": 0.0056725422357971934,
+  "date": "2026-05-04",
+  "timestamp": "2026-05-04T21:37:57+00:00",
+  "portfolio_return": 0.0009365340179826759,
+  "benchmark_return": -0.004062189384334225,
+  "alpha": 0.004998723402316901,
   "position_returns": [
+    {
+      "ticker": "WDC",
+      "weight": 0.13,
+      "return": 0.02512049641702041,
+      "price": 442.3599853515625
+    },
+    {
+      "ticker": "PWR",
+      "weight": 0.22,
+      "return": 0.02038507219641117,
+      "price": 757.3400268554688
+    },
     {
       "ticker": "STX",
       "weight": 0.05,
-      "return": 0.07910750084398566,
-      "price": 726.9299926757812
-    },
-    {
-      "ticker": "INTC",
-      "weight": 0.05,
-      "return": 0.05440303987109485,
-      "price": 99.62000274658203
-    },
-    {
-      "ticker": "NOKIA.HE",
-      "weight": 0.12,
-      "return": 0.02861291082572004,
-      "price": 10.604999542236328
-    },
-    {
-      "ticker": "NXPI",
-      "weight": 0.18,
-      "return": 0.005620061708728752,
-      "price": 295.239990234375
-    },
-    {
-      "ticker": "GNRC",
-      "weight": 0.25,
-      "return": 0.00042427707788927904,
-      "price": 259.3399963378906
-    },
-    {
-      "ticker": "NVDA",
-      "weight": 0.05,
-      "return": -0.005612117727474941,
-      "price": 198.4499969482422
+      "return": 0.015971256473855,
+      "price": 738.5399780273438
     },
     {
       "ticker": "CNC",
-      "weight": 0.25,
-      "return": -0.006518876570560828,
-      "price": 53.34000015258789
+      "weight": 0.21,
+      "return": 0.004124507312969206,
+      "price": 53.560001373291016
     },
     {
-      "ticker": "QCOM",
-      "weight": 0.05,
-      "return": -0.014311211148313463,
-      "price": 177.00999450683594
+      "ticker": "GNRC",
+      "weight": 0.22,
+      "return": -0.008752946116010296,
+      "price": 257.07000732421875
+    },
+    {
+      "ticker": "INTC",
+      "weight": 0.17,
+      "return": -0.0385465153725556,
+      "price": 95.77999877929688
     }
   ],
-  "ai_recommendation": "Update: keep STX and INTC (top contributors) and keep NOKIA.HE for momentum, but drop/trim QCOM and CNC (worst performers) and consider reallocating that risk into STX/INTC for a stronger weekly climb before Monday 09:00 EET. Keep NXPI and GNRC as stabilizers; reduce NVDA only if you need to free capital, since it\u2019s currently dragging.",
+  "ai_recommendation": "Keep WDC, PWR, and STX (they\u2019re leading and driving your positive alpha), and keep CNC (small winner). Drop GNRC and INTC (both lagged sharply, especially INTC -3.9%), and reallocate that capital into similar-strength semis/defense names that are trending today.",
   "game_standing": {
-    "rank": 393,
-    "total_players": 8792,
-    "value_eur": 12593.999029094679,
-    "today_return_pct": 0.509,
-    "week_return_pct": 8.369,
-    "month_return_pct": 25.94
+    "rank": 406,
+    "total_players": 8817,
+    "value_eur": 12603.441696760266,
+    "today_return_pct": 0.067,
+    "week_return_pct": 4.839,
+    "month_return_pct": 26.034000000000002
   }
 }
