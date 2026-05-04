@@ -717,3 +717,39 @@ Winners: QCOM +14.8%, STX +4.4%, NOKIA.HE +2.9% | Losers: NVDA -5.0%, CNC -0.9%,
 - ▲ **NOKIA.HE**: 12.0% → 14.0% (+2.0%)
 
 ---
+## 2026-05-04 06:55:04
+
+**Market:** BULL regime · SPX vs 50d SMA: +6.0% · VIX: 17.0 · S&P 500 20d: +9.8%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.5% · Benchmark +0.3% · Alpha +0.2%
+Winners: STX +7.9%, INTC +5.4%, NXPI +0.5% | Losers: QCOM -1.5%, CNC -0.7%, NVDA -0.6%
+
+**Paper account:** Equity €12,574.87 (start €10,000) · Today +0.46% · Since start +25.75% · Turnover 33.7% · Cash €1,886.23
+
+**Confidence:** 86% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I anchored the portfolio around the validated consensus core: STX, INTC, and CNC, then added the strongest unique names that still fit the rotation mandate and avoid dead-money holdings. I removed current holdings NXPI, QCOM, NVDA, and NOKIA.HE because the proposals offered materially stronger alternatives or cleaner volume-confirmed momentum, while keeping exposure split across Tech, Healthcare, and Industrials/Utilities to respect the high tech-rotation warning. The resulting book should remain aggressive and high-beta in a BULL regime, but with less mono-tech crowding than the current portfolio and still broadly aligned with the strategist beta target.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **STX** | 5.0% | Triple-consensus pick and the clearest momentum leader today: vol_ratio 1.75, mom_5d +23.8%, RSI 86 with acceleration, so it earns maximum conviction despite overbought optics. |
+| 2 | **INTC** | 17.0% | Double-consensus pick with elite cross-signal strength; mom_5d +20.5%, strong Sharpe/relative strength, and still-valid tech leadership make it a high-conviction hold even with sector rotation risk. |
+| 3 | **CNC** | 21.0% | Double-consensus non-tech momentum name with exceptional 5d strength (+27.3%) that preserves sector diversification; volume is softer at 0.87, so conviction stays at the consensus floor rather than higher. |
+| 4 | **GNRC** | 22.0% | Best unique non-tech continuation from the current book and Proposal A: mom_5d +17.2%, vol_ratio 1.02, RSI 82, and still-valid industrial momentum make it a strong rotation-aware complement to tech. |
+| 5 | **PWR** | 22.0% | Strong unique catalyst pick from Proposal B with mom_5d +18.6%, RSI 87, and supportive vol_ratio 1.38; preferred over slower low-beta alternatives because it adds a second non-tech momentum engine. |
+| 6 | **WDC** | 13.0% | Best sixth-slot tech candidate on slot-cost: vol_ratio 2.21 and positive 5d momentum (+6.6%) give it cleaner catalyst confirmation than MU, while still participating in storage/semis strength. |
+
+**Changes from yesterday:**
+- ➕ Added **PWR** at 22.0%
+- ➕ Added **WDC** at 13.0%
+- ➖ Removed **NXPI** (was 18.0%)
+- ➖ Removed **NOKIA.HE** (was 12.0%)
+- ➖ Removed **QCOM** (was 5.0%)
+- ➖ Removed **NVDA** (was 5.0%)
+- ▲ **INTC**: 5.0% → 17.0% (+12.0%)
+- ▼ **CNC**: 25.0% → 21.0% (-4.0%)
+- ▼ **GNRC**: 25.0% → 22.0% (-3.0%)
+
+---

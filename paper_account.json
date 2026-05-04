@@ -1,43 +1,41 @@
 {
   "start_date": "2026-04-13",
   "initial_capital": 10000.0,
-  "cash": 0.0,
+  "cash": 1886.23024499,
   "positions": {
-    "GNRC": 14.14275196,
-    "CNC": 67.82823982,
-    "NXPI": 9.12994119,
-    "NOKIA.HE": 140.33381087,
-    "QCOM": 4.03209564,
-    "INTC": 7.79790407,
-    "NVDA": 3.63513247,
-    "STX": 1.12282736
+    "QCOM": 4.16806162,
+    "STX": 1.01493758,
+    "GNRC": 14.2243498,
+    "PWR": 4.97021425,
+    "INTC": 16.29326238,
+    "NOKIA.HE": 166.00486921
   },
   "pending_order": {
-    "submitted_date": "2026-05-01",
+    "submitted_date": "2026-05-04",
     "positions": [
-      {
-        "ticker": "QCOM",
-        "weight": 0.05
-      },
       {
         "ticker": "STX",
         "weight": 0.05
       },
       {
+        "ticker": "INTC",
+        "weight": 0.17
+      },
+      {
+        "ticker": "CNC",
+        "weight": 0.21
+      },
+      {
         "ticker": "GNRC",
-        "weight": 0.25
+        "weight": 0.22
       },
       {
         "ticker": "PWR",
-        "weight": 0.25
+        "weight": 0.22
       },
       {
-        "ticker": "INTC",
-        "weight": 0.11
-      },
-      {
-        "ticker": "NOKIA.HE",
-        "weight": 0.14
+        "ticker": "WDC",
+        "weight": 0.13
       }
     ]
   },
@@ -478,10 +476,56 @@
         ]
       },
       "executed_pending": false
+    },
+    {
+      "date": "2026-05-04",
+      "equity": 12574.87,
+      "cash": 1886.23,
+      "daily_return": 0.004612,
+      "return_since_start": 0.257487,
+      "turnover": 0.337384,
+      "positions": {
+        "QCOM": 4.16806162,
+        "STX": 1.01493758,
+        "GNRC": 14.2243498,
+        "PWR": 4.97021425,
+        "INTC": 16.29326238,
+        "NOKIA.HE": 166.00486921
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-04",
+        "positions": [
+          {
+            "ticker": "STX",
+            "weight": 0.05
+          },
+          {
+            "ticker": "INTC",
+            "weight": 0.17
+          },
+          {
+            "ticker": "CNC",
+            "weight": 0.21
+          },
+          {
+            "ticker": "GNRC",
+            "weight": 0.22
+          },
+          {
+            "ticker": "PWR",
+            "weight": 0.22
+          },
+          {
+            "ticker": "WDC",
+            "weight": 0.13
+          }
+        ]
+      },
+      "executed_pending": true
     }
   ],
-  "last_rebalanced_date": "2026-05-01",
-  "last_equity": 12517.13923801,
+  "last_rebalanced_date": "2026-05-04",
+  "last_equity": 12574.86829992,
   "verified_weights": {
     "GNRC": 0.25,
     "CNC": 0.25,
