@@ -721,7 +721,7 @@ Winners: QCOM +14.8%, STX +4.4%, NOKIA.HE +2.9% | Losers: NVDA -5.0%, CNC -0.9%,
 
 **Market:** BULL regime · SPX vs 50d SMA: +6.0% · VIX: 17.0 · S&P 500 20d: +9.8%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 13:43:23.
 
 **Yesterday's P&L:** Portfolio +0.5% · Benchmark +0.3% · Alpha +0.2%
 Winners: STX +7.9%, INTC +5.4%, NXPI +0.5% | Losers: QCOM -1.5%, CNC -0.7%, NVDA -0.6%
