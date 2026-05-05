@@ -10,15 +10,35 @@
     "WDC": 4.47130914,
     "STX": 1.02086821
   },
-  "verified_weights": {
-    "GNRC": 0.22,
-    "PWR": 0.22,
-    "CNC": 0.21,
-    "INTC": 0.17,
-    "WDC": 0.13,
-    "STX": 0.05
+  "pending_order": {
+    "submitted_date": "2026-05-05",
+    "positions": [
+      {
+        "ticker": "STX",
+        "weight": 0.05
+      },
+      {
+        "ticker": "WDC",
+        "weight": 0.06
+      },
+      {
+        "ticker": "CNC",
+        "weight": 0.25
+      },
+      {
+        "ticker": "MU",
+        "weight": 0.17
+      },
+      {
+        "ticker": "PWR",
+        "weight": 0.25
+      },
+      {
+        "ticker": "ON",
+        "weight": 0.17
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -474,8 +494,62 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-05-05",
+      "equity": 12715.16,
+      "cash": 0.0,
+      "daily_return": 0.002694,
+      "return_since_start": 0.271516,
+      "turnover": 0.0,
+      "positions": {
+        "GNRC": 12.59057149,
+        "PWR": 4.3993461,
+        "CNC": 58.43304858,
+        "INTC": 25.32763477,
+        "WDC": 4.47130914,
+        "STX": 1.02086821
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-05",
+        "positions": [
+          {
+            "ticker": "STX",
+            "weight": 0.05
+          },
+          {
+            "ticker": "WDC",
+            "weight": 0.06
+          },
+          {
+            "ticker": "CNC",
+            "weight": 0.25
+          },
+          {
+            "ticker": "MU",
+            "weight": 0.17
+          },
+          {
+            "ticker": "PWR",
+            "weight": 0.25
+          },
+          {
+            "ticker": "ON",
+            "weight": 0.17
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-05-04",
-  "last_equity": 12681.0
+  "last_rebalanced_date": "2026-05-05",
+  "last_equity": 12715.16003345,
+  "verified_weights": {
+    "GNRC": 0.22,
+    "PWR": 0.22,
+    "CNC": 0.21,
+    "INTC": 0.17,
+    "WDC": 0.13,
+    "STX": 0.05
+  }
 }

@@ -753,3 +753,37 @@ Winners: STX +7.9%, INTC +5.4%, NXPI +0.5% | Losers: QCOM -1.5%, CNC -0.7%, NVDA
 - ▼ **GNRC**: 25.0% → 22.0% (-3.0%)
 
 ---
+## 2026-05-05 06:25:28
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.5% · VIX: 18.3 · S&P 500 20d: +8.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.4% · Benchmark -0.4% · Alpha +0.8%
+Winners: WDC +2.8%, PWR +2.4%, STX +1.9% | Losers: INTC -3.5%, GNRC -0.5%
+
+**Paper account:** Equity €12,715.16 (start €10,000) · Today +0.27% · Since start +27.15% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 6 · **Total weight:** 95.0%
+
+**Thesis:** I anchored the portfolio around the triple-consensus names STX, WDC, and CNC, then added the double-consensus upgrades MU and PWR, with ON as the best unique high-beta breakout to replace lagging INTC and GNRC. I excluded EBAY and NOKIA.HE because they were weaker slot-cost choices versus MU/ON, and removed INTC/GNRC due to clear recent lagging behavior versus stronger semiconductor alternatives. The result stays concentrated for a BULL regime, keeps at least two sectors represented, and should remain near the strategist beta target while leaning into the strongest momentum leaders.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **STX** | 5.0% | Triple-consensus core leader with elite 5d momentum, strong volume confirmation, live-game validation, and accelerating bull-regime fit despite crowded optics. |
+| 2 | **WDC** | 6.0% | Triple-consensus momentum winner with strong recent alpha contribution, positive volume support, low retail crowding, and continued leadership in the strongest sector. |
+| 3 | **CNC** | 25.0% | Triple-consensus non-tech diversifier with explosive 5d momentum and recent positive contribution; healthcare breadth is weak, but its individual signal stack is still strong enough to keep as the required second-sector leader. |
+| 4 | **MU** | 17.0% | Double-consensus upgrade over INTC with stronger semiconductor momentum, positive volume, near-52w-high leadership, and better competition upside for a bull tape. |
+| 5 | **PWR** | 25.0% | Double-consensus industrial winner that remains validated by recent alpha, strong 5d momentum, and solid volume; kept as a non-tech/non-health momentum leg despite some relative deceleration. |
+| 6 | **ON** | 17.0% | Best unique asymmetric add from the full analyst: strong vol_ratio breakout, positive 5d momentum, and a cleaner replacement for lagging INTC while preserving aggressive bull-regime beta. |
+
+**Changes from yesterday:**
+- ➕ Added **MU** at 17.0%
+- ➕ Added **ON** at 17.0%
+- ➖ Removed **GNRC** (was 22.0%)
+- ➖ Removed **INTC** (was 17.0%)
+- ▼ **WDC**: 13.0% → 6.0% (-7.0%)
+- ▲ **CNC**: 21.0% → 25.0% (+4.0%)
+- ▲ **PWR**: 22.0% → 25.0% (+3.0%)
+
+---
