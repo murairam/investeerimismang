@@ -757,7 +757,7 @@ Winners: STX +7.9%, INTC +5.4%, NXPI +0.5% | Losers: QCOM -1.5%, CNC -0.7%, NVDA
 
 **Market:** BULL regime · SPX vs 50d SMA: +5.5% · VIX: 18.3 · S&P 500 20d: +8.9%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 11:34:41.
 
 **Yesterday's P&L:** Portfolio +0.4% · Benchmark -0.4% · Alpha +0.8%
 Winners: WDC +2.8%, PWR +2.4%, STX +1.9% | Losers: INTC -3.5%, GNRC -0.5%
