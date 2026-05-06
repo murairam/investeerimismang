@@ -1,60 +1,60 @@
 {
-  "date": "2026-05-05",
-  "timestamp": "2026-05-05T21:37:36+00:00",
-  "portfolio_return": 0.02529629116407759,
-  "benchmark_return": 0.008120017337603702,
-  "alpha": 0.017176273826473888,
+  "date": "2026-05-06",
+  "timestamp": "2026-05-06T21:41:33+00:00",
+  "portfolio_return": 0.03232502187722641,
+  "benchmark_return": 0.014588330317794274,
+  "alpha": 0.01773669155943214,
   "position_returns": [
+    {
+      "ticker": "CNC",
+      "weight": 0.25,
+      "return": 0.044356404475709876,
+      "price": 55.33000183105469
+    },
     {
       "ticker": "MU",
       "weight": 0.17,
-      "return": 0.11059068201928368,
-      "price": 640.2000122070312
+      "return": 0.04122151537838992,
+      "price": 666.5900268554688
     },
     {
       "ticker": "WDC",
       "weight": 0.06,
-      "return": 0.05176784784424582,
-      "price": 465.260009765625
-    },
-    {
-      "ticker": "STX",
-      "weight": 0.05,
-      "return": 0.0439651646550121,
-      "price": 771.010009765625
-    },
-    {
-      "ticker": "PWR",
-      "weight": 0.25,
-      "return": 0.01884220824210714,
-      "price": 771.6099853515625
+      "return": 0.03845158353470235,
+      "price": 483.1499938964844
     },
     {
       "ticker": "ON",
       "weight": 0.17,
-      "return": 0.006174022420281089,
-      "price": 102.66999816894531
-    },
-    {
-      "ticker": "CNC",
-      "weight": 0.25,
-      "return": -0.010829010757716695,
-      "price": 52.97999954223633
+      "return": 0.030193810552328948,
+      "price": 105.7699966430664
     },
     {
       "ticker": "EBAY",
       "weight": 0.05,
-      "return": -0.03722674130302772,
-      "price": 105.26000213623047
+      "return": 0.027455817318986275,
+      "price": 108.1500015258789
+    },
+    {
+      "ticker": "STX",
+      "weight": 0.05,
+      "return": 0.019986735514906817,
+      "price": 786.4199829101562
+    },
+    {
+      "ticker": "PWR",
+      "weight": 0.25,
+      "return": 0.01766437078519978,
+      "price": 785.239990234375
     }
   ],
-  "ai_recommendation": "Yes\u2014update the portfolio: keep MU, WDC, and STX (strongest contributors) and keep PWR/ON (positive/flat). Drop CNC and EBAY (both negative, especially EBAY at -3.7%) and reallocate that capital into the strongest remaining winners (MU/WDC/STX) for tomorrow.",
+  "ai_recommendation": "Yes\u2014keep the portfolio updated: your alpha is strongly positive and every current holding is outperforming, so don\u2019t drop any names today. Keep CNC, MU, WDC, and ON as core (best relative returns), and only consider trimming the lowest performers (STX, PWR) if you need cash for a new higher-upside setup.",
   "game_standing": {
-    "rank": 355,
-    "total_players": 8863,
-    "value_eur": 13163.516751793491,
-    "today_return_pct": 3.7220000000000004,
-    "week_return_pct": 11.299,
-    "month_return_pct": 31.635
+    "rank": 556,
+    "total_players": 8887,
+    "value_eur": 13461.196231479566,
+    "today_return_pct": 2.253,
+    "week_return_pct": 16.401,
+    "month_return_pct": 34.611999999999995
   }
 }
