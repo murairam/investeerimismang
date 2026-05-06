@@ -11,16 +11,31 @@
     "EBAY": 6.78590884,
     "STX": 1.00455418
   },
-  "verified_weights": {
-    "PWR": 0.25,
-    "MU": 0.17,
-    "CNC": 0.25,
-    "ON": 0.17,
-    "WDC": 0.06,
-    "EBAY": 0.05,
-    "STX": 0.05
+  "pending_order": {
+    "submitted_date": "2026-05-06",
+    "positions": [
+      {
+        "ticker": "MU",
+        "weight": 0.17
+      },
+      {
+        "ticker": "STX",
+        "weight": 0.17
+      },
+      {
+        "ticker": "WDC",
+        "weight": 0.18
+      },
+      {
+        "ticker": "PWR",
+        "weight": 0.25
+      },
+      {
+        "ticker": "INTC",
+        "weight": 0.23
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -495,8 +510,60 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-05-06",
+      "equity": 12960.31,
+      "cash": 0.0,
+      "daily_return": 0.021221,
+      "return_since_start": 0.296031,
+      "turnover": 0.0,
+      "positions": {
+        "PWR": 4.89808672,
+        "MU": 4.37587231,
+        "CNC": 69.25909323,
+        "ON": 24.72041969,
+        "WDC": 2.01257831,
+        "EBAY": 6.78590884,
+        "STX": 1.00455418
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-06",
+        "positions": [
+          {
+            "ticker": "MU",
+            "weight": 0.17
+          },
+          {
+            "ticker": "STX",
+            "weight": 0.17
+          },
+          {
+            "ticker": "WDC",
+            "weight": 0.18
+          },
+          {
+            "ticker": "PWR",
+            "weight": 0.25
+          },
+          {
+            "ticker": "INTC",
+            "weight": 0.23
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-05-05",
-  "last_equity": 12691.0
+  "last_rebalanced_date": "2026-05-06",
+  "last_equity": 12960.30961157,
+  "verified_weights": {
+    "PWR": 0.25,
+    "MU": 0.17,
+    "CNC": 0.25,
+    "ON": 0.17,
+    "WDC": 0.06,
+    "EBAY": 0.05,
+    "STX": 0.05
+  }
 }

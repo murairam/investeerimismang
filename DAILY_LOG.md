@@ -787,3 +787,35 @@ Winners: WDC +2.8%, PWR +2.4%, STX +1.9% | Losers: INTC -3.5%, GNRC -0.5%
 - ▲ **PWR**: 22.0% → 25.0% (+3.0%)
 
 ---
+## 2026-05-06 06:47:16
+
+**Market:** BULL regime · SPX vs 50d SMA: +6.2% · VIX: 17.4 · S&P 500 20d: +9.7%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +2.2% · Benchmark +0.8% · Alpha +1.4%
+Winners: MU +10.7%, WDC +4.8%, STX +4.0% | Losers: EBAY -4.1%, CNC -1.4%
+
+**Paper account:** Equity €12,960.31 (start €10,000) · Today +2.12% · Since start +29.60% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** The portfolio is built around the four double-consensus names MU, STX, WDC, and PWR, which receive the highest conviction under the ensemble rules, while INTC is the best unique high-beta add to replace weaker current holdings. I would exit CNC and EBAY immediately for weak/negative recent action, and also rotate out of ON because its 5d momentum has decelerated materially versus INTC; despite the Tech rotation alert, the strongest absolute-return setup is still concentrated in proven storage/semiconductor leaders with PWR providing the required second-sector exposure. Portfolio beta should remain aggressive and likely near the upper end of the BULL target, but less extreme than the strategist proposal because PWR offsets the semiconductor concentration somewhat.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **MU** | 17.0% | Double-consensus pick with elite momentum and catalyst confirmation: +26.8% 5d, vol_ratio 1.59, RSI 86, and it was one of the strongest live contributors, so it remains a core competition leader. |
+| 2 | **STX** | 17.0% | Double-consensus pick and one of the strongest active movers in the whole set, with +33.0% 5d momentum and strong recent portfolio contribution; RSI>85 with accelerating momentum is a bullish leader signal, not a downgrade. |
+| 3 | **WDC** | 18.0% | Double-consensus pick with strong trend persistence and breakout behavior: +18.9% 5d, RSI 86, and positive recent contribution; slightly below MU/STX only because its volume confirmation is good rather than exceptional. |
+| 4 | **PWR** | 25.0% | Double-consensus non-Tech diversifier that satisfies the mandatory second-sector rule while still carrying real momentum (+22.2% 5d, RSI 90, vol_ratio 1.26); it earns its slot as the best validated rotation hedge outside semis/storage. |
+| 5 | **INTC** | 23.0% | Best unique aggressive add from Proposal A: +27.8% 5d, RSI 86, beta 2.99, and strong trend/Sharpe profile make it a higher-upside replacement for weaker current holdings despite Tech rotation risk. |
+
+**Changes from yesterday:**
+- ➕ Added **INTC** at 23.0%
+- ➖ Removed **CNC** (was 25.0%)
+- ➖ Removed **ON** (was 17.0%)
+- ➖ Removed **EBAY** (was 5.0%)
+- ▲ **STX**: 5.0% → 17.0% (+12.0%)
+- ▲ **WDC**: 6.0% → 18.0% (+12.0%)
+
+---

@@ -1,17 +1,17 @@
 # Pre-Game Learning Report
 
-Generated: 2026-05-05
+Generated: 2026-05-06
 Target go-live date: 2026-04-06
 Days remaining: 0
 
 ## Scoreboard
-- Training days with measurable alpha: 38
-- Win days (alpha > 0): 22
+- Training days with measurable alpha: 39
+- Win days (alpha > 0): 23
 - Loss days (alpha < 0): 16
-- Average daily alpha: +0.11%
-- Paper account equity: €12,715.16 (from €10,000.00, return +27.15%)
+- Average daily alpha: +0.14%
+- Paper account equity: €12,960.31 (from €10,000.00, return +29.60%)
 - Max drawdown (paper): 3.81%
-- Average turnover: 1.76%
+- Average turnover: 1.68%
 
 ## Confidence note
 - Evidence status: actionable
@@ -32,7 +32,7 @@ Days remaining: 0
 |---|---|---:|---:|---:|
 | INTC | winner | 22 | +4.17% | 73% |
 | AMD | winner | 20 | +3.14% | 80% |
-| ON | winner | 20 | +2.66% | 80% |
+| WDC | winner | 10 | +2.96% | 80% |
 | MPWR | winner | 8 | +2.65% | 100% |
 | NOKIA.HE | winner | 8 | +2.64% | 75% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
@@ -41,6 +41,7 @@ Days remaining: 0
 | VWS.CO | loser | 12 | -0.20% | 33% |
 
 ## Action plan until April 6
+- Avoid overusing diversifier rationales until their hit rate recovers above 40%.
 - Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%.
 
 ## Daily routine
