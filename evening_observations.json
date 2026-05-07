@@ -1,60 +1,48 @@
 {
-  "date": "2026-05-06",
-  "timestamp": "2026-05-06T21:41:33+00:00",
-  "portfolio_return": 0.03232502187722641,
-  "benchmark_return": 0.014588330317794274,
-  "alpha": 0.01773669155943214,
+  "date": "2026-05-07",
+  "timestamp": "2026-05-07T21:31:11+00:00",
+  "portfolio_return": -0.01004422673935044,
+  "benchmark_return": -0.003803095327784889,
+  "alpha": -0.006241131411565551,
   "position_returns": [
     {
-      "ticker": "CNC",
+      "ticker": "DVA",
       "weight": 0.25,
-      "return": 0.044356404475709876,
-      "price": 55.33000183105469
+      "return": 0.012275580586363022,
+      "price": 196.25999450683594
+    },
+    {
+      "ticker": "DOC",
+      "weight": 0.25,
+      "return": 0.008205120380108122,
+      "price": 19.65999984741211
     },
     {
       "ticker": "MU",
-      "weight": 0.17,
-      "return": 0.04122151537838992,
-      "price": 666.5900268554688
+      "weight": 0.13,
+      "return": -0.02994347525241936,
+      "price": 646.6300048828125
     },
     {
-      "ticker": "WDC",
-      "weight": 0.06,
-      "return": 0.03845158353470235,
-      "price": 483.1499938964844
+      "ticker": "SMCI",
+      "weight": 0.12,
+      "return": -0.0300057968870705,
+      "price": 33.619998931884766
     },
     {
-      "ticker": "ON",
-      "weight": 0.17,
-      "return": 0.030193810552328948,
-      "price": 105.7699966430664
-    },
-    {
-      "ticker": "EBAY",
-      "weight": 0.05,
-      "return": 0.027455817318986275,
-      "price": 108.1500015258789
-    },
-    {
-      "ticker": "STX",
-      "weight": 0.05,
-      "return": 0.019986735514906817,
-      "price": 786.4199829101562
-    },
-    {
-      "ticker": "PWR",
+      "ticker": "AMD",
       "weight": 0.25,
-      "return": 0.01766437078519978,
-      "price": 785.239990234375
+      "return": -0.030684218286820997,
+      "price": 408.4599914550781
     }
   ],
-  "ai_recommendation": "Yes\u2014keep the portfolio updated: your alpha is strongly positive and every current holding is outperforming, so don\u2019t drop any names today. Keep CNC, MU, WDC, and ON as core (best relative returns), and only consider trimming the lowest performers (STX, PWR) if you need cash for a new higher-upside setup.",
+  "ai_recommendation": "Update: drop/trim **MU, SMCI, and AMD** (all ~-3% to -3.1% today) and keep **DVA** (best +1.2%) and **DOC** (+0.8%) as your core. Since the leaderboard snapshot is Monday 09:00 EET and you\u2019re currently lagging (alpha -0.62%), take higher-conviction upside by reallocating from the three laggards into **DVA/DOC** rather than adding more low-performing names.",
   "game_standing": {
-    "rank": 556,
-    "total_players": 8887,
-    "value_eur": 13461.196231479566,
-    "today_return_pct": 2.253,
-    "week_return_pct": 16.401,
-    "month_return_pct": 34.611999999999995
+    "rank": 625,
+    "total_players": 8923,
+    "value_eur": 13206.795081754553,
+    "today_return_pct": -1.8880000000000001,
+    "week_return_pct": 8.055,
+    "month_return_pct": 32.113
   }
 }
