@@ -3,36 +3,34 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "PWR": 4.89808672,
-    "MU": 4.37587231,
-    "CNC": 69.25909323,
-    "ON": 24.72041969,
-    "WDC": 2.01257831,
-    "EBAY": 6.78590884,
-    "STX": 1.00455418
+    "MU": 4.0055276,
+    "STX": 3.39518935,
+    "WDC": 5.85140483,
+    "PWR": 5.00042847,
+    "INTC": 31.96543156
   },
   "pending_order": {
-    "submitted_date": "2026-05-06",
+    "submitted_date": "2026-05-07",
     "positions": [
       {
         "ticker": "MU",
-        "weight": 0.17
+        "weight": 0.05
       },
       {
-        "ticker": "STX",
-        "weight": 0.17
-      },
-      {
-        "ticker": "WDC",
-        "weight": 0.18
-      },
-      {
-        "ticker": "PWR",
+        "ticker": "DVA",
         "weight": 0.25
       },
       {
-        "ticker": "INTC",
-        "weight": 0.23
+        "ticker": "SMCI",
+        "weight": 0.1
+      },
+      {
+        "ticker": "AMD",
+        "weight": 0.2
+      },
+      {
+        "ticker": "DOC",
+        "weight": 0.25
       }
     ]
   },
@@ -553,10 +551,51 @@
         ]
       },
       "executed_pending": false
+    },
+    {
+      "date": "2026-05-07",
+      "equity": 13362.79,
+      "cash": 0.0,
+      "daily_return": 0.031055,
+      "return_since_start": 0.336279,
+      "turnover": 0.488625,
+      "positions": {
+        "MU": 4.0055276,
+        "STX": 3.39518935,
+        "WDC": 5.85140483,
+        "PWR": 5.00042847,
+        "INTC": 31.96543156
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-07",
+        "positions": [
+          {
+            "ticker": "MU",
+            "weight": 0.05
+          },
+          {
+            "ticker": "DVA",
+            "weight": 0.25
+          },
+          {
+            "ticker": "SMCI",
+            "weight": 0.1
+          },
+          {
+            "ticker": "AMD",
+            "weight": 0.2
+          },
+          {
+            "ticker": "DOC",
+            "weight": 0.25
+          }
+        ]
+      },
+      "executed_pending": true
     }
   ],
-  "last_rebalanced_date": "2026-05-06",
-  "last_equity": 12960.30961157,
+  "last_rebalanced_date": "2026-05-07",
+  "last_equity": 13362.78867847,
   "verified_weights": {
     "PWR": 0.25,
     "MU": 0.17,
