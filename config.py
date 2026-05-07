@@ -83,6 +83,8 @@ OVERBOUGHT_MOM5D_FLOOR = 0.02   # dead-cat filter: RSI>85 cap fires when mom_5d 
 # Prevents the observed pattern of max-sizing exhausted momentum without volume backing.
 HIGH_MOMENTUM_RSI_GATE = 72          # RSI threshold for the soft Tier-1 gate
 HIGH_MOMENTUM_CAP_WITHOUT_VOLUME = 0.18  # cap hot-but-unconfirmed positions just below Tier-1 (18%)
+DEEP_CORRECTION_PCT_FROM_HIGH = -0.10  # added 2026-05-07: pct_from_52w_high below this → not a leader pattern, cap
+DEEP_CORRECTION_CAP = 0.12             # max weight for "deep correction with momentum" picks (e.g. SMCI -43% from high w/ +24% 5d)
 DEAD_MONEY_VOL_RATIO = 0.90
 DEAD_MONEY_MOM_5D = 0.01
 DEVIL_ACCURACY_CAP_WEIGHT = 0.10  # kept for backward compat; use DEVIL_CAP_HIGH below

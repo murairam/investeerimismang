@@ -379,13 +379,86 @@ class OpenAIRiskManager(BaseAgent):
                         final_total * 100,
                     )
             else:
-                # Uncapped positions exist but are all at max_weight — leave freed weight as cash
-                logger.warning(
-                    "Sector cap freed %.0f%% but all non-capped positions are at max_weight — "
-                    "leaving as cash (%.0f%% total)",
-                    total_freed * 100,
-                    sum(p.weight for p in positions) * 100,
+                # Uncapped positions exist but are all at max_weight — try injecting NEW
+                # diversifiers from non-capped sectors so freed weight does not become cash.
+                logger.info(
+                    "Sector cap: uncapped positions at max_w — injecting fresh diversifiers from non-capped sectors instead of leaving as cash",
                 )
+                portfolio_tickers = {p.ticker for p in positions}
+
+                def _div_score(c: dict) -> float:
+                    s = c.get("competition_score")
+                    if s is not None:
+                        try:
+                            v = float(s)
+                            if not math.isnan(v):
+                                return v
+                        except (TypeError, ValueError):
+                            pass
+                    s2 = c.get("sharpe_20d")
+                    if s2 is not None:
+                        try:
+                            v2 = float(s2)
+                            if not math.isnan(v2):
+                                return v2
+                        except (TypeError, ValueError):
+                            pass
+                    return 0.0
+
+                div_candidates = sorted(
+                    (
+                        c for c in snapshot.get("candidates", [])
+                        if c.get("ticker") not in portfolio_tickers
+                        and c.get("ticker")
+                        and (_sector_of(c["ticker"]) not in capped_sectors)
+                    ),
+                    key=_div_score,
+                    reverse=True,
+                )
+
+                freed_remaining = total_freed
+                injected: list[tuple[dict, float]] = []
+                for cand in div_candidates:
+                    current_total = sum(p.weight for p in positions) + sum(w for _, w in injected)
+                    if current_total >= 0.99:
+                        break
+                    if len(positions) + len(injected) >= config.GAME_CONSTRAINTS["max_stocks"]:
+                        break
+                    if freed_remaining <= 1e-9:
+                        break
+                    needed = 1.0 - current_total
+                    div_weight = min(freed_remaining, max_w, max(needed, min_w))
+                    if div_weight < min_w:
+                        break
+                    injected.append((cand, div_weight))
+                    freed_remaining -= div_weight
+
+                for cand, div_weight in injected:
+                    positions.append(Position(
+                        ticker=cand["ticker"],
+                        weight=div_weight,
+                        conviction=5,
+                        rationale=(
+                            f"Sector cap redistribution ({cand.get('sector', '?')}): "
+                            "auto-inserted to consume freed weight from Tech sector trim — "
+                            "prevents idle cash drag while honouring rotation cap"
+                        ),
+                    ))
+
+                if injected:
+                    logger.warning(
+                        "Sector cap: redistributed %.0f%% trimmed weight into %d new non-capped picks %s",
+                        total_freed * 100,
+                        len(injected),
+                        [f"{c['ticker']} {w*100:.0f}%" for c, w in injected],
+                    )
+                else:
+                    logger.warning(
+                        "Sector cap freed %.0f%% but no eligible non-capped candidates found — "
+                        "leaving as cash (%.0f%% total)",
+                        total_freed * 100,
+                        sum(p.weight for p in positions) * 100,
+                    )
 
         return PortfolioProposal(
             positions=positions,
@@ -533,6 +606,66 @@ class OpenAIRiskManager(BaseAgent):
                 "Portfolio beta %.2f outside target %s (coverage %.0f%%)",
                 actual_beta, target_str, covered_weight * 100,
             )
+            if regime in ("BULL", "NEUTRAL") and hi is not None and actual_beta > hi:
+                # 2026-05-07: enforce BULL/NEUTRAL beta cap, not just log it.
+                # Iteratively scale down the highest-beta positions until portfolio beta <= hi.
+                # No weight ever leaves the book — it shifts to lower-beta uncapped names.
+                cap_individual = config.STRESS_INDIVIDUAL_BETA_CAP  # 2.0
+                positions = list(proposal.positions)
+                indexed = sorted(
+                    [(i, p, beta_map.get(p.ticker, float("nan"))) for i, p in enumerate(positions)],
+                    key=lambda x: (x[2] if not math.isnan(x[2]) else -1.0),
+                    reverse=True,
+                )
+                pos_min = config.GAME_CONSTRAINTS.get("min_position", 0.05)
+                # Step 1: trim weight off any individual position with beta > cap_individual
+                #         in proportion to (beta - hi).
+                freed = 0.0
+                for i, p, b in indexed:
+                    if math.isnan(b) or b <= cap_individual:
+                        continue
+                    new_weight = max(pos_min, p.weight * (cap_individual / b))
+                    if new_weight + 1e-9 < p.weight:
+                        freed += p.weight - new_weight
+                        positions[i] = Position(
+                            ticker=p.ticker, weight=new_weight,
+                            rationale=p.rationale, conviction=p.conviction,
+                        )
+                        logger.info(
+                            "Beta enforcement: %s beta %.2f → weight %.0f%% trimmed to %.0f%%",
+                            p.ticker, b, p.weight * 100, new_weight * 100,
+                        )
+                # Step 2: redistribute freed into low-beta uncapped positions.
+                if freed > 1e-9:
+                    pos_max = config.GAME_CONSTRAINTS.get("max_position", 0.25)
+                    eligible = [
+                        i for i, p in enumerate(positions)
+                        if not math.isnan(beta_map.get(p.ticker, float("nan")))
+                        and beta_map[p.ticker] <= cap_individual
+                    ]
+                    headrooms = {i: pos_max - positions[i].weight for i in eligible if pos_max - positions[i].weight > 1e-9}
+                    total_hr = sum(headrooms.values())
+                    if total_hr > 1e-9:
+                        for i, hr in headrooms.items():
+                            share = hr / total_hr
+                            add = min(hr, freed * share)
+                            positions[i] = Position(
+                                ticker=positions[i].ticker,
+                                weight=positions[i].weight + add,
+                                rationale=positions[i].rationale,
+                                conviction=positions[i].conviction,
+                            )
+                logger.warning(
+                    "%s regime beta enforcement: trimmed %.1f%% from high-beta names, "
+                    "redistributed to lower-beta positions",
+                    regime, freed * 100,
+                )
+                proposal = PortfolioProposal(
+                    positions=positions,
+                    reasoning=proposal.reasoning,
+                    confidence=proposal.confidence,
+                    learning_reflection=proposal.learning_reflection,
+                )
             if regime == "BEAR" and hi is not None and actual_beta > hi:
                 cap = config.OVERBOUGHT_WEIGHT_CAP  # 15%
                 logger.warning(
@@ -801,6 +934,33 @@ class OpenAIRiskManager(BaseAgent):
                         pos.ticker, effective_ob_cap * 100, rsi, pct_high * 100,
                         sector or "?", sector_rot_level or "none",
                     )
+
+        # Pass A2 — Deep correction cap (added 2026-05-07): when a stock has high
+        # short-term momentum but is FAR from its 52-week high (e.g. SMCI -43% from
+        # high with +24% 5d momentum), it fails the at_52w_high+overbought leadership
+        # whitelist pattern (62% hit / +0.81%). Such "bounce-from-correction" plays
+        # have lower hit rates and shouldn't get max-conviction weights.
+        deep_correction_threshold = getattr(config, "DEEP_CORRECTION_PCT_FROM_HIGH", -0.10)
+        deep_correction_cap = getattr(config, "DEEP_CORRECTION_CAP", 0.12)
+        for i, pos in enumerate(kept):
+            c = candidate_map.get(pos.ticker, {})
+            pct_high = c.get("pct_from_52w_high", float("nan"))
+            mom_5d_dc = c.get("mom_5d", float("nan"))
+            if (
+                not math.isnan(pct_high)
+                and pct_high < deep_correction_threshold
+                and not math.isnan(mom_5d_dc)
+                and mom_5d_dc >= 0.10
+                and pos.weight > deep_correction_cap
+            ):
+                kept[i] = Position(
+                    ticker=pos.ticker, weight=deep_correction_cap,
+                    rationale=pos.rationale, conviction=pos.conviction,
+                )
+                logger.info(
+                    "Deep correction cap: %s → %.0f%% (pct_from_52w_high %.1f%% with +%.1f%% 5d momentum — bounce, not leader)",
+                    pos.ticker, deep_correction_cap * 100, pct_high * 100, mom_5d_dc * 100,
+                )
 
         # Pass B — Devil accuracy cap (Rule 19): code-enforced tiered cap
         devil_capped_indices: set[int] = set()

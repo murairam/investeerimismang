@@ -83,7 +83,7 @@ from portfolio.models import PortfolioProposal
 from portfolio.validator import PortfolioValidator
 
 logger = logging.getLogger(__name__)
-_FULL_ANALYST_RESULT_TIMEOUT = 600  # keep generous but avoid >10 minute hangs
+_FULL_ANALYST_RESULT_TIMEOUT = 1500  # raised 2026-05-07: deepseek-v3.2 via OpenRouter routinely hits 8-12 min on long candidate lists; user prefers waiting over losing 3rd proposal (FullAnalyst is highest-quality signal source)
 _ENRICHMENT_TOTAL_TIMEOUT = API_TIMEOUT_SECONDS * 3
 
 

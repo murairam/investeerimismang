@@ -125,6 +125,25 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 - **Visible to Risk Manager:** dynamic `RANK CONTEXT` block listing the last 5 sessions; instruction "If rank slipping despite positive alpha — field running hotter, INCREASE concentration / beta / right-tail breakouts"
 - **Why:** in an 8900-portfolio field, daily alpha alone is the wrong metric — rank delta tells us whether our alpha is enough to outpace the field's right tail
 
+### Deep Correction Cap (Added 2026-05-07)
+- **Trigger:** `pct_from_52w_high < -10%` AND `mom_5d >= 10%`
+- **Action:** Cap position at `config.DEEP_CORRECTION_CAP` (12%)
+- **Where enforced:** `_enforce_selection_quality` Pass A2 in `agents/risk_manager.py`
+- **Why:** A bounce off a deep correction is not the at_52w_high leadership pattern (62% hit / +0.81%). Such bounce plays should not get max-conviction sizing.
+
+### BULL/NEUTRAL Beta Enforcement (Added 2026-05-07)
+- **Trigger:** Portfolio beta exceeds regime upper bound (BULL ≤2.0, NEUTRAL ≤1.30)
+- **Action:** Iteratively trim weight off positions with beta > `STRESS_INDIVIDUAL_BETA_CAP` proportional to `(stress_cap / beta)`; redistribute freed weight to lower-beta positions up to max_weight (no cash, no exit from book)
+- **Where enforced:** `_enforce_beta` in `agents/risk_manager.py`
+- **Why:** previously logged a warning but took no action. High-beta books need active enforcement, not just notification.
+
+### Sector Cap Cash Avoidance (Updated 2026-05-07)
+- **Behaviour:** when sector trim frees weight and existing uncapped positions are at max_weight, the Risk Manager now injects fresh diversifiers from non-capped sectors (sorted by `competition_score`) until the book reaches ~99% invested
+- **Why:** previously freed weight became cash drag. With 5-stock concentrated books, a Tech trim from 83→55% would lose 28% to cash. Now redistributes into the highest-ranked non-Tech candidates instead.
+
+### FullAnalyst Timeout Raised (Updated 2026-05-07)
+- **`orchestrator._FULL_ANALYST_RESULT_TIMEOUT`:** 600s → 1500s. deepseek-v3.2 via OpenRouter routinely hits 8-12 min on long candidate lists; losing the 3rd proposal hurts consensus quality more than the wait. User preference: wait for FullAnalyst rather than miss it.
+
 ### Hard-Ban Rule (Added 2026-05-07)
 - **Trigger:** ticker `hit_rate <= 0.25` AND `observations >= 10` in `learning_state.recurring_losers`
 - **Effect:** `weight_caps` entry with `max_weight=0.0`, `reason=hard_ban_low_hit_rate_<rate>%_over_<n>_obs`; mirrored hard rule "BAN <ticker>: hit rate ... do not propose"
