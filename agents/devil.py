@@ -149,6 +149,7 @@ class OpenAIDevil:
             try:
                 result = self._call_openai(user_message)
                 result = self._postprocess_bear_cases(result, snapshot)
+                result = self._maybe_invert_for_contrarian(result)
                 logger.info(
                     "Devil's advocate challenged %d picks: %d HIGH, %d MEDIUM, %d LOW risk (model: %s)",
                     len(result),
@@ -174,6 +175,38 @@ class OpenAIDevil:
         if cleaned[-1] not in ".!?":
             cleaned += "."
         return cleaned
+
+    @staticmethod
+    def _maybe_invert_for_contrarian(bears: dict[str, dict]) -> dict[str, dict]:
+        """Prepend [CONTRARIAN-INVERTED] to bear cases when Devil's accuracy is empirically inverted.
+
+        Triggered when devil_accuracy.observations >= 30 and devil_is_accurate=False.
+        Marker is visible to the Risk Manager so HIGH-flagged tickers are read as
+        momentum confirmation, not warning. Raw structure unchanged for the learning loop.
+        """
+        try:
+            from data.learning_state import load_learning_state
+            ls = load_learning_state()
+        except Exception:
+            return bears
+        devil_acc = ls.get("devil_accuracy", {}) or {}
+        if not isinstance(devil_acc, dict):
+            return bears
+        observations = devil_acc.get("observations") or 0
+        is_accurate = devil_acc.get("devil_is_accurate")
+        if observations < 30 or is_accurate is not False:
+            return bears
+        marker = "[CONTRARIAN-INVERTED] "
+        out: dict[str, dict] = {}
+        for ticker, item in bears.items():
+            bear_case = item.get("bear_case", "")
+            if bear_case and not bear_case.startswith(marker):
+                bear_case = marker + bear_case
+            new_item = dict(item)
+            new_item["bear_case"] = bear_case
+            new_item["contrarian_inverted"] = True
+            out[ticker] = new_item
+        return out
 
     def _postprocess_bear_cases(self, bears: dict[str, dict], snapshot: MarketSnapshot) -> dict[str, dict]:
         """Normalize awkward volume wording when vol_ratio is missing (N/A)."""

@@ -400,6 +400,50 @@ def load_last_known_participant_count() -> Optional[int]:
     return None
 
 
+def load_rank_delta_history(days: int = 10) -> list[dict]:
+    """Return consecutive-day rank deltas. Newest first.
+
+    Each entry: {date, rank, total_participants, rank_delta, total_delta,
+                 normalized_delta} where rank_delta is (today - yesterday).
+    Negative rank_delta = climbing. normalized_delta uses rank/total to
+    normalise across changing field size.
+    """
+    standings = load_competition_standing_history(max_days=days + 1)
+    if not standings:
+        return []
+    out: list[dict] = []
+    for i, row in enumerate(standings):
+        rank = row.get("rank")
+        total = row.get("total_participants")
+        if rank is None or total is None or total == 0:
+            continue
+        if i + 1 >= len(standings):
+            rank_delta = None
+            total_delta = None
+            normalized_delta = None
+        else:
+            prev = standings[i + 1]
+            prev_rank = prev.get("rank")
+            prev_total = prev.get("total_participants") or 0
+            if prev_rank is None or prev_total == 0:
+                rank_delta = None
+                total_delta = None
+                normalized_delta = None
+            else:
+                rank_delta = rank - prev_rank
+                total_delta = total - prev_total
+                normalized_delta = (rank / total) - (prev_rank / prev_total)
+        out.append({
+            "date": row.get("date"),
+            "rank": rank,
+            "total_participants": total,
+            "rank_delta": rank_delta,
+            "total_delta": total_delta,
+            "normalized_delta": round(normalized_delta, 6) if normalized_delta is not None else None,
+        })
+    return out
+
+
 def save_verified(
     positions: list[dict],
     date: str,

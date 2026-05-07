@@ -134,10 +134,17 @@ class OpenAIRiskManager(BaseAgent):
         }
 
         n_participants = snapshot.get("n_participants", 844)
+        rank_history = snapshot.get("rank_history") or []
+        devil_inversion_active = bool(snapshot.get("devil_inversion_active"))
         last_error: Optional[Exception] = None
         for attempt in range(1, self.MAX_RETRIES + 1):
             try:
-                result = self._call_openai(user_message, n_participants)
+                result = self._call_openai(
+                    user_message,
+                    n_participants,
+                    rank_history=rank_history,
+                    devil_inversion_active=devil_inversion_active,
+                )
                 result = self._enforce_beta(result, snapshot, regime, beta_targets)
                 result = self._enforce_selection_quality(result, snapshot, bear_cases or {})
                 logger.info(
@@ -1765,8 +1772,22 @@ class OpenAIRiskManager(BaseAgent):
         ]
         return "\n".join(lines)
 
-    def _call_openai(self, user_message: str, n_participants: int = 844) -> PortfolioProposal:
+    def _call_openai(
+        self,
+        user_message: str,
+        n_participants: int = 844,
+        rank_history: Optional[list[dict]] = None,
+        devil_inversion_active: bool = False,
+    ) -> PortfolioProposal:
         system_prompt = _SYSTEM_PROMPT.format(n_participants=n_participants)
+        from agents._prompt_blocks import (
+            RATIONALE_GUIDANCE_BLOCK,
+            render_devil_contrarian_block,
+            render_rank_context_block,
+        )
+        system_prompt += RATIONALE_GUIDANCE_BLOCK
+        system_prompt += render_devil_contrarian_block(devil_inversion_active)
+        system_prompt += render_rank_context_block(rank_history or [])
         response = self.client.chat.completions.create(
             model=self.MODEL,
             response_format={"type": "json_object"},

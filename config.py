@@ -75,7 +75,7 @@ OPENROUTER_CHALLENGER_MODEL = "nvidia/nemotron-3-super-120b-a12b"  # paid model 
 # Risk control thresholds
 OVERBOUGHT_RSI_THRESHOLD = 85   # raised from 79: in competition momentum markets RSI 79-84 = leader, not topper
 OVERBOUGHT_HIGH_PCT = 0.02      # within 2% of 52w high
-OVERBOUGHT_VOLUME_EXCEPTION = 1.8  # vol_ratio above this bypasses cap (genuine breakout volume)
+OVERBOUGHT_VOLUME_EXCEPTION = 1.5  # vol_ratio above this bypasses cap (lowered 2026-05-07 from 1.8: empirical at_52w_high+overbought hit rate 62% over 92 obs — leaders with vol 1.5-1.8 were getting capped unfairly)
 OVERBOUGHT_WEIGHT_CAP = 0.15
 OVERBOUGHT_MOM5D_FLOOR = 0.02   # dead-cat filter: RSI>85 cap fires when mom_5d < 2% OR mom_5d is NaN (data unavailable); accelerating RSI = leader, not topper
 # Tier-1 RSI gate: positions with RSI above this but below OVERBOUGHT_RSI_THRESHOLD are
@@ -96,9 +96,11 @@ STRESS_INDIVIDUAL_BETA_CAP = 2.0  # any single stock with beta > this gets cappe
 FALLBACK_REPLACEMENT_WEIGHT = 0.05
 MIN_CANDIDATE_SCORE_FOR_SLOT = 0.15
 # Sector concentration caps — enforced when rotation_risk signals sector exhaustion
-SECTOR_CAP_UNCONDITIONAL = 0.55   # never exceed 55% in any single sector (was 70% — a 6-stock mono-sector book reached 84% with the 70% cap; lowered 2026-04-27)
-SECTOR_ROTATION_CAP_MEDIUM = 0.45 # cap at 45% when rotation risk is MEDIUM (was 55%)
-SECTOR_ROTATION_CAP_HIGH = 0.35   # cap at 35% when rotation risk is HIGH (was 40%)
+SECTOR_CAP_UNCONDITIONAL = 0.70   # raised back from 0.55 on 2026-05-07: 55% was forcing diversifier rationale picks (hit rate 40%, avg -0.42%) into the book to satisfy multi-sector minimum; with 5-stock concentrated books, mono-sector >55% is normal when one sector leads
+SECTOR_ROTATION_CAP_MEDIUM = 0.55 # raised from 0.45 with same rationale
+SECTOR_ROTATION_CAP_HIGH = 0.40   # raised from 0.35 with same rationale
+PRE_EARNINGS_MAX_PER_NAME = 0.12  # was 0.20 — catalyst rationale hit rate 40% over 20 obs, avg -0.47%
+PRE_EARNINGS_MAX_TOTAL = 0.30     # was 0.40 — same rationale
 LOW_VOLUME_VOL_RATIO_THRESHOLD = 0.80   # low-volume confirmation floor for concentration caps
 LOW_VOLUME_MAX_WEIGHT = 0.18
 PORTFOLIO_MIN_AVG_VOL_RATIO = 0.85

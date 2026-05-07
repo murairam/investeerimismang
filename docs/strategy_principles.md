@@ -169,3 +169,42 @@ This section is updated manually when the regime materially shifts. Always defer
 - **Devil accuracy note:** The Devil's HIGH-risk flags have been net BULLISH signals in this game (+0.63%/day on flagged picks vs -0.31% on non-flagged). Do not over-weight Devil warnings.
 - **Signal ranking:** vol_ratio is the most reliable directional signal (56% accuracy). mom_5d and vs_index follow at 50%.
 - **Avoid:** MAERSK-B.CO (SELL consensus), telecom (TEL.OL, TELIA.ST, ELISA.HE), low-beta fillers.
+
+---
+
+## May 2026 Recalibration (2026-05-07)
+
+After 17 trading days live (€10k → €13.46k paper, +34.6%), rank trajectory in the live game went **393 → 406 → 355 → 556 → 551** out of ~8900 portfolios. Two consecutive +2-3% days lost ~200 ranks. Diagnosis: field's right tail outpacing us; need higher right-tail variance and lower turnover, not incremental alpha.
+
+### Rationale evidence (n=139 position observations)
+
+| Tag | Obs | Hit | Avg 1d |
+|---|---|---|---|
+| at_52w_high | 92 | 62% | +0.81% |
+| overbought (RSI>80) | 63 | 60% | +0.80% |
+| breakout | 22 | 59% | +0.62% |
+| **catalyst (earnings)** | 20 | 40% | **−0.47%** |
+| **diversifier** | 5 | 40% | **−0.42%** |
+| **non_us_differentiator** | 37 | 27% | **−0.31%** |
+
+### Rules added or changed
+
+- **Rationale blacklist** propagated to all four agent system prompts: do not propose positions whose primary thesis is `non_us_differentiator`, `diversifier`, or earnings-only `catalyst`.
+- **Rationale whitelist:** `at_52w_high + overbought + vol_ratio≥1.5 + mom_5d≥10%` is treated as leadership confirmation (max conviction allowed), not exhaustion.
+- **Sector cap relaxed back to 70%** (was 55%). The 55% cap was forcing diversifier picks into the book to satisfy multi-sector minimum, dragging returns. With 5-stock concentrated books, mono-sector >55% is normal when one sector leads.
+- **Pre-earnings caps tightened:** per name 20% → 12%, total 40% → 30%.
+- **Overbought volume exception lowered** (1.8 → 1.5): leaders with vol_ratio 1.5–1.8 were getting capped despite RSI>85 + mom_5d>10% setup that empirically wins 62% of the time.
+- **Turnover baseline raised:** min_hold_weight 0.50 → 0.65, replacement_sharpe_delta 0.20 → 0.40. Rationale: 14-day live data showed panic exits of winners (sold INTC then re-bought next day; sold QCOM the day after +14.8%). Whipsaw was costing alpha.
+- **Devil's Advocate inversion:** with 80 obs and accuracy 24% (HIGH-flagged averaged +1.06%/day), Devil bear cases are prefixed `[CONTRARIAN-INVERTED]` and a `DEVIL CONTRARIAN MODE ACTIVE` block is injected into the Risk Manager system prompt instructing it not to downweight HIGH-flagged tickers.
+- **Hard ban for tickers with hit_rate ≤25% and ≥10 obs:** `weight_caps` entry `max_weight=0.0`. Initial casualty: EQNR.OL (20% over 10 obs).
+
+### New rank-aware feedback loop
+
+- `competition_standings` table feeds `load_rank_delta_history(days)`.
+- New `learning_state.rank_performance` block: 5-day rank delta, normalized delta (rank/total), best/worst alpha-day rank delta, alpha→rank Pearson correlation.
+- Risk Manager system prompt now receives a dynamic `RANK CONTEXT` block listing the last five sessions; instruction: "If rank slipping despite positive alpha — field running hotter, INCREASE concentration / beta / right-tail breakouts."
+- New `learning_state.missed_winners` block (will populate from 2026-05-08 onward): compares 1d return of held positions to top-3 unheld `candidate_alternatives`.
+
+### Candidate alternatives logging
+
+`orchestrator.py` now captures the top-30 candidates by `competition_score` (was top-5) including `proposed_by` (which agents proposed the ticker) and `in_final` flags. Persisted inside `decision_metrics` JSONB on `daily_runs`. Enables future post-mortem: which high-ranked names did the system pass over, and at what cost?

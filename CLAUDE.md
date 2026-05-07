@@ -84,7 +84,7 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 
 ### Pre-Earnings Opportunity Signal
 - **New function:** `data/earnings_fetcher.py::format_earnings_opportunity()` — tags stocks with earnings in 2–6 days AND strong momentum (mom_5d ≥ 4% OR mom_20d ≥ 10%) AND RSI 50–75 as `PRE_EARNINGS_SETUP`
-- **Sizing limits (Risk Manager rule 13):** max 20% per pre-earnings position, max 40% total, ≤2 names same week; hard cap 10% only for earnings within 1 day
+- **Sizing limits (tightened 2026-05-07 — `catalyst` rationale 40% hit rate / -0.47% avg over 20 obs):** max 12% per pre-earnings position (`config.PRE_EARNINGS_MAX_PER_NAME`), max 30% total (`config.PRE_EARNINGS_MAX_TOTAL`), ≤2 names same week; hard cap 10% for earnings within 1 day
 - **Low-conviction earners** still get `EARNINGS RISK` warning via updated `format_earnings_warning(candidates=...)`
 
 ### Competition-Optimized Candidate Ranking
@@ -98,9 +98,9 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 
 ## Risk Control Features (Added March 2026, updated April 2026)
 
-### Sector Concentration Cap (Updated 2026-04-29)
-- **Unconditional ceiling:** 55% in any single sector (lowered from 70% — the old 70% cap was too high for a 5-6 stock book; a 6-stock mono-sector portfolio reached 84% and dropped 300 ranks in one sector down-day)
-- **Rotation-risk MEDIUM:** 45% (was 55%); **HIGH:** 35% (was 40%)
+### Sector Concentration Cap (Updated 2026-05-07)
+- **Unconditional ceiling:** 70% in any single sector (raised back from 55% on 2026-05-07 — the 55% cap was forcing `diversifier`-rationale picks into the book to satisfy multi-sector minimum; those picks averaged -0.42% return and dragged alpha. With 5-stock concentrated books, mono-sector >55% is normal when one sector leads)
+- **Rotation-risk MEDIUM:** 55% (was 45%); **HIGH:** 40% (was 35%)
 - **MANDATORY minimum:** at least 2 sectors in every portfolio — **code-enforced in `portfolio/validator.py::validate()` AND by `_enforce_sector_rotation_cap()` after step 5c** (previously prompt-only; added to validator 2026-04-29)
 - **SECTOR_MAP fix:** 20 SP500/OBX tickers added that were previously mis-tagged as "US" fallback (ON, MCHP, MPWR, LRCX, TER, ANET, COHR, SMCI, WDC, STX, GLW, DELL, GEV, WAB, STLD, HOOD, CVNA, FOXA, SBAC, SDRL.OL) — the missing tags made sector enforcement blind to true Tech concentration
 - **Exhaustion trigger fix:** `vol_ratio < 1.2` gate removed from `detect_rotation_risk()` `exhaustion_high` branch — high-volume sector rallies are crowding events, not exceptions
@@ -111,6 +111,30 @@ All pipeline wiring is in `orchestrator.py`. Entry point is `main.py`.
 - **Action:** Cap position weight at 15% — **code-enforced in `_enforce_selection_quality()` (Pass A)**
 - **Exception:** If volume_ratio > 1.8 (strong breakout volume), full 25% is allowed
 - **Rationale:** Prevents max-sizing exhausted patterns while allowing momentum leaders at RSI 79-84
+
+### Devil Inversion Mode (Added 2026-05-07)
+- **Trigger:** `learning_state.devil_accuracy.observations >= 30` AND `devil_is_accurate is False` (currently True: n=80, accuracy 24%, HIGH-flagged averaged +1.06%/day next-day vs LOW -0.07%)
+- **Effect 1:** `agents/devil.py::_maybe_invert_for_contrarian()` prepends `[CONTRARIAN-INVERTED]` to every bear case so Risk Manager can visibly identify the inversion
+- **Effect 2:** `orchestrator.py` sets `snapshot["devil_inversion_active"] = True`
+- **Effect 3:** `agents/risk_manager.py::_call_openai` injects `DEVIL CONTRARIAN MODE ACTIVE` block into the system prompt instructing the synthesiser not to downweight HIGH-flagged tickers and to weight its own signals over Devil's prose
+- **Why:** with 80 obs the directional evidence is strong enough to treat HIGH flags as a contrarian-buy confirmation rather than a warning
+
+### Rank-Aware Feedback Loop (Added 2026-05-07)
+- **Source:** `competition_standings` table (Postgres). `data/portfolio_store.py::load_rank_delta_history(days)` returns consecutive-day deltas with `normalized_delta = rank/total - prev_rank/prev_total`
+- **Stored in `learning_state.rank_performance`:** last_5d_rank_delta, last_5d_normalized_delta, best_alpha_day, worst_alpha_day, alpha_rank_correlation
+- **Visible to Risk Manager:** dynamic `RANK CONTEXT` block listing the last 5 sessions; instruction "If rank slipping despite positive alpha — field running hotter, INCREASE concentration / beta / right-tail breakouts"
+- **Why:** in an 8900-portfolio field, daily alpha alone is the wrong metric — rank delta tells us whether our alpha is enough to outpace the field's right tail
+
+### Hard-Ban Rule (Added 2026-05-07)
+- **Trigger:** ticker `hit_rate <= 0.25` AND `observations >= 10` in `learning_state.recurring_losers`
+- **Effect:** `weight_caps` entry with `max_weight=0.0`, `reason=hard_ban_low_hit_rate_<rate>%_over_<n>_obs`; mirrored hard rule "BAN <ticker>: hit rate ... do not propose"
+- **Initial casualty:** EQNR.OL (20% hit over 10 obs)
+
+### Candidate Alternatives Logging (Added 2026-05-07)
+- **What:** orchestrator captures top-30 candidates (was top-5) by `competition_score` after Risk Manager output
+- **Each entry:** `{ticker, rank, competition_score, selection_score, mom_5d, vol_ratio, proposed_by:[strategist|challenger|full_analyst], in_final}`
+- **Stored:** inside `decision_metrics.candidate_alternatives` JSONB on `daily_runs` (no schema migration needed — column already JSONB)
+- **Consumed by:** `learning_state.missed_winners` (compares 1d return of held positions vs top-3 unheld; produces `missed_winner_rate` and `avg_opportunity_cost`)
 
 ### Devil's Accuracy Feedback Loop (Updated 2026-04-29)
 - **What it measures:** Devil's advocate flagged picks as HIGH-risk — tracked against 1-day returns

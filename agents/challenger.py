@@ -23,6 +23,7 @@ from google.genai import types
 from openai import OpenAI
 
 import config
+from agents._prompt_blocks import RATIONALE_GUIDANCE_BLOCK
 from agents.base_agent import BaseAgent, conviction_to_weight
 from data.cost_tracker import log_usage
 from data.fetcher import MarketSnapshot, sanitize_ticker
@@ -526,6 +527,7 @@ class GeminiChallenger(BaseAgent):
                 "These rules are derived from verified game performance and OVERRIDE any base instruction above.\n"
                 + learning_context
             )
+        system_prompt += RATIONALE_GUIDANCE_BLOCK
 
         for attempt in range(1, 3):
             try:
@@ -599,6 +601,7 @@ class GeminiChallenger(BaseAgent):
                 "These rules are derived from verified game performance and OVERRIDE any base instruction above.\n"
                 + learning_context
             )
+        system_prompt += RATIONALE_GUIDANCE_BLOCK
         system_prompt += (
             "\n\nCRITICAL OUTPUT FORMAT: Return exactly one valid JSON object and nothing else. "
             "No markdown, no code fences, no prose before or after JSON. "
@@ -810,6 +813,7 @@ class GeminiChallenger(BaseAgent):
                 "These rules are derived from verified game performance and OVERRIDE any base instruction above.\n"
                 + learning_context
             )
+        system_prompt += RATIONALE_GUIDANCE_BLOCK
 
         response = self.client.models.generate_content(
             model=self.MODEL,

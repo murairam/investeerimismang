@@ -16,6 +16,7 @@ from data.portfolio_store import (
     load_decision_history,
     load_performance_history,
     load_competition_standing_history,
+    load_rank_delta_history,
     save_learning_state_to_db,
     load_learning_state_from_db,
 )
@@ -154,13 +155,21 @@ def load_learning_state() -> dict:
 def save_learning_state(state: dict) -> None:
     save_learning_state_to_db(state)
     dir_ = os.path.dirname(_STATE_PATH)
+    tmp = None
     try:
         with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp") as f:
             json.dump(state, f, indent=2)
             tmp = f.name
         os.replace(tmp, _STATE_PATH)
+        tmp = None
     except Exception as exc:
         logger.warning("Could not save learning state to JSON: %s", exc)
+    finally:
+        if tmp and os.path.exists(tmp):
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
 
 
 def generate_learning_state() -> dict:
@@ -277,25 +286,40 @@ def generate_learning_state() -> dict:
 
     for loser in losers[:3]:
         if loser["observations"] >= _MIN_STRONG_TICKER_OBSERVATIONS:
-            weight_caps.append(
-                {
-                    "scope": "ticker",
-                    "ticker": loser["ticker"],
-                    "max_weight": 0.07,
-                    "reason": "recurring_underperformer",
-                }
-            )
+            # Hard ban for tickers with hit_rate <= 25% and >=10 observations
+            # (e.g. EQNR.OL at 20% over 10 obs). 0.07 cap was too soft.
+            if loser["observations"] >= 10 and loser.get("hit_rate", 1.0) <= 0.25:
+                weight_caps.append(
+                    {
+                        "scope": "ticker",
+                        "ticker": loser["ticker"],
+                        "max_weight": 0.0,
+                        "reason": f"hard_ban_low_hit_rate_{int(loser['hit_rate']*100)}%_over_{loser['observations']}_obs",
+                    }
+                )
+                hard_rules.append(
+                    f"BAN {loser['ticker']}: hit rate {loser.get('hit_rate', 0):.0%} over {loser['observations']} observations — do not propose."
+                )
+            else:
+                weight_caps.append(
+                    {
+                        "scope": "ticker",
+                        "ticker": loser["ticker"],
+                        "max_weight": 0.07,
+                        "reason": "recurring_underperformer",
+                    }
+                )
 
     turnover_guidance = {
-        "instruction": "Keep at least 50% of weight in existing holdings unless a replacement has materially stronger signals.",
-        "min_hold_weight": 0.50,
-        "replacement_sharpe_delta": 0.20,
+        "instruction": "Hold >=65% of weight in continuing winners. Drop a name only if replacement has materially stronger 5d momentum AND volume confirmation (Sharpe delta >=0.4).",
+        "min_hold_weight": 0.65,
+        "replacement_sharpe_delta": 0.40,
     }
     if len(hold_vs_replace) >= _MIN_STRONG_DAILY_OBSERVATIONS and _avg(hold_vs_replace) < 0:
         turnover_guidance = {
-            "instruction": "Recent replacements have underperformed dropped names. Prefer holding unless the replacement has clearly stronger 5d momentum and volume confirmation.",
-            "min_hold_weight": 0.65,
-            "replacement_sharpe_delta": 0.30,
+            "instruction": "Recent replacements have underperformed dropped names. Hold >=75% of weight in continuing positions; drop only on overwhelming evidence (Sharpe delta >=0.5, volume confirmation, and 5d momentum lead >=4pp).",
+            "min_hold_weight": 0.75,
+            "replacement_sharpe_delta": 0.50,
         }
         hard_rules.append(
             "Do not replace an existing holding unless the incoming candidate is materially stronger on both 5d momentum and volume confirmation."
@@ -360,9 +384,130 @@ def generate_learning_state() -> dict:
         "competition_standing": derive_competition_posture(load_competition_standing_history(max_days=5)),
         "agent_accuracy": _agent_accuracy(history),
         "yesterday_postmortem": _build_postmortem(history),
+        "rank_performance": _rank_performance(history),
+        "missed_winners": _missed_winners(history),
     }
     save_learning_state(state)
     return state
+
+
+def _rank_performance(history: list[dict]) -> dict:
+    """Summarise rank movement and its correlation with daily alpha."""
+    rank_history = load_rank_delta_history(days=10)
+    if not rank_history:
+        return {"status": "no_data"}
+
+    last_5 = [r for r in rank_history[:5] if r.get("rank_delta") is not None]
+    last_5_rank_delta = sum(r["rank_delta"] for r in last_5) if last_5 else 0
+    last_5_norm_delta = sum(r["normalized_delta"] for r in last_5 if r.get("normalized_delta") is not None) if last_5 else 0.0
+
+    alpha_by_date: dict[str, float] = {}
+    for item in history:
+        outcome = (item.get("outcomes") or {}).get("1d") or {}
+        alpha = outcome.get("alpha")
+        if alpha is None:
+            alpha = (item.get("performance") or {}).get("alpha_1d")
+        if alpha is None:
+            continue
+        try:
+            alpha_by_date[str(item.get("date"))] = float(alpha)
+        except (TypeError, ValueError):
+            continue
+
+    paired: list[tuple[float, int]] = []
+    for r in rank_history:
+        if r.get("rank_delta") is None:
+            continue
+        alpha = alpha_by_date.get(str(r.get("date")))
+        if alpha is None:
+            continue
+        paired.append((alpha, r["rank_delta"]))
+
+    correlation = None
+    best_alpha_day = None
+    worst_alpha_day = None
+    if paired:
+        best = max(paired, key=lambda x: x[0])
+        worst = min(paired, key=lambda x: x[0])
+        best_alpha_day = {"alpha": round(best[0], 6), "rank_delta": best[1]}
+        worst_alpha_day = {"alpha": round(worst[0], 6), "rank_delta": worst[1]}
+
+    if len(paired) >= 3:
+        n = len(paired)
+        sx = sum(a for a, _ in paired)
+        sy = sum(d for _, d in paired)
+        sxx = sum(a * a for a, _ in paired)
+        syy = sum(d * d for _, d in paired)
+        sxy = sum(a * d for a, d in paired)
+        denom = math.sqrt(max(0.0, n * sxx - sx * sx)) * math.sqrt(max(0.0, n * syy - sy * sy))
+        if denom > 0:
+            correlation = round((n * sxy - sx * sy) / denom, 4)
+
+    serialisable_history = [
+        {**entry, "date": str(entry["date"]) if entry.get("date") is not None else None}
+        for entry in rank_history[:5]
+    ]
+    return {
+        "status": "actionable" if last_5 else "insufficient_data",
+        "last_5d_rank_delta": last_5_rank_delta,
+        "last_5d_normalized_delta": round(last_5_norm_delta, 6),
+        "best_alpha_day": best_alpha_day,
+        "worst_alpha_day": worst_alpha_day,
+        "alpha_rank_correlation": correlation,
+        "recent_history": serialisable_history,
+    }
+
+
+def _missed_winners(history: list[dict]) -> dict:
+    """Compare next-day return of held positions vs top-3 unheld candidate_alternatives.
+
+    Reads candidate_alternatives stored inside decision_metrics jsonb. Only entries
+    populated by the post-2026-05-07 capture path will have proposed_by/in_final
+    fields; older entries are skipped gracefully.
+    """
+    opportunity_costs: list[float] = []
+    miss_count = 0
+    eligible = 0
+    for item in history:
+        metrics = item.get("decision_metrics") or {}
+        alts = metrics.get("candidate_alternatives") or []
+        if not alts:
+            continue
+        outcome = (item.get("outcomes") or {}).get("1d") or {}
+        position_returns = outcome.get("position_returns") or {}
+        if not position_returns:
+            position_returns = (item.get("performance") or {}).get("position_returns") or {}
+        if not position_returns:
+            continue
+
+        held_avg = _avg(list(position_returns.values()))
+        top_unheld = [a for a in alts if not a.get("in_final")][:3]
+        unheld_returns: list[float] = []
+        for alt in top_unheld:
+            ret = position_returns.get(alt.get("ticker"))
+            if ret is None:
+                continue
+            try:
+                unheld_returns.append(float(ret))
+            except (TypeError, ValueError):
+                continue
+        if not unheld_returns:
+            continue
+        unheld_avg = _avg(unheld_returns)
+        eligible += 1
+        cost = unheld_avg - held_avg
+        opportunity_costs.append(cost)
+        if cost > 0:
+            miss_count += 1
+
+    if not opportunity_costs:
+        return {"status": "insufficient_data", "observations": 0}
+    return {
+        "status": "actionable" if eligible >= 5 else "insufficient_data",
+        "observations": eligible,
+        "missed_winner_rate": round(miss_count / eligible, 4),
+        "avg_opportunity_cost": round(_avg(opportunity_costs), 6),
+    }
 
 
 def _devil_accuracy(history: list[dict]) -> dict:

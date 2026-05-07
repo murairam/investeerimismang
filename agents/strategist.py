@@ -545,6 +545,9 @@ class OpenAIStrategist(BaseAgent):
                 + learning_context
             )
 
+        from agents._prompt_blocks import RATIONALE_GUIDANCE_BLOCK
+        system_prompt += RATIONALE_GUIDANCE_BLOCK
+
         response = self.client.chat.completions.create(
             model=self.MODEL,
             response_format={"type": "json_object"},

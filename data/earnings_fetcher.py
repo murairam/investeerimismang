@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
+import config
+
 logger = logging.getLogger(__name__)
 
 _DAYS_AHEAD = 7        # warn if earnings within this many calendar days
@@ -203,7 +205,8 @@ def format_earnings_opportunity(candidates: list[dict], earnings: list[dict]) ->
             f"5d {m5}, 20d {m20}, RSI {rsi:.0f} -> PRE_EARNINGS_SETUP"
         )
     lines.append(
-        "  Sizing limits: max 20% per pre-earnings position, max 40% total, <=2 names same week."
+        f"  Sizing limits: max {int(config.PRE_EARNINGS_MAX_PER_NAME * 100)}% per pre-earnings position, "
+        f"max {int(config.PRE_EARNINGS_MAX_TOTAL * 100)}% total, <=2 names same week."
     )
     if cluster_dates:
         cstr = ", ".join(f"{d} ({n} names)" for d, n in cluster_dates.items())

@@ -498,6 +498,9 @@ class OpenAIFullAnalyst(BaseAgent):
                 + learning_context
             )
 
+        from agents._prompt_blocks import RATIONALE_GUIDANCE_BLOCK
+        system_prompt += RATIONALE_GUIDANCE_BLOCK
+
         # OpenRouter does not reliably enforce response_format or handle long outputs —
         # use max_tokens to prevent truncation and omit response_format for OR calls.
         openrouter_call = self._openrouter_enabled and self.model != self.MODEL and not fast_mode

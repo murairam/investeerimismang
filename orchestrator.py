@@ -73,6 +73,7 @@ from data.portfolio_store import (
     load_last,
     load_last_known_participant_count,
     load_performance_history,
+    load_rank_delta_history,
     load_yesterday_prices,
     save as save_portfolio,
 )
@@ -122,6 +123,21 @@ class AlphaSharkOrchestrator:
 
         # Inject live participant count so agent prompts stay accurate as the game progresses.
         snapshot["n_participants"] = load_last_known_participant_count() or 844
+
+        # Rank-aware feedback for Risk Manager: last 5 days of rank movement vs field.
+        snapshot["rank_history"] = load_rank_delta_history(days=5)
+
+        # Devil-inversion flag: True when empirical accuracy is inverted (HIGH flags = winners).
+        try:
+            from data.learning_state import load_learning_state as _ls_load
+            _ls = _ls_load()
+            _devil_acc = (_ls or {}).get("devil_accuracy", {}) or {}
+            snapshot["devil_inversion_active"] = bool(
+                (_devil_acc.get("observations") or 0) >= 30
+                and _devil_acc.get("devil_is_accurate") is False
+            )
+        except Exception:
+            snapshot["devil_inversion_active"] = False
 
         # Step 1a: commodity prices (Brent, WTI, NatGas) — energy thesis validation
         snapshot["commodity_context"] = self.fetcher.fetch_commodity_context()
@@ -947,16 +963,28 @@ class AlphaSharkOrchestrator:
             {pos.ticker for pos in full_analyst_proposal.positions} if full_analyst_proposal and full_analyst_proposal.positions else set()
         )
         selected_now = {pos.ticker for pos in final_proposal.positions}
+        proposed_by_map: dict[str, list[str]] = {}
+        for agent_name, agent_proposal in (
+            ("strategist", strategist_proposal),
+            ("challenger", challenger_proposal),
+            ("full_analyst", full_analyst_proposal),
+        ):
+            if agent_proposal and agent_proposal.positions:
+                for pos in agent_proposal.positions:
+                    proposed_by_map.setdefault(pos.ticker, []).append(agent_name)
         candidate_alternatives = [
             {
                 "ticker": candidate["ticker"],
+                "rank": idx + 1,
+                "competition_score": round(float(candidate.get("competition_score", 0.0)), 6),
                 "selection_score": round(float(candidate.get("selection_score", 0.0)), 6),
                 "mom_5d": round(float(candidate.get("mom_5d", 0.0)), 6) if candidate.get("mom_5d") is not None else None,
                 "vol_ratio": round(float(candidate.get("vol_ratio", 0.0)), 6) if candidate.get("vol_ratio") is not None else None,
+                "proposed_by": proposed_by_map.get(candidate["ticker"], []),
+                "in_final": candidate["ticker"] in selected_now,
             }
-            for candidate in snapshot["candidates"]
-            if candidate["ticker"] not in selected_now
-        ][:5]
+            for idx, candidate in enumerate(snapshot["candidates"][:30])
+        ]
         decision_context = {
             "strategist_proposal": strategist_proposal,
             "challenger_proposal": challenger_proposal if (challenger_proposal and challenger_proposal.positions) else None,
