@@ -819,40 +819,36 @@ Winners: MU +10.7%, WDC +4.8%, STX +4.0% | Losers: EBAY -4.1%, CNC -1.4%
 - ▲ **WDC**: 6.0% → 18.0% (+12.0%)
 
 ---
-## 2026-05-07 06:42:40
+## 2026-05-07 16:07:29
 
-**Market:** BULL regime · SPX vs 50d SMA: +7.6% · VIX: 17.4 · S&P 500 20d: +8.6%
+**Market:** BULL regime · SPX vs 50d SMA: +7.4% · VIX: 17.3 · S&P 500 20d: +7.9%
 
-**Verification:** Verified against actual game holdings at 14:42:49.
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio +2.9% · Benchmark +1.5% · Alpha +1.4%
-Winners: CNC +4.1%, MU +3.8%, WDC +3.5%
+**Yesterday's P&L:** Portfolio -2.0% · Benchmark -0.1% · Alpha -2.0%
+Losers: MU -3.1%, DOC -2.4%, AMD -2.2%
 
-**Paper account:** Equity €13,362.79 (start €10,000) · Today +3.11% · Since start +33.63% · Turnover 48.9% · Cash €0.00
+**Paper account:** Equity €13,461.00 (start €10,000) · Today +3.86% · Since start +34.61% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 87% · **Positions:** 5 · **Total weight:** 85.0%
+**Confidence:** 86% · **Positions:** 6 · **Total weight:** 80.0%
 
-**Thesis:** Consensus was strongest in MU and DVA, so they anchor the portfolio at the highest conviction levels. I then filled remaining slots with the fastest unique breakout names—SMCI, AMD, and DOC—while dropping slower current holdings like CNC, ON, WDC, STX, EBAY, and PWR because better acceleration and/or cleaner catalyst profiles exist today. Portfolio remains aggressive and likely high-beta for a BULL tape, but with meaningful diversification outside Tech to respect the rotation-risk alert.
+**Thesis:** The synthesis leans hardest into the double-consensus core of AMD, MU, and SMCI, then adds the strongest unique upgrades in INTC and DDOG to match the BULL regime and the mandate to increase right-tail exposure. DOC is removed as a weaker non-leader, while DVA stays as the required second-sector exposure because its momentum and volume remain too strong to exit; this keeps concentration aggressive while avoiding a mono-sector portfolio. Beta should remain elevated and appropriate for a BULL tape, though still below the strategist’s extreme 2.94 proposal by keeping one non-Tech momentum name.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **MU** | 5.0% | Triple-consensus core holding with elite momentum (+28.0% 5d), strong relative strength, solid volume confirmation, and live alpha validation; maximum-conviction BULL leader despite overbought status because RSI>85 with accelerating 5d momentum is a positive signal. |
-| 2 | **DVA** | 25.0% | Double-consensus breakout with exceptional vol_ratio (4.34) and +26.9% 5d momentum, giving the portfolio a high-conviction non-Tech/Health catalyst name and satisfying the consensus floor. |
-| 3 | **SMCI** | 10.0% | Best unique aggressive upside pick from the full analyst: explosive breakout profile with vol_ratio 4.06 and +31.1% 5d momentum, clearly stronger than slower current holdings and exactly the kind of right-tail name this competition rewards. |
-| 4 | **AMD** | 20.0% | Strong unique momentum replacement from the strategist with +24.4% 5d momentum, vol_ratio 2.07, and high beta that fits the BULL mandate; included because it materially outruns weaker current Tech names on acceleration. |
-| 5 | **DOC** | 25.0% | High-volume non-Tech diversifier with vol_ratio 3.68 and +21.3% 5d momentum; earns its slot over slower incumbents by combining breakout confirmation with sector diversification amid elevated Tech rotation risk. |
+| 1 | **AMD** | 5.0% | Consensus pick in both proposals and a validated core ticker; vol_ratio 2.07 with +16.1% 5d momentum keeps it as a top BULL-regime semiconductor leader. |
+| 2 | **MU** | 5.0% | Consensus pick in both proposals with the strongest acceleration profile among the core names; +24.8% 5d momentum and solid volume support justify maximum conviction despite elevated RSI. |
+| 3 | **SMCI** | 12.0% | Consensus pick in both proposals and one of the tape’s highest-torque movers; vol_ratio 4.06 and +24.0% 5d momentum make it a right-tail competition name. |
+| 4 | **INTC** | 16.0% | Best unique addition from Proposal A and a validated core ticker; +16.2% 5d momentum with RSI 83 and positive volume confirms it as a strong upgrade over weaker current non-leaders. |
+| 5 | **DDOG** | 17.0% | Best unique catalyst pick from Proposal B; vol_ratio 1.62, RSI 87, and exceptional +39.0% 5d momentum fit the whitelist pattern of leadership rather than exhaustion. |
+| 6 | **DVA** | 25.0% | Retained as the non-Tech second-sector position because its own signals are still elite: vol_ratio 4.34, +23.6% 5d momentum, and near-52w-high behavior keep it earning a slot. |
 
 **Changes from yesterday:**
-- ➕ Added **DVA** at 25.0%
-- ➕ Added **SMCI** at 10.0%
-- ➕ Added **AMD** at 20.0%
-- ➕ Added **DOC** at 25.0%
-- ➖ Removed **PWR** (was 25.0%)
-- ➖ Removed **CNC** (was 25.0%)
-- ➖ Removed **ON** (was 17.0%)
-- ➖ Removed **WDC** (was 6.0%)
-- ➖ Removed **EBAY** (was 5.0%)
-- ➖ Removed **STX** (was 5.0%)
-- ▼ **MU**: 17.0% → 5.0% (-12.0%)
+- ➕ Added **INTC** at 16.0%
+- ➕ Added **DDOG** at 17.0%
+- ➖ Removed **DOC** (was 25.0%)
+- ▼ **AMD**: 25.0% → 5.0% (-20.0%)
+- ▼ **MU**: 13.0% → 5.0% (-8.0%)
 
 ---
+
