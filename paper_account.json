@@ -3,37 +3,20 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "MU": 4.0055276,
-    "STX": 3.39518935,
-    "WDC": 5.85140483,
-    "PWR": 5.00042847,
-    "INTC": 31.96543156
+    "AMD": 9.40422708,
+    "DOC": 203.22294286,
+    "DVA": 20.43969097,
+    "MU": 3.09137634,
+    "SMCI": 54.8807488
   },
-  "pending_order": {
-    "submitted_date": "2026-05-07",
-    "positions": [
-      {
-        "ticker": "MU",
-        "weight": 0.05
-      },
-      {
-        "ticker": "DVA",
-        "weight": 0.25
-      },
-      {
-        "ticker": "SMCI",
-        "weight": 0.1
-      },
-      {
-        "ticker": "AMD",
-        "weight": 0.2
-      },
-      {
-        "ticker": "DOC",
-        "weight": 0.25
-      }
-    ]
+  "verified_weights": {
+    "AMD": 0.25,
+    "DOC": 0.25,
+    "DVA": 0.25,
+    "MU": 0.13,
+    "SMCI": 0.12
   },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -554,55 +537,22 @@
     },
     {
       "date": "2026-05-07",
-      "equity": 13362.79,
+      "equity": 13461.0,
       "cash": 0.0,
-      "daily_return": 0.031055,
-      "return_since_start": 0.336279,
-      "turnover": 0.488625,
+      "daily_return": 0.038633,
+      "return_since_start": 0.3461,
+      "turnover": 0.0,
       "positions": {
-        "MU": 4.0055276,
-        "STX": 3.39518935,
-        "WDC": 5.85140483,
-        "PWR": 5.00042847,
-        "INTC": 31.96543156
+        "AMD": 9.40422708,
+        "DOC": 203.22294286,
+        "DVA": 20.43969097,
+        "MU": 3.09137634,
+        "SMCI": 54.8807488
       },
-      "pending_order": {
-        "submitted_date": "2026-05-07",
-        "positions": [
-          {
-            "ticker": "MU",
-            "weight": 0.05
-          },
-          {
-            "ticker": "DVA",
-            "weight": 0.25
-          },
-          {
-            "ticker": "SMCI",
-            "weight": 0.1
-          },
-          {
-            "ticker": "AMD",
-            "weight": 0.2
-          },
-          {
-            "ticker": "DOC",
-            "weight": 0.25
-          }
-        ]
-      },
-      "executed_pending": true
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-05-07",
-  "last_equity": 13362.78867847,
-  "verified_weights": {
-    "PWR": 0.25,
-    "MU": 0.17,
-    "CNC": 0.25,
-    "ON": 0.17,
-    "WDC": 0.06,
-    "EBAY": 0.05,
-    "STX": 0.05
-  }
+  "last_equity": 13461.0
 }

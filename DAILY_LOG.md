@@ -823,7 +823,7 @@ Winners: MU +10.7%, WDC +4.8%, STX +4.0% | Losers: EBAY -4.1%, CNC -1.4%
 
 **Market:** BULL regime · SPX vs 50d SMA: +7.6% · VIX: 17.4 · S&P 500 20d: +8.6%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 14:42:49.
 
 **Yesterday's P&L:** Portfolio +2.9% · Benchmark +1.5% · Alpha +1.4%
 Winners: CNC +4.1%, MU +3.8%, WDC +3.5%
