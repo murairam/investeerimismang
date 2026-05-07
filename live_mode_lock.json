@@ -14,7 +14,7 @@
     "config.py": "6035c93d795b37df24267753e2d56e9d6464ab0ce93973e80dd29271282b727c",
     "docs/rules.txt": "72cd80a937c847262b7754b21c21e4ecf5266cc91705b599a929f62c1cb75881",
     "agents/strategist.py": "e4d72ac99932accb87beda2cd3972c61a90aac46098a4495c963cf57ef4f2f02",
-    "agents/full_analyst.py": "00f20625efcf0db0dbc23b685bfcfd518a687950a0d077a7595821cf53875103",
+    "agents/full_analyst.py": "c3c2f10ae6dbba270ff215c492d43635238296054f7dde7c12e7f371f903788f",
     "agents/devil.py": "b5cb1f0dd6174e1e786eec5dbf0616aef06740a58ed864ed5cec21f4c7958915",
     "agents/risk_manager.py": "ec035ad991c4c889fc4a8d977283aa5fb90818c392ff3b27c0057685a6df0b3c",
     "agents/challenger.py": "20df053112c73365b051d715a981e9e2f168ab8cbff0f5c9bcb9bb0b36d00ee8"
