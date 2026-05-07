@@ -31,6 +31,7 @@ from config import (
     TOP_N_CANDIDATES,
 )
 from data.provider_overrides import get_provider_override
+from data.social_sentiment import fetch_for_universe as fetch_social_sentiment
 from data.universe_loader import load_game_universe
 from data.symbol_master import upsert_symbol_records
 from data.yahoo_symbols import (
@@ -69,6 +70,8 @@ class CandidateInfo(TypedDict):
     mom_aligned: int      # 1 = all three timeframes (5d, 20d, 60d) are positive — confirmed multi-timeframe uptrend
     breakout_score: int   # 1 = vol_ratio>1.5 AND mom_5d>3% AND price>SMA50 AND RSI 55-75 (quality breakout filter)
     rel_sector: float     # stock 20d return minus sector median 20d return (positive = true sector leader)
+    reddit_hype_score: float  # 0-100 normalised WSB mention rank (rank 1→100, off-list→0, Nordic/Baltic→NaN)
+    momentum_trajectory: str  # 'rising' | 'falling' | 'flat' (24h mention trend from ApeWisdom)
 
 
 class MarketSnapshot(TypedDict):
@@ -1392,6 +1395,8 @@ class DataFetcher:
                     and not math.isnan(rsi_val) and 55 <= rsi_val <= 75
                 ),
                 "rel_sector": float("nan"),  # filled in after sector_momentum is computed below
+                "reddit_hype_score": float("nan"),  # filled in after top-N filtering via fetch_social_sentiment
+                "momentum_trajectory": "flat",      # filled in after top-N filtering via fetch_social_sentiment
             })
 
         for record in records:
@@ -1506,6 +1511,16 @@ class DataFetcher:
             "Catalyst signals: short_interest=%d/%d, premarket_gap=%d/%d, iv_proxy=%d/%d (%d options, %d realized HV)",
             si_count, len(top_tickers), pm_count, len(top_tickers), iv_count, len(top_tickers), iv_options, hv_filled,
         )
+
+        # Social sentiment: single ApeWisdom call for all top-N tickers (US only; Nordic/Baltic → NaN)
+        logger.info("Fetching Reddit/WSB social sentiment for %d top candidates …", len(top_tickers))
+        social_data = fetch_social_sentiment(top_tickers)
+        wsb_count = sum(1 for v in social_data.values() if not math.isnan(v.get("reddit_hype_score", float("nan"))) and v.get("reddit_hype_score", 0) > 0)
+        logger.info("Social sentiment: %d/%d US tickers found in WSB top-100", wsb_count, len(top_tickers))
+        for r in top:
+            sd = social_data.get(r["ticker"], {})
+            r["reddit_hype_score"] = sd.get("reddit_hype_score", float("nan"))
+            r["momentum_trajectory"] = sd.get("momentum_trajectory", "flat")
 
         as_of = date.today().isoformat()
 

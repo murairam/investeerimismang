@@ -291,6 +291,11 @@ class OpenAIFullAnalyst(BaseAgent):
         show_short_interest = any(row["short_interest"] is not None for row in preprocessed_rows)
         show_premarket_gap = any(row["premarket_gap"] is not None for row in preprocessed_rows)
         show_iv = any(row["iv_proxy"] is not None for row in preprocessed_rows)
+        show_wsb = any(
+            not math.isnan(row["candidate"].get("reddit_hype_score", float("nan")))
+            and row["candidate"].get("reddit_hype_score", 0) > 0
+            for row in preprocessed_rows
+        )
 
         header_fields = [
             "Ticker", "Market", "Sector", "20d(σ)", "Sh(σ)", "5d(σ)", "60dRet", "RSI", "vIdx(σ)",
@@ -302,6 +307,8 @@ class OpenAIFullAnalyst(BaseAgent):
             header_fields.append("PreMkt")
         if show_iv:
             header_fields.append("IV")
+        if show_wsb:
+            header_fields.append("WsbHype")
         header_fields += ["DivYld", "AnaRtg", "AnaUp%", "Price"]
         header = ",".join(header_fields)
 
@@ -374,6 +381,7 @@ class OpenAIFullAnalyst(BaseAgent):
             "Top candidates (sorted by combined score) — ALL signals:",
             "ShrtInt / PreMkt / IV columns are included only when available in today's data.",
             "AnaRtg: analyst consensus 1=StrongBuy→5=StrongSell. AnaUp%: implied upside to mean target. High momentum + positive upside = conviction. High momentum + negative upside = stretched/crowded.",
+            "WsbHype: Reddit/WSB mention rank score 0-100 (rank 1→100, off-list→0, Nordic/Baltic→N/A). Rising trajectory = growing retail attention.",
             "",
             header
         ]
@@ -412,6 +420,14 @@ class OpenAIFullAnalyst(BaseAgent):
                 values.append(fmt_opt(row["premarket_gap"], "+.1%"))
             if show_iv:
                 values.append(fmt_opt(row["iv_proxy"], ".2f"))
+            if show_wsb:
+                hype = c.get("reddit_hype_score", float("nan"))
+                traj = c.get("momentum_trajectory", "flat")
+                if math.isnan(hype):
+                    values.append("N/A")
+                else:
+                    traj_sym = "↑" if traj == "rising" else ("↓" if traj == "falling" else "→")
+                    values.append(f"{hype:.0f}{traj_sym}")
             values += [
                 fmt(c.get("dividend_yield", float("nan"))),
                 fmt(c.get("analyst_rating", float("nan")), ".1f"),
