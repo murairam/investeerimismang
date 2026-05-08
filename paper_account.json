@@ -9,14 +9,31 @@
     "MU": 3.09137634,
     "SMCI": 54.8807488
   },
-  "verified_weights": {
-    "AMD": 0.25,
-    "DOC": 0.25,
-    "DVA": 0.25,
-    "MU": 0.13,
-    "SMCI": 0.12
+  "pending_order": {
+    "submitted_date": "2026-05-08",
+    "positions": [
+      {
+        "ticker": "DDOG",
+        "weight": 0.11
+      },
+      {
+        "ticker": "FTNT",
+        "weight": 0.22
+      },
+      {
+        "ticker": "QCOM",
+        "weight": 0.22
+      },
+      {
+        "ticker": "DVA",
+        "weight": 0.24
+      },
+      {
+        "ticker": "APP",
+        "weight": 0.21
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -551,8 +568,56 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-05-08",
+      "equity": 13363.46,
+      "cash": 0.0,
+      "daily_return": -0.007246,
+      "return_since_start": 0.336346,
+      "turnover": 0.0,
+      "positions": {
+        "AMD": 9.40422708,
+        "DOC": 203.22294286,
+        "DVA": 20.43969097,
+        "MU": 3.09137634,
+        "SMCI": 54.8807488
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-08",
+        "positions": [
+          {
+            "ticker": "DDOG",
+            "weight": 0.11
+          },
+          {
+            "ticker": "FTNT",
+            "weight": 0.22
+          },
+          {
+            "ticker": "QCOM",
+            "weight": 0.22
+          },
+          {
+            "ticker": "DVA",
+            "weight": 0.24
+          },
+          {
+            "ticker": "APP",
+            "weight": 0.21
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-05-07",
-  "last_equity": 13461.0
+  "last_rebalanced_date": "2026-05-08",
+  "last_equity": 13363.4558806,
+  "verified_weights": {
+    "AMD": 0.25,
+    "DOC": 0.25,
+    "DVA": 0.25,
+    "MU": 0.13,
+    "SMCI": 0.12
+  }
 }

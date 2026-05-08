@@ -852,3 +852,37 @@ Losers: MU -3.1%, DOC -2.4%, AMD -2.2%
 
 ---
 
+## 2026-05-08 06:02:02
+
+**Market:** BULL regime · SPX vs 50d SMA: +7.1% · VIX: 17.1 · S&P 500 20d: +7.5%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.0% · Benchmark -0.4% · Alpha -0.6%
+Winners: DVA +1.3%, DOC +0.9% | Losers: AMD -3.0%, SMCI -2.9%, MU -2.9%
+
+**Paper account:** Equity €13,363.46 (start €10,000) · Today -0.72% · Since start +33.63% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 87% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I anchored the portfolio around the validated consensus cluster: DDOG as the only triple-consensus name, plus FTNT and QCOM as mandatory high-conviction double-consensus picks. I then kept DVA because it remains one of the few current holdings with strong live validation and it satisfies the required second-sector exposure, while APP beats slower incumbents like DOC and the weakened/less efficient current semis on slot cost. This rotates out MU, AMD, SMCI, and DOC as inferior current slots versus fresher breakout leaders; portfolio beta should remain aggressive and appropriate for a BULL regime without relying entirely on one subsector of semis.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **DDOG** | 11.0% | Triple-consensus pick with the strongest breakout confirmation in the set: extreme volume, explosive 5d momentum, and leadership at/near highs make it the clearest right-tail BULL candidate. |
+| 2 | **FTNT** | 22.0% | Double-consensus pick with elite vol_ratio and 5d acceleration; qualifies as a leadership breakout and earns high conviction despite overbought RSI because momentum is still expanding. |
+| 3 | **QCOM** | 22.0% | Double-consensus pick with strong volume-backed breakout, solid 5d momentum, and 52-week-high behavior; slightly below FTNT on raw acceleration but still a high-conviction consensus leader. |
+| 4 | **DVA** | 24.0% | Best non-Tech slot and current holding that still validates on the rotation rules: very strong 5d momentum, high volume, and squeeze/catalyst support provide sector diversification without sacrificing aggression. |
+| 5 | **APP** | 21.0% | Unique but high-upside breakout candidate from the full analyst with vol_ratio above 3 and positive 5d momentum; less proven than the consensus names, yet strong enough to earn the final slot in a competition portfolio. |
+
+**Changes from yesterday:**
+- ➕ Added **DDOG** at 11.0%
+- ➕ Added **FTNT** at 22.0%
+- ➕ Added **QCOM** at 22.0%
+- ➕ Added **APP** at 21.0%
+- ➖ Removed **AMD** (was 25.0%)
+- ➖ Removed **DOC** (was 25.0%)
+- ➖ Removed **MU** (was 13.0%)
+- ➖ Removed **SMCI** (was 12.0%)
+
+---
