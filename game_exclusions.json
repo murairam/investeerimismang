@@ -10,6 +10,8 @@
     "HOOD": "Not selectable in game UI",
     "CVNA": "Not selectable in game UI",
     "DASH": "Not selectable in game UI",
-    "XYZ": "Not selectable in game UI"
+    "XYZ": "Not selectable in game UI",
+    "APP": "Not selectable in game UI",
+    "DDOG": "Not selectable in game UI"
   }
 }

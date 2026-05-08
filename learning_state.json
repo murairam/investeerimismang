@@ -1,47 +1,48 @@
 {
-  "generated_from_days": 31,
-  "position_observations": 139,
+  "generated_from_days": 42,
+  "position_observations": 200,
   "minimums": {
     "strong_daily_observations": 7,
     "strong_ticker_observations": 8,
     "strong_rationale_observations": 5
   },
   "hard_rules": [
-    "RATIONALE CAP: cap any position whose primary thesis is 'non_us_differentiator' at 15% \u2014 hit rate 27% over 37 observations (threshold: 30%)."
+    "BAN EQNR.OL: hit rate 20% over 10 observations \u2014 do not propose."
   ],
   "biases_to_avoid": [
-    "Avoid overusing catalyst rationales until their hit rate recovers above 40%."
+    "Avoid overusing diversifier rationales until their hit rate recovers above 40%.",
+    "Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%."
   ],
   "validated_winners": [
     {
-      "ticker": "ON",
-      "observations": 10,
-      "avg_return_1d": 0.026271,
-      "hit_rate": 1.0
+      "ticker": "INTC",
+      "observations": 24,
+      "avg_return_1d": 0.036036,
+      "hit_rate": 0.6667
     },
     {
       "ticker": "AMD",
-      "observations": 12,
-      "avg_return_1d": 0.021603,
-      "hit_rate": 0.8333
+      "observations": 20,
+      "avg_return_1d": 0.031414,
+      "hit_rate": 0.8
     },
     {
-      "ticker": "INTC",
+      "ticker": "MPWR",
       "observations": 8,
-      "avg_return_1d": 0.015392,
+      "avg_return_1d": 0.02646,
       "hit_rate": 1.0
     },
     {
-      "ticker": "XOM",
+      "ticker": "NOKIA.HE",
       "observations": 8,
-      "avg_return_1d": 0.014953,
+      "avg_return_1d": 0.026448,
       "hit_rate": 0.75
     },
     {
-      "ticker": "STX",
+      "ticker": "ON",
       "observations": 22,
-      "avg_return_1d": 0.01321,
-      "hit_rate": 0.7273
+      "avg_return_1d": 0.024408,
+      "hit_rate": 0.8182
     }
   ],
   "recurring_losers": [
@@ -50,6 +51,12 @@
       "observations": 10,
       "avg_return_1d": -0.015608,
       "hit_rate": 0.2
+    },
+    {
+      "ticker": "GEV",
+      "observations": 8,
+      "avg_return_1d": -0.012117,
+      "hit_rate": 0.25
     },
     {
       "ticker": "DOW",
@@ -62,18 +69,24 @@
       "observations": 12,
       "avg_return_1d": -0.002034,
       "hit_rate": 0.3333
+    },
+    {
+      "ticker": "MU",
+      "observations": 8,
+      "avg_return_1d": -0.000145,
+      "hit_rate": 0.25
     }
   ],
   "weight_caps": [
     {
-      "scope": "rationale_tag",
-      "tag": "non_us_differentiator",
-      "max_weight": 0.15,
-      "reason": "non_us_differentiator_hit_rate_27%_over_37_obs"
+      "scope": "ticker",
+      "ticker": "EQNR.OL",
+      "max_weight": 0.0,
+      "reason": "hard_ban_low_hit_rate_20%_over_10_obs"
     },
     {
       "scope": "ticker",
-      "ticker": "EQNR.OL",
+      "ticker": "GEV",
       "max_weight": 0.07,
       "reason": "recurring_underperformer"
     },
@@ -82,24 +95,18 @@
       "ticker": "DOW",
       "max_weight": 0.07,
       "reason": "recurring_underperformer"
-    },
-    {
-      "scope": "ticker",
-      "ticker": "VWS.CO",
-      "max_weight": 0.07,
-      "reason": "recurring_underperformer"
     }
   ],
   "turnover_guidance": {
-    "instruction": "Keep at least 50% of weight in existing holdings unless a replacement has materially stronger signals.",
-    "min_hold_weight": 0.5,
-    "replacement_sharpe_delta": 0.2
+    "instruction": "Hold >=65% of weight in continuing winners. Drop a name only if replacement has materially stronger 5d momentum AND volume confirmation (Sharpe delta >=0.4).",
+    "min_hold_weight": 0.65,
+    "replacement_sharpe_delta": 0.4
   },
   "decision_quality": {
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.582308,
+    "avg_turnover_estimate": 0.575676,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -107,146 +114,159 @@
     {
       "tag": "momentum",
       "instruction": "Prefer momentum setups when other signals are comparable.",
-      "observations": 124
+      "observations": 185
     },
     {
       "tag": "high_sharpe",
       "instruction": "Prefer high_sharpe setups when other signals are comparable.",
-      "observations": 103
+      "observations": 163
     },
     {
       "tag": "breakout",
       "instruction": "Prefer breakout setups when other signals are comparable.",
-      "observations": 22
+      "observations": 54
     },
     {
       "tag": "consensus",
       "instruction": "Prefer consensus setups when other signals are comparable.",
-      "observations": 95
+      "observations": 132
     },
     {
-      "tag": "overbought",
-      "instruction": "Prefer overbought setups when other signals are comparable.",
-      "observations": 63
+      "tag": "catalyst",
+      "instruction": "Prefer catalyst setups when other signals are comparable.",
+      "observations": 32
     }
   ],
-  "early_warning_notes": [
-    "EARLY WARNING: diversifier has weak hit quality (40% over 5 obs)."
-  ],
+  "early_warning_notes": [],
   "rationale_stats": {
     "momentum": {
-      "observations": 124,
-      "avg_return_1d": 0.004759,
-      "hit_rate": 0.5484
+      "observations": 185,
+      "avg_return_1d": 0.007344,
+      "hit_rate": 0.5297
     },
     "high_sharpe": {
-      "observations": 103,
-      "avg_return_1d": 0.005526,
-      "hit_rate": 0.534
+      "observations": 163,
+      "avg_return_1d": 0.007935,
+      "hit_rate": 0.5153
     },
     "breakout": {
-      "observations": 22,
-      "avg_return_1d": 0.006196,
-      "hit_rate": 0.5909
+      "observations": 54,
+      "avg_return_1d": 0.012229,
+      "hit_rate": 0.5556
     },
     "consensus": {
-      "observations": 95,
-      "avg_return_1d": 0.004126,
-      "hit_rate": 0.5263
+      "observations": 132,
+      "avg_return_1d": 0.006166,
+      "hit_rate": 0.5076
     },
     "catalyst": {
-      "observations": 20,
-      "avg_return_1d": -0.004708,
-      "hit_rate": 0.4
+      "observations": 32,
+      "avg_return_1d": 0.008653,
+      "hit_rate": 0.4688
     },
     "diversifier": {
-      "observations": 5,
-      "avg_return_1d": -0.004167,
-      "hit_rate": 0.4
+      "observations": 13,
+      "avg_return_1d": -0.007501,
+      "hit_rate": 0.3846
     },
     "non_us_differentiator": {
-      "observations": 37,
-      "avg_return_1d": -0.003097,
-      "hit_rate": 0.2703
+      "observations": 39,
+      "avg_return_1d": -0.002204,
+      "hit_rate": 0.2821
     },
     "overbought": {
-      "observations": 63,
-      "avg_return_1d": 0.007968,
-      "hit_rate": 0.6032
+      "observations": 116,
+      "avg_return_1d": 0.009384,
+      "hit_rate": 0.5431
     },
     "at_52w_high": {
-      "observations": 92,
-      "avg_return_1d": 0.008085,
-      "hit_rate": 0.6196
+      "observations": 144,
+      "avg_return_1d": 0.010296,
+      "hit_rate": 0.5833
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.005542,
-    "tier2_avg_return_1d": 0.004009,
-    "tier3_avg_return_1d": -0.003466,
-    "tier1_observations": 57,
-    "tier2_observations": 70,
-    "tier3_observations": 12
+    "tier1_avg_return_1d": 0.005,
+    "tier2_avg_return_1d": 0.008662,
+    "tier3_avg_return_1d": 0.003779,
+    "tier1_observations": 81,
+    "tier2_observations": 96,
+    "tier3_observations": 23
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
     "status": "actionable",
-    "observations": 58,
-    "high_risk_avg_return_1d": 0.010595,
-    "low_risk_avg_return_1d": -0.000736,
-    "high_risk_negative_rate": 0.2414,
-    "accuracy": 0.2414,
+    "observations": 80,
+    "lookback_days": 30,
+    "high_risk_avg_return_1d": 0.017922,
+    "low_risk_avg_return_1d": -0.000884,
+    "high_risk_negative_rate_raw": 0.3125,
+    "high_risk_negative_rate_filtered": 0.2875,
+    "high_risk_negative_rate": 0.2875,
+    "accuracy": 0.2875,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
-        "ticker": "ON",
+        "ticker": "PWR",
         "flag_count": 5
       },
       {
-        "ticker": "AMD",
+        "ticker": "STX",
+        "flag_count": 5
+      },
+      {
+        "ticker": "MU",
         "flag_count": 4
       },
       {
-        "ticker": "STX",
+        "ticker": "WDC",
+        "flag_count": 4
+      },
+      {
+        "ticker": "CNC",
         "flag_count": 3
       },
       {
         "ticker": "INTC",
+        "flag_count": 3
+      },
+      {
+        "ticker": "AMD",
         "flag_count": 2
       },
       {
-        "ticker": "COHR",
+        "ticker": "GNRC",
         "flag_count": 2
       },
       {
-        "ticker": "MPWR",
+        "ticker": "NOKIA.HE",
         "flag_count": 2
       },
       {
-        "ticker": "ANET",
+        "ticker": "ON",
         "flag_count": 2
       }
     ]
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.5504,
-      "mom_5d": 0.5504,
-      "sharpe_20d": 0.5504,
-      "rsi_14": 0.5397,
-      "vs_index": 0.5504,
-      "vol_ratio": 0.619,
-      "beta": 0.5349
+      "momentum": 0.5316,
+      "mom_5d": 0.5316,
+      "sharpe_20d": 0.5316,
+      "rsi_14": 0.5191,
+      "vs_index": 0.5316,
+      "vol_ratio": 0.5723,
+      "beta": 0.5211
     },
     "per_regime": {
       "BULL": {
-        "momentum": 0.8077,
-        "mom_5d": 0.8077,
-        "sharpe_20d": 0.8077,
-        "rsi_14": 0.7826,
-        "vs_index": 0.8077,
-        "vol_ratio": 0.8077,
-        "beta": 0.8077
+        "momentum": 0.5862,
+        "mom_5d": 0.5862,
+        "sharpe_20d": 0.5862,
+        "rsi_14": 0.5625,
+        "vs_index": 0.5862,
+        "vol_ratio": 0.5862,
+        "beta": 0.5862
       },
       "NEUTRAL": {
         "momentum": 0.4783,
@@ -289,88 +309,151 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-04-22",
-    "portfolio_return_1d": 0.0306,
-    "benchmark_return_1d": 0.0105,
-    "alpha_1d": 0.0202,
-    "winners": [
-      {
-        "ticker": "AMD",
-        "return_1d": 0.0696,
-        "vs_benchmark": 0.0592,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Consensus hold from current winners and Strategist proposal; still delivering strong alpha with +11.",
-        "rsi_at_entry": 95.761455,
-        "vol_ratio_at_entry": 1.081722
-      },
-      {
-        "ticker": "STLD",
-        "return_1d": 0.0359,
-        "vs_benchmark": 0.0254,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "breakout",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Strong unique pick with the best volume confirmation in the set (vol_ratio 2.27) and +13.1% 5d momen",
-        "rsi_at_entry": 85.432463,
-        "vol_ratio_at_entry": 2.271949
-      },
-      {
-        "ticker": "ANET",
-        "return_1d": 0.0311,
-        "vs_benchmark": 0.0207,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "High-quality unique momentum continuation name; +12.4% 5d momentum with vol_ratio 1.31 supports keep",
-        "rsi_at_entry": 99.039849,
-        "vol_ratio_at_entry": 1.310172
-      },
-      {
-        "ticker": "ON",
-        "return_1d": 0.0269,
-        "vs_benchmark": 0.0164,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Consensus by available evidence across the live portfolio context and Strategist proposal; +21.0% 5d",
-        "rsi_at_entry": 99.959555,
-        "vol_ratio_at_entry": 1.188606
-      }
-    ],
+    "date": "2026-05-06",
+    "portfolio_return_1d": -0.0204,
+    "benchmark_return_1d": -0.0006,
+    "alpha_1d": -0.0198,
+    "winners": [],
     "losers": [
       {
-        "ticker": "MPWR",
-        "return_1d": -0.0009,
-        "vs_benchmark": -0.0114,
+        "ticker": "WDC",
+        "return_1d": -0.0537,
+        "vs_benchmark": -0.053,
         "tags": [
           "momentum",
           "high_sharpe",
           "breakout",
+          "consensus",
           "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Best unique upgrade candidate for a vacated slot; +12.5% 5d momentum and solid breakout quality make",
-        "rsi_at_entry": 95.489374,
-        "vol_ratio_at_entry": 1.030696
+        "rationale_snippet": "Double-consensus pick with strong trend persistence and breakout behavior: +18.9% 5d, RSI 86, and po",
+        "rsi_at_entry": 86.09071,
+        "vol_ratio_at_entry": 1.292415
+      },
+      {
+        "ticker": "STX",
+        "return_1d": -0.0534,
+        "vs_benchmark": -0.0528,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Double-consensus pick and one of the strongest active movers in the whole set, with +33.0% 5d moment",
+        "rsi_at_entry": 91.376203,
+        "vol_ratio_at_entry": 1.466564
+      },
+      {
+        "ticker": "PWR",
+        "return_1d": -0.0519,
+        "vs_benchmark": -0.0513,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "consensus",
+          "diversifier",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Double-consensus non-Tech diversifier that satisfies the mandatory second-sector rule while still ca",
+        "rsi_at_entry": 90.284542,
+        "vol_ratio_at_entry": 1.262029
+      },
+      {
+        "ticker": "MU",
+        "return_1d": -0.0306,
+        "vs_benchmark": -0.03,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "breakout",
+          "consensus",
+          "catalyst",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Double-consensus pick with elite momentum and catalyst confirmation: +26.8% 5d, vol_ratio 1.59, RSI ",
+        "rsi_at_entry": 85.896573,
+        "vol_ratio_at_entry": 1.591789
+      },
+      {
+        "ticker": "INTC",
+        "return_1d": -0.0267,
+        "vs_benchmark": -0.0261,
+        "tags": [
+          "momentum",
+          "high_sharpe",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Best unique aggressive add from Proposal A: +27.8% 5d, RSI 86, beta 2.99, and strong trend/Sharpe pr",
+        "rsi_at_entry": 86.038353,
+        "vol_ratio_at_entry": 1.383282
       }
     ],
-    "lesson": "'momentum' entries outperformed \u2014 continue favouring this setup; 'high_sharpe' entries outperformed \u2014 continue favouring this setup"
+    "lesson": "'momentum' entries underperformed \u2014 review sizing for this thesis today; 'high_sharpe' entries underperformed \u2014 review sizing for this thesis today"
+  },
+  "rank_performance": {
+    "status": "actionable",
+    "last_5d_rank_delta": 233,
+    "last_5d_normalized_delta": 0.025614,
+    "best_alpha_day": {
+      "alpha": 0.040157,
+      "rank_delta": -661
+    },
+    "worst_alpha_day": {
+      "alpha": -0.019782,
+      "rank_delta": 201
+    },
+    "alpha_rank_correlation": -0.8649,
+    "recent_history": [
+      {
+        "date": "2026-05-07",
+        "rank": 551,
+        "total_participants": 8913,
+        "rank_delta": -5,
+        "total_delta": 26,
+        "normalized_delta": -0.000743
+      },
+      {
+        "date": "2026-05-06",
+        "rank": 556,
+        "total_participants": 8887,
+        "rank_delta": 201,
+        "total_delta": 24,
+        "normalized_delta": 0.022509
+      },
+      {
+        "date": "2026-05-05",
+        "rank": 355,
+        "total_participants": 8863,
+        "rank_delta": -51,
+        "total_delta": 46,
+        "normalized_delta": -0.005993
+      },
+      {
+        "date": "2026-05-04",
+        "rank": 406,
+        "total_participants": 8817,
+        "rank_delta": 13,
+        "total_delta": 25,
+        "normalized_delta": 0.001348
+      },
+      {
+        "date": "2026-05-01",
+        "rank": 393,
+        "total_participants": 8792,
+        "rank_delta": 75,
+        "total_delta": 9,
+        "normalized_delta": 0.008493
+      }
+    ]
+  },
+  "missed_winners": {
+    "status": "insufficient_data",
+    "observations": 0
   }
 }
