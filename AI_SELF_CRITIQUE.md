@@ -13,10 +13,10 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - Evidence status: actionable
 - Minimum daily observations for strong conclusions: 5
 - Minimum rationale observations for bias claims: 5
-- Latest day status: experimental / unverified
+- Latest day status: verified
 
 ## What's Working ✅
-- 'at_52w_high' rationale is working: +0.9% avg, 57% hit rate
+- 'at_52w_high' rationale is working: +1.0% avg, 57% hit rate
 
 ## Systematic Biases / Errors ⚠️
 - 'diversifier' rationale is weak: -0.6% avg, 40% hit rate
@@ -31,7 +31,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 | breakout | 61 | +1.00% | 52% |
 | consensus | 136 | +0.58% | 50% |
 | catalyst | 34 | +0.84% | 47% |
-| diversifier | 15 | -0.62% | 40% |
+| diversifier | 15 | -0.61% | 40% |
 | non_us_differentiator | 39 | -0.22% | 28% |
 | overbought | 123 | +0.85% | 53% |
 | at_52w_high | 151 | +0.95% | 57% |
