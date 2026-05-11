@@ -3,38 +3,22 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "QCOM": 19.04064182,
-    "FTNT": 35.97472416,
-    "DVA": 20.04322436,
-    "AMD": 3.31191298,
-    "INTC": 11.91316092,
-    "MU": 1.79455743
+    "MRNA": 76.36756199,
+    "DVA": 20.05816222,
+    "AKAM": 22.47959753,
+    "QCOM": 11.36677241,
+    "AMD": 3.64733571,
+    "MU": 1.33385795
   },
-  "pending_order": {
-    "submitted_date": "2026-05-11",
-    "positions": [
-      {
-        "ticker": "DVA",
-        "weight": 0.25
-      },
-      {
-        "ticker": "MU",
-        "weight": 0.05
-      },
-      {
-        "ticker": "QCOM",
-        "weight": 0.15
-      },
-      {
-        "ticker": "AKAM",
-        "weight": 0.2
-      },
-      {
-        "ticker": "MRNA",
-        "weight": 0.25
-      }
-    ]
+  "verified_weights": {
+    "MRNA": 0.25,
+    "DVA": 0.24,
+    "AKAM": 0.2,
+    "QCOM": 0.15,
+    "AMD": 0.1,
+    "MU": 0.06
   },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -590,55 +574,23 @@
     },
     {
       "date": "2026-05-11",
-      "equity": 14098.88,
+      "equity": 14102.0,
       "cash": 0.0,
-      "daily_return": 0.009659,
-      "return_since_start": 0.409888,
+      "daily_return": 0.009883,
+      "return_since_start": 0.4102,
       "turnover": 0.0,
       "positions": {
-        "QCOM": 19.04064182,
-        "FTNT": 35.97472416,
-        "DVA": 20.04322436,
-        "AMD": 3.31191298,
-        "INTC": 11.91316092,
-        "MU": 1.79455743
+        "MRNA": 76.36756199,
+        "DVA": 20.05816222,
+        "AKAM": 22.47959753,
+        "QCOM": 11.36677241,
+        "AMD": 3.64733571,
+        "MU": 1.33385795
       },
-      "pending_order": {
-        "submitted_date": "2026-05-11",
-        "positions": [
-          {
-            "ticker": "DVA",
-            "weight": 0.25
-          },
-          {
-            "ticker": "MU",
-            "weight": 0.05
-          },
-          {
-            "ticker": "QCOM",
-            "weight": 0.15
-          },
-          {
-            "ticker": "AKAM",
-            "weight": 0.2
-          },
-          {
-            "ticker": "MRNA",
-            "weight": 0.25
-          }
-        ]
-      },
-      "executed_pending": false
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-05-11",
-  "last_equity": 14098.87876354,
-  "verified_weights": {
-    "QCOM": 0.25,
-    "FTNT": 0.25,
-    "DVA": 0.24,
-    "AMD": 0.09,
-    "INTC": 0.09,
-    "MU": 0.08
-  }
+  "last_equity": 14102.0
 }

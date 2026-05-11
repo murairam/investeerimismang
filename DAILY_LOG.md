@@ -890,7 +890,7 @@ Winners: DVA +1.3%, DOC +0.9% | Losers: AMD -3.0%, SMCI -2.9%, MU -2.9%
 
 **Market:** BULL regime · SPX vs 50d SMA: +7.8% · VIX: 18.2 · S&P 500 20d: +8.5%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 13:03:35.
 
 **Yesterday's P&L:** Portfolio -0.4% · Benchmark +0.8% · Alpha -1.2%
 Losers: QCOM -0.4%, FTNT -0.4%, DVA -0.4%
