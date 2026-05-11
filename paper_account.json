@@ -3,12 +3,12 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "MRNA": 76.36756199,
-    "DVA": 20.05816222,
-    "AKAM": 22.47959753,
-    "QCOM": 11.36677241,
-    "AMD": 3.64733571,
-    "MU": 1.33385795
+    "MRNA": 79.30909056,
+    "DVA": 20.23882949,
+    "AKAM": 21.92727243,
+    "QCOM": 10.59368875,
+    "AMD": 3.65645695,
+    "MU": 1.26554704
   },
   "verified_weights": {
     "MRNA": 0.25,
@@ -574,23 +574,23 @@
     },
     {
       "date": "2026-05-11",
-      "equity": 14102.0,
+      "equity": 14233.98,
       "cash": 0.0,
-      "daily_return": 0.009883,
-      "return_since_start": 0.4102,
+      "daily_return": 0.019334,
+      "return_since_start": 0.423398,
       "turnover": 0.0,
       "positions": {
-        "MRNA": 76.36756199,
-        "DVA": 20.05816222,
-        "AKAM": 22.47959753,
-        "QCOM": 11.36677241,
-        "AMD": 3.64733571,
-        "MU": 1.33385795
+        "MRNA": 79.30909056,
+        "DVA": 20.23882949,
+        "AKAM": 21.92727243,
+        "QCOM": 10.59368875,
+        "AMD": 3.65645695,
+        "MU": 1.26554704
       },
       "pending_order": null,
       "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-05-11",
-  "last_equity": 14102.0
+  "last_equity": 14233.97710922
 }
