@@ -886,36 +886,38 @@ Winners: DVA +1.3%, DOC +0.9% | Losers: AMD -3.0%, SMCI -2.9%, MU -2.9%
 - ➖ Removed **SMCI** (was 12.0%)
 
 ---
-## 2026-05-11 06:56:36
+## 2026-05-11 07:50:01
 
-**Market:** BULL regime · SPX vs 50d SMA: +7.8% · VIX: 17.2 · S&P 500 20d: +8.5%
+**Market:** BULL regime · SPX vs 50d SMA: +7.8% · VIX: 18.2 · S&P 500 20d: +8.5%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio +7.0% · Benchmark +0.8% · Alpha +6.1%
-Winners: MU +15.2%, INTC +13.7%, AMD +11.2%
+**Yesterday's P&L:** Portfolio -0.4% · Benchmark +0.8% · Alpha -1.2%
+Losers: QCOM -0.4%, FTNT -0.4%, DVA -0.4%
 
 **Paper account:** Equity €14,098.88 (start €10,000) · Today +0.97% · Since start +40.99% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 84% · **Positions:** 5 · **Total weight:** 90.0%
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
 
-**Thesis:** I prioritized the strongest independently validated names first: DVA as triple consensus, then MU and QCOM as double-consensus leaders. To adapt to the HIGH Tech rotation warning and strategy-decay alert, I replaced weaker current holdings like FTNT and INTC with the fastest non-consensus catalyst breakouts AKAM and MRNA, keeping the book concentrated, multi-sector, and still aggressive for a BULL regime with likely beta moderately above neutral but below the prior 1.86 due to deliberate Tech trimming.
+**Thesis:** I prioritized the four double-consensus names—MU, INTC, QCOM, and HUM—at high conviction per ensemble rules, then used AKAM as the best unique acceleration play to add right-tail upside. I am exiting FTNT, DVA, and AMD because today’s mandate favors faster movers and stronger volume-confirmed leaders, while keeping one Health name prevents an all-Tech book under a HIGH Tech rotation-risk alert. The resulting book stays aggressive and concentrated for a BULL regime, with beta likely still near the strategist’s 1.94 target while avoiding mono-sector overexposure.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **DVA** | 25.0% | Triple-consensus pick across all three proposals with exceptional 5d momentum (+30.7%) and solid volume confirmation, making it the highest-conviction non-Tech anchor. |
-| 2 | **MU** | 5.0% | Double-consensus pick and one of the strongest pure momentum leaders with vol_ratio 1.56, RSI 88, and explosive 5d momentum (+37.4%), fitting the bull-regime mandate despite Tech rotation risk. |
-| 3 | **QCOM** | 15.0% | Double-consensus pick with strong breakout confirmation via vol_ratio 1.70, RSI 86, and 5d momentum of +23.4%; still earns a slot even with elevated Tech rotation risk. |
-| 4 | **AKAM** | 20.0% | Best unique catalyst pick with extreme breakout characteristics: vol_ratio 4.04, 5d momentum +41.9%, and RSI 87, which qualifies as leadership confirmation and offers right-tail upside. |
-| 5 | **MRNA** | 25.0% | High-quality non-Tech unique catalyst with vol_ratio 3.39 and 5d momentum +19.5%; adds aggressive cross-sector upside while helping reduce overconcentration in decelerating Tech. |
+| 1 | **MU** | 17.0% | Consensus pick (2/3) and the strongest pure momentum leader here: vol_ratio 1.56, mom_5d +29.1%, RSI 88, near leadership highs; in this BULL tape that is confirmation, not a cap. |
+| 2 | **INTC** | 17.0% | Consensus pick (2/3), validated core ticker, with elite acceleration (mom_5d +30.0%) and strong volume confirmation; one of the clearest right-tail semis despite rotation risk. |
+| 3 | **QCOM** | 18.0% | Consensus pick (2/3) and current holding that still fully earns its slot with vol_ratio 1.70, mom_5d +29.7%, and breakout-strength RSI; slightly below MU/INTC only because Tech rotation risk is explicitly high. |
+| 4 | **HUM** | 25.0% | Consensus pick (2/3) and the best non-Tech rotation offset, with strong volume and momentum (vol_ratio 1.84, mom_5d +15.1%, RSI 85) while satisfying the mandatory second-sector requirement. |
+| 5 | **AKAM** | 23.0% | Best unique pick: exceptional breakout profile with vol_ratio 4.04, mom_5d +39.2%, RSI 87, giving asymmetric upside and a differentiated catalyst versus crowded consensus names. |
 
 **Changes from yesterday:**
-- ➕ Added **AKAM** at 20.0%
-- ➕ Added **MRNA** at 25.0%
+- ➕ Added **HUM** at 25.0%
+- ➕ Added **AKAM** at 23.0%
 - ➖ Removed **FTNT** (was 25.0%)
+- ➖ Removed **DVA** (was 24.0%)
 - ➖ Removed **AMD** (was 9.0%)
-- ➖ Removed **INTC** (was 9.0%)
-- ▼ **MU**: 8.0% → 5.0% (-3.0%)
-- ▼ **QCOM**: 25.0% → 15.0% (-10.0%)
+- ▲ **MU**: 8.0% → 17.0% (+9.0%)
+- ▲ **INTC**: 9.0% → 17.0% (+8.0%)
+- ▼ **QCOM**: 25.0% → 18.0% (-7.0%)
 
 ---
+
