@@ -1,16 +1,9 @@
 {
   "date": "2026-05-11",
-<<<<<<< Updated upstream
-  "timestamp": "2026-05-11T21:39:49+00:00",
-  "portfolio_return": 0.01772850128482578,
-  "benchmark_return": 0.0018799566475542484,
-  "alpha": 0.015848544637271533,
-=======
-  "timestamp": "2026-05-11T21:41:32+00:00",
+  "timestamp": "2026-05-11T21:50:26+00:00",
   "portfolio_return": 0.01806678323345884,
   "benchmark_return": 0.0018799566475542484,
   "alpha": 0.01618682658590459,
->>>>>>> Stashed changes
   "position_returns": [
     {
       "ticker": "QCOM",
@@ -37,26 +30,19 @@
       "price": 458.7900085449219
     },
     {
-<<<<<<< Updated upstream
-=======
       "ticker": "DVA",
       "weight": 0.24,
       "return": 0.0014095081193044035,
       "price": 198.92999267578125
     },
     {
->>>>>>> Stashed changes
       "ticker": "MRNA",
       "weight": 0.25,
       "return": -0.027046871155034236,
       "price": 52.880001068115234
     }
   ],
-<<<<<<< Updated upstream
-  "ai_recommendation": "Yes\u2014update the portfolio: keep QCOM and MU (strongest contributors) and keep AKAM/AMD for now, but drop MRNA (worst performer, -2.7%) and reallocate that capital into QCOM or MU to maintain your positive alpha.",
-=======
-  "ai_recommendation": "Yes\u2014keep QCOM, MU, and AKAM (they\u2019re driving most of the outperformance), keep AMD and DVA (small gains/flat), and drop MRNA (it\u2019s the only meaningful laggard at -2.7%). Reallocate the freed capital primarily into QCOM and MU to maintain the positive alpha momentum.",
->>>>>>> Stashed changes
+  "ai_recommendation": "Yes\u2014keep QCOM, MU, and AKAM (they\u2019re your strongest contributors) and keep AMD/DVA (small but not harmful). Drop/trim MRNA since it\u2019s the only laggard (-2.7%) and reallocate that weight into QCOM or MU to maintain your positive alpha.",
   "game_standing": {
     "rank": 585,
     "total_players": 8983,
