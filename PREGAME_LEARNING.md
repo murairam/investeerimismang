@@ -1,17 +1,17 @@
 # Pre-Game Learning Report
 
-Generated: 2026-05-08
+Generated: 2026-05-11
 Target go-live date: 2026-04-06
 Days remaining: 0
 
 ## Scoreboard
-- Training days with measurable alpha: 41
-- Win days (alpha > 0): 23
+- Training days with measurable alpha: 42
+- Win days (alpha > 0): 24
 - Loss days (alpha < 0): 18
-- Average daily alpha: +0.07%
-- Paper account equity: €13,363.46 (from €10,000.00, return +33.63%)
+- Average daily alpha: +0.22%
+- Paper account equity: €14,098.88 (from €10,000.00, return +40.99%)
 - Max drawdown (paper): 3.81%
-- Average turnover: 1.52%
+- Average turnover: 1.46%
 
 ## Confidence note
 - Evidence status: actionable
@@ -19,7 +19,7 @@ Days remaining: 0
 - Latest day is still experimental / unverified.
 
 ## Best and worst day
-- Best alpha day: 2026-04-29 (+4.02%)
+- Best alpha day: 2026-05-08 (+6.15%)
 - Worst alpha day: 2026-04-07 (-3.42%)
 
 ## Structured learning state

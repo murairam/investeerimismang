@@ -10,15 +10,31 @@
     "INTC": 11.91316092,
     "MU": 1.79455743
   },
-  "verified_weights": {
-    "QCOM": 0.25,
-    "FTNT": 0.25,
-    "DVA": 0.24,
-    "AMD": 0.09,
-    "INTC": 0.09,
-    "MU": 0.08
+  "pending_order": {
+    "submitted_date": "2026-05-11",
+    "positions": [
+      {
+        "ticker": "DVA",
+        "weight": 0.25
+      },
+      {
+        "ticker": "MU",
+        "weight": 0.05
+      },
+      {
+        "ticker": "QCOM",
+        "weight": 0.15
+      },
+      {
+        "ticker": "AKAM",
+        "weight": 0.2
+      },
+      {
+        "ticker": "MRNA",
+        "weight": 0.25
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -571,8 +587,58 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-05-11",
+      "equity": 14098.88,
+      "cash": 0.0,
+      "daily_return": 0.009659,
+      "return_since_start": 0.409888,
+      "turnover": 0.0,
+      "positions": {
+        "QCOM": 19.04064182,
+        "FTNT": 35.97472416,
+        "DVA": 20.04322436,
+        "AMD": 3.31191298,
+        "INTC": 11.91316092,
+        "MU": 1.79455743
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-11",
+        "positions": [
+          {
+            "ticker": "DVA",
+            "weight": 0.25
+          },
+          {
+            "ticker": "MU",
+            "weight": 0.05
+          },
+          {
+            "ticker": "QCOM",
+            "weight": 0.15
+          },
+          {
+            "ticker": "AKAM",
+            "weight": 0.2
+          },
+          {
+            "ticker": "MRNA",
+            "weight": 0.25
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-05-08",
-  "last_equity": 13964.0
+  "last_rebalanced_date": "2026-05-11",
+  "last_equity": 14098.87876354,
+  "verified_weights": {
+    "QCOM": 0.25,
+    "FTNT": 0.25,
+    "DVA": 0.24,
+    "AMD": 0.09,
+    "INTC": 0.09,
+    "MU": 0.08
+  }
 }
