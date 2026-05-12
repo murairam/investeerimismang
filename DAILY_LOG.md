@@ -919,3 +919,33 @@ Losers: MRNA -0.3%, DVA -0.3%, AKAM -0.3%
 
 ---
 
+## 2026-05-12 06:14:32
+
+**Market:** BULL regime · SPX vs 50d SMA: +7.8% · VIX: 18.4 · S&P 500 20d: +7.6%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.9% · Benchmark +0.2% · Alpha +1.7%
+Winners: QCOM +8.5%, MU +6.5%, AKAM +3.6% | Losers: MRNA -2.7%
+
+**Paper account:** Equity €14,264.17 (start €10,000) · Today +0.21% · Since start +42.64% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I kept the strongest independently validated consensus leaders first: QCOM and MU as triple-consensus max-conviction anchors, then AKAM and DVA as double-consensus names with DVA retained to satisfy sector diversification and reduce mono-Tech factor risk. For the final slot I chose INTC over AMD, STX, and GLW because it offers stronger acceleration and higher beta than STX, cleaner volume than AMD, and more validated leadership than GLW; this also rotates out weaker current holdings like MRNA and likely AMD under the slot-cost rule. Portfolio remains aggressive and Tech-heavy for the BULL regime, but with one Health position to meet sector constraints; beta should stay elevated and closer to the competition mandate without adding filler.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **QCOM** | 16.0% | Triple-consensus pick with elite breakout confirmation: vol_ratio 1.92, mom_5d +40.5%, RSI 89, and yesterday's strongest live contribution; this is exactly the kind of accelerating BULL leader that deserves max conviction. |
+| 2 | **MU** | 17.0% | Triple-consensus pick and validated live winner with vol_ratio 1.65, mom_5d +37.4%, RSI 89, plus strong beta for the regime; consensus plus signal strength supports maximum conviction. |
+| 3 | **AKAM** | 19.0% | Double-consensus pick with the best 5d momentum in the set at +44.0% and strong volume confirmation at 1.74; despite Tech rotation risk, its acceleration is too strong to ignore and consensus sets an 8-floor. |
+| 4 | **DVA** | 25.0% | Double-consensus non-Tech name that satisfies the mandatory sector diversification rule while still earning its slot on signals: vol_ratio 1.25, mom_5d +28.5%, RSI 87, and positive recent contribution. |
+| 5 | **INTC** | 23.0% | Best unique addition from the validated core list with strong momentum and beta for a BULL tape: mom_5d +34.5%, vol_ratio 1.21, RSI 89, and a fresh rotation candidate replacing weaker current holdings. |
+
+**Changes from yesterday:**
+- ➕ Added **INTC** at 23.0%
+- ➖ Removed **MRNA** (was 25.0%)
+- ➖ Removed **AMD** (was 10.0%)
+- ▲ **MU**: 6.0% → 17.0% (+11.0%)
+
+---
