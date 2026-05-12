@@ -1,54 +1,54 @@
 {
-  "date": "2026-05-11",
-  "timestamp": "2026-05-11T21:50:26+00:00",
-  "portfolio_return": 0.01806678323345884,
-  "benchmark_return": 0.0018799566475542484,
-  "alpha": 0.01618682658590459,
+  "date": "2026-05-12",
+  "timestamp": "2026-05-12T21:49:53+00:00",
+  "portfolio_return": -0.022370266623519906,
+  "benchmark_return": -0.0016026088601545085,
+  "alpha": -0.020767657763365397,
   "position_returns": [
-    {
-      "ticker": "QCOM",
-      "weight": 0.15,
-      "return": 0.08416633689183706,
-      "price": 237.52999877929688
-    },
-    {
-      "ticker": "MU",
-      "weight": 0.06,
-      "return": 0.06496969736595304,
-      "price": 795.3300170898438
-    },
-    {
-      "ticker": "AKAM",
-      "weight": 0.2,
-      "return": 0.035881034134914724,
-      "price": 153.00999450683594
-    },
-    {
-      "ticker": "AMD",
-      "weight": 0.1,
-      "return": 0.007908798708686549,
-      "price": 458.7900085449219
-    },
     {
       "ticker": "DVA",
       "weight": 0.24,
-      "return": 0.0014095081193044035,
-      "price": 198.92999267578125
+      "return": 0.008093302516607226,
+      "price": 200.5399932861328
     },
     {
       "ticker": "MRNA",
       "weight": 0.25,
-      "return": -0.027046871155034236,
-      "price": 52.880001068115234
+      "return": 0.0073751774162424955,
+      "price": 53.27000045776367
+    },
+    {
+      "ticker": "AKAM",
+      "weight": 0.2,
+      "return": -0.022547526776677707,
+      "price": 149.55999755859375
+    },
+    {
+      "ticker": "AMD",
+      "weight": 0.1,
+      "return": -0.0228862874178567,
+      "price": 448.2900085449219
+    },
+    {
+      "ticker": "MU",
+      "weight": 0.06,
+      "return": -0.03614851619104964,
+      "price": 766.5800170898438
+    },
+    {
+      "ticker": "QCOM",
+      "weight": 0.15,
+      "return": -0.11459605675321383,
+      "price": 210.30999755859375
     }
   ],
-  "ai_recommendation": "Yes\u2014keep QCOM, MU, and AKAM (they\u2019re your strongest contributors) and keep AMD/DVA (small but not harmful). Drop/trim MRNA since it\u2019s the only laggard (-2.7%) and reallocate that weight into QCOM or MU to maintain your positive alpha.",
+  "ai_recommendation": "Update the portfolio: drop **QCOM** (worst performer, -11.5%) and consider trimming **MU** (also weak, -3.6%); keep **DVA** and **MRNA** (positive returns) and hold **AKAM/AMD** only if you have a clear catalyst\u2014otherwise reduce them given both are -2.3%.",
   "game_standing": {
-    "rank": 585,
-    "total_players": 8983,
-    "value_eur": 14233.97710922313,
-    "today_return_pct": 0.938,
-    "week_return_pct": 13.013,
-    "month_return_pct": 39.056000000000004
+    "rank": 593,
+    "total_players": 8994,
+    "value_eur": 13914.732153002074,
+    "today_return_pct": -2.235,
+    "week_return_pct": 9.641,
+    "month_return_pct": 35.937000000000005
   }
 }
