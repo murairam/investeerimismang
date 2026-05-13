@@ -953,7 +953,7 @@ Winners: QCOM +8.5%, MU +6.5%, AKAM +3.6% | Losers: MRNA -2.7%
 
 **Market:** BULL regime · SPX vs 50d SMA: +7.5% · VIX: 18.0 · S&P 500 20d: +6.2%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 12:25:58.
 
 **Yesterday's P&L:** Portfolio -1.9% · Benchmark -0.2% · Alpha -1.7%
 Winners: DVA +1.2%, MRNA +1.1% | Losers: QCOM -11.1%, MU -3.3%, AMD -1.9%
