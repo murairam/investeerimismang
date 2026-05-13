@@ -949,3 +949,39 @@ Winners: QCOM +8.5%, MU +6.5%, AKAM +3.6% | Losers: MRNA -2.7%
 - ▲ **MU**: 6.0% → 17.0% (+11.0%)
 
 ---
+## 2026-05-13 06:10:38
+
+**Market:** BULL regime · SPX vs 50d SMA: +7.5% · VIX: 18.0 · S&P 500 20d: +6.2%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.9% · Benchmark -0.2% · Alpha -1.7%
+Winners: DVA +1.2%, MRNA +1.1% | Losers: QCOM -11.1%, MU -3.3%, AMD -1.9%
+
+**Paper account:** Equity €13,977.88 (start €10,000) · Today -2.01% · Since start +39.78% · Turnover 37.7% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the five double-consensus names first—DVA, Q, INTC, MU, and AKAM—because ensemble agreement across independent signal lenses is the strongest validation in this setup. HUM is the best unique addition for sector balance and continued acceleration, while I would rotate out QCOM immediately and also remove MRNA; AMD is skipped despite strong 5d momentum because vol_ratio 0.81 fails the rotation rule and recent learning specifically warned against forcing weak-volume holds. This mix stays aggressive and concentrated, with tech leadership preserved but not mono-sector, and portfolio beta should remain in a healthy BULL-range without adding low-quality filler just to target a number.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **DVA** | 17.0% | Consensus in 2/3 proposals and still one of the strongest live movers with vol_ratio 1.50, mom_5d +27.5%, RSI 87, and 52-week-high leadership; earns a top slot despite lower beta because the tape is rewarding acceleration. |
+| 2 | **Q** | 17.0% | Consensus in 2/3 proposals with the cleanest catalyst breakout profile in the set: vol_ratio 2.62, mom_5d +14.8%, RSI 74, and fresh 52-week-high behavior; exactly the kind of right-tail leader this competition rewards. |
+| 3 | **INTC** | 16.0% | Consensus in 2/3 proposals, validated core ticker with strong live momentum (mom_5d +11.3%, RSI 81, vol_ratio 1.13) and very high beta, making it a strong BULL-regime rotation name. |
+| 4 | **MU** | 17.0% | Consensus in 2/3 proposals with elite semiconductor momentum (mom_5d +19.6%, vol_ratio 1.65, RSI 82) and strong upside torque; kept despite recent weakness because today's signals are materially stronger than most alternatives. |
+| 5 | **AKAM** | 16.0% | Consensus in 2/3 proposals and still qualifies under the rotation mandate with exceptional mom_5d +26.6%; volume confirmation is only moderate at 1.12, so conviction stays at the consensus floor rather than higher. |
+| 6 | **HUM** | 17.0% | Best unique add from the non-consensus set: vol_ratio 1.56, mom_5d +23.1%, RSI 88, and strong trend quality provide a second-sector momentum leader without resorting to weak filler. |
+
+**Changes from yesterday:**
+- ➕ Added **Q** at 17.0%
+- ➕ Added **INTC** at 16.0%
+- ➕ Added **HUM** at 17.0%
+- ➖ Removed **MRNA** (was 25.0%)
+- ➖ Removed **QCOM** (was 15.0%)
+- ➖ Removed **AMD** (was 10.0%)
+- ▼ **DVA**: 24.0% → 17.0% (-7.0%)
+- ▲ **MU**: 6.0% → 17.0% (+11.0%)
+- ▼ **AKAM**: 20.0% → 16.0% (-4.0%)
+
+---

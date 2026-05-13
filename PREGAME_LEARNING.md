@@ -1,17 +1,17 @@
 # Pre-Game Learning Report
 
-Generated: 2026-05-12
+Generated: 2026-05-13
 Target go-live date: 2026-04-06
 Days remaining: 0
 
 ## Scoreboard
-- Training days with measurable alpha: 43
+- Training days with measurable alpha: 44
 - Win days (alpha > 0): 24
-- Loss days (alpha < 0): 19
-- Average daily alpha: +0.08%
-- Paper account equity: €14,264.17 (from €10,000.00, return +42.64%)
+- Loss days (alpha < 0): 20
+- Average daily alpha: +0.04%
+- Paper account equity: €13,977.88 (from €10,000.00, return +39.78%)
 - Max drawdown (paper): 3.81%
-- Average turnover: 1.40%
+- Average turnover: 2.85%
 
 ## Confidence note
 - Evidence status: actionable
@@ -30,15 +30,16 @@ Days remaining: 0
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| INTC | winner | 26 | +3.61% | 69% |
-| QCOM | winner | 8 | +2.77% | 50% |
+| INTC | winner | 28 | +2.89% | 64% |
 | MPWR | winner | 8 | +2.65% | 100% |
 | NOKIA.HE | winner | 8 | +2.64% | 75% |
 | AMD | winner | 22 | +2.58% | 73% |
+| ON | winner | 22 | +2.44% | 82% |
 | EQNR.OL | loser | 10 | -1.56% | 20% |
 | GEV | loser | 8 | -1.21% | 25% |
 | DOW | loser | 8 | -0.71% | 50% |
 | VWS.CO | loser | 12 | -0.20% | 33% |
+| QCOM | loser | 10 | -0.00% | 40% |
 
 ## Action plan until April 6
 - BAN EQNR.OL: hit rate 20% over 10 observations — do not propose.
