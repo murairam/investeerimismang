@@ -985,3 +985,37 @@ Winners: DVA +1.2%, MRNA +1.1% | Losers: QCOM -11.1%, MU -3.3%, AMD -1.9%
 - ▼ **AKAM**: 20.0% → 16.0% (-4.0%)
 
 ---
+## 2026-05-14 06:12:48
+
+**Market:** BULL regime · SPX vs 50d SMA: +7.9% · VIX: 17.9 · S&P 500 20d: +6.0%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +2.3% · Benchmark +0.6% · Alpha +1.7%
+Winners: AKAM +7.9%, MU +5.0%, HUM +3.4% | Losers: AXON -4.1%, DVA -1.0%, INTC -0.1%
+
+**Paper account:** Equity €14,200.33 (start €10,000) · Today +2.06% · Since start +42.00% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 87% · **Positions:** 5 · **Total weight:** 80.0%
+
+**Thesis:** I kept the three triple-consensus names AKAM, MU, and HUM at the top, then added the two double-consensus names ON and CSCO because ensemble agreement across independent signal lenses is the strongest validation available today. I would exit DVA and AXON as weak/non-leading holdings and replace INTC with ON under the rotation mandate; QCOM is acceptable but loses the slot to CSCO on superior volume confirmation, while GEN is skipped because its deep distance from the 52-week high makes it a weaker asymmetric choice than the consensus alternatives. The final set stays concentrated for a bull regime, preserves a second sector via HUM, and should keep portfolio beta in an aggressive but still target-consistent range near the strategist's 1.74 baseline.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **AKAM** | 5.0% | Triple-consensus leader with the strongest combined breakout confirmation in the set: vol_ratio 1.90, mom_5d +32.4%, RSI 88, and fresh leadership that fully fits the bull-regime mandate. |
+| 2 | **MU** | 18.0% | Triple-consensus high-beta momentum core with elite 5d acceleration (+20.8%) and strong regime fit; despite crowd awareness, the actual signals still justify maximum conviction in a competition portfolio. |
+| 3 | **HUM** | 25.0% | Triple-consensus non-tech leader that satisfies the sector-balance rule while still acting like a true momentum stock: vol_ratio 1.58, mom_5d +24.0%, RSI 91, and recent portfolio contribution remains strong. |
+| 4 | **ON** | 12.0% | Double-consensus validated breakout and a live validated core ticker with exceptional game hit rate; vol_ratio 1.59, positive 5d momentum, and higher beta make it a stronger rotation target than slower legacy holdings like INTC. |
+| 5 | **CSCO** | 20.0% | Double-consensus pick with the cleanest volume confirmation in the field (vol_ratio 2.28) and solid 5d momentum; lower beta than ON/MU but earns its slot as a high-quality breakout rather than filler. |
+
+**Changes from yesterday:**
+- ➕ Added **ON** at 12.0%
+- ➕ Added **CSCO** at 20.0%
+- ➖ Removed **DVA** (was 17.0%)
+- ➖ Removed **INTC** (was 16.0%)
+- ➖ Removed **AXON** (was 9.0%)
+- ➖ Removed **QCOM** (was 8.0%)
+- ▼ **AKAM**: 16.0% → 5.0% (-11.0%)
+- ▲ **HUM**: 17.0% → 25.0% (+8.0%)
+
+---

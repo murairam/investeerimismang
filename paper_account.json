@@ -11,16 +11,31 @@
     "AXON": 3.72447012,
     "QCOM": 6.1968837
   },
-  "verified_weights": {
-    "DVA": 0.17,
-    "HUM": 0.17,
-    "MU": 0.17,
-    "AKAM": 0.16,
-    "INTC": 0.16,
-    "AXON": 0.09,
-    "QCOM": 0.08
+  "pending_order": {
+    "submitted_date": "2026-05-14",
+    "positions": [
+      {
+        "ticker": "AKAM",
+        "weight": 0.05
+      },
+      {
+        "ticker": "MU",
+        "weight": 0.18
+      },
+      {
+        "ticker": "HUM",
+        "weight": 0.25
+      },
+      {
+        "ticker": "ON",
+        "weight": 0.12
+      },
+      {
+        "ticker": "CSCO",
+        "weight": 0.2
+      }
+    ]
   },
-  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -652,8 +667,60 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-05-14",
+      "equity": 14200.33,
+      "cash": 0.0,
+      "daily_return": 0.020579,
+      "return_since_start": 0.420033,
+      "turnover": 0.0,
+      "positions": {
+        "DVA": 13.80992126,
+        "HUM": 9.37681212,
+        "MU": 3.61272334,
+        "AKAM": 17.4280104,
+        "INTC": 21.61125263,
+        "AXON": 3.72447012,
+        "QCOM": 6.1968837
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-14",
+        "positions": [
+          {
+            "ticker": "AKAM",
+            "weight": 0.05
+          },
+          {
+            "ticker": "MU",
+            "weight": 0.18
+          },
+          {
+            "ticker": "HUM",
+            "weight": 0.25
+          },
+          {
+            "ticker": "ON",
+            "weight": 0.12
+          },
+          {
+            "ticker": "CSCO",
+            "weight": 0.2
+          }
+        ]
+      },
+      "executed_pending": false
     }
   ],
-  "last_rebalanced_date": "2026-05-13",
-  "last_equity": 13914.0
+  "last_rebalanced_date": "2026-05-14",
+  "last_equity": 14200.33251187,
+  "verified_weights": {
+    "DVA": 0.17,
+    "HUM": 0.17,
+    "MU": 0.17,
+    "AKAM": 0.16,
+    "INTC": 0.16,
+    "AXON": 0.09,
+    "QCOM": 0.08
+  }
 }
