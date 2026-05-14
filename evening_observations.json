@@ -1,60 +1,60 @@
 {
-  "date": "2026-05-13",
-  "timestamp": "2026-05-13T21:56:44+00:00",
-  "portfolio_return": 0.020817773851493575,
-  "benchmark_return": 0.005849246488426552,
-  "alpha": 0.014968527363067023,
+  "date": "2026-05-14",
+  "timestamp": "2026-05-14T21:44:23+00:00",
+  "portfolio_return": -0.02595903519085193,
+  "benchmark_return": 0.007655604577358366,
+  "alpha": -0.033614639768210296,
   "position_returns": [
     {
-      "ticker": "AKAM",
-      "weight": 0.16,
-      "return": 0.07742713305754068,
-      "price": 161.13999938964844
-    },
-    {
-      "ticker": "MU",
-      "weight": 0.17,
-      "return": 0.04833153352160302,
-      "price": 803.6300048828125
+      "ticker": "AXON",
+      "weight": 0.09,
+      "return": 0.030173544122365836,
+      "price": 388.19000244140625
     },
     {
       "ticker": "HUM",
       "weight": 0.17,
-      "return": 0.0321652270312478,
-      "price": 304.8500061035156
-    },
-    {
-      "ticker": "QCOM",
-      "weight": 0.08,
-      "return": 0.013598976004717711,
-      "price": 213.1699981689453
-    },
-    {
-      "ticker": "INTC",
-      "weight": 0.16,
-      "return": -0.002653177126314965,
-      "price": 120.29000091552734
+      "return": -0.0114810560273092,
+      "price": 301.3500061035156
     },
     {
       "ticker": "DVA",
       "weight": 0.17,
-      "return": -0.012167085191509885,
-      "price": 198.10000610351562
+      "return": -0.02786473549918267,
+      "price": 192.5800018310547
     },
     {
-      "ticker": "AXON",
-      "weight": 0.09,
-      "return": -0.0427780221034213,
-      "price": 376.82000732421875
+      "ticker": "AKAM",
+      "weight": 0.16,
+      "return": -0.033945645037991246,
+      "price": 155.6699981689453
+    },
+    {
+      "ticker": "MU",
+      "weight": 0.17,
+      "return": -0.03436904414888675,
+      "price": 776.010009765625
+    },
+    {
+      "ticker": "INTC",
+      "weight": 0.16,
+      "return": -0.036245744261098944,
+      "price": 115.93000030517578
+    },
+    {
+      "ticker": "QCOM",
+      "weight": 0.08,
+      "return": -0.061406372614950744,
+      "price": 200.0800018310547
     }
   ],
-  "ai_recommendation": "Yes\u2014keep AKAM, MU, and HUM (they\u2019re your strongest contributors) and keep QCOM; consider dropping AXON (worst performer, -4.3%) and likely trimming DVA (also weak, -1.2%) while holding INTC only if you have a specific rebound thesis.",
+  "ai_recommendation": "Update the portfolio: drop the weakest momentum names **QCOM (-6.1%)** and **INTC (-3.6%)** (also consider trimming **AKAM (-3.4%)**), and keep **AXON (+3.0%)** as your highest-conviction anchor while holding **HUM (-1.1%)** and **DVA (-2.8%)** only if you need exposure. Since you\u2019re currently far below benchmark (alpha **-3.36%**) and the leaderboard snapshot is **Monday 09:00 EET**, rotate into higher-upside replacements rather than \u201cprotecting\u201d with lower-beta\u2014aim to improve expected return, not just reduce volatility.",
   "game_standing": {
-    "rank": 566,
-    "total_players": 9020,
-    "value_eur": 14088.724734143612,
-    "today_return_pct": 1.252,
-    "week_return_pct": 7.02,
-    "month_return_pct": 37.637
+    "rank": 832,
+    "total_players": 9034,
+    "value_eur": 13725.313723327186,
+    "today_return_pct": -2.601,
+    "week_return_pct": 1.9640000000000002,
+    "month_return_pct": 31.401
   }
 }
