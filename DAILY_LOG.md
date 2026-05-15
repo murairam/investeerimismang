@@ -1019,3 +1019,38 @@ Winners: AKAM +7.9%, MU +5.0%, HUM +3.4% | Losers: AXON -4.1%, DVA -1.0%, INTC -
 - ▲ **HUM**: 17.0% → 25.0% (+8.0%)
 
 ---
+## 2026-05-15 06:14:22
+
+**Market:** BULL regime · SPX vs 50d SMA: +8.6% · VIX: 17.3 · S&P 500 20d: +6.5%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -2.0% · Benchmark +0.8% · Alpha -2.7%
+Winners: AXON +3.7% | Losers: QCOM -5.5%, INTC -3.0%, MU -2.8%
+
+**Paper account:** Equity €13,908.01 (start €10,000) · Today -2.06% · Since start +39.08% · Turnover 52.0% · Cash €2,781.60
+
+**Confidence:** 87% · **Positions:** 5 · **Total weight:** 80.0%
+
+**Thesis:** I prioritized all four double-consensus names—PANW, MU, ON, and CSCO—because independent agreement across models is the strongest signal and these names also show the best momentum/volume combinations for a BULL regime. HUM earns the fifth slot as the highest-quality non-tech alternative, preventing a mono-sector portfolio while avoiding weaker unique catalyst names like NTAP and slower/filler incumbents; this also means rotating out weak current holdings such as QCOM and INTC, and not keeping DVA/AKAM/AXON when today's leaders are materially stronger. Portfolio remains aggressive and should stay near the strategist beta target, with concentration tilted toward tech leadership but not purely one-sector.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **PANW** | 5.0% | Consensus pick (2/3) with conviction floor support; elite breakout profile with vol_ratio 1.50, mom_5d +22.0%, RSI 93, and strong cross-signal leadership in a BULL tape. |
+| 2 | **MU** | 18.0% | Consensus pick (2/3) and current holding worth keeping; very high beta 2.81 fits the bull mandate, with mom_5d +20.8% and strong strategist/full-analyst agreement as a right-tail anchor. |
+| 3 | **ON** | 19.0% | Consensus pick (2/3) plus validated core ticker with 100% live hit rate; strong mom_5d +18.4% and 52-week-high breakout behavior outweigh softer volume confirmation. |
+| 4 | **CSCO** | 13.0% | Consensus pick (2/3) with mandatory high conviction; vol_ratio 3.44, mom_5d +26.1%, and RSI 87 mark a textbook high-volume leadership breakout that also adds a different tech sleeve than semis. |
+| 5 | **HUM** | 25.0% | Best non-tech slot from the proposals and keeps the portfolio compliant with multi-sector risk; mom_5d +22.7%, vol_ratio 1.00, and strong trend quality justify inclusion despite being a unique pick. |
+
+**Changes from yesterday:**
+- ➕ Added **PANW** at 5.0%
+- ➕ Added **ON** at 19.0%
+- ➕ Added **CSCO** at 13.0%
+- ➖ Removed **DVA** (was 17.0%)
+- ➖ Removed **AKAM** (was 16.0%)
+- ➖ Removed **INTC** (was 16.0%)
+- ➖ Removed **AXON** (was 9.0%)
+- ➖ Removed **QCOM** (was 8.0%)
+- ▲ **HUM**: 17.0% → 25.0% (+8.0%)
+
+---
