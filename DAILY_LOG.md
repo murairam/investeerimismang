@@ -1054,3 +1054,40 @@ Winners: AXON +3.7% | Losers: QCOM -5.5%, INTC -3.0%, MU -2.8%
 - ▲ **HUM**: 17.0% → 25.0% (+8.0%)
 
 ---
+## 2026-05-18 06:16:47
+
+**Market:** BULL regime · SPX vs 50d SMA: +7.0% · VIX: 18.4 · S&P 500 20d: +4.0%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -1.3% · Benchmark -1.2% · Alpha -0.1%
+Winners: DVA +4.0%, HUM +1.6%, AXON +1.3% | Losers: MU -6.3%, INTC -5.9%, AKAM -2.8%
+
+**Paper account:** Equity €13,763.76 (start €10,000) · Today -1.04% · Since start +37.64% · Turnover 21.7% · Cash €2,752.75
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 90.0%
+
+**Thesis:** I prioritized the four double-consensus names—PANW, CSCO, HUM, and SUBC.OL—as independently validated across models, then added CRWD as the strongest unique momentum slot-cost winner. This aggressively rotates out weaker current holdings like DVA, MU, INTC, QCOM, and AKAM, reduces decelerating Tech concentration versus the prior book, and adds an Energy leader while still keeping portfolio beta tilted above the strategist's too-low 0.88 baseline for a BULL competition setup.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **PANW** | 5.0% | Consensus pick (2/3) with mandatory high-conviction floor; strongest fresh breakout setup today with vol_ratio 1.64, mom_5d +18.0%, RSI 93, and leadership-confirmation signals that fit an aggressive BULL regime. |
+| 2 | **CSCO** | 15.0% | Consensus pick (2/3) with mandatory conviction floor; exceptional acceleration with vol_ratio 1.64 and mom_5d +23.6%, plus low crowding and clean breakout confirmation despite broader Tech rotation risk. |
+| 3 | **HUM** | 25.0% | Consensus pick (2/3) and strongest incumbent to keep; mom_5d +12.2% and near-neutral volume mean it still earns its slot while providing required non-Tech sector exposure. |
+| 4 | **SUBC.OL** | 25.0% | Consensus pick (2/3) with strong Energy breadth tailwind, vol_ratio 1.53, and mom_5d +13.4%; attractive rotation beneficiary as capital shifts away from decelerating Tech. |
+| 5 | **CRWD** | 20.0% | Best unique momentum add from Proposal A: mom_5d +13.8% with solid volume confirmation and low retail crowding, earning the final slot over slower or lower-upside alternatives. |
+
+**Changes from yesterday:**
+- ➕ Added **PANW** at 5.0%
+- ➕ Added **CSCO** at 15.0%
+- ➕ Added **SUBC.OL** at 25.0%
+- ➕ Added **CRWD** at 20.0%
+- ➖ Removed **DVA** (was 17.0%)
+- ➖ Removed **MU** (was 17.0%)
+- ➖ Removed **AKAM** (was 16.0%)
+- ➖ Removed **INTC** (was 16.0%)
+- ➖ Removed **AXON** (was 9.0%)
+- ➖ Removed **QCOM** (was 8.0%)
+- ▲ **HUM**: 17.0% → 25.0% (+8.0%)
+
+---
