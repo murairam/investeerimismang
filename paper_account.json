@@ -1,35 +1,35 @@
 {
   "start_date": "2026-04-13",
   "initial_capital": 10000.0,
-  "cash": 2752.7510571,
+  "cash": 1355.46340758,
   "positions": {
-    "PANW": 3.29691839,
-    "MU": 3.97721224,
-    "ON": 26.89633664,
-    "CSCO": 17.60879648,
-    "HUM": 13.1192762
+    "PANW": 3.18788635,
+    "CSCO": 19.9149048,
+    "HUM": 12.89479209,
+    "SUBC.OL": 105.56162845,
+    "CRWD": 5.10098899
   },
   "pending_order": {
-    "submitted_date": "2026-05-18",
+    "submitted_date": "2026-05-19",
     "positions": [
       {
-        "ticker": "PANW",
+        "ticker": "CRWD",
         "weight": 0.05
       },
       {
+        "ticker": "PANW",
+        "weight": 0.1
+      },
+      {
         "ticker": "CSCO",
-        "weight": 0.15
+        "weight": 0.2
       },
       {
         "ticker": "HUM",
         "weight": 0.25
       },
       {
-        "ticker": "SUBC.OL",
-        "weight": 0.25
-      },
-      {
-        "ticker": "CRWD",
+        "ticker": "FTNT",
         "weight": 0.2
       }
     ]
@@ -790,10 +790,51 @@
         ]
       },
       "executed_pending": true
+    },
+    {
+      "date": "2026-05-19",
+      "equity": 13554.63,
+      "cash": 1355.46,
+      "daily_return": -0.015194,
+      "return_since_start": 0.355463,
+      "turnover": 0.473432,
+      "positions": {
+        "PANW": 3.18788635,
+        "CSCO": 19.9149048,
+        "HUM": 12.89479209,
+        "SUBC.OL": 105.56162845,
+        "CRWD": 5.10098899
+      },
+      "pending_order": {
+        "submitted_date": "2026-05-19",
+        "positions": [
+          {
+            "ticker": "CRWD",
+            "weight": 0.05
+          },
+          {
+            "ticker": "PANW",
+            "weight": 0.1
+          },
+          {
+            "ticker": "CSCO",
+            "weight": 0.2
+          },
+          {
+            "ticker": "HUM",
+            "weight": 0.25
+          },
+          {
+            "ticker": "FTNT",
+            "weight": 0.2
+          }
+        ]
+      },
+      "executed_pending": true
     }
   ],
-  "last_rebalanced_date": "2026-05-18",
-  "last_equity": 13763.75528549,
+  "last_rebalanced_date": "2026-05-19",
+  "last_equity": 13554.63407584,
   "verified_weights": {
     "DVA": 0.17,
     "HUM": 0.17,
