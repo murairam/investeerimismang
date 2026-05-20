@@ -1128,3 +1128,42 @@ Winners: AXON +1.7%, QCOM +0.8%, HUM +0.0% | Losers: MU -6.2%, INTC -0.8%, DVA -
 - ▲ **HUM**: 17.0% → 25.0% (+8.0%)
 
 ---
+## 2026-05-20 06:16:16
+
+**Market:** BULL regime · SPX vs 50d SMA: +5.9% · VIX: 18.1 · S&P 500 20d: +4.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.4% · Benchmark -0.7% · Alpha +0.3%
+Winners: MU +3.0%, INTC +2.9%, HUM +2.0% | Losers: AKAM -5.8%, QCOM -3.5%, DVA -2.0%
+
+**Paper account:** Equity €13,385.53 (start €10,000) · Today -1.25% · Since start +33.86% · Turnover 46.3% · Cash €2,677.11
+
+**Confidence:** 87% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the strongest independently validated consensus cluster: CRWD, PANW, CSCO, HUM, and EVO.ST all appeared in 2+ proposals, so they receive the mandated high-conviction floor, with CRWD highest on triple-consensus plus elite momentum/volume. FTNT is the best unique add for aggressive upside, while current laggards like QCOM and AKAM should be removed because they failed the rotation mandate and were explicitly flagged by learning; DVA and AXON also lose slot priority versus today's faster leaders. This portfolio stays concentrated, spans at least two sectors, and materially raises beta versus the strategist's too-low 0.53 baseline without diluting into low-beta filler names.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **CRWD** | 5.0% | Triple-consensus momentum leader with vol_ratio 1.53, mom_5d +14.1%, RSI 91 and strong software/cyber leadership; in this BULL regime the accelerating overbought breakout is a primary signal, not a cap. |
+| 2 | **PANW** | 15.0% | Triple-consensus pick with powerful 5d momentum (+12.5%) and strong relative strength; near-consensus core cyber leader earns high conviction despite slightly lower volume confirmation than CRWD. |
+| 3 | **CSCO** | 18.0% | Triple-consensus validated and one of the strongest acceleration names on the board with mom_5d +17.4%, positive trend quality, low crowding, and cleaner continuation profile than slower current holdings. |
+| 4 | **HUM** | 23.0% | Double-consensus hold and explicitly supported by learning context as one of the few current winners; mom_5d +6.3% remains positive even if vol_ratio 0.83 keeps conviction below the tech leaders. |
+| 5 | **EVO.ST** | 22.0% | Double-consensus unique catalyst breakout with exceptional volume confirmation (vol_ratio 4.18) and mom_5d +12.1%; earns its slot as the best non-US/non-tech acceleration name rather than a filler diversifier. |
+| 6 | **FTNT** | 17.0% | Best high-upside unique add from the strategist: mom_5d +13.2% and positive trend alignment make it a stronger right-tail bet than the lower-beta utility/insurance alternatives, though only single-model support keeps it below consensus names. |
+
+**Changes from yesterday:**
+- ➕ Added **CRWD** at 5.0%
+- ➕ Added **PANW** at 15.0%
+- ➕ Added **CSCO** at 18.0%
+- ➕ Added **EVO.ST** at 22.0%
+- ➕ Added **FTNT** at 17.0%
+- ➖ Removed **DVA** (was 17.0%)
+- ➖ Removed **MU** (was 17.0%)
+- ➖ Removed **AKAM** (was 16.0%)
+- ➖ Removed **INTC** (was 16.0%)
+- ➖ Removed **AXON** (was 9.0%)
+- ➖ Removed **QCOM** (was 8.0%)
+- ▲ **HUM**: 17.0% → 23.0% (+6.0%)
+
+---
