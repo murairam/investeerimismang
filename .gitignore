@@ -169,5 +169,24 @@ LIVE_HANDOFF_*.md
 # live_mode_lock.json is intentionally tracked — it must persist across CI runs
 # so mode_guard only resets the paper account once (on the true first LIVE run).
 
-# Claude Code temporary worktrees (created by agent isolation mode, never track these)
-.claude/worktrees/
+# Claude Code (entire .claude folder — IDE config, commands, scheduled tasks)
+.claude/
+
+# Competitor intelligence (private game strategy)
+docs/competitor_intel.md
+
+# Cache files
+data/sec_cik_cache.json
+
+# Verbose pregame rerun log (noise for public repo)
+PREGAME_RUNS.md
+
+# AGENTS.md stub artifact
+AGENTS.md
+
+# Node (supabase CLI) — not part of the Python project
+package.json
+package-lock.json
+
+# HAR captures (may contain auth tokens)
+*.har

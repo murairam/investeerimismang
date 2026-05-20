@@ -2,11 +2,15 @@
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 ![CI](https://github.com/murairam/investeerimismang/actions/workflows/alphashark.yml/badge.svg)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5.4-412991?logo=openai&logoColor=white)
+![Gemini](https://img.shields.io/badge/Google-Gemini_2.5_Flash-4285F4?logo=google&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-automated-2088FF?logo=github-actions&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 **AlphaShark** is an autonomous AI trading agent built to win the **Äripäev/SEB Investment Game** (Estonia). Every weekday it wakes up at 06:00 UTC, scans ~630 live tickers across 6 markets, runs a five-agent adversarial AI ensemble, and posts a validated portfolio recommendation to Discord — before the 10:00 EET submission deadline.
 
-> **Game period:** 6 April – 19 June 2026 · **8 595 portfolios** · **Objective: rank #1**
+> **Game period:** 6 April – 19 June 2026 · **~8,900 portfolios** · **Objective: rank #1**
 
 ---
 
@@ -48,6 +52,7 @@ A second-pass debate is available behind `ENABLE_CROSS_CHECK`. When enabled, age
 | Automation | GitHub Actions | Zero-infra scheduled runs; secrets management; auto-commit results |
 | Notifications | Discord webhooks | Formatted daily embeds; @mention reminders in LIVE mode |
 | Persistence | Supabase PostgreSQL + derived JSON/Markdown artifacts | Canonical DB state with local artifacts for auditability and reports |
+| Web automation | Playwright | Intercepts WebSocket frames from the game SPA to extract rank, portfolio value, and daily returns |
 
 ---
 
@@ -104,40 +109,49 @@ Then confirm the system's record matches yours:
 
 ### Current mode: LIVE (since 6 April 2026)
 
-The bot is now in **LIVE mode** — every decision counts toward the real game ranking.
+The bot is in **LIVE mode** — every decision counts toward the real ranking.
 
 - Writes to `DAILY_LOG.md` (one entry per trading day)
 - Strategy files are SHA256-locked via `live_mode_lock.json` — any accidental change is caught at startup
 - `verify.py` must be run after each manual submission to keep the system's record in sync
-- A second GitHub Actions workflow fires at 07:00 UTC and pings Discord if verification hasn't happened
+- A second workflow fires at 07:00 UTC and pings Discord if verification hasn't happened
 
-**Pre-game training ran from ~March through 5 April.** During that period the system operated in PREGAME mode: recording decisions to `PREGAME_LOG.md`, tracking a virtual €10k paper account, and building up `learning_state.json` from 30 days of paper trades. That structured history is still injected into every live-mode prompt — the pre-game learning carries forward.
+**Pre-game training ran from ~March through 5 April.** The system operated in PREGAME mode for 30 days: recording decisions to `PREGAME_LOG.md`, tracking a virtual €10k paper account, and building `learning_state.json`. That structured history is injected into every live-mode prompt — the pre-game learning carries forward.
 
 ---
 
 ## Live Performance
 
-**Game start:** 6 April 2026 · **Today:** 24 April 2026 · **Days elapsed:** ~14 trading days
+**Game period:** 6 April – 19 June 2026 · **~8,900 portfolios** · **Objective: rank #1**
+
+### Live (6 April – 13 May 2026, 29 trading days)
 
 | Metric | Value |
 |--------|-------|
-| Pre-game paper return (30 days) | **+13.96%** |
-| Pre-game win/loss record | 16W – 14L |
-| Devil's advocate accuracy | 24.14% (surprisingly bullish — signals are mostly noise) |
-| Best pre-game signal | `vol_ratio` — breakout confirmation (≈62% directional accuracy) |
-| Worst pre-game signal | `catalyst` rationale tag (–43% alpha vs benchmark) |
+| Paper account return | **+39.78%** (€10,000 → €13,978) |
+| Live win/loss record | **18W – 11L** (62% win rate) |
+| Best known rank | **#355 / 8,913** (top 4%) |
+| Devil's advocate accuracy | 28.75% — HIGH-flagged picks averaged **+1.79%/day** (contrarian buy signal) |
+
+### Pre-game training (March – 5 April 2026, 30 days)
+
+| Metric | Value |
+|--------|-------|
+| Paper return | **+13.96%** |
+| Win/loss | 16W – 14L |
+| Best signal | `vol_ratio` — breakout confirmation (62% directional accuracy) |
+| Worst rationale tag | `catalyst` — –43% alpha vs benchmark over 20 obs |
 
 **What's working:**
-- Momentum + volume confirmation (`mom_20d` + `vol_ratio`) — the core alpha source
-- Pre-earnings setups with RSI 50–75 — consistent edge when sized correctly (≤20%)
-- Aggressive concentration (5 names at ~20% each) — outperforms diversified books in 75-day format
+- Momentum + volume confirmation (`mom_20d` + `vol_ratio`) — core alpha source
+- Aggressive concentration (5 names at ~20% each) — outperforms diversified books in a 75-day format
+- Devil inversion: with 80 obs, devil HIGH-flags average +1.79%/day → treated as contrarian-buy confirmation
 
 **What isn't working:**
-- Nordic diversification for its own sake — adding EQNR.OL, DOW, VWS.CO as "balance" diluted returns
-- Over-cautious tuning in early pregame — conservative risk limits hurt performance before they were relaxed
-- `non_US_differentiator` rationale tag — –27% alpha; Nordic names need genuine signal, not geographic quota
+- Nordic diversification for its own sake — `non_US_differentiator` rationale = –27% alpha
+- `catalyst` rationale tag — 40% hit rate, –0.47% avg over 20 obs; pre-earnings sizing capped accordingly
 
-**Key lesson:** The game rewards conviction. Equal-weighting or sector-capping to look balanced is the fastest way to lose to a competitor running 5 concentrated positions.
+**Key lesson:** The game rewards conviction. Equal-weighting to look balanced loses to any competitor running 5 concentrated momentum names.
 
 ---
 
@@ -376,7 +390,9 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 │   ├── pregame_review.py        # refresh/print pre-game learning summary
 │   ├── evening_review.py        # end-of-day Discord performance review
 │   ├── historical_shadow_trader.py # no-lookahead historical simulator / backtest
-│   └── verification_reminder.py # GitHub Actions job for LIVE mode sync reminders
+│   ├── check_models.py          # smoke-test all model routes without a full run
+│   ├── verification_reminder.py # GitHub Actions job for LIVE mode sync reminders
+│   └── migrations/              # one-time DB migration scripts (Supabase setup)
 ├── docs/
 │   └── rules.txt                # official game rules reference
 ├── data/
@@ -411,16 +427,13 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 │   └── dispatcher.py            # Discord webhook formatter + sender
 ├── portfolio_history.json       # canonical daily record + structured decision history (auto-generated)
 ├── paper_account.json           # virtual paper account ledger (auto-generated)
-├── cost_log.json                # API cost tracking (auto-generated)
-├── verification_tracker.json    # portfolio sync tracking (auto-generated)
 ├── learning_state.json          # structured machine-usable learning state (auto-generated)
+├── verification_tracker.json    # portfolio sync tracking (auto-generated)
 ├── DAILY_LOG.md                 # canonical live-game log — one entry per date
 ├── PREGAME_LOG.md               # canonical pregame log — one entry per date
-├── PREGAME_RUNS.md              # optional debug log of every pregame rerun
 ├── PREGAME_LEARNING.md          # latest structured training summary (auto-generated)
 ├── AI_SELF_CRITIQUE.md          # latest structured reasoning audit (auto-generated)
-├── LIVE_HANDOFF_2026-04-06.md   # one-time pregame-to-live transition summary
-└── live_mode_lock.json          # strategy file fingerprints for LIVE mode (auto-generated)
+└── live_mode_lock.json          # SHA256 strategy file fingerprints — LIVE mode integrity lock
 ```
 
 ---
@@ -429,14 +442,15 @@ DISCORD_USER_ID=...        # optional: Discord user ID for @mentions in LIVE mod
 
 | Date | Change | Why |
 |------|--------|-----|
-| Apr 2026 | **Norkon WebSocket integration** — `verify.py` now intercepts live WS frames via Playwright to extract rank, portfolio value, and daily returns from the game platform | Game SPA delivers stats via WebSocket, not REST; HTML scraping broke after a platform update |
-| Apr 2026 | **JWT auth for game API** — authenticated REST calls using `ARIPAEV_COOKIE` → Norkon JWT exchange | Required for fetching own profile stats from the Norkon backend |
-| Apr 2026 | **Auto-regenerate live_mode_lock.json** (`update_live_lock.yml`) — SHA256 fingerprints are rebuilt automatically on every merge to `main` that touches a protected file | Prevents manual lock drift; no more "strategy freeze" failures after legitimate merges |
-| Apr 2026 | **Devil accuracy feedback loop refined** — HIGH-flagged picks hard-capped at 10% only when Devil accuracy > 60%; repeat-offender pre-injection (≥2 flags in last 5 days) added for all agents | Devil accuracy came in at 24% (bullish signal); tightened thresholds to avoid over-weighting a noisy critic |
-| Mar 2026 | **Competition-optimized ranking** — `competition_score` Z-score composite replaces generic selection score | Regime-specific weighting (BULL: mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%) directly targets the 75-day competition format |
-| Mar 2026 | **Overbought threshold raised 79→85** — RSI cap for weight reduction moved up | RSI 79–84 in momentum markets = leader, not topper; old threshold was cutting winners |
-| Mar 2026 | **Sector rotation table** injected into all agent prompts | Rotation is the #1 alpha source in short competitions — agents were previously blind to which sectors were exhausted |
-| Mar 2026 | **Pre-earnings opportunity signal** (`PRE_EARNINGS_SETUP` tag) | 2–6 day earners with strong momentum + RSI 50–75 have historically been the best short-window setups |
+| May 2026 | **Devil inversion mode** — with 80 observations and 28.75% accuracy, HIGH-flagged picks now prepend `[CONTRARIAN-INVERTED]`; Risk Manager weights own signals over Devil's prose | HIGH-flagged picks averaged +1.79%/day next-day; the adversarial critic became a contrarian buy signal |
+| May 2026 | **Rank-aware feedback loop** — last 5 daily rank deltas injected into Risk Manager; instruction to increase concentration/beta when rank slips despite positive alpha | In an 8,900-portfolio field, daily alpha alone is the wrong metric |
+| May 2026 | **Hard-ban rule** — tickers with hit rate ≤ 25% over ≥ 10 obs get `max_weight = 0.0` in weight_caps | First casualty: EQNR.OL (20% hit rate over 10 obs) |
+| Apr 2026 | **Norkon WebSocket integration** — `verify.py` intercepts live WS frames via Playwright to extract rank, portfolio value, and returns | Game SPA delivers stats via WebSocket, not REST |
+| Apr 2026 | **Auto-regenerate live_mode_lock.json** (`update_live_lock.yml`) — SHA256 fingerprints rebuilt on every merge touching a protected file | Prevents manual lock drift; eliminates "strategy freeze" failures after legitimate merges |
+| Apr 2026 | **Devil accuracy feedback loop refined** — HIGH-flagged picks hard-capped at 10% only when Devil accuracy > 65%; repeat-offender pre-injection (≥2 flags in last 5 days) for all agents | Devil accuracy was 24% (bullish signal); higher threshold avoids over-weighting a noisy critic |
+| Mar 2026 | **Competition-optimized ranking** — `competition_score` Z-score composite replaces generic selection score | Regime-specific weighting (BULL: mom_20d 35% + mom_5d 25% + sharpe_20d 20% + beta 20%) targets the 75-day format |
+| Mar 2026 | **Sector rotation table** injected into all agent prompts | Rotation is the #1 alpha source in short competitions — agents were previously blind to exhausted sectors |
+| Mar 2026 | **Pre-earnings opportunity signal** (`PRE_EARNINGS_SETUP` tag) | 2–6 day earners with strong momentum + RSI 50–75 are the best short-window setups |
 
 ---
 
