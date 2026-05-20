@@ -8,7 +8,40 @@
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-automated-2088FF?logo=github-actions&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**AlphaShark** is an autonomous AI trading agent built to win the **Äripäev/SEB Investment Game** (Estonia). Every weekday it wakes up at 06:00 UTC, scans ~630 live tickers across 6 markets, runs a five-agent adversarial AI ensemble, and posts a validated portfolio recommendation to Discord — before the 10:00 EET submission deadline.
+![AlphaShark portfolio screenshot](./image.png)
+
+## TL;DR
+
+This is the code behind AlphaShark, my bot for the **Äripäev/SEB Investment Game** in Estonia. On weekdays it wakes up at 06:00 UTC, scans about 630 live tickers across 6 markets, runs several portfolio proposals plus a Devil stress test, and posts a validated recommendation to Discord before the 10:00 EET cutoff.
+
+I kept the setup deliberately simple: momentum-first stock selection, regime-based ranking, a learning loop from past runs, and a hard validator for the game rules.
+
+So far, the live book is up 39.78% and the paper account has grown from €10,000 to €13,978, so the project has been doing very well.
+
+You can see how the portfolio is performing here: [portfolio page](https://www.aripaev.ee/investeerimismang/mangija/14687).
+
+## Table of Contents
+
+- [TL;DR](#tldr)
+- [Engineering Highlights](#engineering-highlights)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [What it does](#what-it-does)
+- [Daily workflow](#daily-workflow)
+- [Live Performance](#live-performance)
+- [How it works](#how-it-works)
+- [Current portfolio construction strategy](#current-portfolio-construction-strategy)
+- [Signals computed per candidate](#signals-computed-per-candidate)
+- [Extra context injected into prompts](#extra-context-injected-into-prompts)
+- [Game constraints](#game-constraints)
+- [Universe](#universe)
+- [Data Sources & APIs](#data-sources--apis)
+- [Setup](#setup)
+- [Project structure](#project-structure)
+- [Recent Development Highlights](#recent-development-highlights)
+- [Research References](#research-references)
+
+The sections below cover the full system in detail.
 
 > **Game period:** 6 April – 19 June 2026 · **~8,900 portfolios** · **Objective: rank #1**
 
@@ -20,10 +53,10 @@
 Three agents propose portfolios in parallel — Strategist, Challenger, and Full Analyst — using configurable model routes and fallbacks. A separate Devil pass stress-tests the combined shortlist, then the Risk Manager synthesizes the final portfolio. Agent roles are stable; model routing is configurable via `config.py`.
 
 ### Self-improving learning loop
-Every run persists to `portfolio_history.json`. `learning_state.py` derives structured metrics from that history: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. These are injected as structured JSON into the next day's prompts — the system learns from its own track record with no human labelling required.
+Every run is saved to `portfolio_history.json`. `learning_state.py` turns that history into a few useful metrics: per-signal directional accuracy, devil accuracy vs actual returns, confidence calibration, and strategy decay. Those numbers get fed back into the next day's prompts.
 
 ### Competition-optimized quantitative ranking
-Candidates are ranked by `competition_score`, a regime-specific Z-score composite: in BULL regimes it weights `mom_20d` 35%, `mom_5d` 25%, `sharpe_20d` 20%, `beta` 20% — with different weights in NEUTRAL and BEAR. The regime itself is a 0–100 score derived from VIX level, VIX term structure, SPX vs 200d SMA, market breadth, and credit spreads.
+Candidates are ranked by `competition_score`, a regime-specific Z-score composite. In BULL regimes it weights `mom_20d` 35%, `mom_5d` 25%, `sharpe_20d` 20%, and `beta` 20%, with different weights in NEUTRAL and BEAR. The regime itself is a 0–100 score derived from VIX level, VIX term structure, SPX vs 200d SMA, market breadth, and credit spreads.
 
 ### SHA256 strategy lock in LIVE mode
 Once the competition starts, `live_mode_lock.json` stores SHA256 fingerprints of all strategy files. Any accidental drift (edited prompt, changed config) is caught at startup and the pipeline refuses to run — preventing the classic mistake of iterating on a live system mid-game.
@@ -152,6 +185,8 @@ The bot is in **LIVE mode** — every decision counts toward the real ranking.
 - `catalyst` rationale tag — 40% hit rate, –0.47% avg over 20 obs; pre-earnings sizing capped accordingly
 
 **Key lesson:** The game rewards conviction. Equal-weighting to look balanced loses to any competitor running 5 concentrated momentum names.
+
+So far, the portfolio has been holding up well: the live book is ahead, the paper account is up materially, and the main job now is staying disciplined and not giving the edge back. The next stretch is really about consistency, not a big redesign.
 
 ---
 
