@@ -1132,7 +1132,7 @@ Winners: AXON +1.7%, QCOM +0.8%, HUM +0.0% | Losers: MU -6.2%, INTC -0.8%, DVA -
 
 **Market:** BULL regime · SPX vs 50d SMA: +5.9% · VIX: 18.1 · S&P 500 20d: +4.1%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 16:21:32.
 
 **Yesterday's P&L:** Portfolio -0.4% · Benchmark -0.7% · Alpha +0.3%
 Winners: MU +3.0%, INTC +2.9%, HUM +2.0% | Losers: AKAM -5.8%, QCOM -3.5%, DVA -2.0%

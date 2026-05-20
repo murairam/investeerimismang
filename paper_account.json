@@ -1,43 +1,24 @@
 {
   "start_date": "2026-04-13",
   "initial_capital": 10000.0,
-  "cash": 2677.10656986,
+  "cash": 0.0,
   "positions": {
-    "CRWD": 1.25877496,
-    "PANW": 6.46743919,
-    "CSCO": 26.92019831,
-    "HUM": 12.502224,
-    "FTNT": 24.33447526
+    "HUM": 11.46868275,
+    "EVO.ST": 44.281792,
+    "CSCO": 23.86353835,
+    "FTNT": 20.66898135,
+    "PANW": 9.55637604,
+    "CRWD": 1.2329922
   },
-  "pending_order": {
-    "submitted_date": "2026-05-20",
-    "positions": [
-      {
-        "ticker": "CRWD",
-        "weight": 0.05
-      },
-      {
-        "ticker": "PANW",
-        "weight": 0.15
-      },
-      {
-        "ticker": "CSCO",
-        "weight": 0.18
-      },
-      {
-        "ticker": "HUM",
-        "weight": 0.23
-      },
-      {
-        "ticker": "EVO.ST",
-        "weight": 0.22
-      },
-      {
-        "ticker": "FTNT",
-        "weight": 0.17
-      }
-    ]
+  "verified_weights": {
+    "HUM": 0.23,
+    "EVO.ST": 0.22,
+    "CSCO": 0.18,
+    "FTNT": 0.17,
+    "PANW": 0.15,
+    "CRWD": 0.05
   },
+  "pending_order": null,
   "history": [
     {
       "date": "2026-04-13",
@@ -838,59 +819,23 @@
     },
     {
       "date": "2026-05-20",
-      "equity": 13385.53,
-      "cash": 2677.11,
-      "daily_return": -0.012476,
-      "return_since_start": 0.338553,
-      "turnover": 0.463221,
+      "equity": 13259.0,
+      "cash": 0.0,
+      "daily_return": -0.02181,
+      "return_since_start": 0.3259,
+      "turnover": 0.0,
       "positions": {
-        "CRWD": 1.25877496,
-        "PANW": 6.46743919,
-        "CSCO": 26.92019831,
-        "HUM": 12.502224,
-        "FTNT": 24.33447526
+        "HUM": 11.46868275,
+        "EVO.ST": 44.281792,
+        "CSCO": 23.86353835,
+        "FTNT": 20.66898135,
+        "PANW": 9.55637604,
+        "CRWD": 1.2329922
       },
-      "pending_order": {
-        "submitted_date": "2026-05-20",
-        "positions": [
-          {
-            "ticker": "CRWD",
-            "weight": 0.05
-          },
-          {
-            "ticker": "PANW",
-            "weight": 0.15
-          },
-          {
-            "ticker": "CSCO",
-            "weight": 0.18
-          },
-          {
-            "ticker": "HUM",
-            "weight": 0.23
-          },
-          {
-            "ticker": "EVO.ST",
-            "weight": 0.22
-          },
-          {
-            "ticker": "FTNT",
-            "weight": 0.17
-          }
-        ]
-      },
-      "executed_pending": true
+      "pending_order": null,
+      "source": "verified"
     }
   ],
   "last_rebalanced_date": "2026-05-20",
-  "last_equity": 13385.5328493,
-  "verified_weights": {
-    "DVA": 0.17,
-    "HUM": 0.17,
-    "MU": 0.17,
-    "AKAM": 0.16,
-    "INTC": 0.16,
-    "AXON": 0.09,
-    "QCOM": 0.08
-  }
+  "last_equity": 13259.0
 }
