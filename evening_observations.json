@@ -1,60 +1,54 @@
 {
-  "date": "2026-05-19",
-  "timestamp": "2026-05-19T21:54:44+00:00",
-  "portfolio_return": -0.008221440418663925,
-  "benchmark_return": -0.006678320788135905,
-  "alpha": -0.0015431196305280195,
+  "date": "2026-05-20",
+  "timestamp": "2026-05-20T22:11:02+00:00",
+  "portfolio_return": 0.019511299539786316,
+  "benchmark_return": 0.010792026370445518,
+  "alpha": 0.008719273169340798,
   "position_returns": [
     {
-      "ticker": "MU",
-      "weight": 0.17,
-      "return": 0.025236982072299075,
-      "price": 698.739990234375
+      "ticker": "EVO.ST",
+      "weight": 0.22,
+      "return": 0.07263413800531282,
+      "price": 711.7999877929688
     },
     {
-      "ticker": "INTC",
-      "weight": 0.16,
-      "return": 0.02431362602692122,
-      "price": 110.80000305175781
+      "ticker": "CRWD",
+      "weight": 0.05,
+      "return": 0.053867819034048026,
+      "price": 650.1099853515625
+    },
+    {
+      "ticker": "PANW",
+      "weight": 0.15,
+      "return": 0.027193597828324867,
+      "price": 246.66000366210938
+    },
+    {
+      "ticker": "FTNT",
+      "weight": 0.17,
+      "return": 0.01848950659383153,
+      "price": 130.0
+    },
+    {
+      "ticker": "CSCO",
+      "weight": 0.18,
+      "return": -0.008927013380270798,
+      "price": 114.3499984741211
     },
     {
       "ticker": "HUM",
-      "weight": 0.17,
-      "return": 0.014869241153492752,
-      "price": 310.54998779296875
-    },
-    {
-      "ticker": "AXON",
-      "weight": 0.09,
-      "return": -0.017602721449402003,
-      "price": 392.3399963378906
-    },
-    {
-      "ticker": "DVA",
-      "weight": 0.17,
-      "return": -0.024609079575822146,
-      "price": 194.61000061035156
-    },
-    {
-      "ticker": "QCOM",
-      "weight": 0.08,
-      "return": -0.03943232568927746,
-      "price": 195.61000061035156
-    },
-    {
-      "ticker": "AKAM",
-      "weight": 0.16,
-      "return": -0.06254565011173618,
-      "price": 141.33999633789062
+      "weight": 0.23,
+      "return": -0.020769544173201093,
+      "price": 304.1000061035156
     }
   ],
-  "ai_recommendation": "Keep MU, INTC, and HUM (they\u2019re the only gainers and are outperforming your portfolio/benchmark today), and consider dropping QCOM and AKAM (both large losers, -3.9% and -6.3%) while also trimming DVA and AXON if you need to cut risk. Update tomorrow by reallocating from QCOM/AKAM (and optionally DVA/AXON) into MU/INTC/HUM to improve expected alpha.",
+  "ai_recommendation": "Yes\u2014update the portfolio: keep EVO.ST, CRWD, and PANW (they\u2019re driving the outperformance), keep FTNT (positive but smaller), and drop CSCO and HUM (both negative and dragging). Reallocate the freed weight into EVO.ST/CRWD/PANW in proportion to their relative strength (heaviest on EVO.ST, then CRWD, then PANW).",
   "game_standing": {
-    "rank": 706,
-    "total_players": 9096,
-    "value_eur": 13162.405280781313,
-    "today_return_pct": -2.0629999999999997,
-    "week_return_pct": -7.521,
-    "month_return_pct": 23.241999999999997
+    "rank": 1072,
+    "total_players": 9117,
+    "value_eur": 13179.18683989893,
+    "today_return_pct": 0.441,
+    "week_return_pct": -5.284,
+    "month_return_pct": 23.399
   }
 }
