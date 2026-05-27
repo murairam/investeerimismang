@@ -1,48 +1,48 @@
 {
-  "date": "2026-05-26",
-  "timestamp": "2026-05-26T22:06:33+00:00",
-  "portfolio_return": -0.001512927980293679,
-  "benchmark_return": 0.006108260424063872,
-  "alpha": -0.00762118840435755,
+  "date": "2026-05-27",
+  "timestamp": "2026-05-27T22:18:03+00:00",
+  "portfolio_return": -0.02818387024605147,
+  "benchmark_return": 0.00016487914469087706,
+  "alpha": -0.028348749390742348,
   "position_returns": [
-    {
-      "ticker": "CRWD",
-      "weight": 0.09,
-      "return": 0.012193599542378974,
-      "price": 671.5499877929688
-    },
     {
       "ticker": "EVO.ST",
       "weight": 0.22,
-      "return": 0.004571446010044555,
-      "price": 703.2000122070312
-    },
-    {
-      "ticker": "FTNT",
-      "weight": 0.23,
-      "return": 0.00022410243953796538,
-      "price": 133.9600067138672
+      "return": -0.005972713501311344,
+      "price": 699.0
     },
     {
       "ticker": "DXCM",
       "weight": 0.23,
-      "return": -0.0012482155311407395,
-      "price": 72.01000213623047
+      "return": -0.02430217953180036,
+      "price": 70.26000213623047
     },
     {
       "ticker": "PANW",
       "weight": 0.23,
-      "return": -0.014697930653256308,
-      "price": 256.75
+      "return": -0.03224926496318159,
+      "price": 248.47000122070312
+    },
+    {
+      "ticker": "CRWD",
+      "weight": 0.09,
+      "return": -0.03899933425280666,
+      "price": 645.3599853515625
+    },
+    {
+      "ticker": "FTNT",
+      "weight": 0.23,
+      "return": -0.04501348243115011,
+      "price": 127.93000030517578
     }
   ],
-  "ai_recommendation": "Yes\u2014update: drop **PANW** (worst performer, -1.5%) and keep **CRWD** and **EVO.ST** (positive momentum, +1.2% and +0.5%); hold **FTNT** and **DXCM** for now since they\u2019re roughly flat (-0.0% to -0.1%).",
+  "ai_recommendation": "Yes\u2014update: drop **FTNT** (worst at -4.5%) and consider trimming **CRWD** (next worst at -3.9%); keep **EVO.ST** and **DXCM** as the least-bad exposures, and reassess **PANW** (still down -3.2%) rather than adding more.",
   "game_standing": {
-    "rank": 1432,
-    "total_players": 9210,
-    "value_eur": 13586.337028813881,
-    "today_return_pct": 0.557,
-    "week_return_pct": 1.091,
-    "month_return_pct": 13.014999999999999
+    "rank": 1337,
+    "total_players": 9217,
+    "value_eur": 13720.976539660061,
+    "today_return_pct": 0.9939999999999999,
+    "week_return_pct": 4.569999999999999,
+    "month_return_pct": 14.135
   }
 }
