@@ -55,7 +55,7 @@ jobs:
         run: |
           git config user.name "AlphaShark Bot"
           git config user.email "alphashark@noreply"
-          FILES="portfolio_history.json DAILY_LOG.md PREGAME_LOG.md PREGAME_RUNS.md paper_account.json PREGAME_LEARNING.md AI_SELF_CRITIQUE.md cost_log.json verification_tracker.json live_mode_lock.json"
+          FILES="portfolio_history.json DAILY_LOG.md PREGAME_LOG.md PREGAME_LEARNING.md AI_SELF_CRITIQUE.md live_mode_lock.json"
           for f in $FILES; do
             if [ -e "$f" ]; then
               git add "$f"
