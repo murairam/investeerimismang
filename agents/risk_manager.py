@@ -808,6 +808,8 @@ class OpenAIRiskManager(BaseAgent):
                 return False
             return vol_ratio < config.DEAD_MONEY_VOL_RATIO and mom_5d <= config.DEAD_MONEY_MOM_5D
 
+        _devil_inversion_active = bool(snapshot.get("devil_inversion_active"))
+
         def candidate_score(ticker: str) -> float:
             c = candidate_map.get(ticker, {})
             score = 0.0
@@ -827,9 +829,11 @@ class OpenAIRiskManager(BaseAgent):
                 score -= 2.0
             bear = bear_cases.get(ticker)
             if bear and bear.get("risk") == "HIGH":
-                score -= 2.5
+                # When devil inversion active: HIGH flag = contrarian buy (+1.79%/day avg).
+                # Flip the penalty to a bonus so these candidates surface as fillers.
+                score += 1.5 if _devil_inversion_active else -2.5
             elif bear and bear.get("risk") == "MEDIUM":
-                score -= 0.8
+                score += 0.0 if _devil_inversion_active else -0.8
             return score
 
         kept: list[Position] = []
@@ -1001,7 +1005,7 @@ class OpenAIRiskManager(BaseAgent):
                 cap_value = float(max_weight)
             except (TypeError, ValueError):
                 continue
-            if cap_value <= 0:
+            if cap_value < 0:
                 continue
             cap_reason = str(cap.get("reason", "learning_state_cap"))
             if scope == "global":
@@ -1015,6 +1019,18 @@ class OpenAIRiskManager(BaseAgent):
                 tag = cap.get("tag")
                 if isinstance(tag, str):
                     rationale_tag_caps[tag] = (cap_value, cap_reason)
+
+        # Remove hard-banned tickers (max_weight == 0.0) before applying weight caps.
+        # Previously cap_value <= 0 skipped these, so banned tickers like MU slipped through.
+        hard_banned_tickers = {t for t, (v, _) in ticker_caps.items() if v == 0.0}
+        if hard_banned_tickers:
+            pre_ban_count = len(kept)
+            kept = [p for p in kept if p.ticker not in hard_banned_tickers]
+            if len(kept) < pre_ban_count:
+                logger.info(
+                    "Hard ban enforcement: removed %s from portfolio",
+                    ", ".join(sorted(hard_banned_tickers & {p.ticker for p in proposal.positions})),
+                )
 
         # Apply global cap to all positions
         if global_cap is not None:
@@ -1202,6 +1218,49 @@ class OpenAIRiskManager(BaseAgent):
                 )
         if hot_rsi_indices:
             kept = _redistribute_excess(kept, hot_rsi_excess, hot_rsi_indices | overbought_capped_indices | low_vol_indices)
+
+        # Pass F — Tier-1 count cap: max 2 positions at ≥20%.
+        # Data: Tier 2 (12-18%) averages +0.79%/day vs Tier 1 (20-25%) +0.57%/day.
+        # Three simultaneous max-sized positions bleeds alpha — cap the 3rd+ down to 18%.
+        _TIER1_THRESHOLD = 0.20
+        _TIER1_MAX_COUNT = 2
+        _TIER1_TRIM_TO = 0.18
+        _already_capped = overbought_capped_indices | low_vol_indices | hot_rsi_indices
+        tier1_idx = [i for i, p in enumerate(kept) if p.weight >= _TIER1_THRESHOLD and i not in _already_capped]
+        if len(tier1_idx) > _TIER1_MAX_COUNT:
+            tier1_idx.sort(key=lambda i: -kept[i].weight)
+            tier1_excess = 0.0
+            tier1_trimmed: set[int] = set()
+            for i in tier1_idx[_TIER1_MAX_COUNT:]:
+                pos = kept[i]
+                trim_excess = pos.weight - _TIER1_TRIM_TO
+                tier1_excess += trim_excess
+                kept[i] = Position(ticker=pos.ticker, weight=_TIER1_TRIM_TO, rationale=pos.rationale, conviction=pos.conviction)
+                tier1_trimmed.add(i)
+                logger.info(
+                    "Tier-1 count cap (Pass F): %s %.0f%% → %.0f%% (max %d positions ≥20%%)",
+                    pos.ticker, pos.weight * 100, _TIER1_TRIM_TO * 100, _TIER1_MAX_COUNT,
+                )
+            if tier1_excess > 1e-9:
+                kept = _redistribute_excess(kept, tier1_excess, tier1_trimmed | _already_capped)
+
+        # Pass G — Devil inversion upsize: when contrarian mode active, give HIGH-flagged
+        # positions already in the book a nudge toward higher conviction (+3pp, capped at max_weight).
+        # HIGH flags avg +1.79%/day — they deserve more weight, not less.
+        if _devil_inversion_active:
+            _max_w = config.GAME_CONSTRAINTS["max_weight"]
+            _inv_boost_floor = 0.12
+            for i, pos in enumerate(kept):
+                bear = bear_cases.get(pos.ticker, {})
+                if (bear.get("risk") == "HIGH"
+                        and pos.weight >= _inv_boost_floor
+                        and pos.weight < _max_w):
+                    boosted = min(_max_w, pos.weight + 0.03)
+                    kept[i] = Position(ticker=pos.ticker, weight=boosted, rationale=pos.rationale, conviction=pos.conviction)
+                    logger.info(
+                        "Devil inversion upsize (Pass G): %s %.0f%% → %.0f%% (HIGH = contrarian buy)",
+                        pos.ticker, pos.weight * 100, boosted * 100,
+                    )
 
         # No sector caps are applied. Rotation risk remains an informational input for sizing quality,
         # but legal concentration is preserved if the strongest alpha clusters in one sector.

@@ -284,31 +284,36 @@ def generate_learning_state() -> dict:
                 f"EARLY WARNING: {tag} has weak hit quality ({hit_rate:.0%} over {observations} obs)."
             )
 
+    _hard_banned_tickers: set[str] = set()
+    # Hard ban: any loser with hit_rate ≤ 25% and ≥ 10 obs — not limited to top 3.
+    # MU-class losers at index 4+ were previously escaping this check.
+    for loser in losers:
+        if loser["observations"] >= 10 and loser.get("hit_rate", 1.0) <= 0.25:
+            _hard_banned_tickers.add(loser["ticker"])
+            weight_caps.append(
+                {
+                    "scope": "ticker",
+                    "ticker": loser["ticker"],
+                    "max_weight": 0.0,
+                    "reason": f"hard_ban_low_hit_rate_{int(loser['hit_rate']*100)}%_over_{loser['observations']}_obs",
+                }
+            )
+            hard_rules.append(
+                f"BAN {loser['ticker']}: hit rate {loser.get('hit_rate', 0):.0%} over {loser['observations']} observations — do not propose."
+            )
+    # 7% cap for top-3 underperformers not already hard-banned
     for loser in losers[:3]:
+        if loser["ticker"] in _hard_banned_tickers:
+            continue
         if loser["observations"] >= _MIN_STRONG_TICKER_OBSERVATIONS:
-            # Hard ban for tickers with hit_rate <= 25% and >=10 observations
-            # (e.g. EQNR.OL at 20% over 10 obs). 0.07 cap was too soft.
-            if loser["observations"] >= 10 and loser.get("hit_rate", 1.0) <= 0.25:
-                weight_caps.append(
-                    {
-                        "scope": "ticker",
-                        "ticker": loser["ticker"],
-                        "max_weight": 0.0,
-                        "reason": f"hard_ban_low_hit_rate_{int(loser['hit_rate']*100)}%_over_{loser['observations']}_obs",
-                    }
-                )
-                hard_rules.append(
-                    f"BAN {loser['ticker']}: hit rate {loser.get('hit_rate', 0):.0%} over {loser['observations']} observations — do not propose."
-                )
-            else:
-                weight_caps.append(
-                    {
-                        "scope": "ticker",
-                        "ticker": loser["ticker"],
-                        "max_weight": 0.07,
-                        "reason": "recurring_underperformer",
-                    }
-                )
+            weight_caps.append(
+                {
+                    "scope": "ticker",
+                    "ticker": loser["ticker"],
+                    "max_weight": 0.07,
+                    "reason": "recurring_underperformer",
+                }
+            )
 
     turnover_guidance = {
         "instruction": "Hold >=65% of weight in continuing winners. Drop a name only if replacement has materially stronger 5d momentum AND volume confirmation (Sharpe delta >=0.4).",

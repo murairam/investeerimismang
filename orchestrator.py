@@ -244,6 +244,28 @@ class AlphaSharkOrchestrator:
         else:
             logger.info("No learning context yet (first run or files missing)")
 
+        # Validated winner boost: lift competition_score for tickers with proven track records.
+        # AMD (80% hit, +3.1%/day), ON (82% hit), MPWR (100% hit) were chronically under-ranked
+        # vs fresh candidates because competition_score doesn't account for historical reliability.
+        _validated_winners = {w["ticker"]: w for w in learning_state.get("validated_winners", [])}
+        if _validated_winners:
+            _boosted_count = 0
+            for candidate in snapshot.get("candidates", []):
+                t = candidate["ticker"]
+                if t in _validated_winners:
+                    w = _validated_winners[t]
+                    # Bonus scales from 0.0 (50% hit rate) to 1.0 (100% hit rate)
+                    bonus = max(0.0, (w["hit_rate"] - 0.5) * 2.0)
+                    candidate["competition_score"] = candidate.get("competition_score", 0.0) + bonus
+                    _boosted_count += 1
+            if _boosted_count:
+                snapshot["candidates"].sort(key=lambda x: x.get("competition_score", 0.0), reverse=True)
+                logger.info(
+                    "Validated winner boost: %d tickers lifted (%s)",
+                    _boosted_count,
+                    ", ".join(f"{t} +{max(0.0,(w['hit_rate']-0.5)*2.0):.2f}" for t, w in _validated_winners.items()),
+                )
+
         # Signal importance: log which signals are most predictive this run (Change 1)
         _sig_imp_raw = learning_state.get("signal_importance", {})
         _sig_imp = _sig_imp_raw.get("global", _sig_imp_raw) if isinstance(_sig_imp_raw, dict) else {}
