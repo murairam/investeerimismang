@@ -1167,3 +1167,37 @@ Winners: MU +3.0%, INTC +2.9%, HUM +2.0% | Losers: AKAM -5.8%, QCOM -3.5%, DVA -
 - ▲ **HUM**: 17.0% → 23.0% (+6.0%)
 
 ---
+## 2026-05-29 06:13:41
+
+**Market:** BULL regime · SPX vs 50d SMA: +7.5% · VIX: 15.7 · S&P 500 20d: +6.0%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.1% · Benchmark +0.6% · Alpha +0.6%
+Winners: DELL +3.6%, UAL +1.9%, STX +0.9% | Losers: MU -0.8%, NTAP -0.5%
+
+**Paper account:** Equity €13,947.25 (start €10,000) · Today +0.02% · Since start +39.47% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the double-consensus names DELL, FSLR, and UAL, then filled the remaining slots with the strongest unique momentum breakouts SMCI and F. MU and NTAP are removed because learning context explicitly flagged them as laggards, while STX is also cut today because its vol_ratio 0.65 fails the slot-cost test versus fresher leaders. The result stays concentrated in a BULL regime, keeps at least two sectors, and should lift portfolio beta above the strategist's 1.56 toward the desired high-beta competition posture without becoming mono-sector tech.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **DELL** | 25.0% | Triple-strength leader via proposal consensus, current holding validation, and elite live signals: 52-week-high breakout, vol_ratio 3.40, mom_5d +25.2%, and it was a key driver of recent alpha. |
+| 2 | **FSLR** | 25.0% | Exact 2-of-3 consensus pick with mandatory high-conviction floor; strongest non-tech rotation candidate with vol_ratio 1.95, mom_5d +21.7%, RSI 84, and useful sector diversification away from decelerating tech. |
+| 3 | **UAL** | 18.0% | Exact 2-of-3 consensus pick and current winner that still earns its slot with positive momentum, vol_ratio 1.09, mom_5d +15.2%, and recent contribution to alpha despite high beta. |
+| 4 | **SMCI** | 14.0% | Best unique aggressive add from the full analyst: very high-beta momentum leader with vol_ratio 1.78, mom_5d +23.2%, strong acceleration, and better right-tail upside than lagging incumbents MU/NTAP. |
+| 5 | **F** | 18.0% | Best remaining unique breakout from the strategist with 3.0σ-style short-term momentum, mom_5d +21.6%, acceptable beta for a BULL tape, and low retail crowding, making it a cleaner slot than NTAP or MU. |
+
+**Changes from yesterday:**
+- ➕ Added **FSLR** at 25.0%
+- ➕ Added **SMCI** at 14.0%
+- ➕ Added **F** at 18.0%
+- ➖ Removed **MU** (was 23.0%)
+- ➖ Removed **NTAP** (was 15.0%)
+- ➖ Removed **STX** (was 15.0%)
+- ▲ **DELL**: 22.0% → 25.0% (+3.0%)
+- ▼ **UAL**: 25.0% → 18.0% (-7.0%)
+
+---
