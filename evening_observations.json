@@ -1,48 +1,48 @@
 {
-  "date": "2026-05-29",
-  "timestamp": "2026-05-29T22:12:32+00:00",
-  "portfolio_return": 0.1167632915551236,
-  "benchmark_return": 0.002172260678511728,
-  "alpha": 0.11459103087661188,
+  "date": "2026-06-01",
+  "timestamp": "2026-06-01T22:42:03+00:00",
+  "portfolio_return": 0.022894583485671402,
+  "benchmark_return": 0.0026252961308912415,
+  "alpha": 0.02026928735478016,
   "position_returns": [
     {
       "ticker": "DELL",
-      "weight": 0.22,
-      "return": 0.32758246291736315,
-      "price": 420.9100036621094
-    },
-    {
-      "ticker": "NTAP",
-      "weight": 0.15,
-      "return": 0.223946634526055,
-      "price": 174.2899932861328
+      "weight": 0.16,
+      "return": 0.10702997648193979,
+      "price": 465.9599914550781
     },
     {
       "ticker": "MU",
+      "weight": 0.19,
+      "return": 0.06642636457260553,
+      "price": 1035.5
+    },
+    {
+      "ticker": "NTAP",
+      "weight": 0.2,
+      "return": 0.03104024252974602,
+      "price": 179.6999969482422
+    },
+    {
+      "ticker": "FSLR",
       "weight": 0.23,
-      "return": 0.051411966675989795,
-      "price": 971.0
+      "return": -0.012353754813911766,
+      "price": 303.0
     },
     {
-      "ticker": "STX",
-      "weight": 0.15,
-      "return": -0.0010445805031783495,
-      "price": 879.7999877929688
-    },
-    {
-      "ticker": "UAL",
-      "weight": 0.25,
-      "return": -0.0022596429024217546,
-      "price": 114.80000305175781
+      "ticker": "F",
+      "weight": 0.22,
+      "return": -0.04644503144992507,
+      "price": 16.6299991607666
     }
   ],
-  "ai_recommendation": "Yes\u2014update the portfolio: keep **DELL** and **NTAP** (highest contributors, worth staying high-conviction), keep **MU** as a smaller stabilizer, and drop **STX** and **UAL** (near-flat/negative returns) to free capital for higher-upside names. If you\u2019re not already near the top of the weekly leaderboard by Monday 09:00 EET, reallocate the freed capital into 1\u20132 higher-momentum/high-beta positions rather than adding more low-impact holdings.",
+  "ai_recommendation": "Yes\u2014keep DELL, MU, and NTAP (they\u2019re driving the outperformance), and consider dropping FSLR and F (both are dragging with -1.2% and -4.6%); reallocate that capital into DELL/MU/NTAP or the closest high-momentum substitutes. If you must keep one laggard for diversification, keep the smaller loser (FSLR) and cut F first.",
   "game_standing": {
-    "rank": 560,
-    "total_players": 9243,
-    "value_eur": 15556.210843449771,
-    "today_return_pct": 11.655999999999999,
-    "week_return_pct": 17.39,
-    "month_return_pct": 34.516999999999996
+    "rank": 524,
+    "total_players": 9261,
+    "value_eur": 15922.384565827375,
+    "today_return_pct": 2.335,
+    "week_return_pct": 17.958,
+    "month_return_pct": 27.072000000000003
   }
 }
