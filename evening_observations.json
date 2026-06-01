@@ -1,48 +1,48 @@
 {
-  "date": "2026-05-27",
-  "timestamp": "2026-05-27T22:18:03+00:00",
-  "portfolio_return": -0.02818387024605147,
-  "benchmark_return": 0.00016487914469087706,
-  "alpha": -0.028348749390742348,
+  "date": "2026-05-29",
+  "timestamp": "2026-05-29T22:12:32+00:00",
+  "portfolio_return": 0.1167632915551236,
+  "benchmark_return": 0.002172260678511728,
+  "alpha": 0.11459103087661188,
   "position_returns": [
     {
-      "ticker": "EVO.ST",
+      "ticker": "DELL",
       "weight": 0.22,
-      "return": -0.005972713501311344,
-      "price": 699.0
+      "return": 0.32758246291736315,
+      "price": 420.9100036621094
     },
     {
-      "ticker": "DXCM",
+      "ticker": "NTAP",
+      "weight": 0.15,
+      "return": 0.223946634526055,
+      "price": 174.2899932861328
+    },
+    {
+      "ticker": "MU",
       "weight": 0.23,
-      "return": -0.02430217953180036,
-      "price": 70.26000213623047
+      "return": 0.051411966675989795,
+      "price": 971.0
     },
     {
-      "ticker": "PANW",
-      "weight": 0.23,
-      "return": -0.03224926496318159,
-      "price": 248.47000122070312
+      "ticker": "STX",
+      "weight": 0.15,
+      "return": -0.0010445805031783495,
+      "price": 879.7999877929688
     },
     {
-      "ticker": "CRWD",
-      "weight": 0.09,
-      "return": -0.03899933425280666,
-      "price": 645.3599853515625
-    },
-    {
-      "ticker": "FTNT",
-      "weight": 0.23,
-      "return": -0.04501348243115011,
-      "price": 127.93000030517578
+      "ticker": "UAL",
+      "weight": 0.25,
+      "return": -0.0022596429024217546,
+      "price": 114.80000305175781
     }
   ],
-  "ai_recommendation": "Yes\u2014update: drop **FTNT** (worst at -4.5%) and consider trimming **CRWD** (next worst at -3.9%); keep **EVO.ST** and **DXCM** as the least-bad exposures, and reassess **PANW** (still down -3.2%) rather than adding more.",
+  "ai_recommendation": "Yes\u2014update the portfolio: keep **DELL** and **NTAP** (highest contributors, worth staying high-conviction), keep **MU** as a smaller stabilizer, and drop **STX** and **UAL** (near-flat/negative returns) to free capital for higher-upside names. If you\u2019re not already near the top of the weekly leaderboard by Monday 09:00 EET, reallocate the freed capital into 1\u20132 higher-momentum/high-beta positions rather than adding more low-impact holdings.",
   "game_standing": {
-    "rank": 1337,
-    "total_players": 9217,
-    "value_eur": 13720.976539660061,
-    "today_return_pct": 0.9939999999999999,
-    "week_return_pct": 4.569999999999999,
-    "month_return_pct": 14.135
+    "rank": 560,
+    "total_players": 9243,
+    "value_eur": 15556.210843449771,
+    "today_return_pct": 11.655999999999999,
+    "week_return_pct": 17.39,
+    "month_return_pct": 34.516999999999996
   }
 }
