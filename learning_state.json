@@ -1,6 +1,6 @@
 {
-  "generated_from_days": 42,
-  "position_observations": 200,
+  "generated_from_days": 56,
+  "position_observations": 270,
   "minimums": {
     "strong_daily_observations": 7,
     "strong_ticker_observations": 8,
@@ -16,15 +16,15 @@
   "validated_winners": [
     {
       "ticker": "INTC",
-      "observations": 24,
-      "avg_return_1d": 0.036036,
-      "hit_rate": 0.6667
+      "observations": 30,
+      "avg_return_1d": 0.026906,
+      "hit_rate": 0.6
     },
     {
-      "ticker": "AMD",
-      "observations": 20,
-      "avg_return_1d": 0.031414,
-      "hit_rate": 0.8
+      "ticker": "CSCO",
+      "observations": 10,
+      "avg_return_1d": 0.026884,
+      "hit_rate": 0.6
     },
     {
       "ticker": "MPWR",
@@ -39,10 +39,10 @@
       "hit_rate": 0.75
     },
     {
-      "ticker": "ON",
+      "ticker": "AMD",
       "observations": 22,
-      "avg_return_1d": 0.024408,
-      "hit_rate": 0.8182
+      "avg_return_1d": 0.025817,
+      "hit_rate": 0.7273
     }
   ],
   "recurring_losers": [
@@ -65,16 +65,16 @@
       "hit_rate": 0.5
     },
     {
+      "ticker": "MU",
+      "observations": 22,
+      "avg_return_1d": -0.004182,
+      "hit_rate": 0.2727
+    },
+    {
       "ticker": "VWS.CO",
       "observations": 12,
       "avg_return_1d": -0.002034,
       "hit_rate": 0.3333
-    },
-    {
-      "ticker": "MU",
-      "observations": 8,
-      "avg_return_1d": -0.000145,
-      "hit_rate": 0.25
     }
   ],
   "weight_caps": [
@@ -106,7 +106,7 @@
     "avg_hold_vs_replace_1d": 0.0,
     "positive_hold_vs_replace_rate": 0.0,
     "avg_slot_opportunity_cost_1d": 0.0,
-    "avg_turnover_estimate": 0.575676,
+    "avg_turnover_estimate": 0.608627,
     "observations": 0,
     "status": "insufficient_data"
   },
@@ -114,159 +114,155 @@
     {
       "tag": "momentum",
       "instruction": "Prefer momentum setups when other signals are comparable.",
-      "observations": 185
+      "observations": 255
     },
     {
       "tag": "high_sharpe",
       "instruction": "Prefer high_sharpe setups when other signals are comparable.",
-      "observations": 163
+      "observations": 193
     },
     {
       "tag": "breakout",
       "instruction": "Prefer breakout setups when other signals are comparable.",
-      "observations": 54
+      "observations": 95
     },
     {
       "tag": "consensus",
       "instruction": "Prefer consensus setups when other signals are comparable.",
-      "observations": 132
+      "observations": 189
     },
     {
       "tag": "catalyst",
       "instruction": "Prefer catalyst setups when other signals are comparable.",
-      "observations": 32
+      "observations": 39
     }
   ],
   "early_warning_notes": [],
   "rationale_stats": {
     "momentum": {
-      "observations": 185,
-      "avg_return_1d": 0.007344,
-      "hit_rate": 0.5297
+      "observations": 255,
+      "avg_return_1d": 0.007359,
+      "hit_rate": 0.5451
     },
     "high_sharpe": {
-      "observations": 163,
-      "avg_return_1d": 0.007935,
-      "hit_rate": 0.5153
+      "observations": 193,
+      "avg_return_1d": 0.007133,
+      "hit_rate": 0.4974
     },
     "breakout": {
-      "observations": 54,
-      "avg_return_1d": 0.012229,
-      "hit_rate": 0.5556
+      "observations": 95,
+      "avg_return_1d": 0.009899,
+      "hit_rate": 0.5684
     },
     "consensus": {
-      "observations": 132,
-      "avg_return_1d": 0.006166,
-      "hit_rate": 0.5076
+      "observations": 189,
+      "avg_return_1d": 0.006284,
+      "hit_rate": 0.5238
     },
     "catalyst": {
-      "observations": 32,
-      "avg_return_1d": 0.008653,
-      "hit_rate": 0.4688
+      "observations": 39,
+      "avg_return_1d": 0.008406,
+      "hit_rate": 0.5128
     },
     "diversifier": {
-      "observations": 13,
-      "avg_return_1d": -0.007501,
-      "hit_rate": 0.3846
+      "observations": 17,
+      "avg_return_1d": -0.004495,
+      "hit_rate": 0.4706
     },
     "non_us_differentiator": {
-      "observations": 39,
-      "avg_return_1d": -0.002204,
-      "hit_rate": 0.2821
+      "observations": 42,
+      "avg_return_1d": -0.002512,
+      "hit_rate": 0.3095
     },
     "overbought": {
-      "observations": 116,
-      "avg_return_1d": 0.009384,
-      "hit_rate": 0.5431
+      "observations": 167,
+      "avg_return_1d": 0.008087,
+      "hit_rate": 0.5449
     },
     "at_52w_high": {
-      "observations": 144,
-      "avg_return_1d": 0.010296,
-      "hit_rate": 0.5833
+      "observations": 196,
+      "avg_return_1d": 0.008906,
+      "hit_rate": 0.5765
     }
   },
   "conviction_tiers": {
-    "tier1_avg_return_1d": 0.005,
-    "tier2_avg_return_1d": 0.008662,
-    "tier3_avg_return_1d": 0.003779,
-    "tier1_observations": 81,
-    "tier2_observations": 96,
-    "tier3_observations": 23
+    "tier1_avg_return_1d": 0.00609,
+    "tier2_avg_return_1d": 0.008829,
+    "tier3_avg_return_1d": 0.001851,
+    "tier1_observations": 114,
+    "tier2_observations": 123,
+    "tier3_observations": 33
   },
   "changed_hard_rules": [],
   "devil_accuracy": {
     "status": "actionable",
-    "observations": 80,
+    "observations": 77,
     "lookback_days": 30,
-    "high_risk_avg_return_1d": 0.017922,
-    "low_risk_avg_return_1d": -0.000884,
-    "high_risk_negative_rate_raw": 0.3125,
-    "high_risk_negative_rate_filtered": 0.2875,
-    "high_risk_negative_rate": 0.2875,
-    "accuracy": 0.2875,
+    "high_risk_avg_return_1d": 0.006641,
+    "low_risk_avg_return_1d": 0.016694,
+    "high_risk_negative_rate_raw": 0.4545,
+    "high_risk_negative_rate_filtered": 0.3636,
+    "high_risk_negative_rate": 0.3636,
+    "accuracy": 0.3636,
     "devil_is_accurate": false,
     "high_flagged_tickers_recent": [
       {
-        "ticker": "PWR",
-        "flag_count": 5
+        "ticker": "CRWD",
+        "flag_count": 3
+      },
+      {
+        "ticker": "FTNT",
+        "flag_count": 3
+      },
+      {
+        "ticker": "F",
+        "flag_count": 3
+      },
+      {
+        "ticker": "DELL",
+        "flag_count": 3
+      },
+      {
+        "ticker": "NTAP",
+        "flag_count": 3
+      },
+      {
+        "ticker": "PANW",
+        "flag_count": 2
       },
       {
         "ticker": "STX",
-        "flag_count": 5
-      },
-      {
-        "ticker": "MU",
-        "flag_count": 4
-      },
-      {
-        "ticker": "WDC",
-        "flag_count": 4
-      },
-      {
-        "ticker": "CNC",
-        "flag_count": 3
-      },
-      {
-        "ticker": "INTC",
-        "flag_count": 3
-      },
-      {
-        "ticker": "AMD",
         "flag_count": 2
       },
       {
-        "ticker": "GNRC",
+        "ticker": "UAL",
         "flag_count": 2
       },
       {
-        "ticker": "NOKIA.HE",
-        "flag_count": 2
-      },
-      {
-        "ticker": "ON",
+        "ticker": "FSLR",
         "flag_count": 2
       }
     ]
   },
   "signal_importance": {
     "global": {
-      "momentum": 0.5316,
-      "mom_5d": 0.5316,
-      "sharpe_20d": 0.5316,
-      "rsi_14": 0.5191,
-      "vs_index": 0.5316,
-      "vol_ratio": 0.5723,
-      "beta": 0.5211
+      "momentum": 0.5462,
+      "mom_5d": 0.5462,
+      "sharpe_20d": 0.4462,
+      "rsi_14": 0.5375,
+      "vs_index": 0.5462,
+      "vol_ratio": 0.5763,
+      "beta": 0.5385
     },
     "per_regime": {
       "BULL": {
-        "momentum": 0.5862,
-        "mom_5d": 0.5862,
-        "sharpe_20d": 0.5862,
-        "rsi_14": 0.5625,
-        "vs_index": 0.5862,
-        "vol_ratio": 0.5862,
-        "beta": 0.5862
+        "momentum": 0.586,
+        "mom_5d": 0.586,
+        "sharpe_20d": 0.4204,
+        "rsi_14": 0.5733,
+        "vs_index": 0.586,
+        "vol_ratio": 0.586,
+        "beta": 0.586
       },
       "NEUTRAL": {
         "momentum": 0.4783,
@@ -309,146 +305,134 @@
     }
   },
   "yesterday_postmortem": {
-    "date": "2026-05-06",
-    "portfolio_return_1d": -0.0204,
-    "benchmark_return_1d": -0.0006,
-    "alpha_1d": -0.0198,
-    "winners": [],
-    "losers": [
+    "date": "2026-05-28",
+    "portfolio_return_1d": 0.0114,
+    "benchmark_return_1d": 0.0058,
+    "alpha_1d": 0.0057,
+    "winners": [
       {
-        "ticker": "WDC",
-        "return_1d": -0.0537,
-        "vs_benchmark": -0.053,
+        "ticker": "DELL",
+        "return_1d": 0.0358,
+        "vs_benchmark": 0.0301,
         "tags": [
           "momentum",
-          "high_sharpe",
-          "breakout",
           "consensus",
-          "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick with strong trend persistence and breakout behavior: +18.9% 5d, RSI 86, and po",
-        "rsi_at_entry": 86.09071,
-        "vol_ratio_at_entry": 1.292415
+        "rationale_snippet": "Triple-consensus pick with explosive 5d momentum, near-52w-high leadership, and low crowding; this i",
+        "rsi_at_entry": 76.177191,
+        "vol_ratio_at_entry": 1.195122
+      },
+      {
+        "ticker": "UAL",
+        "return_1d": 0.0191,
+        "vs_benchmark": 0.0133,
+        "tags": [
+          "momentum",
+          "breakout"
+        ],
+        "rationale_snippet": "Best unique non-tech aggressor with strong volume confirmation, high beta, and 52-week-high breakout",
+        "rsi_at_entry": 68.606003,
+        "vol_ratio_at_entry": 1.857289
       },
       {
         "ticker": "STX",
-        "return_1d": -0.0534,
-        "vs_benchmark": -0.0528,
+        "return_1d": 0.0089,
+        "vs_benchmark": 0.0032,
         "tags": [
           "momentum",
-          "high_sharpe",
-          "consensus",
-          "overbought",
           "at_52w_high"
         ],
-        "rationale_snippet": "Double-consensus pick and one of the strongest active movers in the whole set, with +33.0% 5d moment",
-        "rsi_at_entry": 91.376203,
-        "vol_ratio_at_entry": 1.466564
-      },
-      {
-        "ticker": "PWR",
-        "return_1d": -0.0519,
-        "vs_benchmark": -0.0513,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "consensus",
-          "diversifier",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Double-consensus non-Tech diversifier that satisfies the mandatory second-sector rule while still ca",
-        "rsi_at_entry": 90.284542,
-        "vol_ratio_at_entry": 1.262029
-      },
-      {
-        "ticker": "MU",
-        "return_1d": -0.0306,
-        "vs_benchmark": -0.03,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "breakout",
-          "consensus",
-          "catalyst",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Double-consensus pick with elite momentum and catalyst confirmation: +26.8% 5d, vol_ratio 1.59, RSI ",
-        "rsi_at_entry": 85.896573,
-        "vol_ratio_at_entry": 1.591789
-      },
-      {
-        "ticker": "INTC",
-        "return_1d": -0.0267,
-        "vs_benchmark": -0.0261,
-        "tags": [
-          "momentum",
-          "high_sharpe",
-          "overbought",
-          "at_52w_high"
-        ],
-        "rationale_snippet": "Best unique aggressive add from Proposal A: +27.8% 5d, RSI 86, beta 2.99, and strong trend/Sharpe pr",
-        "rsi_at_entry": 86.038353,
-        "vol_ratio_at_entry": 1.383282
+        "rationale_snippet": "Strong unique momentum/storage name from the validated core list; lower volume than top picks keeps ",
+        "rsi_at_entry": 66.151123,
+        "vol_ratio_at_entry": 0.796685
       }
     ],
-    "lesson": "'momentum' entries underperformed \u2014 review sizing for this thesis today; 'high_sharpe' entries underperformed \u2014 review sizing for this thesis today"
+    "losers": [
+      {
+        "ticker": "MU",
+        "return_1d": -0.0079,
+        "vs_benchmark": -0.0136,
+        "tags": [
+          "momentum",
+          "consensus",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Triple-consensus pick with the strongest absolute momentum profile and high-beta upside in a BULL ta",
+        "rsi_at_entry": 73.262225,
+        "vol_ratio_at_entry": 1.353948
+      },
+      {
+        "ticker": "NTAP",
+        "return_1d": -0.005,
+        "vs_benchmark": -0.0107,
+        "tags": [
+          "momentum",
+          "breakout",
+          "consensus",
+          "overbought",
+          "at_52w_high"
+        ],
+        "rationale_snippet": "Double-consensus pick and mandatory high-conviction inclusion; vol_ratio 2.28, RSI 89.8, and +20.2% ",
+        "rsi_at_entry": 89.801934,
+        "vol_ratio_at_entry": 2.281821
+      }
+    ],
+    "lesson": "'consensus' entries underperformed \u2014 review sizing for this thesis today; 'momentum' entries outperformed \u2014 continue favouring this setup"
   },
   "rank_performance": {
     "status": "actionable",
-    "last_5d_rank_delta": 233,
-    "last_5d_normalized_delta": 0.025614,
+    "last_5d_rank_delta": 254,
+    "last_5d_normalized_delta": 0.026383,
     "best_alpha_day": {
-      "alpha": 0.040157,
-      "rank_delta": -661
+      "alpha": 0.01352,
+      "rank_delta": -45
     },
     "worst_alpha_day": {
-      "alpha": -0.019782,
-      "rank_delta": 201
+      "alpha": -0.028361,
+      "rank_delta": 12
     },
-    "alpha_rank_correlation": -0.8649,
+    "alpha_rank_correlation": -0.1562,
     "recent_history": [
       {
-        "date": "2026-05-07",
-        "rank": 551,
-        "total_participants": 8913,
-        "rank_delta": -5,
-        "total_delta": 26,
-        "normalized_delta": -0.000743
+        "date": "2026-05-28",
+        "rank": 1316,
+        "total_participants": 9231,
+        "rank_delta": -21,
+        "total_delta": 14,
+        "normalized_delta": -0.002495
       },
       {
-        "date": "2026-05-06",
-        "rank": 556,
-        "total_participants": 8887,
-        "rank_delta": 201,
-        "total_delta": 24,
-        "normalized_delta": 0.022509
+        "date": "2026-05-27",
+        "rank": 1337,
+        "total_participants": 9217,
+        "rank_delta": -95,
+        "total_delta": 7,
+        "normalized_delta": -0.010425
       },
       {
-        "date": "2026-05-05",
-        "rank": 355,
-        "total_participants": 8863,
-        "rank_delta": -51,
-        "total_delta": 46,
-        "normalized_delta": -0.005993
+        "date": "2026-05-26",
+        "rank": 1432,
+        "total_participants": 9210,
+        "rank_delta": 403,
+        "total_delta": 45,
+        "normalized_delta": 0.043208
       },
       {
-        "date": "2026-05-04",
-        "rank": 406,
-        "total_participants": 8817,
-        "rank_delta": 13,
-        "total_delta": 25,
-        "normalized_delta": 0.001348
+        "date": "2026-05-25",
+        "rank": 1029,
+        "total_participants": 9165,
+        "rank_delta": 12,
+        "total_delta": 17,
+        "normalized_delta": 0.001103
       },
       {
-        "date": "2026-05-01",
-        "rank": 393,
-        "total_participants": 8792,
-        "rank_delta": 75,
-        "total_delta": 9,
-        "normalized_delta": 0.008493
+        "date": "2026-05-22",
+        "rank": 1017,
+        "total_participants": 9148,
+        "rank_delta": -45,
+        "total_delta": 7,
+        "normalized_delta": -0.005008
       }
     ]
   },
