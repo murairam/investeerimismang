@@ -3,18 +3,18 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "UAL": 35.30323569,
-    "MU": 4.04650784,
-    "DELL": 11.27440948,
-    "NTAP": 17.11512803,
-    "STX": 2.76727474
+    "FSLR": 14.06330766,
+    "F": 245.09402487,
+    "NTAP": 20.61978802,
+    "MU": 3.39942738,
+    "DELL": 6.36170643
   },
   "verified_weights": {
-    "UAL": 0.25,
-    "MU": 0.23,
-    "DELL": 0.22,
-    "NTAP": 0.15,
-    "STX": 0.15
+    "FSLR": 0.23,
+    "F": 0.22,
+    "NTAP": 0.2,
+    "MU": 0.19,
+    "DELL": 0.16
   },
   "pending_order": null,
   "history": [
@@ -866,8 +866,25 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-06-01",
+      "equity": 15922.0,
+      "cash": 0.0,
+      "daily_return": 0.141853,
+      "return_since_start": 0.5922,
+      "turnover": 0.0,
+      "positions": {
+        "FSLR": 14.06330766,
+        "F": 245.09402487,
+        "NTAP": 20.61978802,
+        "MU": 3.39942738,
+        "DELL": 6.36170643
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-05-28",
-  "last_equity": 13944.0
+  "last_rebalanced_date": "2026-06-01",
+  "last_equity": 15922.0
 }

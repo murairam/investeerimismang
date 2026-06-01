@@ -1205,7 +1205,7 @@ Winners: DELL +3.6%, UAL +1.9%, STX +0.9% | Losers: MU -0.8%, NTAP -0.5%
 
 **Market:** BULL regime · SPX vs 50d SMA: +7.4% · VIX: 15.3 · S&P 500 20d: +5.1%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 22:44:19.
 
 **Yesterday's P&L:** Portfolio +11.6% · Benchmark +0.2% · Alpha +11.4%
 Winners: DELL +32.7%, NTAP +22.4%, MU +5.1% | Losers: UAL -0.3%, STX -0.1%
