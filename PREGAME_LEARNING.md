@@ -1,17 +1,17 @@
 # Pre-Game Learning Report
 
-Generated: 2026-06-01
+Generated: 2026-06-02
 Target go-live date: 2026-04-06
 Days remaining: 0
 
 ## Scoreboard
-- Training days with measurable alpha: 55
-- Win days (alpha > 0): 29
+- Training days with measurable alpha: 56
+- Win days (alpha > 0): 30
 - Loss days (alpha < 0): 26
-- Average daily alpha: +0.17%
-- Paper account equity: €15,564.89 (from €10,000.00, return +55.65%)
+- Average daily alpha: +0.21%
+- Paper account equity: €15,903.47 (from €10,000.00, return +59.03%)
 - Max drawdown (paper): 7.69%
-- Average turnover: 4.68%
+- Average turnover: 4.55%
 
 ## Confidence note
 - Evidence status: actionable
@@ -30,7 +30,7 @@ Days remaining: 0
 ## Ticker lessons
 | Ticker | Bucket | Obs | Avg 1d return | Hit rate |
 |---|---|---:|---:|---:|
-| DELL | winner | 16 | +5.26% | 62% |
+| DELL | winner | 18 | +5.87% | 67% |
 | INTC | winner | 30 | +2.69% | 60% |
 | CSCO | winner | 10 | +2.69% | 60% |
 | MPWR | winner | 8 | +2.65% | 100% |
@@ -38,7 +38,6 @@ Days remaining: 0
 | EQNR.OL | loser | 10 | -1.56% | 20% |
 | GEV | loser | 8 | -1.21% | 25% |
 | DOW | loser | 8 | -0.71% | 50% |
-| MU | loser | 22 | -0.42% | 27% |
 | VWS.CO | loser | 12 | -0.20% | 33% |
 
 ## Action plan until April 6

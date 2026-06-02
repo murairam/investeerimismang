@@ -1234,3 +1234,36 @@ Winners: DELL +32.7%, NTAP +22.4%, MU +5.1% | Losers: UAL -0.3%, STX -0.1%
 - ▲ **NTAP**: 15.0% → 20.0% (+5.0%)
 
 ---
+## 2026-06-02 06:13:02
+
+**Market:** BULL regime · SPX vs 50d SMA: +7.4% · VIX: 16.0 · S&P 500 20d: +5.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +2.3% · Benchmark +0.3% · Alpha +2.1%
+Winners: DELL +10.8%, MU +6.7%, NTAP +3.2% | Losers: F -4.6%, FSLR -1.2%
+
+**Paper account:** Equity €15,903.47 (start €10,000) · Today -0.12% · Since start +59.03% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 88% · **Positions:** 5 · **Total weight:** 80.0%
+
+**Thesis:** I prioritized the four triple-consensus names as the independently validated core and removed F first plus FSLR second because both were weaker than the replacement set, with F already flagged by learning context and MGM/HPE offering materially stronger momentum-catalyst profiles. The final portfolio stays concentrated in the strongest rotation leaders while still meeting the multi-sector rule via MGM; beta should remain aggressive and near the BULL target, though slightly moderated by NTAP/MGM versus an all-high-beta tech stack.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **DELL** | 5.0% | Triple-consensus core holding and current portfolio winner; extreme 5d momentum, strong volume confirmation, and 52-week-high leadership fit the BULL competition mandate perfectly. |
+| 2 | **HPE** | 21.0% | Triple-consensus replacement for weaker holdings with the cleanest fresh breakout profile in the set; vol_ratio 5.23, RSI 89, and strong 5d acceleration make it a top right-tail candidate. |
+| 3 | **MU** | 12.0% | Triple-consensus momentum engine and validated live-game winner; despite lighter volume today, its 5d surge and high beta keep it as a high-conviction BULL-regime leader. |
+| 4 | **NTAP** | 17.0% | Triple-consensus hold with continued positive momentum, solid volume support, and strong recent contribution; lower beta than peers is acceptable because the trend remains highly confirmed. |
+| 5 | **MGM** | 25.0% | Double-consensus non-Tech addition that earns the diversification slot on merit, not as filler; vol_ratio 5.45, RSI 90, and high short interest create a credible squeeze/catalyst setup. |
+
+**Changes from yesterday:**
+- ➕ Added **HPE** at 21.0%
+- ➕ Added **MGM** at 25.0%
+- ➖ Removed **FSLR** (was 23.0%)
+- ➖ Removed **F** (was 22.0%)
+- ▼ **DELL**: 16.0% → 5.0% (-11.0%)
+- ▼ **MU**: 19.0% → 12.0% (-7.0%)
+- ▼ **NTAP**: 20.0% → 17.0% (-3.0%)
+
+---
