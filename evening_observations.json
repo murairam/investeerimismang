@@ -1,48 +1,48 @@
 {
-  "date": "2026-06-01",
-  "timestamp": "2026-06-01T22:42:03+00:00",
-  "portfolio_return": 0.022894583485671402,
-  "benchmark_return": 0.0026252961308912415,
-  "alpha": 0.02026928735478016,
+  "date": "2026-06-02",
+  "timestamp": "2026-06-02T22:34:29+00:00",
+  "portfolio_return": -0.010065203003124776,
+  "benchmark_return": 0.0012920889411551784,
+  "alpha": -0.011357291944279955,
   "position_returns": [
-    {
-      "ticker": "DELL",
-      "weight": 0.16,
-      "return": 0.10702997648193979,
-      "price": 465.9599914550781
-    },
     {
       "ticker": "MU",
       "weight": 0.19,
-      "return": 0.06642636457260553,
-      "price": 1035.5
-    },
-    {
-      "ticker": "NTAP",
-      "weight": 0.2,
-      "return": 0.03104024252974602,
-      "price": 179.6999969482422
+      "return": 0.02761948390723079,
+      "price": 1064.0999755859375
     },
     {
       "ticker": "FSLR",
       "weight": 0.23,
-      "return": -0.012353754813911766,
-      "price": 303.0
+      "return": 0.026435675794141966,
+      "price": 311.010009765625
+    },
+    {
+      "ticker": "NTAP",
+      "weight": 0.2,
+      "return": -0.022593197704745216,
+      "price": 175.63999938964844
     },
     {
       "ticker": "F",
       "weight": 0.22,
-      "return": -0.04644503144992507,
-      "price": 16.6299991607666
+      "return": -0.028863473629556213,
+      "price": 16.149999618530273
+    },
+    {
+      "ticker": "DELL",
+      "weight": 0.16,
+      "return": -0.06577816649187418,
+      "price": 435.30999755859375
     }
   ],
-  "ai_recommendation": "Yes\u2014keep DELL, MU, and NTAP (they\u2019re driving the outperformance), and consider dropping FSLR and F (both are dragging with -1.2% and -4.6%); reallocate that capital into DELL/MU/NTAP or the closest high-momentum substitutes. If you must keep one laggard for diversification, keep the smaller loser (FSLR) and cut F first.",
+  "ai_recommendation": "Yes\u2014update: drop **DELL** (worst performer, -6.6%) and consider trimming **F** (-2.9%) if you need room, while **keep MU and FSLR** (both strong, +2.6\u20132.8%) and **keep NTAP** for now (only -2.3%). If you can only make one change, drop **DELL** and reallocate to **MU or FSLR**.",
   "game_standing": {
-    "rank": 524,
-    "total_players": 9261,
-    "value_eur": 15922.384565827375,
-    "today_return_pct": 2.335,
-    "week_return_pct": 17.958,
-    "month_return_pct": 27.072000000000003
+    "rank": 680,
+    "total_players": 9268,
+    "value_eur": 15760.569444263456,
+    "today_return_pct": -1.005,
+    "week_return_pct": 16.649,
+    "month_return_pct": 25.134
   }
 }
