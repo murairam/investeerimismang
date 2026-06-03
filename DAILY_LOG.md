@@ -1267,3 +1267,34 @@ Winners: DELL +10.8%, MU +6.7%, NTAP +3.2% | Losers: F -4.6%, FSLR -1.2%
 - ▼ **NTAP**: 20.0% → 17.0% (-3.0%)
 
 ---
+## 2026-06-03 06:13:31
+
+**Market:** BULL regime · SPX vs 50d SMA: +7.2% · VIX: 15.8 · S&P 500 20d: +5.7%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.9% · Benchmark +0.1% · Alpha -1.0%
+Winners: MU +2.9%, FSLR +2.7% | Losers: DELL -6.5%, F -2.8%, NTAP -2.2%
+
+**Paper account:** Equity €15,785.58 (start €10,000) · Today -0.86% · Since start +57.86% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I elevated all four double-consensus names to high conviction per ensemble rules, with HPE highest because its volume-confirmed breakout is the cleanest leadership signal on the board. I replace dead-money DELL and weak F with HPE and APTV, while keeping MU, NTAP, and FSLR because their visible momentum still validates them; this stays concentrated in the strongest rotation leaders while preserving at least two sectors. Portfolio beta should remain bullish and close to target, though slightly moderated by NTAP/FSLR versus an all-high-beta tech basket.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **HPE** | 12.0% | Consensus pick with the strongest active breakout profile today: 52-week high, vol_ratio 5.79, mom_5d +47.6%, RSI 92 and very low crowding; this is exactly the whitelist leadership setup. |
+| 2 | **MU** | 20.0% | Consensus pick and validated core ticker with elite 5d momentum (+18.9%) and strong ongoing relative strength; vol_ratio is softer at 0.83, so conviction stays just below max but remains high. |
+| 3 | **NTAP** | 23.0% | Consensus pick with exceptional acceleration (mom_5d +26.5%), vol_ratio 1.15, RSI 91 and continued momentum confirmation; despite lower beta, the signal quality earns a high score. |
+| 4 | **FSLR** | 23.0% | Consensus pick and current holding that still validates on the rotation mandate: positive 5d momentum (+15.3%), near-high leadership behavior, and acceptable volume support at 0.97. |
+| 5 | **APTV** | 22.0% | Best unique non-consensus addition for sector balance and right-tail upside: mom_5d +25.8%, vol_ratio 1.54, RSI 83, plus recent insider buying gives it a differentiated catalyst. |
+
+**Changes from yesterday:**
+- ➕ Added **HPE** at 12.0%
+- ➕ Added **APTV** at 22.0%
+- ➖ Removed **F** (was 22.0%)
+- ➖ Removed **DELL** (was 16.0%)
+- ▲ **NTAP**: 20.0% → 23.0% (+3.0%)
+
+---
