@@ -1,48 +1,48 @@
 {
-  "date": "2026-06-03",
-  "timestamp": "2026-06-03T22:37:34+00:00",
-  "portfolio_return": 0.0030867858441466006,
-  "benchmark_return": -0.007372041104846239,
-  "alpha": 0.01045882694899284,
+  "date": "2026-06-04",
+  "timestamp": "2026-06-04T22:01:37+00:00",
+  "portfolio_return": -0.026558330786077715,
+  "benchmark_return": 0.004054961568363158,
+  "alpha": -0.030613292354440873,
   "position_returns": [
     {
-      "ticker": "NTAP",
-      "weight": 0.2,
-      "return": 0.030972457642395534,
-      "price": 181.0800018310547
+      "ticker": "FSLR",
+      "weight": 0.25,
+      "return": -0.010369168241849969,
+      "price": 314.95001220703125
     },
     {
-      "ticker": "FSLR",
-      "weight": 0.23,
-      "return": 0.023278962113891577,
-      "price": 318.25
+      "ticker": "NTAP",
+      "weight": 0.15,
+      "return": -0.012204587428318536,
+      "price": 178.8699951171875
+    },
+    {
+      "ticker": "HPE",
+      "weight": 0.05,
+      "return": -0.026473306596099033,
+      "price": 53.689998626708984
+    },
+    {
+      "ticker": "CRWD",
+      "weight": 0.16,
+      "return": -0.0381481775991559,
+      "price": 719.0900268554688
     },
     {
       "ticker": "MU",
       "weight": 0.19,
-      "return": 0.014538080122224128,
-      "price": 1079.5699462890625
-    },
-    {
-      "ticker": "F",
-      "weight": 0.22,
-      "return": -0.02724455670441328,
-      "price": 15.710000038146973
-    },
-    {
-      "ticker": "DELL",
-      "weight": 0.16,
-      "return": -0.0326893732423702,
-      "price": 421.0799865722656
+      "return": -0.07741040455630288,
+      "price": 996.0
     }
   ],
-  "ai_recommendation": "Yes\u2014keep NTAP, FSLR, and MU (they\u2019re strong vs the benchmark), and consider dropping F and DELL since both are negative (-2.7% and -3.3%) while your alpha is already positive. Reallocate the freed weight toward the leaders (NTAP/FSLR/MU) for tomorrow.",
+  "ai_recommendation": "Drop/trim the weakest performers\u2014**MU (-7.7%)** and **CRWD (-3.8%)**\u2014and reallocate to higher-conviction, steadier names (keep **FSLR** and **NTAP** for now; **HPE (-2.6%)** is borderline but not as bad as MU/CRWD). Since the leaderboard snapshot is **Monday 09:00 EET**, make this change **today** to give the new weights time to show early gains before the cutoff.",
   "game_standing": {
-    "rank": 671,
-    "total_players": 9276,
-    "value_eur": 15818.320830093606,
-    "today_return_pct": 0.368,
-    "week_return_pct": 16.432,
-    "month_return_pct": 25.592
+    "rank": 609,
+    "total_players": 9281,
+    "value_eur": 15606.720547240007,
+    "today_return_pct": -1.279,
+    "week_return_pct": 13.725999999999999,
+    "month_return_pct": 23.912
   }
 }
