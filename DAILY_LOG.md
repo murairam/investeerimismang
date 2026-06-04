@@ -1302,7 +1302,7 @@ Winners: MU +2.9%, FSLR +2.7% | Losers: DELL -6.5%, F -2.8%, NTAP -2.2%
 
 **Market:** BULL regime · SPX vs 50d SMA: +6.1% · VIX: 16.1 · S&P 500 20d: +4.1%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 16:58:12.
 
 **Yesterday's P&L:** Portfolio +0.4% · Benchmark -0.7% · Alpha +1.1%
 Winners: NTAP +3.2%, FSLR +2.4%, MU +1.5% | Losers: DELL -3.2%, F -2.7%
