@@ -1,48 +1,48 @@
 {
-  "date": "2026-06-04",
-  "timestamp": "2026-06-04T22:01:37+00:00",
-  "portfolio_return": -0.026558330786077715,
-  "benchmark_return": 0.004054961568363158,
-  "alpha": -0.030613292354440873,
+  "date": "2026-06-05",
+  "timestamp": "2026-06-05T21:56:47+00:00",
+  "portfolio_return": -0.07850491820959875,
+  "benchmark_return": -0.026445361894386843,
+  "alpha": -0.052059556315211905,
   "position_returns": [
-    {
-      "ticker": "FSLR",
-      "weight": 0.25,
-      "return": -0.010369168241849969,
-      "price": 314.95001220703125
-    },
     {
       "ticker": "NTAP",
       "weight": 0.15,
-      "return": -0.012204587428318536,
-      "price": 178.8699951171875
-    },
-    {
-      "ticker": "HPE",
-      "weight": 0.05,
-      "return": -0.026473306596099033,
-      "price": 53.689998626708984
+      "return": -0.06613743027892527,
+      "price": 167.0399932861328
     },
     {
       "ticker": "CRWD",
       "weight": 0.16,
-      "return": -0.0381481775991559,
-      "price": 719.0900268554688
+      "return": -0.06684838549969274,
+      "price": 671.02001953125
+    },
+    {
+      "ticker": "HPE",
+      "weight": 0.05,
+      "return": -0.08362819852142644,
+      "price": 49.20000076293945
+    },
+    {
+      "ticker": "FSLR",
+      "weight": 0.25,
+      "return": -0.11411335465445616,
+      "price": 279.010009765625
     },
     {
       "ticker": "MU",
       "weight": 0.19,
-      "return": -0.07741040455630288,
-      "price": 996.0
+      "return": -0.13252007051644077,
+      "price": 864.010009765625
     }
   ],
-  "ai_recommendation": "Drop/trim the weakest performers\u2014**MU (-7.7%)** and **CRWD (-3.8%)**\u2014and reallocate to higher-conviction, steadier names (keep **FSLR** and **NTAP** for now; **HPE (-2.6%)** is borderline but not as bad as MU/CRWD). Since the leaderboard snapshot is **Monday 09:00 EET**, make this change **today** to give the new weights time to show early gains before the cutoff.",
+  "ai_recommendation": "Update the portfolio: drop the weakest momentum/return names **MU (-13.3%)** and **FSLR (-11.4%)**, and keep **NTAP (-6.6%)** and **CRWD (-6.7%)** as higher-relative performers; **HPE (-8.4%)** is borderline\u2014reduce it if you need room to reallocate. Since you\u2019re underperforming the benchmark (alpha **-5.21%**) and need to climb before Monday 09:00 EET, reallocate the freed weight into **higher-conviction, lower-drawdown winners** rather than adding more of the laggards.",
   "game_standing": {
-    "rank": 609,
-    "total_players": 9281,
-    "value_eur": 15606.720547240007,
-    "today_return_pct": -1.279,
-    "week_return_pct": 13.725999999999999,
-    "month_return_pct": 23.912
+    "rank": 581,
+    "total_players": 9283,
+    "value_eur": 14375.347104255048,
+    "today_return_pct": -7.861,
+    "week_return_pct": 3.18,
+    "month_return_pct": 13.270000000000001
   }
 }
