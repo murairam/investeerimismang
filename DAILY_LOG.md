@@ -1329,3 +1329,37 @@ Winners: NTAP +3.2%, FSLR +2.4%, MU +1.5% | Losers: DELL -3.2%, F -2.7%
 - ▼ **NTAP**: 20.0% → 15.0% (-5.0%)
 
 ---
+## 2026-06-05 06:12:37
+
+**Market:** BULL regime · SPX vs 50d SMA: +6.1% · VIX: 16.1 · S&P 500 20d: +4.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.1% · Benchmark -0.7% · Alpha +0.7%
+Losers: FSLR -0.1%, MU -0.1%, CRWD -0.1%
+
+**Paper account:** Equity €12,941.80 (start €10,000) · Today -15.74% · Since start +29.42% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the consensus core: APTV as the only triple-consensus maximum-conviction name, then AVGO, DELL, FSLR, HPE, and NTAP as validated double-consensus picks. MU and CRWD are removed per learning constraints, while FSLR is retained as the strongest non-tech leader to satisfy sector-balance without resorting to weak filler; this remains tech-heavy because the signal concentration is clearly superior, and the resulting beta should sit around the late-game preferred moderate-aggressive range rather than the full BULL 1.6-2.0 target.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **APTV** | 23.0% | Triple-consensus pick across all three proposals; combines elite 5d momentum (+21.0%) with strong catalyst support and insider buying, making it the clearest independently validated right-tail setup. |
+| 2 | **AVGO** | 15.0% | Double-consensus pick with exceptional volume confirmation (vol_ratio 3.47) and strong 5d momentum (+12.6%); leadership breakout in the strongest sector earns high conviction despite rotation-risk awareness. |
+| 3 | **DELL** | 5.0% | Double-consensus pick and one of the strongest acceleration names in the set with explosive 5d momentum (+33.1%); cleaner replacement for MU/CRWD under the rotation mandate. |
+| 4 | **FSLR** | 23.0% | Double-consensus incumbent and the best non-tech sector balance name; momentum remains positive (+5.2% 5d) and it satisfies the mandate to keep at least one strong leader outside dominant tech. |
+| 5 | **HPE** | 17.0% | Double-consensus pick with extreme recent acceleration (+44.6% 5d); volume is softer, but the move is too strong to ignore and it still outranks weaker incumbents on competition terms. |
+| 6 | **NTAP** | 17.0% | Double-consensus incumbent with very strong 5d momentum (+27.5%); lower volume confirmation tempers upside versus the top names, but ensemble agreement requires high-conviction inclusion. |
+
+**Changes from yesterday:**
+- ➕ Added **APTV** at 23.0%
+- ➕ Added **AVGO** at 15.0%
+- ➕ Added **DELL** at 5.0%
+- ➖ Removed **MU** (was 19.0%)
+- ➖ Removed **CRWD** (was 16.0%)
+- ▲ **HPE**: 5.0% → 17.0% (+12.0%)
+- ▲ **NTAP**: 15.0% → 17.0% (+2.0%)
+
+---
