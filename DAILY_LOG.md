@@ -1363,3 +1363,39 @@ Losers: FSLR -0.1%, MU -0.1%, CRWD -0.1%
 - ▲ **NTAP**: 15.0% → 17.0% (+2.0%)
 
 ---
+## 2026-06-08 06:12:01
+
+**Market:** BULL regime · SPX vs 50d SMA: +3.2% · VIX: 21.5 · S&P 500 20d: +0.6%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -7.2% · Benchmark -2.6% · Alpha -4.6%
+Losers: MU -12.5%, FSLR -10.6%, HPE -7.6%
+
+**Paper account:** Equity €11,371.58 (start €10,000) · Today -25.97% · Since start +13.72% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I elevated the double-consensus names HUM and MGM per ensemble rules, then filled the remaining concentrated 5-stock book with the strongest unique non-Tech rotation leaders. I excluded current Tech holdings because the rotation alert is HIGH and the mandate explicitly says to cut dead-money or weaker Tech; this mix keeps at least two sectors represented and should land closer to the late-game preferred moderate-beta profile than the prior Tech-heavy book while still preserving upside.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **HUM** | 17.0% | Consensus pick in 2/2 available proposals with strong 5d momentum, positive volume confirmation, health-sector breadth support, and near-52w-high leadership in a tape rotating away from weak Tech breadth. |
+| 2 | **MGM** | 20.0% | Consensus pick in 2/2 proposals, so conviction floor applies; strong 5d momentum and non-Tech exposure fit the rotation mandate, though low volume confirmation keeps it at the floor rather than higher. |
+| 3 | **COO** | 21.0% | Best unique pick from Proposal C: standout momentum-volume confirmation with vol_ratio 3.23 and +11.1% 5d momentum, giving it true breakout quality in a stronger sector backdrop. |
+| 4 | **ODFL** | 24.0% | High-quality unique industrial leader with +9.0% 5d momentum, supportive volume, and cleaner sector action than Tech, earning a slot over weaker current holdings. |
+| 5 | **URI** | 18.0% | Industrial momentum remains constructive with solid 5d strength and acceptable volume, and it adds a second non-health leadership lane without resorting to weak filler. |
+
+**Changes from yesterday:**
+- ➕ Added **HUM** at 17.0%
+- ➕ Added **MGM** at 20.0%
+- ➕ Added **COO** at 21.0%
+- ➕ Added **ODFL** at 24.0%
+- ➕ Added **URI** at 18.0%
+- ➖ Removed **FSLR** (was 25.0%)
+- ➖ Removed **MU** (was 19.0%)
+- ➖ Removed **CRWD** (was 16.0%)
+- ➖ Removed **NTAP** (was 15.0%)
+- ➖ Removed **HPE** (was 5.0%)
+
+---
