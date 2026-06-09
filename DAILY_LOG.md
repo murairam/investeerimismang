@@ -1399,3 +1399,38 @@ Losers: MU -12.5%, FSLR -10.6%, HPE -7.6%
 - ➖ Removed **HPE** (was 5.0%)
 
 ---
+## 2026-06-09 06:11:38
+
+**Market:** BULL regime · SPX vs 50d SMA: +3.2% · VIX: 18.9 · S&P 500 20d: +0.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.4% · Benchmark +0.3% · Alpha +1.1%
+Winners: MU +9.6%, NTAP +1.7%, HPE +1.1% | Losers: CRWD -2.0%, FSLR -1.5%
+
+**Paper account:** Equity €11,560.37 (start €10,000) · Today -24.74% · Since start +15.60% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I elevated the two consensus names, HPE and NTAP, per ensemble rules, but kept NTAP below HPE because its live momentum/volume are materially weaker. For unique additions, I favored rotation-aligned Health and Industrial leaders with strong acceleration and volume confirmation—LLY, COO, and ODFL—while removing weaker current holdings FSLR, CRWD, and MU due to the mandate to cut names with inferior current momentum and to reduce tech concentration under the high rotation-risk alert. The resulting 5-name book stays concentrated, spans at least three sectors, and should land around the late-game preferred moderate-beta zone rather than the too-low 0.89 strategist profile.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **HPE** | 20.0% | Consensus pick in 2/3 proposals with strong recent price action (mom_5d +6.9%) and validated keep-from-current-book status; volume is light but ensemble agreement and live gain support high conviction. |
+| 2 | **LLY** | 17.0% | Best unique non-tech rotation leader from Proposal C with strong momentum, solid volume confirmation, and health-sector breadth support that fits the current rotation away from crowded tech. |
+| 3 | **COO** | 20.0% | High-quality unique catalyst pick with explosive volume (vol_ratio 2.18) and strong 5d momentum (+11.7%), giving it clear slot-winning acceleration despite being below its 52-week high. |
+| 4 | **ODFL** | 25.0% | Industrial momentum leader near highs with RSI 90.4 and mom_5d +9.0%; this qualifies as leadership rather than exhaustion, and it adds non-tech exposure without sacrificing upside. |
+| 5 | **KLAC** | 18.0% | Replacement selected by slot-cost filter: stronger short-term acceleration or cleaner momentum than removed alternatives. |
+
+**Changes from yesterday:**
+- ➕ Added **LLY** at 17.0%
+- ➕ Added **COO** at 20.0%
+- ➕ Added **ODFL** at 25.0%
+- ➕ Added **KLAC** at 18.0%
+- ➖ Removed **FSLR** (was 25.0%)
+- ➖ Removed **MU** (was 19.0%)
+- ➖ Removed **CRWD** (was 16.0%)
+- ➖ Removed **NTAP** (was 15.0%)
+- ▲ **HPE**: 5.0% → 20.0% (+15.0%)
+
+---

@@ -1,6 +1,6 @@
 # Pre-Game Learning Report
 
-Generated: 2026-06-08
+Generated: 2026-06-09
 Target go-live date: 2026-04-06
 Days remaining: 0
 
@@ -8,9 +8,9 @@ Days remaining: 0
 - Training days with measurable alpha: 58
 - Win days (alpha > 0): 31
 - Loss days (alpha < 0): 27
-- Average daily alpha: +0.13%
-- Paper account equity: €11,371.58 (from €10,000.00, return +13.72%)
-- Max drawdown (paper): 28.58%
+- Average daily alpha: +0.14%
+- Paper account equity: €11,560.37 (from €10,000.00, return +15.60%)
+- Max drawdown (paper): 27.39%
 - Average turnover: 4.42%
 
 ## Confidence note
@@ -39,6 +39,7 @@ Days remaining: 0
 | FSLR | loser | 12 | -0.83% | 50% |
 | DOW | loser | 8 | -0.71% | 50% |
 | VWS.CO | loser | 12 | -0.20% | 33% |
+| APA | loser | 8 | -0.19% | 50% |
 
 ## Action plan until April 6
 - Avoid overusing diversifier rationales until their hit rate recovers above 40%.
