@@ -1434,3 +1434,39 @@ Winners: MU +9.6%, NTAP +1.7%, HPE +1.1% | Losers: CRWD -2.0%, FSLR -1.5%
 - ▲ **HPE**: 5.0% → 20.0% (+15.0%)
 
 ---
+## 2026-06-10 06:15:50
+
+**Market:** BULL regime · SPX vs 50d SMA: +3.2% · VIX: 18.9 · S&P 500 20d: +0.1%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.2% · Benchmark +0.3% · Alpha -0.5%
+Losers: FSLR -0.3%, MU -0.3%, CRWD -0.3%
+
+**Paper account:** Equity €11,551.03 (start €10,000) · Today -24.80% · Since start +15.51% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the two consensus names first: HUM as the strongest validated rotation leader and MU as a lower-end consensus keep rather than a full exit, while replacing weak current holdings FSLR, NTAP, HPE and also rotating out CRWD due to the tech breadth collapse and recent underperformance. The best unique additions came from Proposal C's health leadership (COO, LLY, CAH) plus ODFL as the cleanest non-health/non-tech momentum name, giving a concentrated multi-sector portfolio tilted to the live rotation rather than yesterday's decelerating tech book; beta should land around the late-game preferred moderate range rather than the original underpowered strategist mix.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **HUM** | 19.0% | Consensus pick in 2/3 proposals with strong 5d momentum (+11.5%) and leadership from the strongest broad sector (Health breadth 84%), making it the highest-conviction rotation target despite light volume. |
+| 2 | **MU** | 19.0% | Consensus pick in 2/3 proposals and the only current holding explicitly worth keeping as a core, but conviction is held to the consensus floor because 5d momentum is sharply negative (-10.3%) even though volume and relative strength remain supportive. |
+| 3 | **COO** | 12.0% | Best unique health breakout with exceptional 5d momentum (+12.8%), supportive volume (1.25), low crowding, and direct alignment with the ongoing rotation away from weak tech breadth. |
+| 4 | **LLY** | 17.0% | High-quality health leader near highs with strong 5d momentum (+8.5%) and confirmed volume, offering cleaner trend persistence than weaker current tech holdings. |
+| 5 | **ODFL** | 17.0% | Top non-tech rotation candidate from the momentum strategist, combining +8.5% 5d momentum, near-52-week-high behavior, and low retail crowding, which helps diversify away from the collapsing tech breadth regime. |
+| 6 | **CAH** | 16.0% | Earns the sixth slot as a solid health/defensive momentum name with positive 5d momentum (+5.5%) and volume confirmation, reinforcing the strongest sector rotation without adding dead-money exposure. |
+
+**Changes from yesterday:**
+- ➕ Added **HUM** at 19.0%
+- ➕ Added **COO** at 12.0%
+- ➕ Added **LLY** at 17.0%
+- ➕ Added **ODFL** at 17.0%
+- ➕ Added **CAH** at 16.0%
+- ➖ Removed **FSLR** (was 25.0%)
+- ➖ Removed **CRWD** (was 16.0%)
+- ➖ Removed **NTAP** (was 15.0%)
+- ➖ Removed **HPE** (was 5.0%)
+
+---
