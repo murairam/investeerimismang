@@ -1470,3 +1470,39 @@ Losers: FSLR -0.3%, MU -0.3%, CRWD -0.3%
 - ➖ Removed **HPE** (was 5.0%)
 
 ---
+## 2026-06-11 06:26:42
+
+**Market:** BULL regime · SPX vs 50d SMA: +2.7% · VIX: 19.9 · S&P 500 20d: -0.4%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -0.1% · Benchmark -0.3% · Alpha +0.2%
+Losers: FSLR -0.1%, MU -0.1%, CRWD -0.1%
+
+**Paper account:** Equity €11,214.30 (start €10,000) · Today -26.99% · Since start +12.14% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 5 · **Total weight:** 95.0%
+
+**Thesis:** I prioritized the two double-consensus names, ODFL and APH, then filled remaining slots with the strongest non-tech rotation leaders that had real momentum and volume support rather than dead-money current holdings. This portfolio exits weak existing names like HPE and FSLR, avoids lagging energy and decelerating tech breadth, and should land in a moderate beta range more consistent with the late-game lock-in overlay while still preserving right-tail upside.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **ODFL** | 11.0% | Consensus pick in 2/3 proposals with the strongest combined evidence: vol_ratio 1.68, mom_5d +5.9%, RSI 94 and clear breakout leadership; this is exactly the whitelist-style momentum profile to lean into. |
+| 2 | **APH** | 20.0% | Consensus pick in 2/3 proposals and a cleaner growth/industrial-tech exposure than weak broad tech holdings, with positive momentum, supportive volume, and better regime fit than staying in decelerating semis. |
+| 3 | **CAH** | 21.0% | Strong unique pick from the full analyst with vol_ratio 1.50 and mom_5d +9.1% in a leading health sector, giving needed non-industrial diversification without sacrificing acceleration. |
+| 4 | **RL** | 18.0% | High-upside unique mover with exceptional 5d momentum (+9.4%) that earns its slot despite only moderate volume, offering consumer exposure away from the tech rotation risk zone. |
+| 5 | **MAERSK-B.CO** | 25.0% | Unique but compelling breakout candidate with mom_5d +10.8% and vol_ratio 1.35; included for raw acceleration, though lower beta and foreign-listing status keep conviction below the consensus names. |
+
+**Changes from yesterday:**
+- ➕ Added **ODFL** at 11.0%
+- ➕ Added **APH** at 20.0%
+- ➕ Added **CAH** at 21.0%
+- ➕ Added **RL** at 18.0%
+- ➕ Added **MAERSK-B.CO** at 25.0%
+- ➖ Removed **FSLR** (was 25.0%)
+- ➖ Removed **MU** (was 19.0%)
+- ➖ Removed **CRWD** (was 16.0%)
+- ➖ Removed **NTAP** (was 15.0%)
+- ➖ Removed **HPE** (was 5.0%)
+
+---

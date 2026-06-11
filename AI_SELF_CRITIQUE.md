@@ -1,7 +1,7 @@
 # AI Self-Critique Report
 
-Generated: 2026-06-10
-Training days analyzed: 58
+Generated: 2026-06-11
+Training days analyzed: 0
 Days until live mode: 0
 
 ## Meta-Learning Question
@@ -10,46 +10,34 @@ Days until live mode: 0
 This report evaluates whether the AI's stated rationales and conviction levels correlate with outcomes.
 
 ## Confidence note
-- Evidence status: actionable
+- Evidence status: insufficient_data
 - Minimum daily observations for strong conclusions: 5
 - Minimum rationale observations for bias claims: 5
 - Latest day status: experimental / unverified
 
 ## What's Working ✅
-- 'at_52w_high' rationale is working: +1.0% avg, 56% hit rate
-- Conviction sizing is working: Tier 1 +0.9% > Tier 3 -0.2%
+- Only 0 day(s) of data — this report is descriptive, not yet reliable enough for strong policy changes.
 
 ## Systematic Biases / Errors ⚠️
-- 'diversifier' rationale is weak: -0.6% avg, 47% hit rate
-- 'non_us_differentiator' rationale is weak: +0.0% avg, 36% hit rate
-- Alpha hit rate is low: 53%.
+- None detected yet, or the sample is still too small for a strong claim.
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
 |---|---:|---:|---:|
-| momentum | 287 | +0.83% | 53% |
-| high_sharpe | 184 | +0.79% | 51% |
-| breakout | 109 | +1.24% | 54% |
-| consensus | 209 | +0.68% | 51% |
-| catalyst | 43 | +0.63% | 49% |
-| diversifier | 19 | -0.58% | 47% |
-| non_us_differentiator | 36 | +0.03% | 36% |
-| overbought | 185 | +0.67% | 53% |
-| at_52w_high | 220 | +0.95% | 56% |
+| insufficient data | 0 | 0.00% | 0% |
 
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 126 | +0.95% |
-| Tier 2 (medium conviction) | 12-18% | 133 | +0.96% |
-| Tier 3 (low conviction) | 5-10% | 33 | -0.19% |
+| Tier 1 (high conviction) | 20-25% | 0 | +0.00% |
+| Tier 2 (medium conviction) | 12-18% | 0 | +0.00% |
+| Tier 3 (low conviction) | 5-10% | 0 | +0.00% |
 
 ## Structured Learning State
 - Active hard rules: 0
 - Changed hard rules since yesterday: 0
-- Validated winners tracked: 5
-- Recurring losers tracked: 4
+- Validated winners tracked: 0
+- Recurring losers tracked: 0
 
 ## Action Items for the AI
-- Avoid overusing diversifier rationales until their hit rate recovers above 40%.
-- Avoid overusing non_us_differentiator rationales until their hit rate recovers above 40%.
+- Keep collecting data. Do not make large strategic changes from this report yet.
