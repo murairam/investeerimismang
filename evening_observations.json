@@ -1,48 +1,48 @@
 {
-  "date": "2026-06-11",
-  "timestamp": "2026-06-11T22:22:34+00:00",
-  "portfolio_return": 0.05619663261908959,
-  "benchmark_return": 0.017518885564244746,
-  "alpha": 0.03867774705484484,
+  "date": "2026-06-12",
+  "timestamp": "2026-06-12T22:06:35+00:00",
+  "portfolio_return": 0.011597959699067883,
+  "benchmark_return": 0.0050255138730570525,
+  "alpha": 0.006572445826010831,
   "position_returns": [
     {
-      "ticker": "MU",
-      "weight": 0.19,
-      "return": 0.11659639151573842,
-      "price": 995.8699951171875
+      "ticker": "RL",
+      "weight": 0.18,
+      "return": 0.02715490344480065,
+      "price": 403.9800109863281
     },
     {
-      "ticker": "FSLR",
+      "ticker": "MAERSK-B.CO",
       "weight": 0.25,
-      "return": 0.08785657632250032,
-      "price": 271.1700134277344
+      "return": 0.013161502604880804,
+      "price": 18475.0
     },
     {
-      "ticker": "CRWD",
-      "weight": 0.16,
-      "return": 0.06760434699524298,
-      "price": 691.530029296875
+      "ticker": "CAH",
+      "weight": 0.21,
+      "return": 0.012163150645973397,
+      "price": 223.85000610351562
     },
     {
-      "ticker": "HPE",
-      "weight": 0.05,
-      "return": 0.028797483188791606,
-      "price": 46.79999923706055
+      "ticker": "APH",
+      "weight": 0.2,
+      "return": 0.008789166200192433,
+      "price": 153.8000030517578
     },
     {
-      "ticker": "NTAP",
-      "weight": 0.15,
-      "return": -0.0011826368546949961,
-      "price": 160.47000122070312
+      "ticker": "ODFL",
+      "weight": 0.11,
+      "return": -0.008112667708266685,
+      "price": 245.75
     }
   ],
-  "ai_recommendation": "Yes\u2014update to keep the winners and cut the laggard: drop **NTAP (-0.1%)** and reallocate that capital into **MU** and **FSLR** (highest relative strength: +11.7%, +8.8%) while keeping **CRWD** and **HPE** for stability. Since the leaderboard snapshot is **Monday 09:00 EET**, lean into higher-conviction momentum (MU/FSLR) rather than protecting with lower-beta names.",
+  "ai_recommendation": "Update the portfolio: keep RL, MAERSK-B.CO, CAH, and APH (they\u2019re driving the outperformance), and drop ODFL since it\u2019s the only laggard (-0.8%)\u2014replace it with a higher-momentum/higher-beta name to push for the Monday 09:00 EET leaderboard snapshot. If you\u2019re already near the top of the weekly ranking, instead of adding beta, rotate ODFL into a lower-volatility substitute to protect gains.",
   "game_standing": {
-    "rank": 825,
-    "total_players": 9298,
-    "value_eur": 14221.096375030727,
-    "today_return_pct": 2.571,
-    "week_return_pct": -10.044,
-    "month_return_pct": 0.847
+    "rank": 809,
+    "total_players": 9300,
+    "value_eur": 14390.683179179636,
+    "today_return_pct": 0.8330000000000001,
+    "week_return_pct": -7.763000000000001,
+    "month_return_pct": 1.109
   }
 }
