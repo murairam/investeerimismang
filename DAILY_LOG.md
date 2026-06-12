@@ -1506,3 +1506,39 @@ Losers: FSLR -0.1%, MU -0.1%, CRWD -0.1%
 - ➖ Removed **HPE** (was 5.0%)
 
 ---
+## 2026-06-12 06:12:02
+
+**Market:** BULL regime · SPX vs 50d SMA: +2.3% · VIX: 19.4 · S&P 500 20d: -0.7%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +5.4% · Benchmark +1.8% · Alpha +3.7%
+Winners: MU +11.4%, FSLR +8.5%, CRWD +6.5% | Losers: NTAP -0.4%
+
+**Paper account:** Equity €11,568.17 (start €10,000) · Today -24.69% · Since start +15.68% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I am rotating out of the current holdings because the provided context says MU, FSLR, CRWD, NTAP, and HPE all show negative 5d momentum and/or weak volume today, so they no longer earn slots under the rotation mandate; NTAP was already flagged as the laggard to cut, and today the broader set also fails the keep test. The portfolio leans into the four double-consensus leaders KLAC, AMAT, LRCX, and BBY, then adds NCLH as the best asymmetric non-consensus catalyst via heavy insider buying to avoid pure groupthink and satisfy sector balance. Beta should remain aggressive and near the upper end of the BULL target, though slightly moderated versus the strategist’s 2.14 by including BBY and NCLH rather than adding a fifth semiconductor name.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **KLAC** | 23.0% | Consensus pick (2/3) with the strongest combined breakout evidence: vol_ratio 1.63, mom_5d +13.6%, strong relative strength, and fresh semiconductor leadership in the market’s top sector. |
+| 2 | **AMAT** | 19.0% | Consensus pick (2/3) with high-beta semi momentum, mom_5d +10.6%, solid volume confirmation, and strong regime fit for an aggressive rotation into current leaders. |
+| 3 | **LRCX** | 23.0% | Consensus pick (2/3) and another validated semiconductor breakout with vol_ratio 1.55, positive acceleration, and very high beta that supports right-tail upside in a competition setting. |
+| 4 | **BBY** | 19.0% | Consensus pick (2/3) and the best non-tech slot, with strong 5d momentum and top vs_index among candidates, giving required sector diversification despite weaker volume than the semi leaders. |
+| 5 | **NCLH** | 16.0% | Best unique pick: massive insider cluster buying plus squeeze/catalyst potential offers asymmetric upside and lowers pure semiconductor crowding, though momentum confirmation is weaker than the consensus names. |
+
+**Changes from yesterday:**
+- ➕ Added **KLAC** at 23.0%
+- ➕ Added **AMAT** at 19.0%
+- ➕ Added **LRCX** at 23.0%
+- ➕ Added **BBY** at 19.0%
+- ➕ Added **NCLH** at 16.0%
+- ➖ Removed **FSLR** (was 25.0%)
+- ➖ Removed **MU** (was 19.0%)
+- ➖ Removed **CRWD** (was 16.0%)
+- ➖ Removed **NTAP** (was 15.0%)
+- ➖ Removed **HPE** (was 5.0%)
+
+---
