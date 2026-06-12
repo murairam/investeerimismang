@@ -1510,7 +1510,7 @@ Losers: FSLR -0.1%, MU -0.1%, CRWD -0.1%
 
 **Market:** BULL regime · SPX vs 50d SMA: +2.3% · VIX: 19.4 · S&P 500 20d: -0.7%
 
-**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+**Verification:** Verified against actual game holdings at 13:33:14.
 
 **Yesterday's P&L:** Portfolio +5.4% · Benchmark +1.8% · Alpha +3.7%
 Winners: MU +11.4%, FSLR +8.5%, CRWD +6.5% | Losers: NTAP -0.4%

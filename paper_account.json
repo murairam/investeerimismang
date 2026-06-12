@@ -3,18 +3,18 @@
   "initial_capital": 10000.0,
   "cash": 0.0,
   "positions": {
-    "FSLR": 14.49850357,
-    "MU": 3.4067901,
-    "CRWD": 4.12008188,
-    "NTAP": 15.14992786,
-    "HPE": 16.66435612
+    "MAERSK-B.CO": 1.49759726,
+    "CAH": 15.4973347,
+    "APH": 21.41008382,
+    "RL": 7.46952317,
+    "ODFL": 7.24612479
   },
   "verified_weights": {
-    "FSLR": 0.25,
-    "MU": 0.19,
-    "CRWD": 0.16,
-    "NTAP": 0.15,
-    "HPE": 0.05
+    "MAERSK-B.CO": 0.25,
+    "CAH": 0.21,
+    "APH": 0.2,
+    "RL": 0.18,
+    "ODFL": 0.11
   },
   "pending_order": null,
   "history": [
@@ -900,8 +900,25 @@
       },
       "pending_order": null,
       "source": "verified"
+    },
+    {
+      "date": "2026-06-12",
+      "equity": 14098.0,
+      "cash": 0.0,
+      "daily_return": -0.082161,
+      "return_since_start": 0.4098,
+      "turnover": 0.0,
+      "positions": {
+        "MAERSK-B.CO": 1.49759726,
+        "CAH": 15.4973347,
+        "APH": 21.41008382,
+        "RL": 7.46952317,
+        "ODFL": 7.24612479
+      },
+      "pending_order": null,
+      "source": "verified"
     }
   ],
-  "last_rebalanced_date": "2026-06-04",
-  "last_equity": 15360.0
+  "last_rebalanced_date": "2026-06-12",
+  "last_equity": 14098.0
 }
