@@ -34,6 +34,9 @@ RATIONALE_TAGS: tuple[str, ...] = (
 )
 
 
+# Matches portfolio_positions.ticker / agent_proposals.ticker VARCHAR(20) in the DB schema.
+_MAX_TICKER_LEN = 20
+
 load_dotenv()
 _DB_URL = os.environ.get("SUPABASE_CONNECTION_STRING")
 _db_conn = None
@@ -56,12 +59,22 @@ def _get_db_connection():
 
 @contextmanager
 def get_db_cursor(commit: bool = False) -> Generator[psycopg2.extensions.cursor, None, None]:
-    """Provides a database cursor. Commits transaction if commit=True."""
+    """Provides a database cursor. Commits transaction if commit=True.
+
+    Rolls back on any exception so a single failed statement doesn't leave the
+    shared connection stuck in an aborted-transaction state for the rest of
+    the process (every later query would otherwise fail with "current
+    transaction is aborted").
+    """
     conn = _get_db_connection()
-    with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        yield cur
-    if commit:
-        conn.commit()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            yield cur
+        if commit:
+            conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
 
 def _portfolio_to_dict(proposal: PortfolioProposal, signal_map: Optional[dict[str, dict]] = None) -> dict:
     signal_map = signal_map or {}
@@ -665,6 +678,9 @@ def save(
 
             cur.execute("DELETE FROM portfolio_positions WHERE date = %s", (date,))
             for pos in final_portfolio_dict.get("positions", []):
+                if len(pos['ticker']) > _MAX_TICKER_LEN:
+                    logger.warning("Skipping final position with implausible ticker %r (too long for DB)", pos['ticker'])
+                    continue
                 cur.execute("INSERT INTO portfolio_positions (date, ticker, weight, rationale, tags, run_time) VALUES (%s, %s, %s, %s, %s, %s)",
                             (date, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags']), run_time))
 
@@ -674,6 +690,9 @@ def save(
                 if agent_proposal:
                     agent_dict = _portfolio_to_dict(agent_proposal, signal_snapshot)
                     for pos in agent_dict.get("positions", []):
+                        if len(pos['ticker']) > _MAX_TICKER_LEN:
+                            logger.warning("Skipping %s proposal position with implausible ticker %r (too long for DB)", agent_name, pos['ticker'])
+                            continue
                         cur.execute("INSERT INTO agent_proposals (date, agent, ticker, weight, rationale, tags, run_time) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                                     (date, agent_name, pos['ticker'], pos['weight'], pos['rationale'], Json(pos['tags']), run_time))
         logger.info("Saved AI proposal to DB for %s", date)
