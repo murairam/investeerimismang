@@ -1,6 +1,6 @@
 # AI Self-Critique Report
 
-Generated: 2026-06-12
+Generated: 2026-06-15
 Training days analyzed: 58
 Days until live mode: 0
 
@@ -16,31 +16,31 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - Latest day status: experimental / unverified
 
 ## What's Working ✅
-- 'at_52w_high' rationale is working: +0.9% avg, 56% hit rate
+- 'at_52w_high' rationale is working: +0.9% avg, 57% hit rate
 - Conviction sizing is working: Tier 1 +0.9% > Tier 3 -0.1%
 
 ## Systematic Biases / Errors ⚠️
 - 'non_us_differentiator' rationale is weak: +0.0% avg, 36% hit rate
-- Alpha hit rate is low: 53%.
+- Alpha hit rate is low: 52%.
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
 |---|---:|---:|---:|
-| momentum | 286 | +0.88% | 54% |
-| high_sharpe | 177 | +0.79% | 51% |
-| breakout | 110 | +1.30% | 55% |
-| consensus | 206 | +0.71% | 51% |
-| catalyst | 42 | +0.78% | 50% |
-| diversifier | 20 | -0.28% | 50% |
+| momentum | 286 | +0.87% | 55% |
+| high_sharpe | 172 | +0.73% | 51% |
+| breakout | 111 | +1.31% | 55% |
+| consensus | 208 | +0.67% | 52% |
+| catalyst | 42 | +0.62% | 50% |
+| diversifier | 21 | -0.20% | 52% |
 | non_us_differentiator | 36 | +0.03% | 36% |
-| overbought | 185 | +0.68% | 53% |
-| at_52w_high | 218 | +0.93% | 56% |
+| overbought | 184 | +0.67% | 53% |
+| at_52w_high | 217 | +0.94% | 57% |
 
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 126 | +0.95% |
-| Tier 2 (medium conviction) | 12-18% | 134 | +1.04% |
+| Tier 1 (high conviction) | 20-25% | 125 | +0.91% |
+| Tier 2 (medium conviction) | 12-18% | 135 | +1.04% |
 | Tier 3 (low conviction) | 5-10% | 31 | -0.06% |
 
 ## Structured Learning State
