@@ -1542,38 +1542,39 @@ Winners: MU +11.4%, FSLR +8.5%, CRWD +6.5% | Losers: NTAP -0.4%
 - ➖ Removed **HPE** (was 5.0%)
 
 ---
-## 2026-06-15 05:51:20
+## 2026-06-15 06:14:32
 
 **Market:** BULL regime · SPX vs 50d SMA: +2.5% · VIX: 17.7 · S&P 500 20d: -0.9%
 
 **Verification:** Pending manual confirmation via `python scripts/verify.py`.
 
-**Yesterday's P&L:** Portfolio -0.5% · Benchmark +0.5% · Alpha -1.0%
-Winners: RL +2.3%, CAH +0.8%, APH +0.5% | Losers: MAERSK-B.CO -4.1%, ODFL -1.2%
+**Yesterday's P&L:** Portfolio -0.4% · Benchmark +0.5% · Alpha -0.9%
+Winners: RL +2.4%, CAH +0.9%, APH +0.5% | Losers: MAERSK-B.CO -4.1%, ODFL -1.2%
 
-**Paper account:** Equity €13,498.51 (start €10,000) · Today -4.25% · Since start +34.99% · Turnover 0.0% · Cash €0.00
+**Paper account:** Equity €13,504.13 (start €10,000) · Today -4.21% · Since start +35.04% · Turnover 0.0% · Cash €0.00
 
-**Confidence:** 84% · **Positions:** 5 · **Total weight:** 100.0%
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
 
-**Thesis:** Consensus was strongest in WSM and IP, so they form the core with elevated conviction per ensemble rules. I kept RL because it still has strong visible momentum, and rotated out MAERSK-B.CO, CAH, APH, and ODFL because MAERSK is explicitly disfavored, CAH/ODFL no longer fit the rotation mandate, and APH's sub-0.9 volume makes it easier to replace with faster leaders. Final mix stays concentrated in 5 names across Consumer, Materials, and Tech; beta should rise versus the strategist's 1.04 but remain more controlled than an all-high-beta tech chase, fitting late-game lock-in while still adding upside.
+**Thesis:** WSM is the only true consensus name and therefore gets top conviction. I rotated out MAERSK-B.CO, CAH, ODFL, APH, and skipped BBY, HUM, and NCLH because they either fail the slot-cost test on volume/momentum quality or are weaker than the best alternatives; the final book keeps two sectors minimum while leaning into stronger leaders and avoiding excessive Tech concentration despite still lifting beta versus the prior 0.99 strategist mix.
 
 | # | Ticker | Weight | Rationale |
 |---|--------|--------|-----------|
-| 1 | **WSM** | 19.0% | Triple-consensus pick across all three proposals; at 52-week high with strong 5d momentum, positive volume confirmation, and clean consumer leadership makes this the highest-conviction anchor. |
-| 2 | **IP** | 13.0% | Double-consensus pick with vol_ratio 1.58, 5d momentum +6.7%, and materials-sector breakout characteristics; strong rotation fit outside Tech and independently validated by two models. |
-| 3 | **RL** | 23.0% | Current holding still earns its slot with +9.4% 5d momentum, near-52w-high leadership, and acceptable volume at 0.95; stronger than slower defensive alternatives and keeps exposure in a working consumer leader. |
-| 4 | **INTC** | 22.0% | Unique but very high-quality breakout with exceptional +24.8% 5d momentum, validated core ticker status, and strong right-tail potential; included despite Tech rotation risk because the signal strength is materially superior. |
-| 5 | **STX** | 23.0% | Validated core ticker with strong +9.0% 5d momentum and near-adequate volume confirmation; preferred over weaker catalyst-only names as a second tech slot, but kept below top conviction due to sector rotation risk. |
+| 1 | **WSM** | 19.0% | Consensus pick in 2/2 available proposals with strong 5d momentum (+8.2%), positive relative strength, and 52-week-high leadership; ensemble agreement plus live momentum makes this the highest-conviction anchor. |
+| 2 | **INTC** | 22.0% | Unique but elite breakout candidate: validated core ticker with strong volume confirmation (vol_ratio 1.17), explosive 5d momentum (+24.8%), and high-beta upside suited to competition return targets. |
+| 3 | **RL** | 15.0% | Current holding still earns its slot with positive 5d momentum (+9.4%) and acceptable volume (0.95); cleaner non-Tech momentum than weaker alternatives and helps avoid overconcentration in rotation-risk Tech. |
+| 4 | **UAL** | 21.0% | Strong unique momentum pick with positive vs-index, solid 5d acceleration (+8.4%), and cyclical beta for right-tail upside without adding to Tech concentration. |
+| 5 | **KLAC** | 23.0% | Very powerful momentum leader (+31.1% 5d) and high-beta upside, but Tech rotation risk is explicitly HIGH and volume confirmation is only borderline (0.90), so conviction stays below the top tier. |
 
 **Changes from yesterday:**
 - ➕ Added **WSM** at 19.0%
-- ➕ Added **IP** at 13.0%
 - ➕ Added **INTC** at 22.0%
-- ➕ Added **STX** at 23.0%
+- ➕ Added **UAL** at 21.0%
+- ➕ Added **KLAC** at 23.0%
 - ➖ Removed **MAERSK-B.CO** (was 25.0%)
 - ➖ Removed **CAH** (was 21.0%)
 - ➖ Removed **APH** (was 20.0%)
 - ➖ Removed **ODFL** (was 11.0%)
-- ▲ **RL**: 18.0% → 23.0% (+5.0%)
+- ▼ **RL**: 18.0% → 15.0% (-3.0%)
 
 ---
+

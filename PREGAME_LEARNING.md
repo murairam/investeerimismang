@@ -9,8 +9,8 @@ Days remaining: 0
 - Win days (alpha > 0): 30
 - Loss days (alpha < 0): 28
 - Average daily alpha: +0.16%
-- Paper account equity: €13,498.51 (from €10,000.00, return +34.99%)
-- Max drawdown (paper): 15.22%
+- Paper account equity: €13,504.13 (from €10,000.00, return +35.04%)
+- Max drawdown (paper): 15.19%
 - Average turnover: 4.29%
 
 ## Confidence note

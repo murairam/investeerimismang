@@ -31,7 +31,7 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 | breakout | 111 | +1.31% | 55% |
 | consensus | 208 | +0.67% | 52% |
 | catalyst | 42 | +0.62% | 50% |
-| diversifier | 21 | -0.20% | 52% |
+| diversifier | 21 | -0.19% | 52% |
 | non_us_differentiator | 36 | +0.03% | 36% |
 | overbought | 184 | +0.67% | 53% |
 | at_52w_high | 217 | +0.94% | 57% |
