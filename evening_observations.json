@@ -1,48 +1,48 @@
 {
-  "date": "2026-06-15",
-  "timestamp": "2026-06-15T22:34:20+00:00",
-  "portfolio_return": 0.03625637890853934,
-  "benchmark_return": 0.016528391294663436,
-  "alpha": 0.019727987613875904,
+  "date": "2026-06-16",
+  "timestamp": "2026-06-16T22:30:27+00:00",
+  "portfolio_return": -0.036551322731936675,
+  "benchmark_return": -0.005684179609759754,
+  "alpha": -0.03086714312217692,
   "position_returns": [
     {
       "ticker": "STX",
       "weight": 0.21,
-      "return": 0.09426019487537785,
-      "price": 1018.7999877929688
-    },
-    {
-      "ticker": "UAL",
-      "weight": 0.21,
-      "return": 0.0385215088898101,
-      "price": 119.97000122070312
-    },
-    {
-      "ticker": "INTC",
-      "weight": 0.22,
-      "return": 0.026410860749677356,
-      "price": 127.86000061035156
-    },
-    {
-      "ticker": "KLAC",
-      "weight": 0.23,
-      "return": 0.0073859518786432155,
-      "price": 256.4200134277344
+      "return": 0.01230857693128673,
+      "price": 1031.3399658203125
     },
     {
       "ticker": "IP",
       "weight": 0.13,
-      "return": 0.006638944775637867,
-      "price": 36.38999938964844
+      "return": -0.006595159873451384,
+      "price": 36.150001525878906
+    },
+    {
+      "ticker": "UAL",
+      "weight": 0.21,
+      "return": -0.012169701338810235,
+      "price": 118.51000213623047
+    },
+    {
+      "ticker": "KLAC",
+      "weight": 0.23,
+      "return": -0.0744482122962673,
+      "price": 237.3300018310547
+    },
+    {
+      "ticker": "INTC",
+      "weight": 0.22,
+      "return": -0.08454557724848444,
+      "price": 117.05000305175781
     }
   ],
-  "ai_recommendation": "Yes\u2014update the portfolio: keep STX, UAL, and INTC (they\u2019re driving most of the outperformance), and consider trimming/rotating out of the laggards KLAC and IP (small gains; redeploy into higher-momentum names). If you must drop only one, drop IP first, then reassess KLAC after the next session.",
+  "ai_recommendation": "Yes\u2014update: drop **KLAC** and **INTC** (both are dragging hard: **-7.4%** and **-8.5%**), and keep **STX** (only winner: **+1.2%**) while holding **IP**/**UAL** for now since they\u2019re only mildly negative (**-0.7% / -1.2%**). Reallocate the freed capital from **KLAC/INTC** into **STX** and one additional relative-strength name from today\u2019s winners/least-bad performers to improve tomorrow\u2019s alpha.",
   "game_standing": {
-    "rank": 1438,
-    "total_players": 9301,
-    "value_eur": 14051.05382426373,
-    "today_return_pct": -1.352,
-    "week_return_pct": -2.268,
-    "month_return_pct": 2.368
+    "rank": 1575,
+    "total_players": 9303,
+    "value_eur": 13479.37820887666,
+    "today_return_pct": -3.6580000000000004,
+    "week_return_pct": -7.739,
+    "month_return_pct": -0.8869999999999999
   }
 }
