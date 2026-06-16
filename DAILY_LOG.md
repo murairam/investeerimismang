@@ -1578,3 +1578,37 @@ Winners: RL +2.4%, CAH +0.9%, APH +0.5% | Losers: MAERSK-B.CO -4.1%, ODFL -1.2%
 
 ---
 
+## 2026-06-16 06:17:26
+
+**Market:** BULL regime · SPX vs 50d SMA: +2.5% · VIX: 17.7 · S&P 500 20d: -0.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.4% · Benchmark +0.5% · Alpha -0.1%
+Winners: KLAC +0.9%, INTC +0.2%, UAL +0.2%
+
+**Paper account:** Equity €14,241.67 (start €10,000) · Today +0.45% · Since start +42.42% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** UAL is the only formal consensus name and gets elevated conviction accordingly. I rotated out dead-money/laggard exposure like IP and also excluded slower STX versus faster alternatives, while keeping the strongest current winners and adding travel leaders plus one top-tier semi breakout despite Tech rotation risk. The mix stays aggressive but less mono-Tech than Proposal C, with beta likely still elevated yet more balanced versus the strategist’s 2.34 proposal beta.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **UAL** | 20.0% | Consensus pick in 2/2 available proposals with strong 5d momentum (+9.2%), solid volume (1.31), and it remains one of the current portfolio’s proven drivers. |
+| 2 | **KLAC** | 18.0% | Unique but elite momentum leader with the strongest visible 5d acceleration (+21.2%), breakout volume (1.64), and near-peak leadership despite Tech rotation risk. |
+| 3 | **AMAT** | 18.0% | Best replacement/add from the semi complex: very strong 5d momentum (+14.8%), good volume confirmation (1.39), and cleaner acceleration than slower incumbents. |
+| 4 | **INTC** | 14.0% | Validated core ticker with strong live hit rate, positive 5d momentum (+12.5%), acceptable volume (0.99), and explicit learning-context support to keep it. |
+| 5 | **RCL** | 15.0% | Best non-Tech rotation leader from Proposal A with excellent 5d momentum (+14.9%), helping satisfy sector-balance while preserving aggressive upside. |
+| 6 | **NCLH** | 15.0% | High-upside travel catalyst with strong insider cluster buying, positive 5d momentum (+8.1%), and a differentiated non-Tech right-tail setup for competition mode. |
+
+**Changes from yesterday:**
+- ➕ Added **AMAT** at 18.0%
+- ➕ Added **RCL** at 15.0%
+- ➕ Added **NCLH** at 15.0%
+- ➖ Removed **STX** (was 21.0%)
+- ➖ Removed **IP** (was 13.0%)
+- ▼ **KLAC**: 23.0% → 18.0% (-5.0%)
+- ▼ **INTC**: 22.0% → 14.0% (-8.0%)
+
+---
