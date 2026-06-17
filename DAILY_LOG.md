@@ -1612,3 +1612,36 @@ Winners: KLAC +0.9%, INTC +0.2%, UAL +0.2%
 - ▼ **INTC**: 22.0% → 14.0% (-8.0%)
 
 ---
+## 2026-06-17 06:08:28
+
+**Market:** BULL regime · SPX vs 50d SMA: +3.1% · VIX: 16.4 · S&P 500 20d: +1.5%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio -3.8% · Benchmark -0.6% · Alpha -3.3%
+Winners: STX +1.1% | Losers: INTC -8.6%, KLAC -7.6%, UAL -1.4%
+
+**Paper account:** Equity €14,162.10 (start €10,000) · Today -0.11% · Since start +41.62% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 87% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the two triple-consensus leaders, WDC and STX, then added the two double-consensus names AMAT and LUV as independently validated follow-through picks across momentum and catalyst lenses. I removed KLAC and INTC per learning-state drag and exited IP because it no longer clears the slot-cost bar versus stronger alternatives; the final mix stays concentrated, spans at least two sectors, and should keep beta aggressive but below the strategist proposal's excessive 2.73 by balancing semis with airlines.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **WDC** | 22.0% | Triple-consensus pick with the strongest breakout profile in the set: vol_ratio 2.40, mom_5d +30.9%, near highs, and exactly the kind of right-tail BULL leader the competition rewards. |
+| 2 | **STX** | 23.0% | Triple-consensus pick and current holding that still fully earns its slot; validated winner with vol_ratio 1.76, mom_5d +21.2%, 52-week-high leadership, and live hit-rate support from validated core tickers. |
+| 3 | **AMAT** | 18.0% | Double-consensus pick with strong semiconductor-equipment momentum, mom_5d +13.1%, RSI 73.4, and enough volume confirmation to justify replacing weaker current tech names like KLAC and INTC. |
+| 4 | **LUV** | 17.0% | Double-consensus pick that satisfies the mandatory second-sector exposure while still carrying real momentum: vol_ratio 1.83 and mom_5d +9.7% make it a cleaner non-tech rotation name than legacy holds IP or a weaker travel alternative. |
+| 5 | **UAL** | 20.0% | Unique hold that still passes the slot test with positive mom_5d +7.4%, vol_ratio 1.06, and near-52-week-high positioning; retained over IP because its visible signals remain valid even after yesterday's mild pullback. |
+
+**Changes from yesterday:**
+- ➕ Added **WDC** at 22.0%
+- ➕ Added **AMAT** at 18.0%
+- ➕ Added **LUV** at 17.0%
+- ➖ Removed **KLAC** (was 23.0%)
+- ➖ Removed **INTC** (was 22.0%)
+- ➖ Removed **IP** (was 13.0%)
+- ▲ **STX**: 21.0% → 23.0% (+2.0%)
+
+---

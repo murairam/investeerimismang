@@ -1,15 +1,15 @@
 # Pre-Game Learning Report
 
-Generated: 2026-06-16
+Generated: 2026-06-17
 Target go-live date: 2026-04-06
 Days remaining: 0
 
 ## Scoreboard
 - Training days with measurable alpha: 58
-- Win days (alpha > 0): 29
-- Loss days (alpha < 0): 29
-- Average daily alpha: +0.14%
-- Paper account equity: €14,241.67 (from €10,000.00, return +42.42%)
+- Win days (alpha > 0): 28
+- Loss days (alpha < 0): 30
+- Average daily alpha: +0.07%
+- Paper account equity: €14,162.10 (from €10,000.00, return +41.62%)
 - Max drawdown (paper): 11.46%
 - Average turnover: 4.18%
 
@@ -38,6 +38,7 @@ Days remaining: 0
 | GEV | loser | 8 | -1.21% | 25% |
 | FSLR | loser | 12 | -0.83% | 50% |
 | DOW | loser | 8 | -0.71% | 50% |
+| KLAC | loser | 8 | -0.44% | 50% |
 | VWS.CO | loser | 12 | -0.20% | 33% |
 
 ## Action plan until April 6
