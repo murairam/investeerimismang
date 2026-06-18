@@ -1645,3 +1645,36 @@ Winners: STX +1.1% | Losers: INTC -8.6%, KLAC -7.6%, UAL -1.4%
 - ▲ **STX**: 21.0% → 23.0% (+2.0%)
 
 ---
+## 2026-06-18 06:12:25
+
+**Market:** BULL regime · SPX vs 50d SMA: +1.6% · VIX: 18.4 · S&P 500 20d: +0.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +1.9% · Benchmark -1.2% · Alpha +3.1%
+Winners: INTC +4.2%, STX +4.1%, KLAC +1.4% | Losers: UAL -1.5%
+
+**Paper account:** Equity €14,443.70 (start €10,000) · Today +1.87% · Since start +44.44% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 86% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** I prioritized the three double-consensus names first: STX, WDC, and KLAC, all of which independently validated across proposals and still show live momentum support. Then I added AMAT as the strongest unique semiconductor upgrade and MRNA as the highest-quality non-Tech breakout, while removing UAL, IP, and INTC because UAL clearly failed its slot, IP is slower than the available upgrades, and INTC's sub-0.9 volume and weaker relative profile no longer justify keeping it over faster leaders. This remains an aggressive BULL portfolio, but with one strong Health name to satisfy sector discipline and reduce pure semiconductor factor risk versus the overly concentrated proposal set.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **STX** | 22.0% | Consensus pick in both proposals and a validated core ticker; elite 5d momentum (+30.8%) with solid volume confirmation makes it the highest-conviction leadership hold. |
+| 2 | **WDC** | 19.0% | Consensus pick in both proposals with the cleanest breakout profile on the board: vol_ratio 1.90, mom_5d +45.4%, high beta, and low retail crowding support maximum competition-style conviction. |
+| 3 | **KLAC** | 16.0% | Consensus pick in both proposals and current holding still validating itself with positive 5d momentum (+11.9%) and acceptable volume, so it keeps a high-conviction slot despite being less explosive than STX/WDC. |
+| 4 | **AMAT** | 18.0% | Best unique upgrade from Proposal A: strong semiconductor equipment breakout with mom_5d +19.4%, vol_ratio 1.27, and better acceleration than the weaker current holds it would replace. |
+| 5 | **MRNA** | 25.0% | Best non-Tech aggressor and earns the mandatory second-sector slot on merit, not diversification alone; vol_ratio 2.19 and mom_5d +34.5% signal a real breakout with strong upside torque. |
+
+**Changes from yesterday:**
+- ➕ Added **WDC** at 19.0%
+- ➕ Added **AMAT** at 18.0%
+- ➕ Added **MRNA** at 25.0%
+- ➖ Removed **INTC** (was 22.0%)
+- ➖ Removed **UAL** (was 21.0%)
+- ➖ Removed **IP** (was 13.0%)
+- ▼ **KLAC**: 23.0% → 16.0% (-7.0%)
+
+---
