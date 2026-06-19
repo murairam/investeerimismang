@@ -1678,3 +1678,38 @@ Winners: INTC +4.2%, STX +4.1%, KLAC +1.4% | Losers: UAL -1.5%
 - ▼ **KLAC**: 23.0% → 16.0% (-7.0%)
 
 ---
+## 2026-06-19 06:13:52
+
+**Market:** BULL regime · SPX vs 50d SMA: +2.5% · VIX: 16.4 · S&P 500 20d: +0.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +5.7% · Benchmark +1.1% · Alpha +4.6%
+Winners: INTC +11.2%, KLAC +9.3%, UAL +2.8%
+
+**Paper account:** Equity €15,260.02 (start €10,000) · Today +7.63% · Since start +52.60% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 84% · **Positions:** 6 · **Total weight:** 100.0%
+
+**Thesis:** The synthesis leans hardest into the double-consensus names STX and MRNA, then adds the strongest unique breakout WDC plus still-valid current leaders KLAC and INTC. UAL and IP are removed because they fail the strongest-sector rotation test versus materially faster Tech leaders, and APH/GE are skipped on slot cost because their momentum is clearly weaker; portfolio remains aggressive with heavy Tech exposure but preserves a second sector through MRNA, with beta likely still elevated yet more justified by current leadership and recent alpha.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **STX** | 17.0% | Consensus pick in both available proposals and a validated core ticker; current holding still earns its slot with vol_ratio 2.39, mom_5d +24.5%, strong relative strength, and leadership in the strongest sector. |
+| 2 | **MRNA** | 25.0% | Consensus pick in both proposals with the strongest non-Tech momentum sleeve; vol_ratio 3.95 and mom_5d +30.0% make it a high-conviction breakout while satisfying the mandatory second-sector requirement. |
+| 3 | **WDC** | 18.0% | Best unique aggressor from Proposal A with elite acceleration; mom_5d +42.2%, vol_ratio 2.20, and high-beta breakout characteristics fit the competition mandate better than slower alternatives. |
+| 4 | **KLAC** | 19.0% | Existing winner remains valid under turnover rules with positive 5d momentum, vol_ratio 2.17, and continued semicap leadership; kept over weaker current holdings because signals still confirm trend persistence. |
+| 5 | **INTC** | 16.0% | Validated core ticker with 100% live hit rate and still-strong mom_5d +15.8% plus vol_ratio 1.85; retained as the better fifth slot versus lower-octane APH/GE despite not being top-two in raw acceleration. |
+| 6 | **AMAT** | 5.0% | Sector cap redistribution (US): auto-inserted to consume freed weight from Tech sector trim — prevents idle cash drag while honouring rotation cap |
+
+**Changes from yesterday:**
+- ➕ Added **MRNA** at 25.0%
+- ➕ Added **WDC** at 18.0%
+- ➕ Added **AMAT** at 5.0%
+- ➖ Removed **UAL** (was 21.0%)
+- ➖ Removed **IP** (was 13.0%)
+- ▼ **STX**: 21.0% → 17.0% (-4.0%)
+- ▼ **KLAC**: 23.0% → 19.0% (-4.0%)
+- ▼ **INTC**: 22.0% → 16.0% (-6.0%)
+
+---
