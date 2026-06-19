@@ -1,48 +1,48 @@
 {
-  "date": "2026-06-17",
-  "timestamp": "2026-06-17T22:20:39+00:00",
-  "portfolio_return": 0.011327535918709612,
-  "benchmark_return": -0.012148282108228825,
-  "alpha": 0.023475818026938437,
+  "date": "2026-06-19",
+  "timestamp": "2026-06-19T21:44:02+00:00",
+  "portfolio_return": 0.05119192667631765,
+  "benchmark_return": 0.010846212235623431,
+  "alpha": 0.04034571444069422,
   "position_returns": [
     {
       "ticker": "INTC",
       "weight": 0.22,
-      "return": 0.034600558024525885,
-      "price": 121.0999984741211
-    },
-    {
-      "ticker": "STX",
-      "weight": 0.21,
-      "return": 0.033674619058446265,
-      "price": 1066.0699462890625
+      "return": 0.1064410171879362,
+      "price": 133.99000549316406
     },
     {
       "ticker": "KLAC",
       "weight": 0.23,
-      "return": 0.005898933492112679,
-      "price": 238.72999572753906
-    },
-    {
-      "ticker": "IP",
-      "weight": 0.13,
-      "return": 0.00027657873059960814,
-      "price": 36.15999984741211
+      "return": 0.08725339171382474,
+      "price": 259.55999755859375
     },
     {
       "ticker": "UAL",
       "weight": 0.21,
-      "return": -0.022614127557731734,
-      "price": 115.83000183105469
+      "return": 0.02149700271438615,
+      "price": 118.31999969482422
+    },
+    {
+      "ticker": "IP",
+      "weight": 0.13,
+      "return": 0.01825220824660323,
+      "price": 36.81999969482422
+    },
+    {
+      "ticker": "STX",
+      "weight": 0.21,
+      "return": 0.003902215041488022,
+      "price": 1070.22998046875
     }
   ],
-  "ai_recommendation": "Yes\u2014update the portfolio: keep INTC and STX (both strong vs the benchmark) and keep KLAC (stable), but drop UAL (worst performer at -2.3%) and replace it with a stronger relative-momentum name. Keep IP unchanged for now since it\u2019s flat (+0.0%) and doesn\u2019t drag performance.",
+  "ai_recommendation": "Yes\u2014update: keep **INTC** and **KLAC** (highest contributors, strong alpha), keep **UAL** and **IP** as smaller ballast, and consider dropping **STX** (lowest return, likely weakest edge) to free capital for higher-conviction upside before the **Monday 09:00 EET** leaderboard snapshot. If you\u2019re already near the top of the weekly ranking, shift the freed capital into lower-volatility winners rather than adding more risk.",
   "game_standing": {
-    "rank": 1436,
-    "total_players": 9306,
-    "value_eur": 13632.479240151657,
-    "today_return_pct": 1.133,
-    "week_return_pct": -4.367,
-    "month_return_pct": 0.23900000000000002
+    "rank": 1286,
+    "total_players": 9305,
+    "value_eur": 14330.299462628724,
+    "today_return_pct": 5.119191007877122,
+    "week_return_pct": 0.41000000000000003,
+    "month_return_pct": 6.627
   }
 }
