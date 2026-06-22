@@ -1,44 +1,44 @@
 {
-  "date": "2026-06-19",
-  "timestamp": "2026-06-19T21:44:02+00:00",
-  "portfolio_return": 0.05119192667631765,
-  "benchmark_return": 0.010846212235623431,
-  "alpha": 0.04034571444069422,
+  "date": "2026-06-22",
+  "timestamp": "2026-06-22T22:21:57+00:00",
+  "portfolio_return": 0.025476094522595267,
+  "benchmark_return": -0.003705051979052687,
+  "alpha": 0.029181146501647954,
   "position_returns": [
     {
       "ticker": "INTC",
       "weight": 0.22,
-      "return": 0.1064410171879362,
-      "price": 133.99000549316406
+      "return": 0.05186951760067471,
+      "price": 140.94000244140625
     },
     {
       "ticker": "KLAC",
       "weight": 0.23,
-      "return": 0.08725339171382474,
-      "price": 259.55999755859375
-    },
-    {
-      "ticker": "UAL",
-      "weight": 0.21,
-      "return": 0.02149700271438615,
-      "price": 118.31999969482422
-    },
-    {
-      "ticker": "IP",
-      "weight": 0.13,
-      "return": 0.01825220824660323,
-      "price": 36.81999969482422
+      "return": 0.03698569191636891,
+      "price": 269.1600036621094
     },
     {
       "ticker": "STX",
       "weight": 0.21,
-      "return": 0.003902215041488022,
-      "price": 1070.22998046875
+      "return": 0.02224760941879178,
+      "price": 1094.0400390625
+    },
+    {
+      "ticker": "UAL",
+      "weight": 0.21,
+      "return": 0.0030426015152138497,
+      "price": 118.68000030517578
+    },
+    {
+      "ticker": "IP",
+      "weight": 0.13,
+      "return": 0.001901132411852302,
+      "price": 36.88999938964844
     }
   ],
-  "ai_recommendation": "Yes\u2014update: keep **INTC** and **KLAC** (highest contributors, strong alpha), keep **UAL** and **IP** as smaller ballast, and consider dropping **STX** (lowest return, likely weakest edge) to free capital for higher-conviction upside before the **Monday 09:00 EET** leaderboard snapshot. If you\u2019re already near the top of the weekly ranking, shift the freed capital into lower-volatility winners rather than adding more risk.",
+  "ai_recommendation": "Yes\u2014update the portfolio: keep INTC, KLAC, and STX (they\u2019re driving the outperformance), and consider trimming/dropping UAL and IP if they don\u2019t show improving momentum/volume tomorrow. Reallocate that freed weight toward INTC/KLAC first, then STX.",
   "game_standing": {
-    "rank": 1286,
+    "rank": 1294,
     "total_players": 9305,
     "value_eur": 14330.299462628724,
     "today_return_pct": 5.119191007877122,
