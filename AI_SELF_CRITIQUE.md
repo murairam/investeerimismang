@@ -1,6 +1,6 @@
 # AI Self-Critique Report
 
-Generated: 2026-06-19
+Generated: 2026-06-22
 Training days analyzed: 58
 Days until live mode: 0
 
@@ -16,39 +16,40 @@ This report evaluates whether the AI's stated rationales and conviction levels c
 - Latest day status: experimental / unverified
 
 ## What's Working ✅
-- 'breakout' rationale is working: +1.3% avg, 56% hit rate
-- 'at_52w_high' rationale is working: +0.9% avg, 57% hit rate
-- Conviction sizing is working: Tier 1 +1.0% > Tier 3 -0.1%
+- 'momentum' rationale is working: +0.9% avg, 55% hit rate
+- 'breakout' rationale is working: +1.3% avg, 59% hit rate
+- 'at_52w_high' rationale is working: +1.0% avg, 58% hit rate
+- Conviction sizing is working: Tier 1 +0.9% > Tier 3 +0.0%
 
 ## Systematic Biases / Errors ⚠️
-- 'non_us_differentiator' rationale is weak: +0.0% avg, 34% hit rate
+- 'non_us_differentiator' rationale is weak: -0.1% avg, 28% hit rate
 - Alpha hit rate is low: 48%.
 
 ## Rationale Performance Breakdown
 | Rationale Type | Observations | Avg Return | Hit Rate |
 |---|---:|---:|---:|
-| momentum | 295 | +0.90% | 54% |
-| high_sharpe | 161 | +0.76% | 49% |
-| breakout | 119 | +1.34% | 56% |
-| consensus | 207 | +0.82% | 52% |
-| catalyst | 41 | +0.55% | 46% |
+| momentum | 295 | +0.92% | 55% |
+| high_sharpe | 157 | +0.84% | 50% |
+| breakout | 124 | +1.33% | 59% |
+| consensus | 203 | +0.87% | 53% |
+| catalyst | 41 | +0.53% | 46% |
 | diversifier | 21 | -0.00% | 52% |
-| non_us_differentiator | 35 | +0.03% | 34% |
-| overbought | 177 | +0.73% | 53% |
-| at_52w_high | 222 | +0.94% | 57% |
+| non_us_differentiator | 32 | -0.09% | 28% |
+| overbought | 173 | +0.80% | 53% |
+| at_52w_high | 222 | +0.97% | 58% |
 
 ## Conviction Sizing Accuracy
 | Tier | Weight Range | Observations | Avg Return |
 |---|---|---:|---:|
-| Tier 1 (high conviction) | 20-25% | 128 | +0.96% |
-| Tier 2 (medium conviction) | 12-18% | 137 | +1.06% |
-| Tier 3 (low conviction) | 5-10% | 30 | -0.12% |
+| Tier 1 (high conviction) | 20-25% | 127 | +0.94% |
+| Tier 2 (medium conviction) | 12-18% | 138 | +1.10% |
+| Tier 3 (low conviction) | 5-10% | 30 | +0.01% |
 
 ## Structured Learning State
 - Active hard rules: 1
 - Changed hard rules since yesterday: 0
 - Validated winners tracked: 5
-- Recurring losers tracked: 5
+- Recurring losers tracked: 4
 
 ## Action Items for the AI
 - BAN VWS.CO: hit rate 20% over 10 observations — do not propose.

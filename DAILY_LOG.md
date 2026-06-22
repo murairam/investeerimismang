@@ -1713,3 +1713,37 @@ Winners: INTC +11.2%, KLAC +9.3%, UAL +2.8%
 - ▼ **INTC**: 22.0% → 16.0% (-6.0%)
 
 ---
+## 2026-06-22 06:12:27
+
+**Market:** BULL regime · SPX vs 50d SMA: +2.5% · VIX: 16.4 · S&P 500 20d: +0.9%
+
+**Verification:** Pending manual confirmation via `python scripts/verify.py`.
+
+**Yesterday's P&L:** Portfolio +0.0% · Benchmark +1.1% · Alpha -1.1%
+Winners: KLAC +0.0%, INTC +0.0%, UAL +0.0%
+
+**Paper account:** Equity €15,230.35 (start €10,000) · Today +7.42% · Since start +52.30% · Turnover 0.0% · Cash €0.00
+
+**Confidence:** 82% · **Positions:** 5 · **Total weight:** 100.0%
+
+**Thesis:** The only true consensus name was STX, so it receives the mandatory elevated conviction and remains the anchor. I rotated out KLAC, UAL, INTC, and IP because the proposals identified materially stronger momentum leaders, then filled the book with the fastest movers from A and C while preserving at least two sectors through MRNA and CAT. This keeps the portfolio aggressive and concentrated, with beta likely still elevated but more balanced than the strategist's 2.15 proposal and aligned with the need to chase stronger right-tail breakouts after recent alpha slippage.
+
+| # | Ticker | Weight | Rationale |
+|---|--------|--------|-----------|
+| 1 | **STX** | 21.0% | Consensus pick across A and incumbent validation; strong 5d momentum (+16.2%) and live-game hit-rate support keeping it as the highest-conviction carryover. |
+| 2 | **WDC** | 18.0% | Best unique breakout from A with exceptional 5d momentum (+33.8%), strong competition-score framing, low retail crowding, and clear rotation upgrade versus fading incumbents. |
+| 3 | **MRNA** | 25.0% | High-velocity non-tech leader from A with +29.4% 5d momentum and strong diversification value without looking like filler; earns a core slot on acceleration. |
+| 4 | **MU** | 11.0% | Top unique pick from C with very high beta and strong 5d momentum (+16.8%); fits the competition mandate for right-tail upside better than slower incumbents. |
+| 5 | **CAT** | 25.0% | Best industrial balance pick from C with solid +9.5% 5d momentum and sector alignment to leading breadth, giving the portfolio a second sector without sacrificing strength. |
+
+**Changes from yesterday:**
+- ➕ Added **WDC** at 18.0%
+- ➕ Added **MRNA** at 25.0%
+- ➕ Added **MU** at 11.0%
+- ➕ Added **CAT** at 25.0%
+- ➖ Removed **KLAC** (was 23.0%)
+- ➖ Removed **INTC** (was 22.0%)
+- ➖ Removed **UAL** (was 21.0%)
+- ➖ Removed **IP** (was 13.0%)
+
+---
