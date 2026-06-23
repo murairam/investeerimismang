@@ -11,13 +11,13 @@
 
 ## TL;DR
 
-AlphaShark was my autonomous quantitative trading agent for the **Äripäev/SEB Investment Game 2026** in Estonia — a 75-day competition among ~9,300 portfolios with a single winner. Every weekday it woke up at 06:00 UTC, scanned ~630 live tickers across 6 markets, ran four AI agents in a debate-then-synthesize loop, and posted a validated portfolio recommendation to Discord before the 10:00 EET submission cutoff.
+This is the code behind AlphaShark, my bot for the **Äripäev/SEB Investment Game** in Estonia. Every weekday it woke up at 06:00 UTC, scanned about 630 live tickers across 6 markets, ran four AI agents in a debate loop, and posted a validated portfolio recommendation to Discord before the 10:00 EET cutoff.
 
-**The game ran 6 April – 19 June 2026. It's over.**
+I kept the setup deliberately opinionated: momentum-first stock selection, regime-based ranking, a self-improving learning loop from past runs, and a hard validator for the game rules.
 
-The paper trading account — tracking what would have happened if every recommendation was executed — returned **+41.78%** (peak **+59.22%** on June 1) over 36 tracked trading days, with a last-known game rank of **#809 / 9,300 players**.
+The game ran 6 April – 19 June 2026 and it's now over. The paper trading account — what would have happened if I submitted every recommendation — ended up at **+41.78%**, peaking at **+59.22%** on June 1, with a last known rank of **#809 out of 9,300 players**.
 
-See the full post-game analysis: [POST_GAME_ANALYSIS.md](./POST_GAME_ANALYSIS.md)
+The full post-game breakdown is here: [POST_GAME_ANALYSIS.md](./POST_GAME_ANALYSIS.md)
 
 ## Table of Contents
 
